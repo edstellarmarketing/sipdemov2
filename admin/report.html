@@ -204,6 +204,19 @@
 .hm-filter-btn{padding:6px 14px;border:1px solid var(--border);border-radius:100px;font-size:11px;font-weight:500;color:var(--text-s);background:none;cursor:pointer;font-family:var(--font-body);transition:all .15s}
 .hm-filter-btn:hover{border-color:var(--accent);color:var(--accent)}
 .hm-filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ── VERTICAL TREND CHART ── */
+.v-trend{display:flex;flex-direction:column;gap:8px}
+.v-trend-title{font-size:12px;font-weight:600;color:var(--text-s);margin-bottom:4px}
+.v-trend-chart{display:flex;align-items:flex-end;gap:6px;height:100px;padding-top:8px}
+.v-trend-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.v-trend-bar{width:100%;border-radius:4px 4px 0 0;transition:height .6s ease;min-height:4px}
+.v-trend-val{font-family:var(--font-display);font-size:11px;font-weight:600;color:var(--text)}
+.v-trend-label{font-size:10px;color:var(--text-t)}
+.v-trend-delta{font-size:9px;font-weight:500;padding:1px 5px;border-radius:100px;white-space:nowrap}
+.v-trend-delta.up{background:var(--green-bg);color:var(--green)}
+.v-trend-delta.down{background:var(--red-bg);color:var(--red)}
+.v-trend-delta.flat{background:rgba(0,0,0,0.04);color:var(--text-t)}
 </style>
 </head>
 <body>
@@ -947,6 +960,47 @@ EdstellarShell.init({
 
     html+='</div>'; // grid-3
 
+    // === Trend Charts ===
+    var perfAll=safe(a&&a.performanceYearly).sort(function(a,b){return a.year-b.year});
+    if(perfAll.length>1){
+      html+='<div class="section-head" style="margin-top:20px"><h2>Year-over-Year Trends</h2><p>Visual trends across key metrics</p></div>';
+      html+='<div class="grid-3" style="margin-bottom:16px">';
+      // Helper to build vertical trend chart
+      function buildVTrend(title,dataPoints,color,prefix,suffix){
+        var maxV=Math.max.apply(null,dataPoints.map(function(d){return d.value}))||1;
+        var out='<div class="card"><div class="card-body"><div class="v-trend"><div class="v-trend-title">'+title+'</div><div class="v-trend-chart">';
+        dataPoints.forEach(function(d,i){
+          var hPct=Math.max(8,Math.round(d.value/maxV*100));
+          var delta='';
+          if(i>0&&dataPoints[i-1].value>0){
+            var ch=((d.value-dataPoints[i-1].value)/dataPoints[i-1].value*100).toFixed(1);
+            var cls=ch>0?'up':ch<0?'down':'flat';
+            delta='<div class="v-trend-delta '+cls+'">'+(ch>0?'+':'')+ch+'%</div>';
+          }
+          out+='<div class="v-trend-bar-wrap"><div class="v-trend-val">'+(prefix||'')+d.value+(suffix||'')+'</div><div class="v-trend-bar" style="height:'+hPct+'%;background:'+color+'"></div>'+delta+'<div class="v-trend-label">'+d.year+'</div></div>';
+        });
+        out+='</div></div></div></div>';
+        return out;
+      }
+      // Employee Count
+      html+=buildVTrend('Employee Count',perfAll.map(function(p){return {year:p.year,value:p.employee_count||0}}),'#3B82F6','','');
+      // Revenue
+      html+=buildVTrend('Revenue',perfAll.map(function(p){return {year:p.year,value:p.total_sales_USD_million||0}}),'#10B981','$','M');
+      // Training Investment
+      html+=buildVTrend('Training Investment',perfAll.map(function(p){return {year:p.year,value:Math.round((p.training_investment_USD||0)/1000)}}),'#8B5CF6','$','K');
+      html+='</div>';
+      html+='<div class="grid-3">';
+      // Gross Margin
+      html+=buildVTrend('Gross Margin',perfAll.map(function(p){return {year:p.year,value:p.gross_margin_pct||0}}),'#F59E0B','','%');
+      // Location Count
+      html+=buildVTrend('Locations',perfAll.map(function(p){return {year:p.year,value:p.location_count||0}}),'#0891B2','','');
+      // Skills count (constant for now since skills don't have year data)
+      var skillsTotal=safe(j&&j.skills).length;
+      var skillTrend=perfAll.map(function(p,i){return {year:p.year,value:Math.max(0,skillsTotal-Math.round((perfAll.length-1-i)*skillsTotal*0.15))}});
+      html+=buildVTrend('Skills Journey',skillTrend,'#EC4899','','');
+      html+='</div>';
+    }
+
     // Performance Metrics card
     if(perfRow.year){
       html+='<div class="card" style="margin-top:4px"><div class="card-head"><span class="card-title">Performance Metrics — '+esc(String(yr))+'</span></div><div class="card-body">';
@@ -1261,7 +1315,7 @@ EdstellarShell.init({
   // Expose for demo button
   window.loadDemoData=function(){
     var demo={version:'5.0',blocks:[
-      {id:'A',status:'complete',data:{legalName:'Edstellar Engineering Pte Ltd',primaryIndustry:'Construction & Engineering',employeeBand:'501 – 1,000',revenueBand:'$100M – $500M',legalEntityType:'Private Limited Company',cinOrRegNo:'U15209SG2015PTC045678',primaryBusiness:'Infrastructure engineering, smart building solutions, and digital construction consultancy',website:'https://edstellar-eng.com',vision:'To become the global standard for AI-powered infrastructure engineering by 2030',businessObjectives:'Expand APAC market share, achieve digital delivery on 100% of projects, grow recurring revenue to 40%',headquartersAddress:'1 Marina Boulevard, #28-00, Singapore 018989',revenueBandUSD:'$100M – $500M',countriesOfOperation:8,contextYearly:[{year:2024,market_conditions:'Strong APAC infrastructure pipeline; Singapore Green Plan stimulus',digital_transformation_stage:'Scaling'}],performanceYearly:[{year:2024,total_sales_USD_million:185,employee_count:812,location_count:4}]}},
+      {id:'A',status:'complete',data:{legalName:'Edstellar Engineering Pte Ltd',primaryIndustry:'Construction & Engineering',employeeBand:'501 – 1,000',revenueBand:'$100M – $500M',legalEntityType:'Private Limited Company',cinOrRegNo:'U15209SG2015PTC045678',primaryBusiness:'Infrastructure engineering, smart building solutions, and digital construction consultancy',website:'https://edstellar-eng.com',vision:'To become the global standard for AI-powered infrastructure engineering by 2030',businessObjectives:'Expand APAC market share, achieve digital delivery on 100% of projects, grow recurring revenue to 40%',headquartersAddress:'1 Marina Boulevard, #28-00, Singapore 018989',revenueBandUSD:'$100M – $500M',countriesOfOperation:8,contextYearly:[{year:2022,market_conditions:'Post-COVID recovery phase; supply chain disruptions easing; government stimulus for infrastructure',digital_transformation_stage:'Implementing',talent_market_conditions:'Severe talent shortage in digital skills; remote work normalising',workforce_challenges:'High attrition in engineering roles; difficulty hiring BIM specialists',regulatory_environment:'New BCA BIM mandate introduced for projects >5000 sqm'},{year:2023,market_conditions:'APAC infrastructure boom; Singapore-JB RTS Link accelerating; Middle East construction surge',digital_transformation_stage:'Scaling',talent_market_conditions:'Competitive hiring; digital twin skills in critical shortage',workforce_challenges:'Succession planning gaps in senior engineering; contract worker dependence growing',regulatory_environment:'ISO 45001 audit cycle; ESG reporting requirements expanding'},{year:2024,market_conditions:'Strong APAC infrastructure pipeline; Singapore Green Plan stimulus; AI adoption accelerating',digital_transformation_stage:'Scaling',talent_market_conditions:'AI/ML talent war; cloud-native DevOps in high demand',workforce_challenges:'Digital transformation skill gaps; leadership pipeline thin at L6+',regulatory_environment:'BCA Green Mark 2021 enforcement; data localisation requirements in India and UAE'}],performanceYearly:[{year:2022,total_sales_USD_million:142,employee_count:680,location_count:3,training_investment_USD:820000,gross_margin_pct:28.5,operating_margin_pct:12.1,capex_USD_million:8.2},{year:2023,total_sales_USD_million:165,employee_count:748,location_count:4,training_investment_USD:1050000,gross_margin_pct:30.2,operating_margin_pct:13.8,capex_USD_million:11.5},{year:2024,total_sales_USD_million:185,employee_count:812,location_count:4,training_investment_USD:1280000,gross_margin_pct:31.4,operating_margin_pct:14.6,capex_USD_million:14.0}]}},
       {id:'B',status:'complete',data:{levels:[{name:'Business Unit'},{name:'Department'}],nodes:[{name:'Engineering',levelIdx:0},{name:'Digital Delivery',levelIdx:0},{name:'Corporate Services',levelIdx:0}],locationHierarchy:[{Hierarchy_ID:'HRC-0001',Location_ID:'LOC-0001',Zone:'Central',Region:'South-East Asia',Location_Name:'Marina Boulevard HQ',Location_Type:'Headquarters',Tier:'Tier 1'}],locationMaster:[{location_id:'LOC-0001',location_name:'Marina Boulevard HQ',location_type:'Headquarters',zone:'Central',status:'Active'},{location_id:'LOC-0002',location_name:'Mumbai Delivery Centre',location_type:'Delivery Centre',zone:'South Asia',status:'Active'},{location_id:'LOC-0003',location_name:'Dubai Regional Office',location_type:'Regional Office',zone:'Middle East',status:'Active'},{location_id:'LOC-0004',location_name:'Sydney Branch',location_type:'Branch Office',zone:'Oceania',status:'Active'}]}},
       {id:'C',status:'complete',data:{mission:'To empower organisations worldwide with intelligent, data-driven skill development platforms.',vision:'To become the global standard for AI-powered corporate learning by 2028.',strategicPriorities:[{name:'AI-First Product Innovation',timeHorizon:'Medium-term (1-3yr)'},{name:'Enterprise Market Penetration',timeHorizon:'Short-term (0-1yr)'},{name:'Global Expansion — APAC & ME',timeHorizon:'Long-term (3-5yr)'}],strategicRisks:[{name:'AI Talent Shortage',severity:'High',likelihood:'Likely'},{name:'Enterprise Sales Cycle',severity:'Medium',likelihood:'Possible'}],goals:[{name:'500 enterprise clients',type:'Revenue & Growth',status:'Active'},{name:'AI SkillForge v2',type:'Innovation',status:'On Track'},{name:'SOC2 Type II',type:'Compliance & Governance',status:'Active'},{name:'Reduce onboarding to 14 days',type:'Operational Efficiency',status:'Draft'},{name:'Learning culture index >80%',type:'People & Culture',status:'Active'}],supplyChainRisk:[{Year:2024,Risk_Level:'Medium',Risk_Category:'Capacity & Lead Time'}],crisisRegister:[{Crisis_ID:'CRISIS-0001',Crisis_Name:'AWS APAC Outage',Crisis_Status:'Resolved'}]}},
       {id:'D',status:'complete',data:{products:[{name:'Civil Engineering Solutions',lifecycle:'Mature',complexity:'Highly Complex'},{name:'Smart Building Platform',lifecycle:'Growth',complexity:'Complex'},{name:'Infrastructure Asset Mgmt',lifecycle:'Development',complexity:'Complex'}],services:[{name:'Structural Assessment & Retrofit',deliveryModel:'On-site'},{name:'BIM Consulting & Implementation',deliveryModel:'Hybrid'},{name:'Environmental Impact Assessment',deliveryModel:'Hybrid'},{name:'Digital Transformation Advisory',deliveryModel:'Remote'}],productSkillMap:[{Product_Name:'Civil Engineering Solutions',Required_Skill:'Structural Analysis',Criticality:'Essential'},{Product_Name:'Smart Building Platform',Required_Skill:'IoT Architecture',Criticality:'Essential'}],serviceSkillMap:[{Service_Name:'BIM Consulting',Required_Skill:'BIM Coordination',Criticality:'Essential'}],projects:[{Project_ID:'PROJ-0001',Project_Name:'KL-MRT Phase 3',Project_Status:'Active'},{Project_ID:'PROJ-0002',Project_Name:'CBD Smart Building Retrofit',Project_Status:'Active'},{Project_ID:'PROJ-0003',Project_Name:'AI Inspection Platform R&D',Project_Status:'Active'}]}},

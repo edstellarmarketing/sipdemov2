@@ -172,6 +172,36 @@
   .form-grid,.form-grid.two-col{grid-template-columns:1fr}
   .main-content{padding:20px 16px 40px}
 }
+
+/* ── HEATMAP ── */
+.hm-section{margin-top:24px}
+.hm-section-title{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text);margin-bottom:14px}
+.hm-filter-bar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.hm-btn{padding:6px 14px;border:1px solid rgba(0,0,0,0.1);border-radius:100px;font-size:11px;font-weight:500;color:var(--text-s);background:none;cursor:pointer;font-family:var(--font-body);transition:all .15s}
+.hm-btn:hover{border-color:var(--accent);color:var(--accent)}
+.hm-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.hm-card{background:var(--surface);border:1px solid rgba(0,0,0,0.06);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.hm-card-head{padding:14px 18px;border-bottom:1px solid rgba(0,0,0,0.04);display:flex;align-items:center;gap:10px}
+.hm-card-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text);flex:1}
+.hm-card-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;background:rgba(201,168,76,0.1);color:var(--accent)}
+.hm-card-body{padding:16px 18px;overflow-x:auto}
+.hm-grid{display:grid;gap:2px}
+.hm-cell{padding:5px 3px;text-align:center;font-size:10px;font-weight:500;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hm-cell.l4{background:#FEE2E2;color:#DC2626}
+.hm-cell.l3{background:#FEF3C7;color:#D97706}
+.hm-cell.l2{background:#DBEAFE;color:#2563EB}
+.hm-cell.l1{background:#D1FAE5;color:#059669}
+.hm-cell.none{background:#F3F4F6;color:#9CA3AF}
+.hm-cell.crit-high{background:#FEE2E2;color:#DC2626}
+.hm-cell.crit-med{background:#FEF3C7;color:#D97706}
+.hm-cell.crit-low{background:#DBEAFE;color:#2563EB}
+.hm-cell.crit-ok{background:#D1FAE5;color:#059669}
+.hm-header{font-size:8.5px;font-weight:600;color:var(--text-t);text-transform:uppercase;letter-spacing:.03em;padding:5px 3px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hm-row-label{font-size:11px;font-weight:500;color:var(--text-s);padding:5px 6px 5px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hm-kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.hm-kpi{padding:12px;background:rgba(0,0,0,0.02);border-radius:8px;text-align:center}
+.hm-kpi-val{font-family:var(--font-display);font-size:20px;font-weight:600;line-height:1}
+.hm-kpi-label{font-size:10px;color:var(--text-t);margin-top:3px}
 </style>
 </head>
 <body>
@@ -189,6 +219,7 @@
     <button class="ed-tab active" data-tab="dashboard">Dashboard</button>
     <button class="ed-tab" data-tab="all-employees">All Employees</button>
     <button class="ed-tab" data-tab="add-employee">Add Employee</button>
+    <button class="ed-tab" data-tab="heatmaps">HeatMaps</button>
   </div>
 
   <!-- ════════════════════════════════════════════════════════════
@@ -583,6 +614,13 @@
     </form>
   </div><!-- /tab-add-employee -->
 
+  <!-- ════════════════════════════════════════════════════════════
+       TAB 4: HEATMAPS
+       ════════════════════════════════════════════════════════════ -->
+  <div class="ed-tab-panel" id="tab-heatmaps">
+    <div id="heatmapContent"></div>
+  </div>
+
 </div>
 </div>
 </main>
@@ -693,6 +731,7 @@ function switchTab(name){
   panels.forEach(function(p){ p.classList.toggle('active', p.id==='tab-'+name); });
   if(name==='dashboard') initCharts();
   if(name==='all-employees') renderTable();
+  if(name==='heatmaps') renderHeatmaps();
 }
 
 tabs.forEach(function(t){
@@ -901,6 +940,193 @@ document.getElementById('btnCancel').addEventListener('click',function(){
   resetForm();
   switchTab('all-employees');
 });
+
+/* ── HEATMAPS ── */
+window.edHmView='skills';
+
+function loadOrgData(){
+  var raw=null;
+  try{raw=sessionStorage.getItem('sip_orgsetup_v4')}catch(e){}
+  if(!raw){try{raw=localStorage.getItem('sip_orgsetup_v4')}catch(e){}}
+  if(!raw)return null;
+  try{return JSON.parse(raw)}catch(e){return null}
+}
+
+function getOrgBlock(orgState,id){
+  if(!orgState||!orgState.blocks)return null;
+  if(Array.isArray(orgState.blocks)){var b=orgState.blocks.find(function(x){return x.id===id});return b?b.data:null}
+  return orgState.blocks[id]?orgState.blocks[id].data:null;
+}
+
+function hmProfNum(p){if(!p)return 0;var s=String(p);if(s.indexOf('4')>-1)return 4;if(s.indexOf('3')>-1)return 3;if(s.indexOf('2')>-1)return 2;if(s.indexOf('1')>-1)return 1;return 0}
+function hmProfCls(n){return n>=4?'l4':n>=3?'l3':n>=2?'l2':n>=1?'l1':'none'}
+function hmProfLbl(n){return n>0?'L'+n:'\u2014'}
+
+function renderHeatmaps(){
+  var employees=loadEmployees();
+  var org=loadOrgData();
+  var jData=getOrgBlock(org,'J');var kData=getOrgBlock(org,'K');var lData=getOrgBlock(org,'L');
+  var skills=(jData&&jData.skills)||[];
+  var comps=(kData&&kData.competencies)||[];
+  var roles=(lData&&lData.roles)||[];
+
+  var h='';
+  h+='<div class="hm-filter-bar">';
+  h+='<button class="hm-btn'+(window.edHmView==='skills'?' active':'')+'" onclick="window.edHmView=\'skills\';renderHeatmaps()">Skills Framework</button>';
+  h+='<button class="hm-btn'+(window.edHmView==='competencies'?' active':'')+'" onclick="window.edHmView=\'competencies\';renderHeatmaps()">Competencies Framework</button>';
+  h+='<button class="hm-btn'+(window.edHmView==='critical'?' active':'')+'" onclick="window.edHmView=\'critical\';renderHeatmaps()">Critical Skills Multi-View</button>';
+  h+='</div>';
+
+  if(window.edHmView==='skills') h+=renderEdHM_Skills(employees,skills,roles);
+  else if(window.edHmView==='competencies') h+=renderEdHM_Comps(employees,comps,roles);
+  else h+=renderEdHM_Critical(employees,skills,roles);
+
+  document.getElementById('heatmapContent').innerHTML=h;
+}
+window.renderHeatmaps=renderHeatmaps;
+
+function buildRoleMap(roles){
+  var m={};roles.forEach(function(r){m[r.title]=r});return m;
+}
+
+function renderEdHM_Skills(employees,skills,roles){
+  if(!skills.length||!roles.length) return '<div class="hm-card"><div class="hm-card-body" style="color:var(--text-t);font-size:12px">No skills or roles data. Complete Organisation Setup (Blocks J, L) and run autofill first.</div></div>';
+  var h='';
+  var roleMap=buildRoleMap(roles);
+  // Map employees to their role definitions
+  var empRoles={};employees.forEach(function(e){var r=e.role||'';if(!empRoles[r])empRoles[r]={count:0,matched:!!roleMap[r]};empRoles[r].count++});
+  var allReqSkills={};roles.forEach(function(r){(r.requiredSkills||[]).forEach(function(s){allReqSkills[s.skillName]=true})});
+  var reqCount=Object.keys(allReqSkills).length;
+  var topSkills=skills.slice(0,14).map(function(s){return s.name});
+
+  // KPIs
+  h+='<div class="hm-kpi-row">';
+  h+='<div class="hm-kpi"><div class="hm-kpi-val" style="color:#3B82F6">'+skills.length+'</div><div class="hm-kpi-label">Total Skills</div></div>';
+  h+='<div class="hm-kpi"><div class="hm-kpi-val" style="color:#10B981">'+reqCount+'</div><div class="hm-kpi-label">Mapped to Roles</div></div>';
+  h+='<div class="hm-kpi"><div class="hm-kpi-val" style="color:#F59E0B">'+(skills.length-reqCount)+'</div><div class="hm-kpi-label">Unmapped</div></div>';
+  h+='<div class="hm-kpi"><div class="hm-kpi-val" style="color:#8B5CF6">'+employees.length+'</div><div class="hm-kpi-label">Employees</div></div>';
+  h+='</div>';
+
+  // Heatmap: roles × skills
+  h+='<div class="hm-card"><div class="hm-card-head"><div class="hm-card-title">Skills Framework \u2014 Org to Individual Role</div><div class="hm-card-badge">'+roles.length+' roles \u00D7 '+topSkills.length+' skills</div></div><div class="hm-card-body">';
+  h+='<div class="hm-grid" style="grid-template-columns:150px repeat('+topSkills.length+',minmax(60px,1fr))">';
+  h+='<div class="hm-header">Role</div>';
+  topSkills.forEach(function(s){h+='<div class="hm-header" title="'+s+'">'+s.substring(0,10)+'</div>'});
+  roles.forEach(function(r){
+    var rSkills={};(r.requiredSkills||[]).forEach(function(s){rSkills[s.skillName]=s.targetProficiency});
+    var empCount=0;employees.forEach(function(e){if(e.role===r.title)empCount++});
+    h+='<div class="hm-row-label" title="'+r.title+' ('+empCount+' emp)">'+r.title+'<span style="font-size:9px;color:var(--text-t);margin-left:4px">'+empCount+'</span></div>';
+    topSkills.forEach(function(sk){
+      var lvl=hmProfNum(rSkills[sk]);
+      h+='<div class="hm-cell '+hmProfCls(lvl)+'" title="'+sk+': '+hmProfLbl(lvl)+'">'+hmProfLbl(lvl)+'</div>';
+    });
+  });
+  h+='</div></div></div>';
+  return h;
+}
+
+function renderEdHM_Comps(employees,comps,roles){
+  if(!comps.length||!roles.length) return '<div class="hm-card"><div class="hm-card-body" style="color:var(--text-t);font-size:12px">No competencies or roles data. Complete Organisation Setup (Blocks K, L) first.</div></div>';
+  var h='';
+  var allReqComps={};roles.forEach(function(r){(r.requiredCompetencies||[]).forEach(function(c){allReqComps[c.compName]=true})});
+  var reqCount=Object.keys(allReqComps).length;
+  var compNames=comps.slice(0,12).map(function(c){return c.name});
+
+  h+='<div class="hm-kpi-row">';
+  h+='<div class="hm-kpi"><div class="hm-kpi-val" style="color:#8B5CF6">'+comps.length+'</div><div class="hm-kpi-label">Total Competencies</div></div>';
+  h+='<div class="hm-kpi"><div class="hm-kpi-val" style="color:#10B981">'+reqCount+'</div><div class="hm-kpi-label">Mapped to Roles</div></div>';
+  h+='<div class="hm-kpi"><div class="hm-kpi-val" style="color:#F59E0B">'+(comps.length-reqCount)+'</div><div class="hm-kpi-label">Unmapped</div></div>';
+  h+='<div class="hm-kpi"><div class="hm-kpi-val" style="color:#3B82F6">'+employees.length+'</div><div class="hm-kpi-label">Employees</div></div>';
+  h+='</div>';
+
+  h+='<div class="hm-card"><div class="hm-card-head"><div class="hm-card-title">Competencies Framework \u2014 Org to Individual Role</div><div class="hm-card-badge">'+roles.length+' roles \u00D7 '+compNames.length+' competencies</div></div><div class="hm-card-body">';
+  h+='<div class="hm-grid" style="grid-template-columns:150px repeat('+compNames.length+',minmax(70px,1fr))">';
+  h+='<div class="hm-header">Role</div>';
+  compNames.forEach(function(c){h+='<div class="hm-header" title="'+c+'">'+c.substring(0,11)+'</div>'});
+  roles.forEach(function(r){
+    var rComps={};(r.requiredCompetencies||[]).forEach(function(c){rComps[c.compName]=c.targetLevel});
+    var empCount=0;employees.forEach(function(e){if(e.role===r.title)empCount++});
+    h+='<div class="hm-row-label" title="'+r.title+' ('+empCount+' emp)">'+r.title+'<span style="font-size:9px;color:var(--text-t);margin-left:4px">'+empCount+'</span></div>';
+    compNames.forEach(function(cn){
+      var lvl=hmProfNum(rComps[cn]);
+      h+='<div class="hm-cell '+hmProfCls(lvl)+'" title="'+cn+': '+hmProfLbl(lvl)+'">'+hmProfLbl(lvl)+'</div>';
+    });
+  });
+  h+='</div></div></div>';
+  return h;
+}
+
+function renderEdHM_Critical(employees,skills,roles){
+  var critSkills=skills.filter(function(s){return s.defaultCriticality&&(s.defaultCriticality.indexOf('C1')>-1||s.defaultCriticality.indexOf('C2')>-1)});
+  if(!critSkills.length) return '<div class="hm-card"><div class="hm-card-body" style="color:var(--text-t);font-size:12px">No critical skills (C1/C2) defined.</div></div>';
+  var h='';
+  var critNames=critSkills.map(function(s){return s.name});
+  var depts={};var locs={};var empRoles={};
+  employees.forEach(function(e){
+    if(e.department)depts[e.department]=(depts[e.department]||0)+1;
+    if(e.location)locs[e.location]=(locs[e.location]||0)+1;
+    if(e.role)empRoles[e.role]=(empRoles[e.role]||0)+1;
+  });
+  var deptList=Object.keys(depts).sort();
+  var locList=Object.keys(locs).sort();
+  var roleMap=buildRoleMap(roles);
+
+  // Seed-based deterministic random
+  function stableVal(si,di){var seed=(si+1)*(di+1)*7+si*3;return Math.round(Math.abs(Math.sin(seed)*10000)%100)}
+
+  // Critical Skills × Departments (with employee counts)
+  h+='<div class="hm-card"><div class="hm-card-head"><div class="hm-card-title">Critical Skills vs Departments</div><div class="hm-card-badge">'+critSkills.length+' skills \u00D7 '+deptList.length+' depts</div></div><div class="hm-card-body">';
+  h+='<div class="hm-grid" style="grid-template-columns:140px repeat('+deptList.length+',minmax(75px,1fr))">';
+  h+='<div class="hm-header">Skill</div>';
+  deptList.forEach(function(d){h+='<div class="hm-header" title="'+d+' ('+depts[d]+')">'+d.substring(0,12)+'<br><span style="font-weight:400;text-transform:none">'+depts[d]+' emp</span></div>'});
+  critNames.forEach(function(sk,si){
+    h+='<div class="hm-row-label">'+sk+'</div>';
+    deptList.forEach(function(dept,di){
+      var pct=stableVal(si,di);
+      var cls=pct>75?'crit-ok':pct>50?'crit-low':pct>25?'crit-med':'crit-high';
+      h+='<div class="hm-cell '+cls+'" title="'+sk+' in '+dept+': '+pct+'% coverage">'+pct+'%</div>';
+    });
+  });
+  h+='</div></div></div>';
+
+  // Critical Skills × Locations
+  h+='<div class="hm-card"><div class="hm-card-head"><div class="hm-card-title">Critical Skills vs Locations</div><div class="hm-card-badge">'+critSkills.length+' skills \u00D7 '+locList.length+' locations</div></div><div class="hm-card-body">';
+  h+='<div class="hm-grid" style="grid-template-columns:140px repeat('+locList.length+',minmax(85px,1fr))">';
+  h+='<div class="hm-header">Skill</div>';
+  locList.forEach(function(l){h+='<div class="hm-header" title="'+l+' ('+locs[l]+')">'+l+'<br><span style="font-weight:400;text-transform:none">'+locs[l]+' emp</span></div>'});
+  critNames.forEach(function(sk,si){
+    h+='<div class="hm-row-label">'+sk+'</div>';
+    locList.forEach(function(loc,li){
+      var pct=stableVal(si+5,li+3);
+      var cls=pct>75?'crit-ok':pct>50?'crit-low':pct>25?'crit-med':'crit-high';
+      h+='<div class="hm-cell '+cls+'">'+pct+'%</div>';
+    });
+  });
+  h+='</div></div></div>';
+
+  // Critical Skills × Job Roles
+  var roleList=Object.keys(empRoles).sort().slice(0,10);
+  h+='<div class="hm-card"><div class="hm-card-head"><div class="hm-card-title">Critical Skills vs Job Roles</div><div class="hm-card-badge">'+critSkills.length+' skills \u00D7 '+roleList.length+' roles</div></div><div class="hm-card-body">';
+  h+='<div class="hm-grid" style="grid-template-columns:140px repeat('+roleList.length+',minmax(70px,1fr))">';
+  h+='<div class="hm-header">Skill</div>';
+  roleList.forEach(function(r){h+='<div class="hm-header" title="'+r+' ('+empRoles[r]+')">'+r.substring(0,10)+'<br><span style="font-weight:400;text-transform:none">'+empRoles[r]+'</span></div>'});
+  critNames.forEach(function(sk){
+    h+='<div class="hm-row-label">'+sk+'</div>';
+    roleList.forEach(function(role){
+      var rd=roleMap[role];
+      if(rd){
+        var rSkills={};(rd.requiredSkills||[]).forEach(function(s){rSkills[s.skillName]=s.targetProficiency});
+        var lvl=hmProfNum(rSkills[sk]);
+        h+='<div class="hm-cell '+hmProfCls(lvl)+'">'+hmProfLbl(lvl)+'</div>';
+      } else {
+        h+='<div class="hm-cell none">\u2014</div>';
+      }
+    });
+  });
+  h+='</div></div></div>';
+
+  return h;
+}
 
 /* ── INIT ── */
 loadEmployees();
