@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHRO Dashboard · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   CHRO DASHBOARD — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── CONTENT SCROLL AREA ── */
+.content { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+
+/* ── KPI STRIP ── */
+.kpi-strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+
+.kpi-card {
+  background: var(--card);
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 16px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: fadeUp 0.5s ease both;
+}
+
+.kpi-card:nth-child(1) { animation-delay: 0.05s; }
+.kpi-card:nth-child(2) { animation-delay: 0.10s; }
+.kpi-card:nth-child(3) { animation-delay: 0.15s; }
+.kpi-card:nth-child(4) { animation-delay: 0.20s; }
+.kpi-card:nth-child(5) { animation-delay: 0.25s; }
+.kpi-card:nth-child(6) { animation-delay: 0.30s; }
+
+.kpi-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.kpi-value { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+.kpi-value.gold  { color: var(--accent); }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red   { color: var(--red); }
+
+.kpi-sub { font-size: 10px; display: flex; align-items: center; gap: 4px; }
+.kpi-up   { color: var(--green); }
+.kpi-down { color: var(--red); }
+.kpi-neu  { color: var(--text-muted); }
+
+/* ── ROW 2: Charts ── */
+.row-charts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; animation: fadeUp 0.5s ease 0.2s both; }
+
+/* ── PANEL ── */
+.panel {
+  background: var(--card);
+  border: 1px solid #E5E7EB;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-head {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.panel-title { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.panel-sub   { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+.panel-tag {
+  padding: 3px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+.panel-tag.gold   { border-color: var(--accent-bd); color: var(--accent); }
+.panel-tag.red    { border-color: rgba(220,38,38,0.4);  color: var(--red); }
+.panel-tag.green  { border-color: rgba(22,163,74,0.4);  color: var(--green); }
+.panel-tag.blue   { border-color: rgba(37,99,235,0.4);  color: var(--blue); }
+
+.panel-body { flex: 1; padding: 14px 18px; min-height: 0; }
+.panel-body.no-pad { padding: 0; }
+
+/* Chart wrapper */
+.chart-wrap { position: relative; }
+
+/* ── ROW 3: Heatmap + Dept Table ── */
+.row-bottom { display: grid; grid-template-columns: 1fr 1.4fr; gap: 14px; animation: fadeUp 0.5s ease 0.35s both; }
+
+/* ── HEATMAP ── */
+.heatmap-grid { display: grid; gap: 3px; }
+
+.heatmap-skill-label { font-size: 10px; color: var(--text-muted); display: flex; align-items: center; }
+.heatmap-dept-label  { font-size: 9px; color: var(--text-muted); text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+.hm-cell {
+  border-radius: 3px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.15s, filter 0.15s;
+}
+
+.hm-cell:hover { transform: scale(1.08); filter: brightness(1.1); z-index: 2; position: relative; }
+
+/* ── DEPT TABLE ── */
+.dept-table { width: 100%; border-collapse: collapse; }
+
+.dept-table th {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 0 12px 10px;
+  font-weight: 400;
+}
+
+.dept-table th:not(:first-child) { text-align: center; }
+
+.dept-table tr { border-bottom: 1px solid #E5E7EB; }
+.dept-table tr:last-child { border-bottom: none; }
+
+.dept-table td {
+  padding: 9px 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.dept-table td:first-child { color: var(--text-primary); font-size: 12.5px; }
+.dept-table td:not(:first-child) { text-align: center; }
+
+.trend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.trend-chip.up     { background: var(--green-bg);  color: var(--green); }
+.trend-chip.risk   { background: var(--red-bg);    color: var(--red); }
+.trend-chip.stable { background: rgba(0,0,0,0.05); color: var(--text-muted); }
+
+/* Readiness bar */
+.rbar-wrap { width: 80px; height: 5px; background: rgba(0,0,0,0.08); border-radius: 3px; display: inline-block; vertical-align: middle; }
+.rbar-fill { height: 100%; border-radius: 3px; }
+
+/* AI insight box */
+.ai-insight {
+  margin: 14px 18px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--blue-bg);
+  border: 1px solid rgba(37,99,235,0.2);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.ai-icon {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ai-icon svg { width: 10px; height: 10px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; }
+
+.ai-text { font-size: 11.5px; color: var(--text-secondary); line-height: 1.6; }
+.ai-text strong { color: var(--text-primary); font-weight: 500; }
+
+/* ── TREND CHART ROW ── */
+.row-trend { animation: fadeUp 0.5s ease 0.4s both; }
+
+/* Proficiency dist bar */
+.prof-dist { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
+.prof-row  { display: flex; align-items: center; gap: 10px; }
+.prof-lbl  { font-size: 11px; color: var(--text-secondary); width: 100px; flex-shrink: 0; }
+.prof-bar-track { flex: 1; height: 7px; background: rgba(0,0,0,0.07); border-radius: 4px; overflow: hidden; }
+.prof-bar-fill  { height: 100%; border-radius: 4px; transition: width 1s ease; }
+.prof-pct  { font-size: 11px; color: var(--text-muted); width: 28px; text-align: right; flex-shrink: 0; }
+
+/* ── LEVEL BANNER ── */
+.level-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 28px;
+  height: 36px;
+  background: linear-gradient(90deg, var(--accent-lt) 0%, transparent 60%);
+  border-bottom: 1px solid var(--accent-bd);
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.level-banner:hover { background: linear-gradient(90deg, rgba(201,168,76,0.18) 0%, transparent 70%); }
+
+/* ── CONFIDENCE STATEMENT ── */
+.confidence-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 28px;
+  background: var(--accent-lt);
+  border-top: 1px solid var(--accent-bd);
+  flex-shrink: 0;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(1.3); }
+}
+
+/* Scrollbar */
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <!-- SCROLLABLE CONTENT -->
+  <div class="content">
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <div class="kpi-label">Org Readiness</div>
+        <div class="kpi-value gold">61%</div>
+        <div class="kpi-sub kpi-up">↑ 17pts since L1</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Proficiency</div>
+        <div class="kpi-value">2.3<span style="font-size:13px;color:var(--text-muted)">/4.0</span></div>
+        <div class="kpi-sub kpi-up">↑ 0.4 this cycle</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Critical Gaps</div>
+        <div class="kpi-value red">14</div>
+        <div class="kpi-sub kpi-down">↓ from 19 at L1</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Gap Closure</div>
+        <div class="kpi-value green">27%</div>
+        <div class="kpi-sub kpi-neu">Since Oct 2025</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Passport Coverage</div>
+        <div class="kpi-value">92%</div>
+        <div class="kpi-sub kpi-neu">748 / 812 employees</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Training Enrolled</div>
+        <div class="kpi-value">284</div>
+        <div class="kpi-sub kpi-neu">7 active programmes</div>
+      </div>
+    </div>
+
+    <!-- ROW 2: Charts -->
+    <div class="row-charts">
+
+      <!-- Gap closure trend -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Gap Closure Trend</div>
+            <div class="panel-sub">Org readiness score · Oct 2025 – Mar 2026</div>
+          </div>
+          <div class="panel-tag green">+17pts</div>
+        </div>
+        <div class="panel-body">
+          <div class="chart-wrap" style="height:160px">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Proficiency distribution -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Proficiency Distribution</div>
+            <div class="panel-sub">All 812 employees · Current cycle</div>
+          </div>
+          <div class="panel-tag blue">L1–L4 Scale</div>
+        </div>
+        <div class="panel-body" style="display:flex;align-items:center;">
+          <div style="flex:1;height:140px;position:relative">
+            <canvas id="distChart"></canvas>
+          </div>
+          <div class="prof-dist" style="width:130px;padding-left:14px">
+            <div class="prof-row">
+              <div class="prof-lbl">Awareness</div>
+              <div class="prof-bar-track"><div class="prof-bar-fill" style="width:28%;background:#E87060"></div></div>
+              <div class="prof-pct">28%</div>
+            </div>
+            <div class="prof-row">
+              <div class="prof-lbl">Working</div>
+              <div class="prof-bar-track"><div class="prof-bar-fill" style="width:42%;background:#D4820A"></div></div>
+              <div class="prof-pct">42%</div>
+            </div>
+            <div class="prof-row">
+              <div class="prof-lbl">Practitioner</div>
+              <div class="prof-bar-track"><div class="prof-bar-fill" style="width:24%;background:#3AB87A"></div></div>
+              <div class="prof-pct">24%</div>
+            </div>
+            <div class="prof-row">
+              <div class="prof-lbl">Expert</div>
+              <div class="prof-bar-track"><div class="prof-bar-fill" style="width:6%;background:#5BA8E0"></div></div>
+              <div class="prof-pct">6%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Regional readiness -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Regional Readiness</div>
+            <div class="panel-sub">4 offices · Readiness score out of 100</div>
+          </div>
+          <div class="panel-tag gold">Pan-Asia</div>
+        </div>
+        <div class="panel-body">
+          <div class="chart-wrap" style="height:160px">
+            <canvas id="regionChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ROW 3: Heatmap + Dept Table -->
+    <div class="row-bottom">
+
+      <!-- SKILL GAP HEATMAP -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Skill Gap Heatmap</div>
+            <div class="panel-sub">6 critical skills × 5 departments · Gap score 0–4</div>
+          </div>
+          <div class="panel-tag red">14 Critical</div>
+        </div>
+        <div class="panel-body" id="heatmapBody">
+          <!-- rendered by JS -->
+        </div>
+        <div class="ai-insight">
+          <div class="ai-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div>
+          <div class="ai-text"><strong>AI insight:</strong> BIM & Digital Delivery carries 4 of 14 critical gaps. AI Literacy is the widest gap across all departments — no function is exempt. Recommend prioritising the AI & Data Literacy programme to unblock downstream digital delivery goals.</div>
+        </div>
+      </div>
+
+      <!-- DEPT TABLE -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Department Readiness</div>
+            <div class="panel-sub">All 10 departments · Sorted by readiness</div>
+          </div>
+          <div class="panel-tag blue">Live data</div>
+        </div>
+        <div class="panel-body no-pad" style="overflow-y:auto">
+          <table class="dept-table">
+            <thead>
+              <tr>
+                <th>Department</th>
+                <th>Readiness</th>
+                <th>Avg Gap</th>
+                <th>Trend</th>
+              </tr>
+            </thead>
+            <tbody id="deptTableBody"></tbody>
+          </table>
+        </div>
+        <div class="ai-insight">
+          <div class="ai-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div>
+          <div class="ai-text"><strong>AI insight:</strong> IT Infrastructure is the only department trending <strong style="color:var(--red)">at risk</strong> — readiness has stagnated at 49% for 6 weeks. Recommend an HRBP-led intervention review before next cycle closes.</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- level-banner-strip -->
+  <a class="level-banner" href="../level-journey.html">
+    <div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite"></div><span style="font-size:10px;font-family:var(--font-display);font-weight:600;letter-spacing:0.08em;color:var(--accent)">L3 ACTIVE</span></div>
+    <div style="width:1px;height:14px;background:var(--accent-bd)"></div>
+    <div style="font-size:11px;color:var(--text-secondary)">Training Execution &amp; Delivery</div>
+    <div style="width:80px;height:4px;background:rgba(0,0,0,0.07);border-radius:2px;overflow:hidden"><div style="width:63%;height:100%;background:var(--accent);border-radius:2px"></div></div>
+    <div style="font-size:11px;color:var(--accent);font-weight:500">63% complete</div>
+    <div style="width:1px;height:14px;background:var(--accent-bd)"></div>
+    <div style="font-size:11px;color:var(--text-secondary)">2 actions to unlock L4 →</div>
+    <div style="margin-left:auto;font-size:10px;font-family:var(--font-display);font-weight:600;letter-spacing:0.06em;color:var(--accent);text-transform:uppercase">View full journey →</div>
+  </a>
+
+  <!-- confidence-statement -->
+  <div class="confidence-bar">
+    <svg style="width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <span style="font-size:11px;color:var(--accent);font-weight:500;letter-spacing:0.03em">Edstellar &nbsp;·&nbsp; Day 14. First verified intelligence. 748 passports live.</span>
+    <span style="margin-left:auto;font-size:10px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase">Time to value</span>
+  </div>
+
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'manager',
+    activeNav: 'CHRO Dashboard',
+    breadcrumbs: ['Dashboards', 'CHRO Dashboard'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────
+const TREND = {
+  months:    ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
+  readiness: [44, 48, 52, 56, 59, 61]
+};
+
+const DIST = {
+  labels: ["Awareness", "Working", "Practitioner", "Expert"],
+  values: [28, 42, 24, 6],
+  colors: ["#E87060", "#D4820A", "#3AB87A", "#5BA8E0"]
+};
+
+const REGIONS = {
+  labels:    ["Singapore", "Mumbai", "Dubai", "Kuala Lumpur"],
+  readiness: [71, 58, 64, 54]
+};
+
+const HEATMAP = {
+  skills: ["BIM", "Digital Delivery", "Risk Mgmt", "AI Literacy", "ISO 45001", "Data Analytics"],
+  depts:  ["BIM & Digital", "Project Delivery", "Structural Eng", "EHS & Risk", "IT Infra"],
+  values: [
+    [1.8, 1.4, 0.6, 0.4, 1.1],
+    [1.6, 1.3, 0.8, 0.3, 1.4],
+    [0.9, 1.1, 0.7, 1.2, 0.6],
+    [2.1, 1.8, 1.4, 1.0, 1.6],
+    [0.4, 0.6, 0.3, 0.2, 0.5],
+    [1.7, 1.2, 0.9, 0.8, 1.3]
+  ]
+};
+
+const DEPTS = [
+  { dept: "Human Resources",          readiness: 78, gap: 0.4, trend: "stable"    },
+  { dept: "Finance & Procurement",    readiness: 74, gap: 0.5, trend: "stable"    },
+  { dept: "EHS & Risk",               readiness: 72, gap: 0.6, trend: "improving" },
+  { dept: "Legal & Compliance",       readiness: 71, gap: 0.6, trend: "stable"    },
+  { dept: "Structural Engineering",   readiness: 68, gap: 0.7, trend: "stable"    },
+  { dept: "Civil & Geotechnical",     readiness: 65, gap: 0.8, trend: "stable"    },
+  { dept: "Sustainability Advisory",  readiness: 63, gap: 0.9, trend: "improving" },
+  { dept: "Project Delivery",         readiness: 52, gap: 1.1, trend: "improving" },
+  { dept: "IT Infrastructure",        readiness: 49, gap: 1.2, trend: "at risk"   },
+  { dept: "BIM & Digital Delivery",   readiness: 44, gap: 1.4, trend: "improving" }
+];
+
+// ── CHART DEFAULTS ────────────────────────────────────────────
+Chart.defaults.color = "#6B7280";
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size = 11;
+
+function makeGradient(ctx, color) {
+  const g = ctx.createLinearGradient(0, 0, 0, 160);
+  g.addColorStop(0, color + "55");
+  g.addColorStop(1, color + "00");
+  return g;
+}
+
+// ── TREND CHART ───────────────────────────────────────────────
+(function() {
+  const ctx = document.getElementById("trendChart").getContext("2d");
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: TREND.months,
+      datasets: [{
+        data: TREND.readiness,
+        borderColor: "#C8A84B",
+        borderWidth: 2,
+        backgroundColor: makeGradient(ctx, "#C8A84B"),
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: "#C8A84B",
+        pointRadius: 3,
+        pointHoverRadius: 5
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: "#ffffff",
+        titleColor: "#0F1117",
+        bodyColor: "#6B7280",
+        borderColor: "rgba(0,0,0,0.1)",
+        borderWidth: 1,
+        callbacks: { label: ctx => " Readiness: " + ctx.raw + "%" }
+      }},
+      scales: {
+        x: { grid: { color: "rgba(0,0,0,0.04)" }, border: { display: false } },
+        y: { min: 30, max: 80, grid: { color: "rgba(0,0,0,0.04)" }, border: { display: false },
+             ticks: { callback: v => v + "%" } }
+      }
+    }
+  });
+})();
+
+// ── DIST DOUGHNUT ─────────────────────────────────────────────
+(function() {
+  const ctx = document.getElementById("distChart").getContext("2d");
+  new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: DIST.labels,
+      datasets: [{
+        data: DIST.values,
+        backgroundColor: DIST.colors,
+        borderWidth: 0,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: "68%",
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#ffffff",
+          titleColor: "#0F1117",
+          bodyColor: "#6B7280",
+          borderColor: "rgba(0,0,0,0.1)",
+          borderWidth: 1,
+          callbacks: { label: ctx => " " + ctx.label + ": " + ctx.raw + "%" }
+        }
+      }
+    }
+  });
+})();
+
+// ── REGION BAR ────────────────────────────────────────────────
+(function() {
+  const ctx = document.getElementById("regionChart").getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: REGIONS.labels,
+      datasets: [{
+        data: REGIONS.readiness,
+        backgroundColor: ["#2563EB", "#E87060", "#D97706", "#C9A84C"],
+        borderRadius: 5,
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: "#ffffff",
+        titleColor: "#0F1117",
+        bodyColor: "#6B7280",
+        borderColor: "rgba(0,0,0,0.1)",
+        borderWidth: 1,
+        callbacks: { label: ctx => " Readiness: " + ctx.raw + "%" }
+      }},
+      scales: {
+        x: { grid: { display: false }, border: { display: false } },
+        y: { min: 0, max: 100, grid: { color: "rgba(0,0,0,0.04)" }, border: { display: false },
+             ticks: { callback: v => v + "%" } }
+      }
+    }
+  });
+})();
+
+// ── HEATMAP ───────────────────────────────────────────────────
+(function() {
+  const body = document.getElementById("heatmapBody");
+  const nS = HEATMAP.skills.length;
+  const nD = HEATMAP.depts.length;
+
+  body.style.display = "grid";
+  body.style.gridTemplateColumns = "90px " + "1fr ".repeat(nD);
+  body.style.gridTemplateRows = "20px " + "32px ".repeat(nS);
+  body.style.gap = "3px";
+  body.style.padding = "12px 16px";
+  body.style.alignItems = "center";
+
+  // top-left empty
+  const empty = document.createElement("div");
+  body.appendChild(empty);
+
+  // dept headers
+  HEATMAP.depts.forEach(d => {
+    const el = document.createElement("div");
+    el.className = "heatmap-dept-label";
+    el.textContent = d;
+    body.appendChild(el);
+  });
+
+  // rows
+  HEATMAP.skills.forEach((skill, si) => {
+    const lbl = document.createElement("div");
+    lbl.className = "heatmap-skill-label";
+    lbl.textContent = skill;
+    lbl.style.fontSize = "10px";
+    body.appendChild(lbl);
+
+    HEATMAP.depts.forEach((_, di) => {
+      const val = HEATMAP.values[si][di];
+      const cell = document.createElement("div");
+      cell.className = "hm-cell";
+      cell.title = skill + " · " + HEATMAP.depts[di] + " · Gap: " + val.toFixed(1);
+      cell.textContent = val.toFixed(1);
+
+      // colour: 0=green → 2=red
+      const ratio = val / 2.5;
+      const r = Math.round(50 + 180 * ratio);
+      const g = Math.round(170 - 130 * ratio);
+      const b = Math.round(80  - 60  * ratio);
+      cell.style.background = `rgba(${r},${g},${b},0.25)`;
+      cell.style.color       = `rgb(${r},${g},${b})`;
+      cell.style.border      = `1px solid rgba(${r},${g},${b},0.4)`;
+
+      body.appendChild(cell);
+    });
+  });
+})();
+
+// ── DEPT TABLE ────────────────────────────────────────────────
+(function() {
+  const tbody = document.getElementById("deptTableBody");
+  DEPTS.forEach(d => {
+    const barColor = d.readiness >= 70 ? "#3AB87A" : d.readiness >= 55 ? "#D4820A" : "#E87060";
+    const trendClass = d.trend === "improving" ? "up" : d.trend === "at risk" ? "risk" : "stable";
+    const trendIcon  = d.trend === "improving" ? "↑" : d.trend === "at risk" ? "↓" : "→";
+    const trendLabel = d.trend === "improving" ? "Improving" : d.trend === "at risk" ? "At risk" : "Stable";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${d.dept}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+          <div class="rbar-wrap"><div class="rbar-fill" style="width:${d.readiness}%;background:${barColor}"></div></div>
+          <span style="font-size:11px;color:${barColor};width:26px">${d.readiness}%</span>
+        </div>
+      </td>
+      <td style="color:${d.gap >= 1.2 ? '#E87060' : d.gap >= 0.9 ? '#D4820A' : 'var(--text-secondary)'}">${d.gap.toFixed(1)}</td>
+      <td><span class="trend-chip ${trendClass}">${trendIcon} ${trendLabel}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var toast = document.createElement("div");
+  toast.id = "sip-toast";
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#ffffff;border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:'DM Sans',sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.1)";
+  document.body.appendChild(toast);
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){
+      toast.style.opacity="0";
+      toast.style.transform="translateX(-50%) translateY(8px)";
+    }, 2400);
+  }
+  document.addEventListener("click", function(e){
+    var a = e.target.closest("a");
+    if(a && a.getAttribute("href") === "#"){
+      e.preventDefault();
+      var label = (a.textContent || "").trim().replace(/\s+/g," ").substring(0,36);
+      showToast(label + " — available in full platform");
+    }
+  });
+})();
+</script>
+</body>
+</html>

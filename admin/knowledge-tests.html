@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Tests · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   KNOWLEDGE TESTS — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── CONTENT ── */
+.content { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; }
+.content > * { flex-shrink: 0; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
+
+/* ── KPI STRIP ── */
+.kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; animation: fadeUp .4s ease both; }
+.kpi-card { background: var(--card); border: 1px solid #E5E7EB; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.kpi-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.kpi-value { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+.kpi-value.accent { color: var(--accent); }
+.kpi-value.green  { color: var(--green); }
+.kpi-value.red    { color: var(--red); }
+.kpi-value.teal   { color: var(--teal); }
+.kpi-sub { font-size: 10px; display: flex; align-items: center; gap: 4px; color: var(--text-muted); }
+.kpi-up   { color: var(--green); }
+.kpi-down { color: var(--red); }
+
+/* ── PANELS ── */
+.panel { background: var(--card); border: 1px solid #E5E7EB; border-radius: 14px; display: flex; flex-direction: column; overflow: hidden; }
+.panel-head { padding: 14px 18px 12px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.panel-title { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.panel-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.panel-tag { padding: 3px 8px; border-radius: 100px; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid; }
+.panel-tag.teal  { border-color: rgba(8,145,178,.4); color: var(--teal); }
+.panel-tag.accent { border-color: var(--accent-bd); color: var(--accent); }
+.panel-tag.red   { border-color: rgba(220,38,38,.4); color: var(--red); }
+.panel-tag.green { border-color: rgba(22,163,74,.4); color: var(--green); }
+.panel-tag.blue  { border-color: rgba(37,99,235,.4); color: var(--blue); }
+.panel-body { flex: 1; padding: 14px 18px; }
+.panel-body.no-pad { padding: 0; }
+
+/* ── TEST TABLE ── */
+.test-table { width: 100%; border-collapse: collapse; }
+.test-table th {
+  font-size: 10px; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase;
+  text-align: left; padding: 0 12px 10px; font-weight: 400;
+}
+.test-table th:nth-child(n+3) { text-align: center; }
+.test-table tr { border-bottom: 1px solid #E5E7EB; }
+.test-table tr:last-child { border-bottom: none; }
+.test-table td { padding: 10px 12px; font-size: 12px; color: var(--text-secondary); }
+.test-table td:first-child { color: var(--text-primary); font-weight: 500; }
+.test-table td:nth-child(n+3) { text-align: center; }
+
+.status-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 100px; font-size: 10px; font-weight: 500;
+}
+.status-chip.active   { background: var(--teal-bg); color: var(--teal); }
+.status-chip.draft    { background: rgba(0,0,0,0.04); color: var(--text-muted); }
+.status-chip.scheduled { background: var(--amber-bg); color: var(--amber); }
+.status-chip.complete { background: var(--green-bg); color: var(--green); }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; }
+.status-chip.active .status-dot   { background: var(--teal); animation: blink 1.5s infinite; }
+.status-chip.draft .status-dot    { background: var(--text-muted); }
+.status-chip.scheduled .status-dot { background: var(--amber); }
+.status-chip.complete .status-dot { background: var(--green); }
+
+/* ── TWO-COL GRID ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* ── AI BUILDER ── */
+.builder-form { display: flex; flex-direction: column; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 10px; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase; }
+.form-input {
+  background: var(--bg); border: 1px solid #E5E7EB; border-radius: 6px;
+  padding: 8px 12px; color: var(--text-primary); font-family: var(--font-body); font-size: 12px;
+  outline: none; transition: border-color .15s;
+}
+.form-input:focus { border-color: rgba(8,145,178,.5); }
+.form-input::placeholder { color: var(--text-muted); }
+.form-select {
+  background: var(--bg); border: 1px solid #E5E7EB; border-radius: 6px;
+  padding: 8px 12px; color: var(--text-primary); font-family: var(--font-body); font-size: 12px;
+  outline: none; cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239CA3AF' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+.slider-row { display: flex; align-items: center; gap: 10px; }
+.slider-row input[type="range"] {
+  flex: 1; -webkit-appearance: none; appearance: none; height: 4px;
+  background: #E5E7EB; border-radius: 2px; outline: none;
+}
+.slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--teal); cursor: pointer;
+}
+.slider-val { font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--teal); min-width: 24px; text-align: center; }
+
+/* ── QUESTION PREVIEW ── */
+.q-preview { background: var(--bg); border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.q-num { font-family: var(--font-mono); font-size: 10px; color: var(--teal); letter-spacing: .06em; }
+.q-text { font-size: 12px; color: var(--text-primary); line-height: 1.5; }
+.q-options { display: flex; flex-direction: column; gap: 4px; padding-left: 4px; }
+.q-opt { font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+.q-opt .radio { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--text-muted); flex-shrink: 0; }
+.q-opt.correct .radio { border-color: var(--green); background: var(--green-bg); }
+.q-opt.correct { color: var(--green); }
+
+/* ── DELTA BAR ── */
+.delta-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #E5E7EB; }
+.delta-row:last-child { border-bottom: none; }
+.delta-name { font-size: 12px; color: var(--text-primary); font-weight: 500; width: 200px; flex-shrink: 0; }
+.delta-bar-bg { flex: 1; height: 6px; background: rgba(0,0,0,0.05); border-radius: 3px; overflow: hidden; position: relative; }
+.delta-bar-pre { height: 100%; border-radius: 3px; position: absolute; left: 0; top: 0; }
+.delta-bar-post { height: 100%; border-radius: 3px; position: absolute; left: 0; top: 0; }
+.delta-scores { display: flex; gap: 8px; flex-shrink: 0; min-width: 120px; justify-content: flex-end; }
+.delta-pre { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+.delta-post { font-family: var(--font-mono); font-size: 11px; color: var(--teal); }
+.delta-change { font-family: var(--font-mono); font-size: 11px; color: var(--green); font-weight: 600; min-width: 40px; text-align: right; }
+
+/* ── SCHEDULE TABLE ── */
+.sched-table { width: 100%; border-collapse: collapse; }
+.sched-table th {
+  font-size: 10px; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase;
+  text-align: left; padding: 0 12px 10px; font-weight: 400;
+}
+.sched-table tr { border-bottom: 1px solid #E5E7EB; }
+.sched-table tr:last-child { border-bottom: none; }
+.sched-table td { padding: 10px 12px; font-size: 12px; color: var(--text-secondary); }
+.sched-table td:first-child { color: var(--text-primary); font-weight: 500; }
+
+.action-btn {
+  padding: 4px 10px; border-radius: 4px; font-size: 10px; font-family: var(--font-body);
+  cursor: pointer; border: 1px solid #E5E7EB; background: transparent; color: var(--text-secondary);
+  transition: background .15s, color .15s;
+}
+.action-btn:hover { background: rgba(0,0,0,0.04); color: var(--text-primary); }
+.action-btn.teal { border-color: rgba(8,145,178,.3); color: var(--teal); }
+.action-btn.teal:hover { background: var(--teal-bg); }
+
+.tb-btn { padding: 7px 14px; border-radius: 6px; border: 1px solid #E5E7EB; background: transparent; color: var(--text-secondary); font-family: var(--font-body); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: background .15s, color .15s; }
+.tb-btn:hover { background: rgba(0,0,0,0.04); color: var(--text-primary); }
+.tb-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.tb-btn.primary { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 600; }
+.tb-btn.primary:hover { opacity: .88; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.5; transform:scale(1.3); } }
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <!-- SCROLLABLE CONTENT -->
+  <div class="content">
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip">
+      <div class="kpi-card" style="animation: fadeUp .4s ease 0.05s both">
+        <div class="kpi-label">Total Tests</div>
+        <div class="kpi-value">8</div>
+        <div class="kpi-sub">3 active · 2 scheduled · 3 draft</div>
+      </div>
+      <div class="kpi-card" style="animation: fadeUp .4s ease 0.10s both">
+        <div class="kpi-label">Questions in Bank</div>
+        <div class="kpi-value teal">246</div>
+        <div class="kpi-sub kpi-up">+38 added this month</div>
+      </div>
+      <div class="kpi-card" style="animation: fadeUp .4s ease 0.15s both">
+        <div class="kpi-label">Active Tests</div>
+        <div class="kpi-value green">3</div>
+        <div class="kpi-sub">Running across 4 departments</div>
+      </div>
+      <div class="kpi-card" style="animation: fadeUp .4s ease 0.20s both">
+        <div class="kpi-label">Avg Pre/Post Delta</div>
+        <div class="kpi-value accent">+18%</div>
+        <div class="kpi-sub kpi-up">Improvement after training</div>
+      </div>
+    </div>
+
+    <!-- TEST LIBRARY -->
+    <div class="panel" style="animation: fadeUp .5s ease .15s both">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Test Library</div>
+          <div class="panel-sub">8 knowledge tests · 246 questions · Pre/Post & Retention formats</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <div class="panel-tag teal">3 Active</div>
+          <button class="tb-btn" style="padding:5px 10px;font-size:11px" onclick="document.getElementById('aiBuilder').scrollIntoView({behavior:'smooth'})">+ New Test</button>
+        </div>
+      </div>
+      <div class="panel-body no-pad" style="overflow-x:auto">
+        <table class="test-table">
+          <thead>
+            <tr>
+              <th>Test Name</th>
+              <th>Questions</th>
+              <th>Status</th>
+              <th>Type</th>
+              <th>Avg Score</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding-left:18px">BIM Fundamentals</td>
+              <td style="text-align:center"><span style="font-family:var(--font-mono);font-size:12px">32</span></td>
+              <td><span class="status-chip active"><span class="status-dot"></span>Active</span></td>
+              <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--blue-bg);color:var(--blue)">Pre/Post</span></td>
+              <td><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-primary)">72%</span></td>
+              <td><button class="action-btn teal">View</button> <button class="action-btn">Edit</button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:18px">ISO 45001 Safety Standards</td>
+              <td style="text-align:center"><span style="font-family:var(--font-mono);font-size:12px">28</span></td>
+              <td><span class="status-chip active"><span class="status-dot"></span>Active</span></td>
+              <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--blue-bg);color:var(--blue)">Pre/Post</span></td>
+              <td><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-primary)">81%</span></td>
+              <td><button class="action-btn teal">View</button> <button class="action-btn">Edit</button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:18px">Structural Code Compliance</td>
+              <td style="text-align:center"><span style="font-family:var(--font-mono);font-size:12px">24</span></td>
+              <td><span class="status-chip active"><span class="status-dot"></span>Active</span></td>
+              <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--green-bg);color:var(--green)">Retention</span></td>
+              <td><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-primary)">68%</span></td>
+              <td><button class="action-btn teal">View</button> <button class="action-btn">Edit</button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:18px">Data Analytics Basics</td>
+              <td style="text-align:center"><span style="font-family:var(--font-mono);font-size:12px">20</span></td>
+              <td><span class="status-chip draft"><span class="status-dot"></span>Draft</span></td>
+              <td><span style="font-size:10px;color:var(--text-muted)">--</span></td>
+              <td><span style="font-size:10px;color:var(--text-muted)">--</span></td>
+              <td><button class="action-btn">Edit</button> <button class="action-btn">Publish</button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:18px">AI Literacy Foundation</td>
+              <td style="text-align:center"><span style="font-family:var(--font-mono);font-size:12px">26</span></td>
+              <td><span class="status-chip draft"><span class="status-dot"></span>Draft</span></td>
+              <td><span style="font-size:10px;color:var(--text-muted)">--</span></td>
+              <td><span style="font-size:10px;color:var(--text-muted)">--</span></td>
+              <td><button class="action-btn">Edit</button> <button class="action-btn">Publish</button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:18px">Geotechnical Principles</td>
+              <td style="text-align:center"><span style="font-family:var(--font-mono);font-size:12px">22</span></td>
+              <td><span class="status-chip scheduled"><span class="status-dot"></span>Scheduled</span></td>
+              <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--blue-bg);color:var(--blue)">Pre/Post</span></td>
+              <td><span style="font-size:10px;color:var(--text-muted)">--</span></td>
+              <td><button class="action-btn teal">View</button> <button class="action-btn">Edit</button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:18px">Project Risk Management</td>
+              <td style="text-align:center"><span style="font-family:var(--font-mono);font-size:12px">18</span></td>
+              <td><span class="status-chip scheduled"><span class="status-dot"></span>Scheduled</span></td>
+              <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--green-bg);color:var(--green)">Retention</span></td>
+              <td><span style="font-size:10px;color:var(--text-muted)">--</span></td>
+              <td><button class="action-btn teal">View</button> <button class="action-btn">Edit</button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:18px">Environmental ESG Standards</td>
+              <td style="text-align:center"><span style="font-family:var(--font-mono);font-size:12px">24</span></td>
+              <td><span class="status-chip draft"><span class="status-dot"></span>Draft</span></td>
+              <td><span style="font-size:10px;color:var(--text-muted)">--</span></td>
+              <td><span style="font-size:10px;color:var(--text-muted)">--</span></td>
+              <td><button class="action-btn">Edit</button> <button class="action-btn">Publish</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AI TEST BUILDER + PRE/POST DELTA -->
+    <div class="two-col" style="animation: fadeUp .5s ease .25s both">
+
+      <!-- AI TEST BUILDER -->
+      <div class="panel" id="aiBuilder">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">AI Test Builder</div>
+            <div class="panel-sub">Generate knowledge test questions using AI</div>
+          </div>
+          <div class="panel-tag teal">AI Powered</div>
+        </div>
+        <div class="panel-body">
+          <div class="builder-form">
+            <div class="form-group">
+              <div class="form-label">Skill / Topic</div>
+              <input class="form-input" type="text" value="BIM Level 2 — Digital Delivery Standards" placeholder="Enter skill or topic name...">
+            </div>
+            <div class="form-group">
+              <div class="form-label">Difficulty Level</div>
+              <select class="form-select">
+                <option>Foundation</option>
+                <option selected>Intermediate</option>
+                <option>Advanced</option>
+                <option>Expert</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Number of Questions</div>
+              <div class="slider-row">
+                <input type="range" id="qCount" min="5" max="50" value="15" oninput="document.getElementById('qVal').textContent=this.value">
+                <span class="slider-val" id="qVal">15</span>
+              </div>
+            </div>
+            <button class="tb-btn primary" style="width:100%;justify-content:center;padding:10px 14px;margin-top:4px">
+              <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+              Generate with AI
+            </button>
+
+            <div style="font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-top:8px">Preview — Generated Questions</div>
+
+            <div class="q-preview">
+              <div class="q-num">Q1 / MCQ</div>
+              <div class="q-text">Which BIM standard mandates the use of a Common Data Environment (CDE) for collaborative working?</div>
+              <div class="q-options">
+                <div class="q-opt"><span class="radio"></span> BS 7000-4</div>
+                <div class="q-opt correct"><span class="radio"></span> PAS 1192-2 / ISO 19650</div>
+                <div class="q-opt"><span class="radio"></span> BS 8541-1</div>
+                <div class="q-opt"><span class="radio"></span> IFC 4.0 Schema</div>
+              </div>
+            </div>
+
+            <div class="q-preview">
+              <div class="q-num">Q2 / MCQ</div>
+              <div class="q-text">What is the primary purpose of a BIM Execution Plan (BEP) at the pre-contract stage?</div>
+              <div class="q-options">
+                <div class="q-opt"><span class="radio"></span> Define construction sequencing</div>
+                <div class="q-opt"><span class="radio"></span> Calculate project cost estimates</div>
+                <div class="q-opt correct"><span class="radio"></span> Outline the approach to BIM deliverables and responsibilities</div>
+                <div class="q-opt"><span class="radio"></span> Schedule site inspections</div>
+              </div>
+            </div>
+
+            <div class="q-preview">
+              <div class="q-num">Q3 / MCQ</div>
+              <div class="q-text">In a BIM Level 2 workflow, what does LOD 350 typically represent?</div>
+              <div class="q-options">
+                <div class="q-opt"><span class="radio"></span> Conceptual design geometry only</div>
+                <div class="q-opt"><span class="radio"></span> Schematic design with approximate quantities</div>
+                <div class="q-opt correct"><span class="radio"></span> Construction-level detail with interfaces to other systems</div>
+                <div class="q-opt"><span class="radio"></span> As-built verified model for facility management</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRE/POST DELTA RESULTS -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Pre/Post Delta Results</div>
+            <div class="panel-sub">Improvement scores for completed test cycles</div>
+          </div>
+          <div class="panel-tag green">Measured</div>
+        </div>
+        <div class="panel-body">
+          <div style="display:flex;flex-direction:column">
+            <!-- Header -->
+            <div style="display:flex;align-items:center;gap:10px;padding:0 0 8px;border-bottom:1px solid #E5E7EB;margin-bottom:4px">
+              <div style="width:200px;font-size:10px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase">Test</div>
+              <div style="flex:1;font-size:10px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;text-align:center">Score Range</div>
+              <div style="min-width:120px;display:flex;gap:8px;justify-content:flex-end">
+                <span style="font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;min-width:34px;text-align:right">Pre</span>
+                <span style="font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;min-width:34px;text-align:right">Post</span>
+              </div>
+              <div style="min-width:40px;font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;text-align:right">Delta</div>
+            </div>
+
+            <div class="delta-row">
+              <div class="delta-name">BIM Fundamentals</div>
+              <div class="delta-bar-bg">
+                <div class="delta-bar-pre" style="width:54%;background:rgba(156,163,175,0.4)"></div>
+                <div class="delta-bar-post" style="width:72%;background:var(--teal);opacity:0.6"></div>
+              </div>
+              <div class="delta-scores">
+                <span class="delta-pre">54%</span>
+                <span class="delta-post">72%</span>
+              </div>
+              <span class="delta-change">+18%</span>
+            </div>
+
+            <div class="delta-row">
+              <div class="delta-name">ISO 45001 Safety</div>
+              <div class="delta-bar-bg">
+                <div class="delta-bar-pre" style="width:62%;background:rgba(156,163,175,0.4)"></div>
+                <div class="delta-bar-post" style="width:81%;background:var(--teal);opacity:0.6"></div>
+              </div>
+              <div class="delta-scores">
+                <span class="delta-pre">62%</span>
+                <span class="delta-post">81%</span>
+              </div>
+              <span class="delta-change">+19%</span>
+            </div>
+
+            <div class="delta-row">
+              <div class="delta-name">Structural Code</div>
+              <div class="delta-bar-bg">
+                <div class="delta-bar-pre" style="width:52%;background:rgba(156,163,175,0.4)"></div>
+                <div class="delta-bar-post" style="width:68%;background:var(--teal);opacity:0.6"></div>
+              </div>
+              <div class="delta-scores">
+                <span class="delta-pre">52%</span>
+                <span class="delta-post">68%</span>
+              </div>
+              <span class="delta-change">+16%</span>
+            </div>
+
+            <!-- Summary -->
+            <div style="display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;background:linear-gradient(135deg,rgba(8,145,178,.08) 0%,rgba(8,145,178,.02) 100%);border:1px solid rgba(8,145,178,.2);border-radius:8px">
+              <svg style="width:18px;height:18px;stroke:var(--teal);fill:none;stroke-width:1.5;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              <div style="flex:1">
+                <div style="font-family:var(--font-display);font-size:12px;font-weight:600;color:var(--teal)">Average Improvement: +18%</div>
+                <div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Across all pre/post knowledge tests, employees show consistent skill gains after training interventions</div>
+              </div>
+            </div>
+
+            <!-- Per-department breakdown -->
+            <div style="margin-top:16px;font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Department Breakdown</div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+              <div style="background:var(--bg);border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:11px;color:var(--text-secondary)">BIM & Digital Delivery</div>
+                <div style="font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--green)">+22%</div>
+                <div style="font-size:10px;color:var(--text-muted)">54 employees</div>
+              </div>
+              <div style="background:var(--bg);border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:11px;color:var(--text-secondary)">EHS & Risk</div>
+                <div style="font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--green)">+19%</div>
+                <div style="font-size:10px;color:var(--text-muted)">38 employees</div>
+              </div>
+              <div style="background:var(--bg);border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:11px;color:var(--text-secondary)">Structural Engineering</div>
+                <div style="font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--teal)">+16%</div>
+                <div style="font-size:10px;color:var(--text-muted)">42 employees</div>
+              </div>
+              <div style="background:var(--bg);border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:11px;color:var(--text-secondary)">Project Management</div>
+                <div style="font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--teal)">+14%</div>
+                <div style="font-size:10px;color:var(--text-muted)">28 employees</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEST SCHEDULING -->
+    <div class="panel" style="animation: fadeUp .5s ease .35s both">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Test Scheduling</div>
+          <div class="panel-sub">Upcoming and active test windows</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <div class="panel-tag accent">2 Scheduled</div>
+          <button class="tb-btn" style="padding:5px 10px;font-size:11px">+ Schedule Test</button>
+        </div>
+      </div>
+      <div class="panel-body no-pad" style="overflow-x:auto">
+        <table class="sched-table">
+          <thead>
+            <tr>
+              <th style="padding-left:18px">Test</th>
+              <th>Type</th>
+              <th>Department</th>
+              <th>Employees</th>
+              <th>Window Opens</th>
+              <th>Window Closes</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding-left:18px">BIM Fundamentals — Post-Training</td>
+              <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--blue-bg);color:var(--blue)">Post</span></td>
+              <td>BIM & Digital Delivery</td>
+              <td style="font-family:var(--font-mono)">54</td>
+              <td style="color:var(--teal)">22 Mar 2026</td>
+              <td>12 Apr 2026</td>
+              <td><span class="status-chip active"><span class="status-dot"></span>Active</span></td>
+              <td><button class="action-btn teal">Monitor</button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:18px">ISO 45001 — Pre-Training Baseline</td>
+              <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--blue-bg);color:var(--blue)">Pre</span></td>
+              <td>EHS & Risk</td>
+              <td style="font-family:var(--font-mono)">38</td>
+              <td style="color:var(--teal)">18 Mar 2026</td>
+              <td>30 Mar 2026</td>
+              <td><span class="status-chip active"><span class="status-dot"></span>Active</span></td>
+              <td><button class="action-btn teal">Monitor</button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:18px">Structural Code — Retention Check</td>
+              <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--green-bg);color:var(--green)">Retention</span></td>
+              <td>Structural Engineering</td>
+              <td style="font-family:var(--font-mono)">42</td>
+              <td>15 Mar 2026</td>
+              <td style="color:var(--teal)">28 Mar 2026</td>
+              <td><span class="status-chip active"><span class="status-dot"></span>Active</span></td>
+              <td><button class="action-btn teal">Monitor</button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:18px">Geotechnical Principles — Pre-Training</td>
+              <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--blue-bg);color:var(--blue)">Pre</span></td>
+              <td>Geotechnical</td>
+              <td style="font-family:var(--font-mono)">26</td>
+              <td>5 Apr 2026</td>
+              <td>18 Apr 2026</td>
+              <td><span class="status-chip scheduled"><span class="status-dot"></span>Scheduled</span></td>
+              <td><button class="action-btn">Edit</button></td>
+            </tr>
+            <tr>
+              <td style="padding-left:18px">Project Risk Management — Retention</td>
+              <td><span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--green-bg);color:var(--green)">Retention</span></td>
+              <td>Project Management</td>
+              <td style="font-family:var(--font-mono)">28</td>
+              <td>12 Apr 2026</td>
+              <td>28 Apr 2026</td>
+              <td><span class="status-chip scheduled"><span class="status-dot"></span>Scheduled</span></td>
+              <td><button class="action-btn">Edit</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'admin',
+    activeNav: 'Knowledge Tests',
+    breadcrumbs: ['Assess', 'Knowledge Tests'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+// Toast for placeholder links
+(function(){
+  var toast = document.createElement("div");
+  toast.id = "sip-toast";
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:var(--font-body);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08);";
+  document.body.appendChild(toast);
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){
+      toast.style.opacity="0";
+      toast.style.transform="translateX(-50%) translateY(8px)";
+    }, 2400);
+  }
+  document.addEventListener("click", function(e){
+    var a = e.target.closest("a");
+    if(a && a.getAttribute("href") === "#"){
+      e.preventDefault();
+      var label = (a.textContent || "").trim().replace(/\s+/g," ").substring(0,36);
+      showToast(label + " \u2014 available in full platform");
+    }
+    var btn = e.target.closest(".action-btn, .tb-btn:not(.primary)");
+    if(btn && !btn.closest("a")) {
+      var label = (btn.textContent || "").trim().substring(0,40);
+      showToast(label + " \u2014 available in full platform");
+    }
+  });
+})();
+</script>
+</body>
+</html>

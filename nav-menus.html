@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Screens · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/design-system.css">
+<style>
+/* Override design-system resets that assume shell layout */
+html,body{height:100%;overflow:hidden;display:block;grid-template-columns:none;grid-template-rows:none;grid-template-areas:none;}
+
+:root{
+  --ink-soft:#6B7280;
+  --ink-border:rgba(0,0,0,0.07);
+  --ink-panel:#F5F4F0;
+  --ink-card:#ffffff;
+  --paper:var(--text-primary);
+  --paper-mid:#374151;
+  --gold:var(--accent);
+  --gold-dim:var(--accent-lt);
+  --blue:#2563EB;--blue-lt:#3B82F6;--blue-dim:rgba(37,99,235,0.10);
+  --green:#16A34A;--green-lt:#22C55E;--green-dim:rgba(22,163,74,0.10);
+  --amber:#D97706;--amber-lt:#F59E0B;--amber-dim:rgba(217,119,6,0.10);
+  --teal:#0891B2;--teal-lt:#06B6D4;--teal-dim:rgba(8,145,178,0.10);
+  --purple:#7C3AED;--purple-lt:#8B5CF6;--purple-dim:rgba(124,58,237,0.10);
+  --pink:#DB2777;--pink-lt:#EC4899;--pink-dim:rgba(219,39,119,0.10);
+  --red:#DC2626;--red-lt:#EF4444;--red-dim:rgba(220,38,38,0.10);
+}
+body{height:100%;background:var(--bg);color:var(--text-primary);font-family:var(--font-body);overflow:hidden}
+
+/* -- OUTER SHELL -- */
+.shell{display:flex;height:100vh;gap:0}
+
+/* -- PORTAL TABS -- */
+.portal-tabs{
+  width:52px;background:var(--ink-panel);
+  border-right:1px solid var(--ink-border);
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px 0;gap:8px;flex-shrink:0;
+}
+.pt-logo{width:32px;height:32px;background:var(--accent);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);margin-bottom:12px;cursor:pointer;transition:opacity .2s}
+.pt-logo:hover{opacity:.8}
+.pt-btn{
+  width:36px;height:36px;border-radius:8px;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  background:transparent;transition:background .15s;
+  position:relative;
+}
+.pt-btn svg{width:18px;height:18px;stroke:var(--ink-soft);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:stroke .15s}
+.pt-btn:hover{background:rgba(0,0,0,.06)}
+.pt-btn:hover svg{stroke:var(--paper-mid)}
+.pt-btn.active svg{stroke:var(--text-primary)}
+.pt-btn.active{background:rgba(0,0,0,.08)}
+.pt-btn.admin.active{background:var(--blue-dim)}
+.pt-btn.admin.active svg{stroke:var(--blue-lt)}
+.pt-btn.manager.active{background:var(--gold-dim)}
+.pt-btn.manager.active svg{stroke:var(--accent)}
+.pt-btn.employee.active{background:var(--green-dim)}
+.pt-btn.employee.active svg{stroke:var(--green-lt)}
+.pt-btn.internal.active{background:var(--pink-dim)}
+.pt-btn.internal.active svg{stroke:var(--pink-lt)}
+.pt-btn.saas.active{background:var(--purple-dim)}
+.pt-btn.saas.active svg{stroke:var(--purple-lt)}
+.pt-tooltip{
+  position:absolute;left:48px;top:50%;transform:translateY(-50%);
+  background:var(--ink-card);border:1px solid var(--ink-border);
+  padding:5px 10px;border-radius:6px;font-size:11px;color:var(--text-primary);
+  white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:100;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+.pt-btn:hover .pt-tooltip{opacity:1}
+.pt-sep{width:24px;height:1px;background:var(--ink-border);margin:4px 0}
+
+/* -- SIDEBAR -- */
+.sidebar{
+  width:260px;background:var(--ink-panel);border-right:1px solid var(--ink-border);
+  display:flex;flex-direction:column;flex-shrink:0;
+}
+.sb-header{
+  padding:16px 18px 12px;border-bottom:1px solid var(--ink-border);
+  display:flex;flex-direction:column;gap:4px;
+}
+.sb-portal-name{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary)}
+.sb-portal-desc{font-size:11px;color:var(--ink-soft)}
+.sb-level-badge{
+  display:inline-flex;align-items:center;gap:5px;margin-top:4px;
+  padding:3px 9px;border-radius:100px;font-size:10px;border:1px solid;
+  width:fit-content;letter-spacing:.06em;
+}
+
+.sb-search{
+  padding:10px 14px;border-bottom:1px solid var(--ink-border);
+}
+.search-input{
+  width:100%;padding:7px 12px;border-radius:7px;
+  border:1px solid var(--ink-border);background:rgba(0,0,0,.03);
+  color:var(--text-primary);font-family:var(--font-body);font-size:12px;
+  outline:none;transition:border-color .15s;
+}
+.search-input::placeholder{color:var(--ink-soft)}
+.search-input:focus{border-color:rgba(0,0,0,.2)}
+
+.sb-nav{flex:1;overflow-y:auto;padding:8px 0}
+.sb-nav::-webkit-scrollbar{width:3px}
+.sb-nav::-webkit-scrollbar-thumb{background:rgba(0,0,0,.08);border-radius:2px}
+
+.nav-section{margin-bottom:4px}
+.nav-section-header{
+  padding:10px 16px 5px;
+  display:flex;align-items:center;gap:8px;cursor:pointer;
+  user-select:none;
+}
+.nsh-label{font-size:10px;color:var(--ink-soft);letter-spacing:.1em;text-transform:uppercase;flex:1}
+.nsh-count{font-size:10px;color:var(--ink-soft);padding:1px 6px;border-radius:100px;background:rgba(0,0,0,.05)}
+.nsh-arrow{width:10px;height:10px;stroke:var(--ink-soft);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s;flex-shrink:0}
+.nav-section.collapsed .nsh-arrow{transform:rotate(-90deg)}
+.nav-section.collapsed .nav-items{display:none}
+
+.nav-items{}
+.nav-item{
+  display:flex;align-items:flex-start;gap:9px;
+  padding:6px 16px;cursor:pointer;
+  transition:background .12s;
+  border-left:2px solid transparent;
+}
+.nav-item:hover{background:rgba(0,0,0,.04)}
+.nav-item.active{
+  background:rgba(0,0,0,.06);
+  border-left-color:var(--item-color,var(--blue-lt));
+}
+.ni-icon{
+  width:26px;height:26px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+}
+.ni-icon svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ni-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.ni-name{font-size:12.5px;color:var(--paper-mid);line-height:1.3;transition:color .12s}
+.nav-item.active .ni-name,.nav-item:hover .ni-name{color:var(--text-primary)}
+.ni-sub{font-size:10px;color:var(--ink-soft);line-height:1.4}
+.ni-badge{
+  flex-shrink:0;padding:2px 6px;border-radius:100px;font-size:9.5px;
+  border:1px solid;white-space:nowrap;margin-top:3px;
+  font-weight:500;letter-spacing:.03em;
+}
+.badge-built{border-color:rgba(34,197,94,.4);color:var(--green-lt);background:var(--green-dim)}
+.badge-ai{border-color:rgba(59,130,246,.4);color:#3B82F6;background:var(--blue-dim)}
+.badge-new{border-color:rgba(201,168,76,.35);color:var(--accent);background:var(--accent-lt)}
+.badge-l2{border-color:rgba(6,182,212,.3);color:var(--teal-lt);background:var(--teal-dim)}
+.badge-l3{border-color:rgba(245,158,11,.35);color:var(--amber-lt);background:var(--amber-dim)}
+.badge-l4{border-color:rgba(139,92,246,.35);color:var(--purple-lt);background:var(--purple-dim)}
+
+/* -- MAIN CONTENT -- */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{
+  height:52px;border-bottom:1px solid var(--ink-border);
+  display:flex;align-items:center;padding:0 24px;gap:14px;
+  flex-shrink:0;background:var(--ink-panel);
+}
+.topbar-title{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);flex:1}
+.topbar-meta{font-size:11px;color:var(--ink-soft)}
+.tb-pill{padding:4px 11px;border-radius:100px;font-size:11px;border:1px solid;white-space:nowrap}
+.tb-pill.blue{border-color:rgba(59,130,246,.3);color:#3B82F6}
+.screen-area{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:16px;padding:40px;
+  animation:fadeUp .35s ease both;
+}
+.screen-module{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.screen-title{font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--text-primary);text-align:center;line-height:1.15}
+.screen-desc{font-size:13px;color:var(--paper-mid);text-align:center;max-width:480px;line-height:1.7}
+.screen-tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+.screen-tag{padding:4px 12px;border-radius:100px;border:1px solid rgba(0,0,0,.1);font-size:11px;color:var(--paper-mid)}
+.screen-coming{
+  padding:12px 24px;border-radius:8px;
+  border:1px solid rgba(0,0,0,.1);
+  background:rgba(0,0,0,.03);
+  font-size:12px;color:var(--ink-soft);
+  display:flex;align-items:center;gap:8px;margin-top:8px;
+}
+.screen-coming svg{width:14px;height:14px;stroke:var(--ink-soft);fill:none;stroke-width:1.6;stroke-linecap:round}
+.built-link{
+  padding:10px 22px;border-radius:8px;
+  background:var(--accent);border:none;
+  font-family:var(--font-display);font-size:12px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;
+  color:#ffffff;cursor:pointer;margin-top:4px;
+  transition:opacity .15s;text-decoration:none;display:inline-block;
+}
+.built-link:hover{opacity:.85}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- PORTAL TAB SWITCHER -->
+<div class="portal-tabs">
+  <div class="pt-logo" onclick="window.location.href='index.html'" title="Portal selector"></div>
+
+  <button class="pt-btn admin active" onclick="switchPortal('admin')" title="Admin Portal">
+    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+    <div class="pt-tooltip">Admin Portal</div>
+  </button>
+  <button class="pt-btn manager" onclick="switchPortal('manager')" title="Manager Portal">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <div class="pt-tooltip">Manager Portal</div>
+  </button>
+  <button class="pt-btn employee" onclick="switchPortal('employee')" title="Employee Portal">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <div class="pt-tooltip">Employee Portal</div>
+  </button>
+  <div class="pt-sep"></div>
+  <button class="pt-btn internal" onclick="switchPortal('internal')" title="Edstellar Internal">
+    <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <div class="pt-tooltip">Edstellar Internal</div>
+  </button>
+  <button class="pt-btn saas" onclick="switchPortal('saas')" title="SaaS Admin">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+    <div class="pt-tooltip">SaaS Admin</div>
+  </button>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sb-header" id="sbHeader">
+    <div class="sb-portal-name" id="sbPortalName">Admin Portal</div>
+    <div class="sb-portal-desc" id="sbPortalDesc">Super Admin · HR Admin · L&D Manager</div>
+    <div class="sb-level-badge" id="sbLevelBadge" style="border-color:rgba(59,130,246,.35);color:#3B82F6">L1 → L5 Progressive</div>
+  </div>
+  <div class="sb-search">
+    <input class="search-input" type="text" placeholder="Search screens..." id="searchInput" oninput="filterNav(this.value)">
+  </div>
+  <nav class="sb-nav" id="sbNav"></nav>
+</div>
+
+<!-- MAIN AREA -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="screenTitle">Select a screen from the menu</div>
+    <div class="topbar-meta" id="screenMeta">Edstellar · SIP Platform</div>
+    <div class="tb-pill blue" id="screenPhase">—</div>
+  </div>
+  <div class="screen-area" id="screenArea">
+    <div class="screen-module" id="saModule"></div>
+    <div class="screen-title" id="saTitle">Edstellar Skills Intelligence Platform</div>
+    <div class="screen-desc" id="saDesc">Select any screen from the left menu to see its details, role access, and build status. Click a built screen to open it in the demo shell.</div>
+    <div class="screen-tags" id="saTags"></div>
+    <div id="saAction"></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const PORTALS = {
+
+  admin: {
+    name: 'Admin Portal',
+    desc: 'Super Admin · HR Admin · L&D Manager',
+    badge: { text: 'L1 → L5 Progressive', color: 'rgba(59,130,246,.35)', textColor: '#3B82F6' },
+    sections: [
+      {
+        label: 'Foundation', count: 'L1', color: '#3B82F6',
+        items: [
+          { name: 'OrgSetup', sub: 'Org hierarchy · strategy · roles · standards', module: 'M1', phase: 'L1', roles: ['Super Admin'], badge: 'built', link: 'admin/org-setup.html', desc: 'Configure the full organisational context layer — hierarchy builder, BU and department setup, strategic goals, products and services, governing standards, tools and technologies, and the skill criticality framework. This feeds directly into the 7-prompt SkillForge AI pipeline.' },
+          { name: 'OrgSetup V4', sub: 'AI-guided onboarding · full SIP template coverage', module: 'M1', phase: 'L1', roles: ['Super Admin'], badge: 'built', link: 'admin/org-setup-v4.html', desc: 'AI-guided organization onboarding covering all SIP template sheets: company basics, org model, strategic foundation, org context & performance, locations & hierarchy, culture, policies & compliance, standards & certifications, products/services/projects, technology stack, skill ontology, competency framework, role architecture, employee data, performance history, learning & training, assessments & triangulation, market & regulatory intelligence, competitor & supply chain, risk/ESG/governance, and validation dashboard.' },
+          { name: 'DataPort — Excel import', sub: 'Upload · parse · validate · confirm', module: 'M2', phase: 'L1', roles: ['Super Admin'], badge: 'built', link: 'admin/dataport.html', desc: 'The 4-step Excel import wizard. Upload workforce file, sheet-by-sheet parse preview, row-level error highlighting with fix/skip workflow, Data Context Meter, and import confirmation.' },
+          { name: 'Employee Directory', sub: 'Dashboard · directory · add employee', module: 'M2', phase: 'L1', roles: ['HR Admin'], badge: 'built', link: 'admin/employee-directory.html', desc: 'Employee dashboard with KPIs, department/location charts, filterable directory, and add individual employee form.' },
+          { name: 'DataPort — HRIS sync', sub: 'Workday · BambooHR · SAP · delta review', module: 'M2', phase: 'L1', roles: ['Super Admin'], badge: null, desc: 'Connect HRIS systems, map fields, run first sync, review delta (new / changed / removed employees), and commit or reject changes.' },
+          { name: 'Report', sub: 'Analytics · dashboards · exports', module: 'M2', phase: 'L1', roles: ['Super Admin','HR Admin'], badge: null, desc: 'Reporting module for organisation setup analytics, data quality metrics, and exportable summaries.' },
+          { name: 'SkillForge', sub: '7-prompt AI pipeline · framework generation', module: 'M3', phase: 'L1', roles: ['Super Admin'], badge: 'built', link: 'admin/skillforge.html', desc: 'Trigger the 7-prompt Claude AI pipeline: Context Extraction → Synthesis → Role Architecture → Skill Generation → Competency Generation → Role–Skill Mapping → Employee Baselines. Real-time prompt-by-prompt progress with output preview.' },
+          { name: 'ApprovalHub', sub: '3-tier governance · review · publish', module: 'M4', phase: 'L1', roles: ['Admin', 'Dept Head', 'HR Head'], badge: 'built', link: 'admin/approvalhub.html', desc: 'Three-tier approval workflow: Tier 1 Admin inline editing and flagging, Tier 2 Department Head domain review, Tier 3 CHRO final publish. Full audit trail per edit. FrameworkBible locks on Tier 3 approval.' },
+          { name: 'FrameworkBible', sub: 'Published framework · version history · PDF', module: 'M5', phase: 'L1', roles: ['All admin'], badge: 'built', link: 'admin/framework-bible.html', desc: 'Read-only published framework dictionary with full taxonomy hierarchy (Domain → Knowledge Area → Skill Category → Skill), proficiency descriptors at all 4 levels, version history, and Super Admin edit mode.' },
+          { name: 'Employee Scope Management', sub: 'Scope rules · employment type · overrides', module: 'M2', phase: 'L1', roles: ['HR Admin'], badge: 'built', link: 'admin/scope-management.html', desc: 'Set Scope Status rules by employment type or department. Individual overrides with mandatory reason logging. Audit trail for all changes.' },
+          { name: 'Workforce Intelligence', sub: 'Employee directory · filters · analytics', module: 'M6', phase: 'L1', roles: ['HR Admin'], badge: 'built', link: 'admin/workforce-intelligence.html', desc: 'Full workforce directory with proficiency analytics, filters, and bulk actions.' },
+          { name: 'L1 Reports', sub: 'Completion report · org DNA · risk map', module: 'M7', phase: 'L1', roles: ['HR Head'], badge: 'built', link: 'admin/report-l1.html', desc: 'Auto-generated branded PDF on FrameworkBible publish. Executive summary, org DNA profile, risk/opportunity map, and AI-written strategic narrative.' },
+        ]
+      },
+      {
+        label: 'Notification & Integration', count: 'Cross-cutting', color: '#6B7280',
+        items: [
+          { name: 'NotifyEngine', sub: 'Email notifications · all system events', module: 'M9', phase: 'Cross', roles: ['HR Admin'], badge: null, desc: 'Email notification architecture covering every platform trigger: assessment assignment, approval requests, passport updates, certificate issuance, LNA report ready, and overdue reminders.' },
+          { name: 'Integration Hub', sub: 'HRIS · Jira · CRM · calendar connectors', module: 'M14.4', phase: 'L1+', roles: ['Super Admin'], badge: null, desc: 'Connect Workday, BambooHR, SAP SuccessFactors for HRIS data. Jira and Azure DevOps for project signals. Salesforce and HubSpot for CRM signals. Calendar tools for capacity signals.' },
+          { name: 'Data Retention & Archival', sub: 'Retention policy · GDPR · archival rules', module: 'M17', phase: 'Cross', roles: ['Super Admin'], badge: null, desc: 'Configure data retention periods per data type, archival policies, right-to-erasure workflows, and compliance reporting for GDPR, PDPA, and other regional requirements.' },
+          { name: 'Audit Intelligence Layer', sub: 'Auditor access · compliance evidence', module: 'M11', phase: 'Cross', roles: ['Auditor'], badge: null, desc: '8 pre-built compliance evidence package types. Continuous audit readiness dashboard. Pre-audit preparation mode. Cross-system audit trail query interface.' },
+        ]
+      },
+      {
+        label: 'Assessment Engine', count: 'L2', color: '#06B6D4',
+        items: [
+          { name: 'Assessment Distribution', sub: 'Cycle creation · targeting · dispatch', module: 'M10', phase: 'L2', roles: ['L&D Manager', 'HR Admin'], badge: 'built', link: 'admin/assess-engine.html', desc: 'Create assessment cycles, configure population targeting (hierarchy / role / scope filters), set exclusion rules, schedule dispatch, configure partial completion and reminder logic.' },
+          { name: 'Discovery Sessions', sub: '1:1 notes · focus group · AI theme extraction', module: 'M10-F', phase: 'L2', roles: ['L&D Manager', 'Employee'], badge: 'built', link: 'admin/discovery-sessions.html', desc: 'Structured 1:1 meeting notes form and focus group observation capture. AI theme extraction across sessions to surface learning needs at scale.' },
+          { name: 'Survey Builder', sub: 'Engagement · culture · change readiness', module: 'M10-E', phase: 'L2', roles: ['L&D Manager', 'All employees'], badge: 'built', link: 'admin/survey-builder.html', desc: 'Engagement, change readiness, culture pulse, and strategy alignment surveys. Anonymous response collection. AI theme extraction across responses.' },
+          { name: 'Knowledge Test Builder', sub: 'AI-built · MCQ · scenario-based · pre/post', module: 'M10-C', phase: 'L2', roles: ['L&D Manager', 'Employee'], badge: 'built', link: 'admin/knowledge-tests.html', desc: 'AI-built or manual question bank. Multiple choice and scenario-based formats. Pre-training, post-training, and retention test scheduling. Question versioning.' },
+          { name: 'Skills & Competency Assessment', sub: 'Manager + self-rating · baselines', module: 'M10-A', phase: 'L2', roles: ['Manager', 'Employee'], badge: 'l2', desc: 'Simultaneous manager and self-rating interface. AI-estimated baseline shown as starting reference. Per-skill proficiency selector with behavioural descriptor guidance.' },
+          { name: 'Psychometric Assessment', sub: 'Big 5 · DISC · MBTI · cognitive ability', module: 'M10-B', phase: 'L2', roles: ['Employee'], badge: 'l2', desc: 'Third-party instrument delivery for Big 5, DISC, MBTI, and cognitive ability assessments. Secure authenticated sessions with proctoring support.' },
+          { name: '360° Feedback', sub: 'Rater assignment · anonymity · collection', module: 'M10-D', phase: 'L2', roles: ['HR Admin', 'All raters'], badge: 'l2', desc: 'Rater assignment per ratee. Tokenised external rater access. Anonymity enforcement with minimum rater threshold. Multi-rater aggregation with perception gap analysis.' },
+          { name: 'Assessment Governance', sub: 'Integrity · access rules · audit', module: 'M16', phase: 'L2', roles: ['HR Admin'], badge: 'l2', desc: 'Assessment integrity controls, access rule configuration, cycle governance, and audit trail for all assessment actions.' },
+          { name: 'Assessment Content Market', sub: 'Buy · publish · rate content', module: 'M24', phase: 'L2', roles: ['L&D Manager'], badge: 'l2', desc: 'Browse and purchase third-party assessment content. Publish internally-created content with revenue share model. Rate and review published content.' },
+        ]
+      },
+      {
+        label: 'Gap Analysis & Learning', count: 'L2', color: '#06B6D4',
+        items: [
+          { name: 'Skills Matrix', sub: 'Heat map · perception gap · role view', module: 'M10', phase: 'L2', roles: ['Manager', 'HR Manager'], badge: 'built', link: 'manager/skills-matrix.html', desc: 'Employee × skill grid showing current vs required proficiency. Heat map colour coding by gap severity. Perception gap overlay (manager vs self vs AI). Talent mobility signal for surplus proficiency.' },
+          { name: 'Task Evaluation Layer', sub: 'Frequency · confidence · task scoring', module: 'M10', phase: 'L2', roles: ['Manager', 'Employee'], badge: 'built', link: 'manager/task-evaluation.html', desc: 'Task × employee grid with frequency scale (Daily/Weekly/Monthly/Rarely) and confidence scale (Never/Sometimes/Usually/Always). Task scoring feeds weighted gap calculation.' },
+          { name: 'Gap Analysis', sub: 'Individual · role · dept · org heat maps', module: 'M10', phase: 'L2', roles: ['HR Manager', 'HRBP'], badge: 'built', link: 'manager/gap-analysis.html', desc: 'Four views of gap data: individual employee, role-level, department, and organisation-wide. Strategic gap risk flagging. Talent mobility signals for surplus proficiency cells.' },
+          { name: 'LNA / TNA Engine', sub: 'Weighted gap scores · intervention ranking', module: 'M10', phase: 'L2', roles: ['L&D Manager', 'HR Head'], badge: 'built', link: 'manager/lna-report.html', desc: '5-multiplier weighted gap score per employee-skill pair. AI intervention type classification (7 types). Cost estimation and sequencing. LNA and TNA report generation.' },
+          { name: 'LNI — Individual Brief', sub: '8-component personalised needs brief', module: 'M10', phase: 'L2', roles: ['Manager', 'Employee'], badge: 'built', link: 'manager/lni-brief.html', desc: '8-component personalised learning needs brief per employee: who, what, intervention type, sequence, aspiration vs role priorities, budget guidance, and timeline.' },
+          { name: 'LearnPath', sub: 'AI learning paths · IDPs · wellbeing-adjusted', module: 'M11', phase: 'L2', roles: ['Employee', 'Manager'], badge: 'built', link: 'employee/learning-path.html', ai: true, desc: 'AI-generated personalised learning path with wellbeing-adjusted timeline. IDP with aspiration vs role blend. Fast / Standard / Intensive pace options. Manager sign-off workflow.' },
+          { name: 'Succession Planning', sub: 'Pipeline · readiness · AI risk engine', module: 'M16', phase: 'L2', roles: ['HR Head', 'CHRO'], badge: 'built', link: 'manager/succession.html', ai: true, desc: 'Critical role designation and business impact scoring. Candidate pipeline per role with Ready Now / 12M / 24M / Development Required banding. AI succession risk engine with 6 risk signal types.' },
+          { name: 'Wellbeing Intelligence', sub: 'Pulse survey · burnout risk · capacity', module: 'M20', phase: 'L2', roles: ['Employee', 'Manager'], badge: 'l2', ai: true, desc: 'Anonymous pulse survey delivery. AI Burnout Risk Score composite (Low/Moderate/Elevated/High). Team and department wellbeing dashboard. Development capacity adjustment based on wellbeing signals.' },
+          { name: 'Onboarding Flow', sub: 'AI 30-60-90 day plan · new hire journey', module: 'M15', phase: 'L2', roles: ['HR Admin', 'New hire'], badge: 'l2', ai: true, desc: 'AI-generated personalised 30-60-90 day onboarding plan based on role, department, and skill baseline. Milestone tracking and manager check-in prompts.' },
+        ]
+      },
+      {
+        label: 'Training Execution', count: 'L3', color: '#F59E0B',
+        items: [
+          { name: 'TrainConnect — Marketplace', sub: 'Browse · AI-match · enrol · track', module: 'M12', phase: 'L3', roles: ['L&D Manager', 'Employee'], badge: 'l3', desc: 'Course marketplace browsing and search by skill, level, format, and vendor. AI-matched recommendations from TNA output. Enrolment management and calendar integration.' },
+          { name: 'TrainConnect — LMS Integration', sub: 'SCORM · xAPI · completion sync', module: 'M12', phase: 'L3', roles: ['L&D Manager'], badge: 'l3', desc: 'LMS connector configuration for Cornerstone, Docebo, and others. SCORM/xAPI launch and completion tracking. Progress sync back to Skill Passport.' },
+          { name: 'L&D Project Engine', sub: 'Milestones · budget · OD projects · AI suggest', module: 'M14', phase: 'L3', roles: ['L&D Manager'], badge: 'l3', ai: true, desc: '8 project types: Certification, Training, Assessment, Culture, OD, and more. Milestone creation, activity management, budget tracking. AI project suggestion from gap analysis.' },
+          { name: 'Org-Wide Execution Plan', sub: 'AI-sequenced intervention plan · dependencies', module: 'M13', phase: 'L3', roles: ['L&D Manager', 'HR Head'], badge: 'l3', ai: true, desc: 'AI sequences all interventions across the full population. Dependency management, budget allocation, capacity-aware scheduling. Gantt-style view with drag-to-resequence.' },
+          { name: 'Certificate Engine', sub: 'Template · auto-issue · QR · LinkedIn', module: 'M12', phase: 'L3', roles: ['L&D Manager', 'Employee'], badge: 'built', link: 'employee/certificates.html', desc: 'Branded certificate template designer. Auto-issuance on completion trigger. Email, portal, Skill Passport, and LinkedIn distribution. QR code verification and revocation.' },
+          { name: 'Coaching & Mentoring', sub: 'AI matching · programme tracking · milestones', module: 'M13.4', phase: 'L3', roles: ['L&D Manager', 'Employee'], badge: 'l3', ai: true, desc: 'AI coach/mentor matching by methodology, accreditation, and availability. Structured programme setup with milestone tracking and session logging.' },
+          { name: 'AI Content Outline', sub: 'Gap brief → programme structure', module: 'M19', phase: 'L3', roles: ['L&D Manager', 'Trainer'], badge: 'l3', ai: true, desc: 'Gap brief input to AI-generated programme outline: audience analysis, learning outcomes, module structure, delivery format recommendations, and trainer briefing document.' },
+          { name: 'Kirkpatrick Measurement', sub: 'L1–L4 effectiveness · pre/post delta', module: 'M19', phase: 'L3', roles: ['Employee', 'Manager'], badge: 'l3', desc: 'L1 reaction survey, L2 knowledge test delta, L3 behaviour change assessment at 30/60/90 days post-training, L4 business impact linkage.' },
+          { name: 'Trainer & Coach Platform', sub: 'Profile · credits · booking · earnings', module: 'P2', phase: 'L3', roles: ['Trainer', 'Coach'], badge: 'l3', desc: 'Trainer and coach profile builder with public teaser and full profile. Credit-based discovery for client orgs. 8-step booking workflow. Earnings and calendar self-service.' },
+          { name: 'Training Vendor Platform', sub: 'RFP · gap brief · proposal submission', module: 'P3', phase: 'L3', roles: ['Vendor', 'Client org'], badge: 'l3', desc: 'Vendor profile and capability listing. Gap brief receipt from client. Structured RFP response and 3-proposal compliance support for procurement workflows.' },
+          { name: 'Referral Programme', sub: '4 types · pipeline tracking · commission', module: 'P2.5', phase: 'L3', roles: ['Trainer', 'Partner'], badge: 'l3', desc: '4 referral type submission forms with unique trackable URLs. 9-status pipeline view. Partner tier progression (Partner → Silver → Gold → Platinum). Commission payment and tax documentation.' },
+        ]
+      },
+      {
+        label: 'Continuous Intelligence', count: 'L4 / L5', color: '#8B5CF6',
+        items: [
+          { name: 'PulseStrategy — Real-time', sub: 'Signal integration · micro-updates', module: 'M13', phase: 'L4', roles: ['Super Admin', 'L&D Manager'], badge: 'l4', ai: true, desc: 'Connect Jira, Salesforce, GitHub, and calendar tools. Automated proficiency micro-updates from project signals. AI skill inference from tool usage patterns.' },
+          { name: 'Predictive Engine', sub: 'Gap forecasting · alerts · auto-triggers', module: 'M13', phase: 'L4', roles: ['HR Head', 'Manager'], badge: 'l4', ai: true, desc: 'Emerging gap forecasting on 3–12 month horizon. Early warning alerts to managers and HR. Pre-emptive intervention triggers before gaps become critical.' },
+          { name: 'Transformation Dial', sub: 'Culture target · impact preview · governance', module: 'M3.10', phase: 'L4', roles: ['HR Head', 'CHRO'], badge: 'l4', desc: 'Dial settings (−5 to +5 per skill domain). Impact preview before applying. Change governance workflow with CHRO sign-off.' },
+          { name: 'Scenario Modelling', sub: 'What-if · M&A due diligence · comparison', module: 'M13', phase: 'L5', roles: ['CHRO', 'Board'], badge: 'l4', ai: true, desc: 'Scenario creation (e.g. "what if this role disappears"). Comparative analysis output. M&A target skill gap analysis. Workforce strategy modelling for board-level decisions.' },
+          { name: 'Cross-Org Benchmarking', sub: '6 dimensions · anonymised peer data', module: 'M25', phase: 'L5', roles: ['CHRO', 'CLO'], badge: 'l4', desc: '6 benchmark dimensions: Industry, Role, L&D Investment, Velocity, Emerging Skills, Quality. Anonymised peer group data with minimum 10-org cell threshold. Opt-in contribution.' },
+          { name: 'Skill Passport Verification', sub: 'Hiring company portal · ATS integration', module: 'M23', phase: 'L5', roles: ['Hiring company', 'Employee'], badge: 'l4', desc: '4 verification tiers: Public QR, Standard, Deep, Subscription. Employee consent and control flow. Hiring company portal with bulk verification and ATS integration.' },
+          { name: 'Public API & Developer Portal', sub: 'REST · OAuth · sandbox · rate limits', module: 'M21', phase: 'L5', roles: ['Super Admin', 'Developer'], badge: 'l4', desc: 'API key generation with scope permissions. Rate limit tier configuration. Swagger documentation. Sandbox environment with NovaTech demo data. Partner certification programme.' },
+          { name: 'Freemium Engine', sub: 'Lite tier · conversion triggers · ROI calc', module: 'M22', phase: 'L5', roles: ['Super Admin'], badge: 'l4', desc: 'Edstellar Lite free tier configuration. In-product conversion mechanics: value gap visualisation, time-based triggers, social proof. Frictionless upgrade path with annual billing.' },
+          { name: 'Localisation', sub: '8 markets · GDPR · cultural calibration', module: 'M26', phase: 'L5', roles: ['Super Admin'], badge: 'l4', desc: 'Language and interface localisation for 8 markets. Compliance localisation (EEOC, Works Council, GDPR). Cultural calibration for assessments — feedback language, hierarchy norms, calendars.' },
+        ]
+      },
+    ]
+  },
+
+  manager: {
+    name: 'Manager Portal',
+    desc: 'CHRO · CLO · HR Manager · L&D Manager · HRBP',
+    badge: { text: 'Persona-switched dashboards', color: 'rgba(201,168,76,.35)', textColor: '#C9A84C' },
+    sections: [
+      {
+        label: 'Intelligence Dashboards', count: 'All levels', color: '#C9A84C',
+        items: [
+          { name: 'CHRO InsightBoard', sub: 'Org readiness · gap heatmap · regional view', module: 'M6', phase: 'L1+', roles: ['CHRO'], badge: 'built', link: 'manager/chro-dashboard.html', desc: 'Executive summary dashboard: org readiness score, avg proficiency, critical gaps, gap closure trend, proficiency distribution, regional readiness bar chart, skill gap heatmap, department readiness table.' },
+          { name: 'CLO Dashboard', sub: 'Learning investment · programme ROI · velocity', module: 'M6', phase: 'L2+', roles: ['CLO'], badge: 'built', link: 'manager/clo-dashboard.html', desc: 'Learning investment view: training spend vs gap closure, programme ROI by intervention type, completion rates, Kirkpatrick effectiveness scores, skill velocity metrics.' },
+          { name: 'HR Manager Dashboard', sub: 'Team gaps · assessment status · passport', module: 'M6', phase: 'L1+', roles: ['HR Manager'], badge: 'built', link: 'manager/hr-dashboard.html', desc: 'Team-scoped view: skill gaps for direct reports, assessment completion status, passport coverage, upcoming assessment cycles, and escalation queue.' },
+          { name: 'L&D Manager Dashboard', sub: 'Programme pipeline · LNA queue · budget', module: 'M6', phase: 'L2+', roles: ['L&D Manager'], badge: null, desc: 'Programme delivery pipeline, LNA report queue, budget utilisation vs allocation, enrolment status, and upcoming intervention scheduling.' },
+          { name: 'HRBP Dashboard', sub: 'Dept-level skills · IDP status · wellbeing', module: 'M6', phase: 'L2+', roles: ['HRBP'], badge: 'built', link: 'manager/hrbp-dashboard.html', desc: 'Department-level skills overview, IDP completion status, wellbeing signal summary, succession pipeline health, and intervention effectiveness for assigned business unit.' },
+          { name: 'Board Dashboard', sub: 'Strategic workforce · transformation roadmap', module: 'M6', phase: 'L5', roles: ['Board', 'CHRO'], badge: 'l4', desc: 'Multi-year investment planning, board-ready workforce visualisations, transformation roadmap, skill strategy alignment with business plan, and M&A readiness indicators.' },
+        ]
+      },
+      {
+        label: 'Skills & Gap Analysis', count: 'L1 → L2', color: '#C9A84C',
+        items: [
+          { name: 'Skills Matrix', sub: 'Employee × skill · heat map · perception gap', module: 'M10', phase: 'L2', roles: ['Manager', 'HR Manager'], badge: 'built', link: 'manager/skills-matrix.html', desc: 'Employee × skill proficiency grid. Current vs required overlay. Heat map colour coding by gap severity. Perception gap view (manager vs self vs AI-estimated). Role-level and department-level aggregation.' },
+          { name: 'Gap Analysis', sub: 'Four views · strategic risk · mobility signals', module: 'M10', phase: 'L2', roles: ['HR Manager', 'HRBP'], badge: 'built', link: 'manager/gap-analysis.html', desc: 'Individual, role, department, and org-wide gap views. Strategic gap risk flag (linked to business goals). Talent mobility signal for surplus proficiency identification.' },
+          { name: 'LNA / TNA Reports', sub: 'AI narrative · weighted gaps · interventions', module: 'M7', phase: 'L2', roles: ['L&D Manager', 'HR Head'], badge: 'built', link: 'manager/lna-report.html', desc: 'AI-generated gap narrative, weighted gap score table, proficiency distribution, employee risk ranking, intervention timeline, cost summary, and approve-and-schedule CTA.' },
+          { name: 'LNI — Individual Brief', sub: 'Per-employee 8-component brief', module: 'M10', phase: 'L2', roles: ['Manager', 'HRBP'], badge: 'built', link: 'manager/lni-brief.html', desc: 'Per-employee learning needs brief with 8 components. Used by managers in IDP and development conversations. Exportable as PDF.' },
+          { name: 'Task Evaluation', sub: 'Frequency · confidence · task scoring', module: 'M10', phase: 'L2', roles: ['Manager', 'Employee'], badge: 'built', link: 'manager/task-evaluation.html', desc: 'Task × employee grid with frequency scale and confidence scale. Task scoring feeds weighted gap calculation.' },
+          { name: 'Workforce View', sub: 'All employees · filters · search · bulk actions', module: 'M6', phase: 'L1+', roles: ['HR Manager', 'HRBP'], badge: null, desc: 'Full employee directory with proficiency, passport status, assessment status, and department filters. Bulk action support for cycle assignment and notification.' },
+          { name: 'FrameworkBible View', sub: 'Published framework · taxonomy · descriptors', module: 'M5', phase: 'L1', roles: ['All manager roles'], badge: null, desc: 'Read-only view of the published skill and competency framework. Full taxonomy drill-down. Proficiency descriptor reference for assessment and IDP conversations.' },
+        ]
+      },
+      {
+        label: 'Reporting', count: 'L1 → L3', color: '#C9A84C',
+        items: [
+          { name: 'ReportGen — L1 Reports', sub: 'Completion report · org DNA · risk map', module: 'M7', phase: 'L1', roles: ['HR Head'], badge: null, desc: 'Auto-generated branded PDF on FrameworkBible publish. Executive summary, org DNA profile, risk/opportunity map, and AI-written strategic narrative.' },
+          { name: 'ReportGen — L2 Reports', sub: 'LNA · TNA · Skills Matrix · Wellbeing', module: 'M7', phase: 'L2', roles: ['HR Head', 'L&D Manager'], badge: 'built', link: 'manager/reports-l2.html', desc: 'LNA report, TNA report, Skills Matrix report, Wellbeing report, Perception Gap analysis — all with AI executive summary and persona-adaptive rendering.' },
+          { name: 'ReportGen — L3 Reports', sub: 'Training effectiveness · compliance · certs', module: 'M7', phase: 'L3', roles: ['CLO', 'L&D Manager'], badge: 'l3', desc: 'Training Effectiveness report with Kirkpatrick L1–L4. Certificate Registry. Compliance Status report. Programme ROI summary.' },
+          { name: 'Assessment Results', sub: 'Scores · distribution · validated skills', module: 'M10', phase: 'L2', roles: ['HR Manager', 'L&D Manager'], badge: 'built', link: 'manager/assessment-results.html', desc: 'Cycle-level results view: completion rates, score distribution, validated proficiency outcomes, and per-employee result drill-down.' },
+          { name: 'Wellbeing Dashboard', sub: 'Burnout risk · capacity · team pulse', module: 'M20', phase: 'L2', roles: ['HR Manager', 'HRBP'], badge: 'built', link: 'manager/wellbeing-dashboard.html', ai: true, desc: 'Team and department wellbeing dashboard. Burnout Risk Score by employee. Development capacity adjustment recommendations based on wellbeing signals.' },
+        ]
+      },
+      {
+        label: 'People Strategy', count: 'L2 → L5', color: '#C9A84C',
+        items: [
+          { name: 'Succession Planning', sub: 'Pipeline · readiness bands · risk alerts', module: 'M16', phase: 'L2', roles: ['HR Head', 'CHRO'], badge: 'built', link: 'manager/succession.html', ai: true, desc: 'Critical role designation. Candidate pipeline per role with readiness banding. AI succession risk engine. Succession development plans and board-level reporting.' },
+          { name: 'Role Architecture', sub: 'Career paths · role intelligence · KRAs', module: 'M3.12', phase: 'L1+', roles: ['HR Head', 'L&D Manager'], badge: null, desc: 'Career pathway mapping. Role intelligence: required skills, tasks, KRAs, and salary bands. Internal mobility recommendations based on proficiency surplus.' },
+          { name: 'Workforce Planning', sub: 'Headcount · hiring gap · scenario inputs', module: 'M3.13', phase: 'L4', roles: ['CHRO', 'HR Head'], badge: 'l4', desc: 'Headcount planning inputs, hiring gap analysis, and scenario modelling inputs. Feeds the PulseStrategy predictive engine and board reporting.' },
+          { name: 'Transformation Meter', sub: 'Culture current vs target · dial impact', module: 'M3.10', phase: 'L4', roles: ['CHRO', 'HR Head'], badge: 'l4', desc: 'Visual display of culture current vs target profile across skill domains. Transformation Meter showing progress. Dial impact preview.' },
+          { name: 'Scenario Modelling', sub: 'What-if · M&A due diligence · roadmap', module: 'M13', phase: 'L5', roles: ['CHRO', 'Board'], badge: 'l4', ai: true, desc: 'What-if scenario creation with comparative output. M&A target skill gap analysis. Strategic workforce roadmap with multi-year visualisation.' },
+          { name: 'Cross-Org Benchmarking', sub: '6 dimensions · peer group · premium', module: 'M25', phase: 'L5', roles: ['CHRO', 'CLO'], badge: 'l4', desc: 'Benchmark against anonymised peer organisations across 6 dimensions. Included in Enterprise tier. Scale and standalone report add-ons.' },
+        ]
+      },
+      {
+        label: 'Opportunity Intelligence', count: 'Internal', color: '#EC4899',
+        items: [
+          { name: 'Opportunity Dashboard', sub: 'Gap pipeline · match scores · Edstellar view', module: 'P4.2', phase: 'Internal', roles: ['Account Manager', 'Commercial Director'], badge: null, desc: 'Aggregate unaddressed gaps across all client organisations. Match scores against Edstellar training catalogue. Opportunity size and Transformation Dial influence on priority.' },
+          { name: 'AI Proposal Engine', sub: 'Auto-generate · review · edit · send', module: 'P4.3', phase: 'Internal', roles: ['Account Manager'], badge: null, ai: true, desc: 'Auto-generated proposal with 7 components from opportunity trigger. Account manager review queue. Edit and customise before one-click send to client.' },
+        ]
+      },
+    ]
+  },
+
+  employee: {
+    name: 'Employee Portal',
+    desc: 'All employees · self-service · personal record',
+    badge: { text: 'Personal & portable', color: 'rgba(34,197,94,.35)', textColor: '#22C55E' },
+    sections: [
+      {
+        label: 'My Skill Passport', count: 'L1+', color: '#22C55E',
+        items: [
+          { name: 'Skill Passport', sub: 'Verified profile · export · QR authentication', module: 'M8', phase: 'L1+', roles: ['Employee'], badge: 'built', link: 'employee/skill-passport.html', desc: 'Full verified professional record. Skills with source labelling (assessed / manager / AI-estimated). Readiness score. Assessment history. Certificates. IDP goals. Exportable PDF with QR authentication.' },
+          { name: 'My Proficiency Record', sub: 'Assessed · manager-rated · AI-estimated', module: 'M8', phase: 'L1+', roles: ['Employee'], badge: null, desc: 'Detailed view of all skill proficiency scores with source labelling and confidence indicators. History of changes across cycles. Self-declaration update form.' },
+          { name: 'My Certificates', sub: 'Internal + external · QR verify · expiry alerts', module: 'M8 + M12', phase: 'L3+', roles: ['Employee'], badge: 'built', link: 'employee/certificates.html', desc: 'All certificates in one place — Edstellar-issued and externally imported. QR verification code. LinkedIn share link. Expiry and renewal alerts.' },
+          { name: 'My Deep Profile', sub: 'Career history · preferences · aspirations', module: 'M3.11', phase: 'L2+', roles: ['Employee'], badge: 'l2', desc: 'Career and education history. Work preferences and constraints. Career aspirations and declared goals. Historical performance data. Used to personalise AI learning path.' },
+          { name: 'Passport Sharing', sub: 'LinkedIn · hiring orgs · QR link · consent', module: 'M23', phase: 'L5', roles: ['Employee'], badge: 'l4', desc: 'Employee-controlled sharing of verified credentials. LinkedIn integration. QR link generation for hiring companies. Consent management and share history log.' },
+        ]
+      },
+      {
+        label: 'My Learning', count: 'L2+', color: '#22C55E',
+        items: [
+          { name: 'My Learning Path', sub: 'AI-personalised · progress · due dates', module: 'M11', phase: 'L2+', roles: ['Employee'], badge: 'built', link: 'employee/learning-path.html', ai: true, desc: 'AI-generated personalised learning path with wellbeing-adjusted timeline. Programme cards with progress bars, due dates, and skills addressed. Pace selector (Fast / Standard / Intensive).' },
+          { name: 'My IDP', sub: 'Goals · manager sign-off · timeline · review', module: 'M11', phase: 'L2+', roles: ['Employee'], badge: 'built', link: 'employee/my-idp.html', desc: 'Individual Development Plan with aspiration vs role blend. Goal setting with milestones. Manager sign-off workflow. Next review date and progress tracking.' },
+          { name: 'My Assessments', sub: 'Assigned · in progress · completed · results', module: 'M10', phase: 'L2+', roles: ['Employee'], badge: 'built', link: 'employee/my-assessments.html', desc: 'All assigned assessments in one place: upcoming, in progress, and completed. Result summaries with validated proficiency outcomes. Feedback from manager and peers.' },
+          { name: 'Skill Assessment', sub: 'Self-rating · proficiency selector', module: 'M10-A', phase: 'L2+', roles: ['Employee'], badge: 'built', link: 'employee/skill-assessment.html', desc: 'Self-rating interface with AI-estimated baseline. Per-skill proficiency selector with behavioural descriptor guidance.' },
+          { name: 'Psychometric Assessment', sub: 'Big 5 · DISC · MBTI', module: 'M10-B', phase: 'L2+', roles: ['Employee'], badge: 'built', link: 'employee/psychometric.html', desc: 'Third-party psychometric instrument delivery with secure authenticated sessions.' },
+          { name: '360° Feedback', sub: 'Peer & rater feedback collection', module: 'M10-D', phase: 'L2+', roles: ['Employee'], badge: 'built', link: 'employee/360-feedback.html', desc: 'Multi-rater feedback collection with anonymity enforcement and perception gap analysis.' },
+          { name: 'My Training', sub: 'Enrolled programmes · calendar · completion', module: 'M12', phase: 'L3+', roles: ['Employee'], badge: 'built', link: 'employee/my-training.html', desc: 'Enrolled training programmes with calendar view, session details, pre-work, and completion tracking. Certificate issuance on completion.' },
+          { name: 'My 30-60-90 Plan', sub: 'AI onboarding plan · milestones · check-ins', module: 'M15', phase: 'L2+', roles: ['New hire'], badge: 'l2', ai: true, desc: 'AI-generated personalised onboarding plan for new hires. 30-day, 60-day, and 90-day milestone view with tasks, learning, and manager check-in prompts.' },
+          { name: 'Course Marketplace', sub: 'Browse · AI-recommended · self-enrol', module: 'M12', phase: 'L3+', roles: ['Employee'], badge: 'l3', ai: true, desc: 'Browse training programmes by skill, level, and format. AI-matched recommendations based on individual gap profile. Self-enrolment with manager approval workflow.' },
+        ]
+      },
+      {
+        label: 'Engagement & Recognition', count: 'L2+', color: '#22C55E',
+        items: [
+          { name: 'Badges & Achievements', sub: 'Skill badges · milestones · mentor badge', module: 'M18', phase: 'L2+', roles: ['Employee'], badge: 'l2', desc: 'Skill achievement badges (triple-validated: manager + test + AI). Development milestone badges. Mentor badge. Progress visualisation: skill growth chart, gap closure, peer percentile.' },
+          { name: 'Peer Learning', sub: 'Expert directory · communities · cohorts', module: 'M17', phase: 'L3+', roles: ['Employee'], badge: 'l3', desc: 'Internal knowledge network with expert directory and Ask an Expert feature. Learning communities of practice with peer endorsement. Cohort learning with shared challenges.' },
+          { name: 'Team Challenges', sub: 'Completion · learning · culture challenges', module: 'M18', phase: 'L3+', roles: ['Employee', 'Manager'], badge: 'l3', desc: 'Team and department challenges: completion challenges, learning initiative challenges, and culture challenges. Recognition and leaderboard visibility.' },
+          { name: 'My Wellbeing Check-in', sub: 'Pulse check · anonymous · burnout signal', module: 'M20', phase: 'L2+', roles: ['Employee'], badge: 'l2', desc: 'Regular anonymous wellbeing pulse check-ins. Burnout signal detection. Development capacity self-assessment. Opt-in visibility to manager for support conversations.' },
+          { name: 'Recognition', sub: 'Manager recognition · org spotlight · tenure', module: 'M18', phase: 'L2+', roles: ['Employee'], badge: 'l2', desc: 'Manager recognition messages visible to the team. Org spotlight for high-achievement milestones. Tenure milestone celebration. Peer endorsement for skill contributions.' },
+          { name: 'Knowledge Capture', sub: 'Exit capture · project retrospectives · AI curation', module: 'M17', phase: 'L3+', roles: ['Employee'], badge: 'l3', ai: true, desc: 'Structured knowledge capture on exit or project completion. AI curation of insights into the knowledge network. Prevents institutional knowledge loss.' },
+        ]
+      },
+    ]
+  },
+
+  internal: {
+    name: 'Edstellar Internal',
+    desc: 'Account Managers · Commercial · Marketplace Ops',
+    badge: { text: 'Internal use only', color: 'rgba(236,72,153,.35)', textColor: '#EC4899' },
+    sections: [
+      {
+        label: 'Commercial Intelligence', count: 'Internal', color: '#EC4899',
+        items: [
+          { name: 'Opportunity Intelligence Dashboard', sub: 'Client gap pipeline · match scores · priority', module: 'P4.2', phase: 'Internal', roles: ['Account Manager', 'Commercial Director'], badge: null, desc: 'Aggregate unaddressed gaps across all client organisations. Opportunity size scoring. Match against Edstellar training catalogue. Transformation Dial influence on priority ranking.' },
+          { name: 'AI Proposal Engine', sub: '7-component proposal · review · one-click send', module: 'P4.3', phase: 'Internal', roles: ['Account Manager'], badge: null, ai: true, desc: 'Auto-generate proposals with 7 components from opportunity trigger. Account manager review and edit queue. Version history. One-click send to client with tracking.' },
+        ]
+      },
+      {
+        label: 'Admin Console', count: 'Internal', color: '#EC4899',
+        items: [
+          { name: 'Client Master Switches', sub: '10 feature toggles · credit tier · config', module: 'P4.1', phase: 'Internal', roles: ['Marketplace Ops'], badge: null, desc: 'Per-client feature toggle panel with 10 master switches. Credit tier configuration. Complimentary credit granting. Feature enablement audit trail.' },
+          { name: 'Commission & Credit Pricing', sub: 'Rates by category · value band · client tier', module: 'P4.1', phase: 'Internal', roles: ['Commercial Director', 'Finance'], badge: null, desc: 'Commission rate configuration by engagement category, type, and value band. Credit pricing by buyer type and volume. Pricing change governance with approval workflow.' },
+          { name: 'Marketplace Operations', sub: 'Revenue dashboard · pipeline · network health', module: 'P4.2', phase: 'Internal', roles: ['Marketplace Ops', 'Finance'], badge: null, desc: 'Platform health metrics (live). Revenue dashboard by stream. Network health: topic coverage map, trainer availability gap, and client demand vs supply alignment.' },
+          { name: 'Quality Governance', sub: 'Trainer verification · disputes · suspension', module: 'P4.4', phase: 'Internal', roles: ['Marketplace Ops', 'Head of Quality'], badge: null, desc: '6-stage trainer verification process. Suspicious review detection. Trainer suspension workflow. Dispute management and resolution tracking.' },
+        ]
+      },
+    ]
+  },
+
+  saas: {
+    name: 'SaaS Platform Admin',
+    desc: 'Edstellar Engineering · Ops · Customer Success',
+    badge: { text: 'Platform operations', color: 'rgba(139,92,246,.35)', textColor: '#8B5CF6' },
+    sections: [
+      {
+        label: 'Tenant Management', count: 'SaaS Ops', color: '#8B5CF6',
+        items: [
+          { name: 'Tenant Provisioning', sub: 'Create · configure · schema · activate', module: 'SaaS 27.1', phase: 'SaaS', roles: ['Edstellar Ops'], badge: null, desc: 'New tenant creation with tier, CSM assignment, data residency, and contract dates. Schema provisioning. Super Admin account setup. Onboarding pipeline entry.' },
+          { name: 'Tenant Administration', sub: 'All-tenant view · level · churn risk · impersonate', module: 'SaaS 27.1', phase: 'SaaS', roles: ['Edstellar CS'], badge: null, desc: 'All-tenant list with level progression, tier, churn risk score, last activity, and onboarding stage. Level progression signals. Impersonation capability for support.' },
+          { name: 'Subscription & Billing', sub: 'Invoices · upgrades · overdue escalation', module: 'SaaS 27.2', phase: 'SaaS', roles: ['Finance', 'Edstellar CS'], badge: null, desc: 'Billing on Active Participant count. Auto invoice generation with line items. Overdue escalation (7d / 14d / 30d). Upgrade and downgrade workflow with proration.' },
+          { name: 'Onboarding Pipeline', sub: '7-stage tracker · stall alerts · CSM nudges', module: 'SaaS 27.5', phase: 'SaaS', roles: ['Edstellar CS'], badge: null, desc: 'Per-tenant progress through 7 onboarding stages. Stall flag thresholds. Automated CSM notification on stall. Onboarding health score.' },
+        ]
+      },
+      {
+        label: 'Platform Operations', count: 'SaaS Ops', color: '#8B5CF6',
+        items: [
+          { name: 'Platform Configuration', sub: 'Feature flags · prompt versioning · rollback', module: 'SaaS 27.3', phase: 'SaaS', roles: ['Engineering'], badge: null, desc: 'Platform-wide feature flags with audit trail. AI pipeline prompt versioning with one-click rollback. Maintenance mode management. Rate limit configuration.' },
+          { name: 'Platform Health Monitoring', sub: 'Uptime · AI pipeline · error rates · security', module: 'SaaS 27.4', phase: 'SaaS', roles: ['Engineering', 'DevOps'], badge: null, desc: 'Real-time uptime per portal. AI pipeline p95 latency and failure rates. NotifyEngine delivery rate. DB pool utilisation. Security event log.' },
+          { name: 'User Management & Support', sub: 'Cross-tenant search · resets · unlocks', module: 'SaaS 27.6', phase: 'SaaS', roles: ['Edstellar Support'], badge: null, desc: 'Cross-tenant user search by email. Support-initiated password reset and account unlock. Cross-tenant session viewing for bug investigation.' },
+          { name: 'Incident Management', sub: 'P1/P2/P3 log · status page · tenant comms', module: 'SaaS 27.7', phase: 'SaaS', roles: ['Engineering', 'Edstellar CS'], badge: null, desc: 'P1/P2/P3 incident logging with auto-escalation. Public status page with auto-update from monitoring. Super Admin status page broadcast to affected tenants.' },
+        ]
+      },
+    ]
+  }
+};
+
+let activePortal = 'admin';
+let activeItem = null;
+
+function switchPortal(portal) {
+  activePortal = portal;
+  activeItem = null;
+
+  document.querySelectorAll('.pt-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.pt-btn.${portal}`)?.classList.add('active');
+
+  const p = PORTALS[portal];
+  document.getElementById('sbPortalName').textContent = p.name;
+  document.getElementById('sbPortalDesc').textContent = p.desc;
+  const badge = document.getElementById('sbLevelBadge');
+  badge.textContent = p.badge.text;
+  badge.style.borderColor = p.badge.color;
+  badge.style.color = p.badge.textColor;
+
+  renderNav();
+  showDefault();
+}
+
+function renderNav(filter) {
+  const nav = document.getElementById('sbNav');
+  nav.innerHTML = '';
+  const p = PORTALS[activePortal];
+
+  p.sections.forEach(section => {
+    const items = filter
+      ? section.items.filter(i => i.name.toLowerCase().includes(filter) || (i.sub||'').toLowerCase().includes(filter))
+      : section.items;
+    if (!items.length) return;
+
+    const sec = document.createElement('div');
+    sec.className = 'nav-section';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'nav-section-header';
+    hdr.innerHTML = `<span class="nsh-label">${section.label}</span><span class="nsh-count">${section.count}</span><svg class="nsh-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`;
+    hdr.onclick = () => { sec.classList.toggle('collapsed'); };
+
+    const itemsDiv = document.createElement('div');
+    itemsDiv.className = 'nav-items';
+
+    items.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'nav-item' + (activeItem === item.name ? ' active' : '');
+      el.style.setProperty('--item-color', section.color);
+
+      const iconHtml = getIcon(item.module);
+      let badgeHtml = '';
+      if (item.badge === 'built') badgeHtml = '<div class="ni-badge badge-built">Built</div>';
+      else if (item.badge === 'new')   badgeHtml = '<div class="ni-badge badge-new">Next</div>';
+      else if (item.badge === 'ai')    badgeHtml = '<div class="ni-badge badge-ai">AI</div>';
+      else if (item.badge === 'l2')    badgeHtml = '<div class="ni-badge badge-l2">L2</div>';
+      else if (item.badge === 'l3')    badgeHtml = '<div class="ni-badge badge-l3">L3</div>';
+      else if (item.badge === 'l4')    badgeHtml = '<div class="ni-badge badge-l4">L4/L5</div>';
+
+      el.innerHTML = `
+        <div class="ni-icon" style="background:${section.color}22;color:${section.color}">${iconHtml}</div>
+        <div class="ni-text">
+          <div class="ni-name">${item.name}</div>
+          <div class="ni-sub">${item.sub}</div>
+        </div>
+        ${badgeHtml}`;
+
+      el.onclick = () => {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        activeItem = item.name;
+        showScreen(item, section.color);
+      };
+      itemsDiv.appendChild(el);
+    });
+
+    sec.appendChild(hdr);
+    sec.appendChild(itemsDiv);
+    nav.appendChild(sec);
+  });
+}
+
+function getIcon(module) {
+  const m = (module||'').toLowerCase();
+  if (m.includes('m1') || m.includes('org')) return `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>`;
+  if (m.includes('m2') || m.includes('data')) return `<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+  if (m.includes('m3') || m.includes('forge')) return `<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+  if (m.includes('m4') || m.includes('approv')) return `<svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>`;
+  if (m.includes('m6') || m.includes('insight') || m.includes('dash')) return `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`;
+  if (m.includes('m7') || m.includes('report')) return `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+  if (m.includes('m8') || m.includes('passport')) return `<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+  if (m.includes('m10') || m.includes('assess')) return `<svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;
+  if (m.includes('m11') || m.includes('learn')) return `<svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`;
+  if (m.includes('m12') || m.includes('train')) return `<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`;
+  if (m.includes('m13') || m.includes('pulse')) return `<svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`;
+  if (m.includes('m16') || m.includes('success')) return `<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+  if (m.includes('m18') || m.includes('badge') || m.includes('gamif')) return `<svg viewBox="0 0 24 24"><path d="M12 15C8.69 15 6 12.31 6 9V3h12v6c0 3.31-2.69 6-6 6z"/><path d="M8.5 21h7"/><path d="M12 15v6"/></svg>`;
+  if (m.includes('m20') || m.includes('well')) return `<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+  if (m.includes('api')) return `<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+  if (m.includes('p2') || m.includes('p3') || m.includes('market')) return `<svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`;
+  return `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>`;
+}
+
+function showScreen(item, color) {
+  const phaseLabels = { 'L1':'L1 Foundation','L2':'L2 Assessment','L3':'L3 Execution','L4':'L4 Intelligence','L5':'L5 Strategic','Cross':'Cross-cutting','Internal':'Internal','SaaS':'SaaS Ops','L1+':'L1 Active','L2+':'L2 Active','L3+':'L3 Active','L4+':'L4 Active' };
+  const area = document.getElementById('screenArea');
+  area.style.animation = 'none'; area.offsetHeight; area.style.animation = '';
+
+  document.getElementById('saModule').textContent = item.module + ' · ' + (phaseLabels[item.phase] || item.phase);
+  document.getElementById('saTitle').textContent = item.name;
+  document.getElementById('saDesc').textContent = item.desc;
+  document.getElementById('screenTitle').textContent = item.name;
+  document.getElementById('screenMeta').textContent = (item.roles||[]).join(' · ');
+  document.getElementById('screenPhase').textContent = item.phase;
+
+  const tags = document.getElementById('saTags');
+  tags.innerHTML = (item.roles||[]).map(r => `<div class="screen-tag">${r}</div>`).join('');
+  if (item.ai) tags.innerHTML += `<div class="screen-tag" style="border-color:rgba(59,130,246,.4);color:#3B82F6">AI-powered</div>`;
+
+  const action = document.getElementById('saAction');
+  if (item.badge === 'built' && item.link) {
+    action.innerHTML = `<a class="built-link" href="${item.link}">Open in demo shell →</a>`;
+  } else if (item.badge === 'new') {
+    action.innerHTML = `<div class="screen-coming"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Next screen to build</div>`;
+  } else {
+    action.innerHTML = `<div class="screen-coming"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Available in full platform build</div>`;
+  }
+}
+
+function showDefault() {
+  document.getElementById('saModule').textContent = '';
+  document.getElementById('saTitle').textContent = 'Select a screen';
+  document.getElementById('saDesc').textContent = 'Click any item in the menu to see its description, roles, level gate, and build status.';
+  document.getElementById('saTags').innerHTML = '';
+  document.getElementById('saAction').innerHTML = '';
+  document.getElementById('screenTitle').textContent = PORTALS[activePortal].name;
+  document.getElementById('screenMeta').textContent = PORTALS[activePortal].desc;
+  document.getElementById('screenPhase').textContent = '—';
+}
+
+function filterNav(val) {
+  renderNav(val.toLowerCase().trim() || null);
+}
+
+renderNav();
+</script>
+</body>
+</html>

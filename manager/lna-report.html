@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LNA/TNA Report · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════════════════════
+   LNA/TNA REPORT — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── CONTENT SCROLL AREA ── */
+.content { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.10); border-radius: 2px; }
+
+/* ── REPORT HEADER ── */
+.report-header {
+  background: var(--card);
+  border: 1px solid #E5E7EB;
+  border-radius: 14px; overflow: hidden;
+  animation: fadeUp .5s ease .05s both;
+}
+.rh-top {
+  padding: 22px 24px 18px;
+  display: flex; align-items: flex-start; gap: 20px;
+  background: linear-gradient(135deg, rgba(217,119,6,.07) 0%, transparent 55%);
+  border-bottom: 1px solid #E5E7EB;
+}
+.rh-icon { width: 48px; height: 48px; border-radius: 11px; background: var(--amber-bg); border: 1px solid rgba(217,119,6,.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.rh-icon svg { width: 22px; height: 22px; stroke: var(--amber); fill: none; stroke-width: 1.5; stroke-linecap: round; }
+.rh-meta { flex: 1; }
+.rh-type { font-size: 11px; color: var(--amber); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 5px; font-weight: 500; }
+.rh-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--text-primary); line-height: 1.1; margin-bottom: 6px; }
+.rh-sub { font-size: 12px; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 12px; }
+.rh-sub span { display: flex; align-items: center; gap: 4px; }
+.rh-sub svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.rh-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.rh-status { padding: 4px 12px; border-radius: 100px; font-size: 11px; border: 1px solid rgba(217,119,6,.35); color: var(--amber); background: var(--amber-bg); }
+
+.rh-kpis { display: grid; grid-template-columns: repeat(6, 1fr); }
+.rh-kpi { padding: 14px 18px; border-right: 1px solid #E5E7EB; display: flex; flex-direction: column; gap: 4px; }
+.rh-kpi:last-child { border-right: none; }
+.rh-kpi-val { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+.rh-kpi-val.red   { color: var(--red); }
+.rh-kpi-val.amber { color: var(--amber); }
+.rh-kpi-val.gold  { color: var(--accent); }
+.rh-kpi-val.green { color: var(--green); }
+.rh-kpi-key { font-size: 10px; color: var(--text-muted); letter-spacing: .07em; text-transform: uppercase; }
+
+/* ── TWO COLUMN LAYOUT ── */
+.two-col { display: grid; grid-template-columns: 1.15fr 1fr; gap: 16px; animation: fadeUp .5s ease .15s both; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; animation: fadeUp .5s ease .2s both; }
+
+/* ── PANEL ── */
+.panel { background: var(--card); border: 1px solid #E5E7EB; border-radius: 14px; overflow: hidden; }
+.panel-head { padding: 13px 18px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.panel-title { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.panel-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.panel-tag { padding: 3px 9px; border-radius: 100px; font-size: 10px; border: 1px solid; letter-spacing: .05em; white-space: nowrap; }
+.pt-red   { border-color: rgba(220,38,38,.3);  color: var(--red); }
+.pt-amber { border-color: rgba(217,119,6,.3); color: var(--amber); }
+.pt-gold  { border-color: var(--accent-bd); color: var(--accent); }
+.pt-blue  { border-color: rgba(37,99,235,.3); color: var(--blue); }
+.pt-green { border-color: rgba(22,163,74,.3); color: var(--green); }
+.pt-teal  { border-color: rgba(8,145,178,.3); color: var(--teal); }
+.panel-body { padding: 16px 18px; }
+.panel-body.np { padding: 0; }
+
+/* ── AI NARRATIVE ── */
+.ai-narrative {
+  padding: 18px 20px;
+  background: linear-gradient(135deg, rgba(37,99,235,.05) 0%, transparent 60%);
+}
+.ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.ai-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 100px;
+  background: var(--blue-bg); border: 1px solid rgba(37,99,235,.25);
+  font-size: 10px; color: var(--blue); letter-spacing: .08em; text-transform: uppercase;
+}
+.ai-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--blue); animation: blink 2s ease-in-out infinite; }
+.ai-timestamp { font-size: 10px; color: var(--text-muted); }
+.ai-body { font-size: 12.5px; color: var(--text-secondary); line-height: 1.8; }
+.ai-body p { margin-bottom: 12px; }
+.ai-body p:last-child { margin-bottom: 0; }
+.ai-body strong { color: var(--text-primary); font-weight: 500; }
+.ai-body .hl-red   { color: var(--red); font-weight: 500; }
+.ai-body .hl-amber { color: var(--amber); font-weight: 500; }
+.ai-body .hl-gold  { color: var(--accent); font-weight: 500; }
+.ai-body .hl-green { color: var(--green); font-weight: 500; }
+
+/* ── SKILL GAP LIST ── */
+.sg-row {
+  padding: 12px 18px; border-bottom: 1px solid #F3F4F6;
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+  transition: background .15s;
+}
+.sg-row:last-child { border-bottom: none; }
+.sg-row:hover { background: var(--card-hover); }
+.sg-rank { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); width: 18px; flex-shrink: 0; text-align: right; }
+.sg-name { flex: 1; font-size: 12.5px; color: var(--text-primary); min-width: 0; }
+.sg-crit { font-size: 10px; padding: 2px 7px; border-radius: 100px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+.sg-score-wrap { display: flex; align-items: center; gap: 8px; }
+.sg-bar-track { width: 80px; height: 5px; background: #F3F4F6; border-radius: 3px; overflow: hidden; }
+.sg-bar-fill { height: 100%; border-radius: 3px; }
+.sg-score-num { font-family: var(--font-mono); font-size: 12px; width: 26px; text-align: right; }
+.sg-employees { font-size: 10px; color: var(--text-muted); width: 48px; text-align: right; flex-shrink: 0; }
+
+/* ── PROFICIENCY HEATMAP ── */
+.mini-heatmap { padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; }
+.mh-row { display: flex; align-items: center; gap: 8px; }
+.mh-label { font-size: 11px; color: var(--text-secondary); width: 90px; flex-shrink: 0; }
+.mh-dist { display: flex; gap: 3px; flex: 1; }
+.mh-pip { flex: 1; height: 22px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-family: var(--font-mono); cursor: default; }
+.mh-total { font-size: 10px; color: var(--text-muted); width: 38px; text-align: right; flex-shrink: 0; }
+
+/* ── INTERVENTION TABLE ── */
+.int-table { width: 100%; border-collapse: collapse; }
+.int-table th { font-size: 10px; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase; text-align: left; padding: 11px 16px; font-weight: 400; border-bottom: 1px solid #E5E7EB; }
+.int-table th:not(:first-child) { text-align: center; }
+.int-table tr { border-bottom: 1px solid #F3F4F6; transition: background .12s; cursor: pointer; }
+.int-table tr:last-child { border-bottom: none; }
+.int-table tr:hover { background: var(--card-hover); }
+.int-table td { padding: 12px 16px; font-size: 12px; color: var(--text-secondary); }
+.int-table td:not(:first-child) { text-align: center; }
+.int-table td:first-child { color: var(--text-primary); }
+.rank-num { width: 22px; height: 22px; border-radius: 5px; background: #F3F4F6; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-right: 8px; }
+.cost-val { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.type-chip { padding: 3px 8px; border-radius: 100px; font-size: 10px; border: 1px solid #E5E7EB; color: var(--text-secondary); }
+.urgency-chip { padding: 3px 8px; border-radius: 100px; font-size: 10px; border: 1px solid; }
+.u-imm   { border-color: rgba(220,38,38,.35);  color: var(--red);   background: var(--red-bg); }
+.u-high  { border-color: rgba(217,119,6,.35); color: var(--amber); background: var(--amber-bg); }
+.u-med   { border-color: rgba(37,99,235,.3); color: var(--blue);   background: var(--blue-bg); }
+
+/* ── EMPLOYEE RISK TABLE ── */
+.emp-risk-row { padding: 10px 18px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; gap: 12px; }
+.emp-risk-row:last-child { border-bottom: none; }
+.er-av { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 9px; font-weight: 600; flex-shrink: 0; color: #fff; }
+.er-info { flex: 1; min-width: 0; }
+.er-name { font-size: 12px; color: var(--text-primary); }
+.er-role { font-size: 10px; color: var(--text-muted); }
+.er-bar-wrap { width: 80px; }
+.er-bar-track { height: 4px; background: #F3F4F6; border-radius: 2px; overflow: hidden; margin-bottom: 3px; }
+.er-bar-fill { height: 100%; border-radius: 2px; }
+.er-pct { font-size: 9px; color: var(--text-muted); text-align: right; }
+.er-gaps { display: flex; gap: 3px; flex-wrap: wrap; }
+.er-gap-pill { padding: 2px 6px; border-radius: 3px; font-size: 9px; }
+.er-flag { padding: 3px 8px; border-radius: 100px; font-size: 10px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+.ef-crit  { border-color: rgba(220,38,38,.35);  color: var(--red);   background: var(--red-bg); }
+.ef-high  { border-color: rgba(217,119,6,.35); color: var(--amber); background: var(--amber-bg); }
+.ef-med   { border-color: rgba(37,99,235,.3); color: var(--blue);   background: var(--blue-bg); }
+
+/* ── TIMELINE ── */
+.timeline-row { padding: 10px 18px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; gap: 14px; }
+.timeline-row:last-child { border-bottom: none; }
+.tl-month { font-family: var(--font-display); font-size: 11px; font-weight: 600; color: var(--text-secondary); width: 36px; flex-shrink: 0; }
+.tl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.tl-name { font-size: 12px; color: var(--text-primary); flex: 1; }
+.tl-meta { font-size: 10px; color: var(--text-muted); }
+.tl-employees { font-size: 10px; color: var(--text-secondary); }
+
+/* ── COST SUMMARY ── */
+.cost-card { background: linear-gradient(135deg, rgba(201,168,76,.08) 0%, transparent 60%); border: 1px solid var(--accent-bd); border-radius: 14px; padding: 20px 22px; display: flex; align-items: center; gap: 24px; animation: fadeUp .5s ease .4s both; }
+.cc-main { flex: 1; }
+.cc-label { font-size: 11px; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; }
+.cc-value { font-family: var(--font-display); font-size: 32px; font-weight: 600; color: var(--accent); line-height: 1; }
+.cc-sub { font-size: 11px; color: var(--text-secondary); margin-top: 5px; }
+.cc-breakdown { display: flex; gap: 24px; }
+.cc-item { display: flex; flex-direction: column; gap: 3px; }
+.cc-item-val { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.cc-item-key { font-size: 10px; color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; }
+.cc-divider { width: 1px; background: #E5E7EB; align-self: stretch; }
+.cc-cta { display: flex; flex-direction: column; gap: 8px; }
+.cc-btn { padding: 10px 20px; border-radius: 7px; font-family: var(--font-display); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; border: 1px solid; transition: opacity .15s; white-space: nowrap; }
+.cc-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cc-btn.outline { background: transparent; border-color: var(--accent-bd); color: var(--accent); }
+.cc-btn:hover { opacity: .84; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes blink  { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+  <div class="content">
+
+    <!-- REPORT HEADER -->
+    <div class="report-header">
+      <div class="rh-top">
+        <div class="rh-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="rh-meta">
+          <div class="rh-type">Learning Needs Analysis — LNA Report</div>
+          <div class="rh-title">BIM & Digital Delivery Department</div>
+          <div class="rh-sub">
+            <span><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>54 employees · 49 assessed</span>
+            <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Generated 18 Nov 2025 · L2 Cycle 1</span>
+            <span><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Dubai · KL · Singapore clusters</span>
+          </div>
+        </div>
+        <div class="rh-actions">
+          <div class="rh-status">Awaiting CHRO review</div>
+          <div style="font-size:10px;color:var(--text-muted);text-align:right;margin-top:4px">Report ID: LNA-2025-D04-001</div>
+        </div>
+      </div>
+      <div class="rh-kpis">
+        <div class="rh-kpi"><div class="rh-kpi-val red">1.4</div><div class="rh-kpi-key">Avg gap score</div></div>
+        <div class="rh-kpi"><div class="rh-kpi-val red">4</div><div class="rh-kpi-key">Critical gaps</div></div>
+        <div class="rh-kpi"><div class="rh-kpi-val amber">44%</div><div class="rh-kpi-key">Dept readiness</div></div>
+        <div class="rh-kpi"><div class="rh-kpi-val">49</div><div class="rh-kpi-key">Employees assessed</div></div>
+        <div class="rh-kpi"><div class="rh-kpi-val gold">SGD 93.2K</div><div class="rh-kpi-key">Est. intervention cost</div></div>
+        <div class="rh-kpi"><div class="rh-kpi-val green">↑ Improving</div><div class="rh-kpi-key">Dept trend</div></div>
+      </div>
+    </div>
+
+    <!-- ROW 1: AI Narrative + Skill Gaps -->
+    <div class="two-col">
+
+      <!-- AI NARRATIVE -->
+      <div class="panel">
+        <div class="panel-head">
+          <div><div class="panel-title">AI Analysis</div><div class="panel-sub">Claude-generated insight · Based on L2 assessment data</div></div>
+          <div class="panel-tag pt-blue">AI Insight</div>
+        </div>
+        <div class="ai-narrative">
+          <div class="ai-header">
+            <div class="ai-badge"><div class="ai-badge-dot"></div>Claude AI · SkillForge</div>
+            <div class="ai-timestamp">Generated 18 Nov 2025 · 09:14 SGT</div>
+          </div>
+          <div class="ai-body">
+            <p>The BIM & Digital Delivery department represents <strong>the highest-priority skills gap cluster</strong>. Across 49 assessed employees, the weighted gap score averages <span class="hl-red">1.4</span> — the widest in the organisation. Four skills have been flagged as critical: <span class="hl-red">BIM (Advanced)</span>, <span class="hl-red">AI & ML Literacy</span>, <span class="hl-red">IoT & Smart Infrastructure</span>, and <span class="hl-red">Digital Project Delivery</span>. These gaps directly compromise the strategic goal of reducing third-party BIM dependency by 40% by end of FY2026.</p>
+            <p>The root cause is not talent deficit — it is <span class="hl-amber">skill vintage</span>. 68% of department employees joined with BIM skills calibrated to 2018–2021 industry standards. The platform's tools and client expectations have advanced significantly. The gap is a <strong>velocity problem, not a capability problem</strong>.</p>
+            <p>The <span class="hl-gold">Dubai cluster</span> (17 employees) carries the steepest gap score of 2.1 versus the department average of 1.8 — driven by three BIM Manager roles that are operating below the L3 proficiency required for the Dubai Roads Authority contract deliverables due Q3 2026. This is a <span class="hl-red">delivery risk</span>, not merely a development gap.</p>
+            <p><strong>Recommended intervention sequence:</strong> Accelerate the AI & Data Literacy programme currently in progress — current completion at <span class="hl-amber">57%</span> is below the 75% cycle target. Commission an advanced BIM programme for the Dubai cluster. Fast-track IoT & Smart Infrastructure as a Q3 2026 intervention — no programme is currently scheduled and this skill is linked to <span class="hl-gold">3 of the top 5 client deliverables</span>.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SKILL GAP RANKING -->
+      <div class="panel">
+        <div class="panel-head">
+          <div><div class="panel-title">Skill Gap Ranking</div><div class="panel-sub">Weighted gap score · Criticality × Strategic alignment</div></div>
+          <div class="panel-tag pt-red">4 Critical</div>
+        </div>
+        <div class="panel-body np">
+          <div class="sg-row">
+            <div class="sg-rank">1</div>
+            <div class="sg-name">AI & Machine Learning Literacy</div>
+            <div class="sg-crit" style="border-color:rgba(220,38,38,.35);color:var(--red);background:var(--red-bg)">Critical</div>
+            <div class="sg-score-wrap">
+              <div class="sg-bar-track"><div class="sg-bar-fill" style="width:84%;background:var(--red)"></div></div>
+              <div class="sg-score-num" style="color:var(--red)">2.1</div>
+            </div>
+            <div class="sg-employees">72 emps</div>
+          </div>
+          <div class="sg-row">
+            <div class="sg-rank">2</div>
+            <div class="sg-name">Building Information Modelling (Advanced)</div>
+            <div class="sg-crit" style="border-color:rgba(220,38,38,.35);color:var(--red);background:var(--red-bg)">Critical</div>
+            <div class="sg-score-wrap">
+              <div class="sg-bar-track"><div class="sg-bar-fill" style="width:72%;background:var(--red)"></div></div>
+              <div class="sg-score-num" style="color:var(--red)">1.8</div>
+            </div>
+            <div class="sg-employees">41 emps</div>
+          </div>
+          <div class="sg-row">
+            <div class="sg-rank">3</div>
+            <div class="sg-name">IoT & Smart Infrastructure</div>
+            <div class="sg-crit" style="border-color:rgba(220,38,38,.35);color:var(--red);background:var(--red-bg)">Critical</div>
+            <div class="sg-score-wrap">
+              <div class="sg-bar-track"><div class="sg-bar-fill" style="width:64%;background:var(--amber)"></div></div>
+              <div class="sg-score-num" style="color:var(--amber)">1.6</div>
+            </div>
+            <div class="sg-employees">38 emps</div>
+          </div>
+          <div class="sg-row">
+            <div class="sg-rank">4</div>
+            <div class="sg-name">Digital Project Delivery</div>
+            <div class="sg-crit" style="border-color:rgba(220,38,38,.35);color:var(--red);background:var(--red-bg)">Critical</div>
+            <div class="sg-score-wrap">
+              <div class="sg-bar-track"><div class="sg-bar-fill" style="width:52%;background:var(--amber)"></div></div>
+              <div class="sg-score-num" style="color:var(--amber)">1.3</div>
+            </div>
+            <div class="sg-employees">62 emps</div>
+          </div>
+          <div class="sg-row">
+            <div class="sg-rank">5</div>
+            <div class="sg-name">Data Analytics & Visualisation</div>
+            <div class="sg-crit" style="border-color:rgba(217,119,6,.35);color:var(--amber);background:var(--amber-bg)">High</div>
+            <div class="sg-score-wrap">
+              <div class="sg-bar-track"><div class="sg-bar-fill" style="width:44%;background:var(--blue)"></div></div>
+              <div class="sg-score-num" style="color:var(--blue)">1.1</div>
+            </div>
+            <div class="sg-employees">29 emps</div>
+          </div>
+          <div class="sg-row">
+            <div class="sg-rank">6</div>
+            <div class="sg-name">Cloud Infrastructure</div>
+            <div class="sg-crit" style="border-color:rgba(217,119,6,.35);color:var(--amber);background:var(--amber-bg)">High</div>
+            <div class="sg-score-wrap">
+              <div class="sg-bar-track"><div class="sg-bar-fill" style="width:32%;background:var(--blue)"></div></div>
+              <div class="sg-score-num" style="color:var(--blue)">0.8</div>
+            </div>
+            <div class="sg-employees">21 emps</div>
+          </div>
+          <div class="sg-row">
+            <div class="sg-rank">7</div>
+            <div class="sg-name">Cybersecurity Fundamentals</div>
+            <div class="sg-crit" style="border-color:rgba(37,99,235,.3);color:var(--blue);background:var(--blue-bg)">Medium</div>
+            <div class="sg-score-wrap">
+              <div class="sg-bar-track"><div class="sg-bar-fill" style="width:24%;background:var(--green)"></div></div>
+              <div class="sg-score-num" style="color:var(--green)">0.6</div>
+            </div>
+            <div class="sg-employees">18 emps</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2: Proficiency dist + Employee risk + Timeline -->
+    <div class="three-col">
+
+      <!-- Proficiency distribution by skill -->
+      <div class="panel">
+        <div class="panel-head">
+          <div><div class="panel-title">Proficiency Distribution</div><div class="panel-sub">L1–L4 per critical skill · 49 assessed</div></div>
+          <div class="panel-tag pt-amber">By skill</div>
+        </div>
+        <div class="mini-heatmap">
+          <!-- BIM -->
+          <div class="mh-row">
+            <div class="mh-label">BIM Advanced</div>
+            <div class="mh-dist">
+              <div class="mh-pip" style="background:rgba(220,38,38,.12);color:var(--red);flex:38">L1 38%</div>
+              <div class="mh-pip" style="background:rgba(217,119,6,.12);color:var(--amber);flex:44">L2 44%</div>
+              <div class="mh-pip" style="background:rgba(22,163,74,.10);color:var(--green);flex:14">L3</div>
+              <div class="mh-pip" style="background:rgba(37,99,235,.08);color:var(--blue);flex:4"></div>
+            </div>
+            <div class="mh-total">49</div>
+          </div>
+          <!-- AI Literacy -->
+          <div class="mh-row">
+            <div class="mh-label">AI Literacy</div>
+            <div class="mh-dist">
+              <div class="mh-pip" style="background:rgba(220,38,38,.12);color:var(--red);flex:52">L1 52%</div>
+              <div class="mh-pip" style="background:rgba(217,119,6,.12);color:var(--amber);flex:36">L2 36%</div>
+              <div class="mh-pip" style="background:rgba(22,163,74,.10);color:var(--green);flex:10">L3</div>
+              <div class="mh-pip" style="background:rgba(37,99,235,.08);color:var(--blue);flex:2"></div>
+            </div>
+            <div class="mh-total">49</div>
+          </div>
+          <!-- IoT -->
+          <div class="mh-row">
+            <div class="mh-label">IoT & Smart</div>
+            <div class="mh-dist">
+              <div class="mh-pip" style="background:rgba(220,38,38,.12);color:var(--red);flex:46">L1 46%</div>
+              <div class="mh-pip" style="background:rgba(217,119,6,.12);color:var(--amber);flex:38">L2 38%</div>
+              <div class="mh-pip" style="background:rgba(22,163,74,.10);color:var(--green);flex:14">L3</div>
+              <div class="mh-pip" style="background:rgba(37,99,235,.08);color:var(--blue);flex:2"></div>
+            </div>
+            <div class="mh-total">49</div>
+          </div>
+          <!-- Digital Delivery -->
+          <div class="mh-row">
+            <div class="mh-label">Digital Del.</div>
+            <div class="mh-dist">
+              <div class="mh-pip" style="background:rgba(220,38,38,.12);color:var(--red);flex:28">L1</div>
+              <div class="mh-pip" style="background:rgba(217,119,6,.12);color:var(--amber);flex:46">L2 46%</div>
+              <div class="mh-pip" style="background:rgba(22,163,74,.10);color:var(--green);flex:22">L3 22%</div>
+              <div class="mh-pip" style="background:rgba(37,99,235,.08);color:var(--blue);flex:4"></div>
+            </div>
+            <div class="mh-total">49</div>
+          </div>
+          <!-- Data Analytics -->
+          <div class="mh-row">
+            <div class="mh-label">Data Analytics</div>
+            <div class="mh-dist">
+              <div class="mh-pip" style="background:rgba(220,38,38,.12);color:var(--red);flex:22">L1</div>
+              <div class="mh-pip" style="background:rgba(217,119,6,.12);color:var(--amber);flex:48">L2 48%</div>
+              <div class="mh-pip" style="background:rgba(22,163,74,.10);color:var(--green);flex:26">L3 26%</div>
+              <div class="mh-pip" style="background:rgba(37,99,235,.08);color:var(--blue);flex:4"></div>
+            </div>
+            <div class="mh-total">49</div>
+          </div>
+          <div style="padding-top:8px;border-top:1px solid #F3F4F6;display:flex;gap:10px;flex-wrap:wrap">
+            <span style="font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:rgba(220,38,38,.15);border-radius:2px;display:inline-block"></span>L1 Awareness</span>
+            <span style="font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:rgba(217,119,6,.15);border-radius:2px;display:inline-block"></span>L2 Working</span>
+            <span style="font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:rgba(22,163,74,.12);border-radius:2px;display:inline-block"></span>L3 Practitioner</span>
+            <span style="font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:rgba(37,99,235,.12);border-radius:2px;display:inline-block"></span>L4 Expert</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Employee risk table -->
+      <div class="panel">
+        <div class="panel-head">
+          <div><div class="panel-title">Highest-Risk Employees</div><div class="panel-sub">Weighted gap score · Sorted by urgency</div></div>
+          <div class="panel-tag pt-red">Action required</div>
+        </div>
+        <div class="panel-body np">
+          <div class="emp-risk-row">
+            <div class="er-av" style="background:#0E7C72">TA</div>
+            <div class="er-info">
+              <div class="er-name">Tariq Al-Rashidi</div>
+              <div class="er-role">BIM Manager · Dubai</div>
+            </div>
+            <div class="er-bar-wrap">
+              <div class="er-bar-track"><div class="er-bar-fill" style="width:48%;background:var(--red)"></div></div>
+              <div class="er-pct">48% ready</div>
+            </div>
+            <div class="er-flag ef-crit">Critical</div>
+          </div>
+          <div class="emp-risk-row">
+            <div class="er-av" style="background:#1A3A7A">DL</div>
+            <div class="er-info">
+              <div class="er-name">Darren Loh</div>
+              <div class="er-role">Data Analyst · Singapore</div>
+            </div>
+            <div class="er-bar-wrap">
+              <div class="er-bar-track"><div class="er-bar-fill" style="width:57%;background:var(--amber)"></div></div>
+              <div class="er-pct">57% ready</div>
+            </div>
+            <div class="er-flag ef-high">High</div>
+          </div>
+          <div class="emp-risk-row">
+            <div class="er-av" style="background:#3A2A6A">KR</div>
+            <div class="er-info">
+              <div class="er-name">Reza Mahmoudi</div>
+              <div class="er-role">BIM Coordinator · Dubai</div>
+            </div>
+            <div class="er-bar-wrap">
+              <div class="er-bar-track"><div class="er-bar-fill" style="width:52%;background:var(--amber)"></div></div>
+              <div class="er-pct">52% ready</div>
+            </div>
+            <div class="er-flag ef-high">High</div>
+          </div>
+          <div class="emp-risk-row">
+            <div class="er-av" style="background:#1A5A3A">NP</div>
+            <div class="er-info">
+              <div class="er-name">Nurul Ain Putri</div>
+              <div class="er-role">BIM Modeller · KL</div>
+            </div>
+            <div class="er-bar-wrap">
+              <div class="er-bar-track"><div class="er-bar-fill" style="width:61%;background:var(--amber)"></div></div>
+              <div class="er-pct">61% ready</div>
+            </div>
+            <div class="er-flag ef-high">High</div>
+          </div>
+          <div class="emp-risk-row">
+            <div class="er-av" style="background:#4A2A1A">VR</div>
+            <div class="er-info">
+              <div class="er-name">Vivek Raghunathan</div>
+              <div class="er-role">IT Systems Admin · Mumbai</div>
+            </div>
+            <div class="er-bar-wrap">
+              <div class="er-bar-track"><div class="er-bar-fill" style="width:63%;background:var(--amber)"></div></div>
+              <div class="er-pct">63% ready</div>
+            </div>
+            <div class="er-flag ef-med">Medium</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Intervention timeline -->
+      <div class="panel">
+        <div class="panel-head">
+          <div><div class="panel-title">Recommended Timeline</div><div class="panel-sub">Intervention sequencing · Q1–Q3 2026</div></div>
+          <div class="panel-tag pt-teal">AI Sequenced</div>
+        </div>
+        <div class="panel-body np">
+          <div class="timeline-row">
+            <div class="tl-month" style="color:var(--red)">Now</div>
+            <div class="tl-dot" style="background:var(--red)"></div>
+            <div class="tl-name">Accelerate AI & Data Literacy</div>
+            <div class="tl-employees">72 emps</div>
+          </div>
+          <div class="timeline-row">
+            <div class="tl-month">Apr</div>
+            <div class="tl-dot" style="background:var(--red)"></div>
+            <div class="tl-name">BIM Advanced — Dubai cluster</div>
+            <div class="tl-employees">17 emps</div>
+          </div>
+          <div class="timeline-row">
+            <div class="tl-month">May</div>
+            <div class="tl-dot" style="background:var(--amber)"></div>
+            <div class="tl-name">Digital Delivery L3 cohort</div>
+            <div class="tl-employees">28 emps</div>
+          </div>
+          <div class="timeline-row">
+            <div class="tl-month">Jun</div>
+            <div class="tl-dot" style="background:var(--amber)"></div>
+            <div class="tl-name">Data Analytics coaching</div>
+            <div class="tl-employees">29 emps</div>
+          </div>
+          <div class="timeline-row">
+            <div class="tl-month">Jul</div>
+            <div class="tl-dot" style="background:var(--teal)"></div>
+            <div class="tl-name">IoT & Smart Infra — org-wide</div>
+            <div class="tl-employees">38 emps</div>
+          </div>
+          <div class="timeline-row">
+            <div class="tl-month">Sep</div>
+            <div class="tl-dot" style="background:var(--green)"></div>
+            <div class="tl-name">L2 Reassessment cycle closes</div>
+            <div class="tl-employees">All 49</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERVENTION TABLE -->
+    <div class="panel" style="animation: fadeUp .5s ease .3s both">
+      <div class="panel-head">
+        <div><div class="panel-title">Recommended Interventions</div><div class="panel-sub">Ranked by weighted gap score × strategic priority × transformation dial</div></div>
+        <div class="panel-tag pt-gold">4 interventions · SGD 93.2K total</div>
+      </div>
+      <div class="panel-body np">
+        <table class="int-table">
+          <thead>
+            <tr>
+              <th>Intervention</th>
+              <th>Skill addressed</th>
+              <th>Type</th>
+              <th>Urgency</th>
+              <th>Employees</th>
+              <th>Est. cost</th>
+              <th>Gap closure</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="rank-num">1</span>AI & Data Literacy for Engineers</td>
+              <td style="color:var(--red)">AI & ML Literacy</td>
+              <td><span class="type-chip">Training programme</span></td>
+              <td><span class="urgency-chip u-imm">Immediate</span></td>
+              <td>72</td>
+              <td><span class="cost-val">SGD 28,400</span></td>
+              <td style="color:var(--green)">L1 → L2</td>
+            </tr>
+            <tr>
+              <td><span class="rank-num">2</span>BIM Professional — Advanced Track</td>
+              <td style="color:var(--red)">BIM Advanced</td>
+              <td><span class="type-chip">Certification track</span></td>
+              <td><span class="urgency-chip u-high">High</span></td>
+              <td>41</td>
+              <td><span class="cost-val">SGD 34,200</span></td>
+              <td style="color:var(--green)">L2 → L3</td>
+            </tr>
+            <tr>
+              <td><span class="rank-num">3</span>IoT & Smart Infrastructure</td>
+              <td style="color:var(--red)">IoT & Smart Infra</td>
+              <td><span class="type-chip">Training programme</span></td>
+              <td><span class="urgency-chip u-high">High</span></td>
+              <td>38</td>
+              <td><span class="cost-val">SGD 18,600</span></td>
+              <td style="color:var(--green)">L1 → L2</td>
+            </tr>
+            <tr>
+              <td><span class="rank-num">4</span>Data Analytics Coaching</td>
+              <td style="color:var(--amber)">Data Analytics</td>
+              <td><span class="type-chip">Coaching programme</span></td>
+              <td><span class="urgency-chip u-med">Medium</span></td>
+              <td>29</td>
+              <td><span class="cost-val">SGD 12,000</span></td>
+              <td style="color:var(--green)">L2 → L3</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COST SUMMARY -->
+    <div class="cost-card">
+      <div class="cc-main">
+        <div class="cc-label">Total recommended investment</div>
+        <div class="cc-value">SGD 93,200</div>
+        <div class="cc-sub">Across 4 interventions · 180 employee-programme enrolments · Est. gap closure: 44% → 68% readiness by Q3 2026</div>
+      </div>
+      <div class="cc-divider"></div>
+      <div class="cc-breakdown">
+        <div class="cc-item"><div class="cc-item-val">180</div><div class="cc-item-key">Enrolments</div></div>
+        <div class="cc-item"><div class="cc-item-val">4</div><div class="cc-item-key">Programmes</div></div>
+        <div class="cc-item"><div class="cc-item-val" style="color:var(--green)">+24pts</div><div class="cc-item-key">Readiness gain</div></div>
+      </div>
+      <div class="cc-divider"></div>
+      <div class="cc-cta">
+        <button class="cc-btn outline">
+          <svg style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;display:inline;margin-right:5px" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export Report
+        </button>
+        <button class="cc-btn primary">Approve & Schedule →</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+(function(){
+  var toast = document.createElement("div");
+  toast.id = "sip-toast";
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#ffffff;border:1px solid #E5E7EB;color:var(--text-secondary);font-size:12px;font-family:'DM Sans',sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08)";
+  document.body.appendChild(toast);
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){
+      toast.style.opacity="0";
+      toast.style.transform="translateX(-50%) translateY(8px)";
+    }, 2400);
+  }
+  document.addEventListener("click", function(e){
+    var a = e.target.closest("a");
+    if(a && a.getAttribute("href") === "#"){
+      e.preventDefault();
+      var label = (a.textContent || "").trim().replace(/\s+/g," ").substring(0,36);
+      showToast(label + " — available in full platform");
+    }
+  });
+})();
+</script>
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'manager',
+    activeNav: 'LNA/TNA Report',
+    breadcrumbs: ['Analysis', 'LNA/TNA Report'],
+    topbarActions: []
+  });
+</script>
+</body>
+</html>

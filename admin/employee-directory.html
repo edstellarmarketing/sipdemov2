@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Directory · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════════════════════
+   EMPLOYEE DIRECTORY — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+.main-scroll{height:100%;overflow-y:auto}
+.main-content{max-width:1260px;margin:0 auto;padding:28px 32px 60px}
+
+:root{
+  --surface:var(--card);
+  --surface-alt:#F5F4F0;
+  --border:#E5E7EB;
+  --text:var(--text-primary);
+  --text-s:var(--text-secondary);
+  --text-t:var(--text-muted);
+  --radius-sm:6px;--radius-md:10px;--radius-lg:16px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ── PAGE HEADER ── */
+.page-header{margin-bottom:24px}
+.page-title{font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--text)}
+.page-subtitle{font-size:13px;color:var(--text-s);margin-top:2px}
+
+/* ── TABS ── */
+.ed-tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:2px solid var(--border);padding-bottom:0}
+.ed-tab{padding:10px 20px;font-size:13px;font-weight:500;color:var(--text-t);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font-body)}
+.ed-tab:hover{color:var(--text-s)}
+.ed-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.ed-tab-panel{display:none;animation:fadeUp .3s ease both}
+.ed-tab-panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── KPI CARDS ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:24px}
+.kpi-card{background:var(--surface);border:1px solid rgba(0,0,0,0.06);border-radius:12px;padding:18px 16px;position:relative}
+.kpi-label{font-size:10.5px;color:var(--text-t);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.kpi-value{font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--text);line-height:1.1}
+.kpi-sub{font-size:11px;color:var(--text-s);margin-top:4px}
+.kpi-delta{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:500;padding:2px 7px;border-radius:100px;margin-top:6px}
+.kpi-delta.green{background:var(--green-bg);color:var(--green)}
+.kpi-delta.amber{background:var(--amber-bg);color:var(--amber)}
+.kpi-delta.red{background:var(--red-bg);color:var(--red)}
+
+/* gender mini-bar */
+.gender-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:8px;background:rgba(0,0,0,0.04)}
+.gender-bar .male{background:var(--blue);border-radius:4px 0 0 4px}
+.gender-bar .female{background:#E879A0;border-radius:0 4px 4px 0}
+.gender-legend{display:flex;gap:12px;margin-top:4px;font-size:10px;color:var(--text-t)}
+.gender-legend span::before{content:'';display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:4px;vertical-align:middle}
+.gender-legend .m::before{background:var(--blue)}
+.gender-legend .f::before{background:#E879A0}
+
+/* ── CHART SECTION ── */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.chart-card{background:var(--surface);border:1px solid rgba(0,0,0,0.06);border-radius:12px;padding:20px}
+.chart-card h3{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px}
+.chart-wrap{position:relative;height:320px}
+.chart-wrap.doughnut{height:290px;max-width:350px;margin:0 auto}
+
+/* ── MINI CARDS ROW ── */
+.mini-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px}
+.mini-card{background:var(--surface);border:1px solid rgba(0,0,0,0.06);border-radius:12px;padding:18px 16px}
+.mini-card h3{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px}
+
+/* seniority stacked bar */
+.stacked-bar{display:flex;height:22px;border-radius:6px;overflow:hidden;margin-bottom:8px}
+.stacked-bar .seg{transition:width .4s ease}
+.stacked-legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:10px;color:var(--text-t)}
+.stacked-legend span{display:flex;align-items:center;gap:4px}
+.stacked-legend .dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* horiz bars */
+.hbar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.hbar-label{font-size:11px;color:var(--text-s);width:72px;flex-shrink:0;text-align:right}
+.hbar-track{flex:1;height:14px;background:rgba(0,0,0,0.04);border-radius:4px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.hbar-val{font-size:10px;color:var(--text-t);width:56px;flex-shrink:0;font-family:var(--font-mono)}
+
+/* activity list */
+.activity-list{list-style:none;padding:0}
+.activity-list li{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.04);font-size:12px;color:var(--text-s)}
+.activity-list li:last-child{border-bottom:none}
+.activity-list .val{font-weight:600;color:var(--text);font-family:var(--font-mono)}
+
+/* ── BU SUMMARY TABLE ── */
+.bu-table-wrap{background:var(--surface);border:1px solid rgba(0,0,0,0.06);border-radius:12px;overflow:hidden}
+.bu-table-wrap h3{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text);padding:16px 18px 0}
+.bu-table{width:100%;border-collapse:collapse}
+.bu-table th{font-size:10px;color:var(--text-t);letter-spacing:.08em;text-transform:uppercase;text-align:left;padding:10px 14px;font-weight:400;border-bottom:1px solid rgba(0,0,0,0.06);background:rgba(0,0,0,0.02)}
+.bu-table tr{border-bottom:1px solid rgba(0,0,0,0.04)}
+.bu-table tr:last-child{border-bottom:none}
+.bu-table td{padding:10px 14px;font-size:12px;color:var(--text-s)}
+.pill{display:inline-block;padding:2px 9px;border-radius:100px;font-size:10.5px;font-weight:500}
+.pill.green{background:var(--green-bg);color:var(--green)}
+.pill.amber{background:var(--amber-bg);color:var(--amber)}
+.pill.red{background:var(--red-bg);color:var(--red)}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18px;padding:14px 16px;background:var(--surface);border:1px solid rgba(0,0,0,0.06);border-radius:12px}
+.filter-bar input[type=text],
+.filter-bar input[type=search]{padding:8px 12px;border-radius:7px;border:1px solid rgba(0,0,0,0.08);background:#fff;font-family:var(--font-body);font-size:12px;color:var(--text);outline:none;min-width:200px;transition:border-color .2s}
+.filter-bar input:focus{border-color:var(--accent)}
+.filter-bar select{padding:8px 12px;border-radius:7px;border:1px solid rgba(0,0,0,0.08);background:#fff;font-family:var(--font-body);font-size:12px;color:var(--text);outline:none;cursor:pointer;transition:border-color .2s}
+.filter-bar select:focus{border-color:var(--accent)}
+.filter-count{margin-left:auto;font-size:11.5px;color:var(--text-t);white-space:nowrap}
+
+/* ── EMPLOYEE TABLE ── */
+.emp-table-wrap{background:var(--surface);border:1px solid rgba(0,0,0,0.06);border-radius:12px;overflow-x:auto}
+.emp-table{width:100%;border-collapse:collapse;min-width:1100px}
+.emp-table th{font-size:10px;color:var(--text-t);letter-spacing:.08em;text-transform:uppercase;text-align:left;padding:10px 12px;font-weight:400;border-bottom:1px solid rgba(0,0,0,0.06);background:rgba(0,0,0,0.02);white-space:nowrap;position:sticky;top:0}
+.emp-table tr{border-bottom:1px solid rgba(0,0,0,0.04);transition:background .15s}
+.emp-table tr:hover{background:rgba(0,0,0,0.015)}
+.emp-table tr:last-child{border-bottom:none}
+.emp-table td{padding:9px 12px;font-size:11.5px;color:var(--text-s);white-space:nowrap}
+.emp-table td:first-child{font-family:var(--font-mono);font-size:10.5px;color:var(--text-t)}
+.emp-table td.name-cell{font-weight:500;color:var(--text)}
+
+/* status dots */
+.status-dot{display:inline-flex;align-items:center;gap:5px;font-size:11px}
+.status-dot::before{content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.status-dot.active::before{background:var(--green)}
+.status-dot.on-leave::before{background:var(--amber)}
+.status-dot.probation::before{background:var(--blue)}
+.status-dot.notice::before{background:var(--red)}
+.status-dot.terminated::before{background:#9CA3AF}
+
+/* ── ADD EMPLOYEE FORM ── */
+.form-card{background:var(--surface);border:1px solid rgba(0,0,0,0.06);border-radius:12px;padding:24px;margin-bottom:20px}
+.form-card h3{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(0,0,0,0.06)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px 18px}
+.form-grid.two-col{grid-template-columns:1fr 1fr}
+.form-group{margin-bottom:0}
+.form-label{display:block;font-size:10px;color:var(--text-t);letter-spacing:.04em;margin-bottom:5px;text-transform:uppercase}
+.form-label .req{color:var(--red);margin-left:2px}
+.form-input,.form-select{width:100%;padding:9px 12px;border-radius:7px;border:1px solid rgba(0,0,0,0.08);background:#ffffff;color:var(--text);font-family:var(--font-body);font-size:12.5px;outline:none;transition:border-color .2s}
+.form-input:focus,.form-select:focus{border-color:var(--accent)}
+.form-input::placeholder{color:var(--text-muted)}
+.form-select option{background:#fff;color:var(--text)}
+.form-actions{display:flex;gap:10px;margin-top:6px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 22px;border-radius:8px;font-family:var(--font-body);font-size:12.5px;font-weight:500;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#B8983F}
+.btn-outline{background:transparent;border:1px solid rgba(0,0,0,0.12);color:var(--text-s)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-ghost{background:transparent;color:var(--text-t)}
+.btn-ghost:hover{color:var(--text-s)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  .kpi-grid{grid-template-columns:repeat(3,1fr)}
+  .chart-row{grid-template-columns:1fr}
+  .mini-row{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .form-grid,.form-grid.two-col{grid-template-columns:1fr}
+  .main-content{padding:20px 16px 40px}
+}
+</style>
+</head>
+<body>
+<main class="main" id="page-content">
+<div class="main-scroll">
+<div class="main-content">
+
+  <div class="page-header">
+    <div class="page-title">Employee Directory</div>
+    <div class="page-subtitle">Manage your organisation's workforce data, view analytics, and maintain employee records.</div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="ed-tabs" id="edTabs">
+    <button class="ed-tab active" data-tab="dashboard">Dashboard</button>
+    <button class="ed-tab" data-tab="all-employees">All Employees</button>
+    <button class="ed-tab" data-tab="add-employee">Add Employee</button>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════
+       TAB 1: DASHBOARD
+       ════════════════════════════════════════════════════════════ -->
+  <div class="ed-tab-panel active" id="tab-dashboard">
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Employees</div>
+        <div class="kpi-value">812</div>
+        <div class="kpi-delta green"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 2L8 6H2L5 2Z" fill="currentColor"/></svg> +23 this quarter</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Active</div>
+        <div class="kpi-value">786</div>
+        <div class="kpi-sub">96.8% of total</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Tenure</div>
+        <div class="kpi-value">3.4<span style="font-size:14px;font-weight:400;color:var(--text-s)"> yrs</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Gender Ratio</div>
+        <div class="kpi-value" style="font-size:18px">62% M / 38% F</div>
+        <div class="gender-bar"><div class="male" style="width:62%"></div><div class="female" style="width:38%"></div></div>
+        <div class="gender-legend"><span class="m">Male 62%</span><span class="f">Female 38%</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Age</div>
+        <div class="kpi-value">34.2<span style="font-size:14px;font-weight:400;color:var(--text-s)"> yrs</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Attrition Rate</div>
+        <div class="kpi-value">8.2%</div>
+        <div class="kpi-delta amber"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 4L5 8L8 4H2Z" fill="currentColor"/></svg> Amber</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-row">
+      <div class="chart-card">
+        <h3>Employees by Department</h3>
+        <div class="chart-wrap"><canvas id="chartDept"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Employees by Location</h3>
+        <div class="chart-wrap doughnut"><canvas id="chartLoc"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Mini Cards -->
+    <div class="mini-row">
+      <!-- Seniority Distribution -->
+      <div class="mini-card">
+        <h3>Seniority Distribution</h3>
+        <div class="stacked-bar" id="seniorityBar"></div>
+        <div class="stacked-legend" id="seniorityLegend"></div>
+      </div>
+      <!-- Employment Type -->
+      <div class="mini-card">
+        <h3>Employment Type</h3>
+        <div id="empTypeChart">
+          <div class="hbar-row"><div class="hbar-label">Full-time</div><div class="hbar-track"><div class="hbar-fill" style="width:93%;background:var(--blue)"></div></div><div class="hbar-val">756 (93%)</div></div>
+          <div class="hbar-row"><div class="hbar-label">Contract</div><div class="hbar-track"><div class="hbar-fill" style="width:4%;background:var(--amber)"></div></div><div class="hbar-val">32 (4%)</div></div>
+          <div class="hbar-row"><div class="hbar-label">Part-time</div><div class="hbar-track"><div class="hbar-fill" style="width:2%;background:var(--teal)"></div></div><div class="hbar-val">16 (2%)</div></div>
+          <div class="hbar-row"><div class="hbar-label">Intern</div><div class="hbar-track"><div class="hbar-fill" style="width:1%;background:var(--purple)"></div></div><div class="hbar-val">8 (1%)</div></div>
+        </div>
+      </div>
+      <!-- Recent Activity -->
+      <div class="mini-card">
+        <h3>Recent Activity (30d)</h3>
+        <ul class="activity-list">
+          <li><span>New Joiners</span><span class="val">12</span></li>
+          <li><span>Exits</span><span class="val">4</span></li>
+          <li><span>Transfers</span><span class="val">7</span></li>
+          <li><span>Promotions</span><span class="val">3</span></li>
+          <li><span>On Leave Today</span><span class="val">18</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- BU Summary Table -->
+    <div class="bu-table-wrap">
+      <h3>Business Unit Summary</h3>
+      <table class="bu-table">
+        <thead><tr><th>Business Unit</th><th>Headcount</th><th>Avg Tenure</th><th>Skill Coverage</th><th>Assessment Rate</th><th>Attrition</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:500;color:var(--text)">Engineering & Delivery</td><td>324</td><td>4.1y</td>
+            <td><span class="pill amber">78%</span></td>
+            <td><span class="pill green">92%</span></td>
+            <td><span class="pill green">6.2%</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500;color:var(--text)">Digital & Technology</td><td>118</td><td>2.3y</td>
+            <td><span class="pill green">82%</span></td>
+            <td><span class="pill green">88%</span></td>
+            <td><span class="pill amber">11.4%</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500;color:var(--text)">Corporate Functions</td><td>198</td><td>3.8y</td>
+            <td><span class="pill amber">71%</span></td>
+            <td><span class="pill green">85%</span></td>
+            <td><span class="pill green">7.1%</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500;color:var(--text)">Sustainability & EHS</td><td>172</td><td>3.2y</td>
+            <td><span class="pill amber">76%</span></td>
+            <td><span class="pill green">90%</span></td>
+            <td><span class="pill green">5.8%</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /tab-dashboard -->
+
+  <!-- ════════════════════════════════════════════════════════════
+       TAB 2: ALL EMPLOYEES
+       ════════════════════════════════════════════════════════════ -->
+  <div class="ed-tab-panel" id="tab-all-employees">
+
+    <div class="filter-bar">
+      <input type="search" id="filterSearch" placeholder="Search name, ID, or email...">
+      <select id="filterDept">
+        <option value="">All Departments</option>
+        <option>Structural Engineering</option>
+        <option>Civil & Geotechnical</option>
+        <option>Project Delivery</option>
+        <option>BIM & Digital Delivery</option>
+        <option>IT Infrastructure</option>
+        <option>Finance & Procurement</option>
+        <option>Human Resources</option>
+        <option>Legal & Compliance</option>
+        <option>EHS & Risk</option>
+        <option>Sustainability Advisory</option>
+        <option>Transport & Mobility</option>
+        <option>Water & Environment</option>
+        <option>Facilities Management</option>
+        <option>Corporate Strategy</option>
+        <option>Training & Development</option>
+      </select>
+      <select id="filterLoc">
+        <option value="">All Locations</option>
+        <option>Singapore</option>
+        <option>Mumbai</option>
+        <option>Dubai</option>
+        <option>Kuala Lumpur</option>
+      </select>
+      <select id="filterStatus">
+        <option value="">All Status</option>
+        <option>Active</option>
+        <option>On Leave</option>
+        <option>Probation</option>
+        <option>Notice Period</option>
+        <option>Terminated</option>
+      </select>
+      <select id="filterSeniority">
+        <option value="">All Seniority</option>
+        <option>L1</option><option>L2</option><option>L3</option><option>L4</option><option>L5</option><option>L6</option><option>L7</option>
+      </select>
+      <select id="filterType">
+        <option value="">All Types</option>
+        <option>Full-time</option>
+        <option>Part-time</option>
+        <option>Contract</option>
+        <option>Intern</option>
+      </select>
+      <div class="filter-count" id="filterCount">Showing 28 of 812</div>
+    </div>
+
+    <div class="emp-table-wrap">
+      <table class="emp-table">
+        <thead>
+          <tr>
+            <th>Emp ID</th><th>Name</th><th>Email</th><th>Department</th><th>Role / Title</th><th>Seniority</th><th>Location</th><th>Type</th><th>Status</th><th>Join Date</th><th>Manager</th>
+          </tr>
+        </thead>
+        <tbody id="empTableBody"></tbody>
+      </table>
+    </div>
+  </div><!-- /tab-all-employees -->
+
+  <!-- ════════════════════════════════════════════════════════════
+       TAB 3: ADD EMPLOYEE
+       ════════════════════════════════════════════════════════════ -->
+  <div class="ed-tab-panel" id="tab-add-employee">
+
+    <form id="addEmployeeForm" autocomplete="off">
+
+    <!-- Personal Information -->
+    <div class="form-card">
+      <h3>Personal Information</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Employee ID</label>
+          <input class="form-input" type="text" id="fEmpId" placeholder="EMP-813">
+        </div>
+        <div class="form-group">
+          <label class="form-label">First Name <span class="req">*</span></label>
+          <input class="form-input" type="text" id="fFirstName" required placeholder="e.g. Priya">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name <span class="req">*</span></label>
+          <input class="form-input" type="text" id="fLastName" required placeholder="e.g. Sharma">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email <span class="req">*</span></label>
+          <input class="form-input" type="email" id="fEmail" required placeholder="priya.sharma@infraco.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" type="text" id="fPhone" placeholder="+65 9123 4567">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date of Birth</label>
+          <input class="form-input" type="date" id="fDob">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Gender</label>
+          <select class="form-select" id="fGender">
+            <option value="">Select...</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Non-binary</option>
+            <option>Prefer not to say</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nationality</label>
+          <select class="form-select" id="fNationality">
+            <option value="">Select...</option>
+            <option>Singaporean</option><option>Indian</option><option>Emirati</option><option>Malaysian</option>
+            <option>American</option><option>Australian</option><option>Bangladeshi</option><option>Brazilian</option>
+            <option>British</option><option>Canadian</option><option>Chinese</option><option>Colombian</option>
+            <option>Dutch</option><option>Egyptian</option><option>Filipino</option><option>French</option>
+            <option>German</option><option>Indonesian</option><option>Irish</option><option>Italian</option>
+            <option>Japanese</option><option>Kenyan</option><option>Korean</option><option>Mexican</option>
+            <option>New Zealander</option><option>Nigerian</option><option>Pakistani</option><option>Russian</option>
+            <option>Saudi</option><option>South African</option><option>Spanish</option><option>Sri Lankan</option>
+            <option>Swedish</option><option>Thai</option><option>Turkish</option><option>Vietnamese</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employment Details -->
+    <div class="form-card">
+      <h3>Employment Details</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Department <span class="req">*</span></label>
+          <select class="form-select" id="fDept" required>
+            <option value="">Select department...</option>
+            <option>Structural Engineering</option>
+            <option>Civil & Geotechnical</option>
+            <option>Project Delivery</option>
+            <option>BIM & Digital Delivery</option>
+            <option>IT Infrastructure</option>
+            <option>Finance & Procurement</option>
+            <option>Human Resources</option>
+            <option>Legal & Compliance</option>
+            <option>EHS & Risk</option>
+            <option>Sustainability Advisory</option>
+            <option>Transport & Mobility</option>
+            <option>Water & Environment</option>
+            <option>Facilities Management</option>
+            <option>Corporate Strategy</option>
+            <option>Training & Development</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role / Job Title <span class="req">*</span></label>
+          <input class="form-input" type="text" id="fRole" required placeholder="e.g. Senior Structural Engineer">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Seniority Band</label>
+          <select class="form-select" id="fSeniority">
+            <option value="">Select...</option>
+            <option>L1</option><option>L2</option><option>L3</option><option>L4</option><option>L5</option><option>L6</option><option>L7</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Employment Type</label>
+          <select class="form-select" id="fEmpType">
+            <option value="">Select...</option>
+            <option>Full-time</option>
+            <option>Part-time</option>
+            <option>Contract</option>
+            <option>Intern</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Manager / Reporting To</label>
+          <input class="form-input" type="text" id="fManager" placeholder="e.g. Rajesh Kumar">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location <span class="req">*</span></label>
+          <select class="form-select" id="fLocation" required>
+            <option value="">Select...</option>
+            <option>Singapore</option>
+            <option>Mumbai</option>
+            <option>Dubai</option>
+            <option>Kuala Lumpur</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Join Date <span class="req">*</span></label>
+          <input class="form-input" type="date" id="fJoinDate" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Probation End Date</label>
+          <input class="form-input" type="date" id="fProbEnd">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select" id="fStatus">
+            <option>Active</option>
+            <option>On Leave</option>
+            <option>Probation</option>
+            <option>Notice Period</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Qualifications & Skills -->
+    <div class="form-card">
+      <h3>Qualifications & Skills</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Highest Qualification</label>
+          <select class="form-select" id="fQual">
+            <option value="">Select...</option>
+            <option>High School</option>
+            <option>Diploma</option>
+            <option>Bachelor's</option>
+            <option>Master's</option>
+            <option>PhD</option>
+            <option>Professional Certification</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">University / Institution</label>
+          <input class="form-input" type="text" id="fUniversity" placeholder="e.g. NUS, IIT Bombay">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Years of Experience</label>
+          <input class="form-input" type="number" id="fYoe" min="0" max="50" placeholder="e.g. 8">
+        </div>
+        <div class="form-group" style="grid-column:span 2">
+          <label class="form-label">Key Skills (comma separated)</label>
+          <input class="form-input" type="text" id="fSkills" placeholder="e.g. Structural Analysis, SAP2000, Revit, Project Management">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Certifications (comma separated)</label>
+          <input class="form-input" type="text" id="fCerts" placeholder="e.g. PMP, PE, LEED AP">
+        </div>
+      </div>
+    </div>
+
+    <!-- Compensation -->
+    <div class="form-card">
+      <h3>Compensation <span style="font-size:11px;font-weight:400;color:var(--text-t);margin-left:6px">(Optional)</span></h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Annual CTC</label>
+          <input class="form-input" type="number" id="fCtc" placeholder="e.g. 120000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Currency</label>
+          <select class="form-select" id="fCurrency">
+            <option>SGD</option><option>INR</option><option>AED</option><option>MYR</option><option>USD</option><option>EUR</option><option>GBP</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pay Band / Grade</label>
+          <input class="form-input" type="text" id="fPayBand" placeholder="e.g. G4">
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" id="btnSave">Save Employee</button>
+      <button type="button" class="btn btn-outline" id="btnSaveAnother">Save & Add Another</button>
+      <button type="button" class="btn btn-ghost" id="btnCancel">Cancel</button>
+    </div>
+
+    </form>
+  </div><!-- /tab-add-employee -->
+
+</div>
+</div>
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal: 'admin',
+  activeNav: 'Employee Directory',
+  breadcrumbs: ['People', 'Employee Directory'],
+  topbarActions: []
+});
+</script>
+<script>
+/* ══════════════════════════════════════════════════════════════
+   EMPLOYEE DIRECTORY — PAGE LOGIC
+   ══════════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
+
+/* ── STORAGE ── */
+var STORAGE_KEY = 'sip_employee_directory';
+
+/* ── DEMO EMPLOYEES ── */
+var DEMO_EMPLOYEES = [
+  {id:'EMP-001',firstName:'Rajesh',lastName:'Kumar',email:'rajesh.kumar@infraco.com',department:'Structural Engineering',role:'Principal Structural Engineer',seniority:'L5',location:'Singapore',type:'Full-time',status:'Active',joinDate:'2018-03-12',manager:'Vikram Nair'},
+  {id:'EMP-002',firstName:'Priya',lastName:'Sharma',email:'priya.sharma@infraco.com',department:'Civil & Geotechnical',role:'Senior Geotechnical Engineer',seniority:'L4',location:'Mumbai',type:'Full-time',status:'Active',joinDate:'2019-07-01',manager:'Anand Mehta'},
+  {id:'EMP-003',firstName:'Wei Lin',lastName:'Tan',email:'weilin.tan@infraco.com',department:'Project Delivery',role:'Project Director',seniority:'L6',location:'Singapore',type:'Full-time',status:'Active',joinDate:'2015-01-20',manager:'Vikram Nair'},
+  {id:'EMP-004',firstName:'Ahmed',lastName:'Al-Rashid',email:'ahmed.alrashid@infraco.com',department:'BIM & Digital Delivery',role:'BIM Manager',seniority:'L4',location:'Dubai',type:'Full-time',status:'Active',joinDate:'2020-09-15',manager:'Wei Lin Tan'},
+  {id:'EMP-005',firstName:'Siti',lastName:'Aminah',email:'siti.aminah@infraco.com',department:'IT Infrastructure',role:'Systems Architect',seniority:'L4',location:'Kuala Lumpur',type:'Full-time',status:'Active',joinDate:'2021-02-08',manager:'James Loh'},
+  {id:'EMP-006',firstName:'Deepak',lastName:'Patel',email:'deepak.patel@infraco.com',department:'Finance & Procurement',role:'Finance Controller',seniority:'L5',location:'Mumbai',type:'Full-time',status:'Active',joinDate:'2017-11-03',manager:'Nisha Reddy'},
+  {id:'EMP-007',firstName:'Sarah',lastName:'Chen',email:'sarah.chen@infraco.com',department:'Human Resources',role:'HR Business Partner',seniority:'L4',location:'Singapore',type:'Full-time',status:'Active',joinDate:'2020-04-14',manager:'Li Mei Wong'},
+  {id:'EMP-008',firstName:'Omar',lastName:'Hassan',email:'omar.hassan@infraco.com',department:'Legal & Compliance',role:'Senior Legal Counsel',seniority:'L5',location:'Dubai',type:'Full-time',status:'Active',joinDate:'2016-08-22',manager:'Fatima Al-Sayed'},
+  {id:'EMP-009',firstName:'Kavitha',lastName:'Nair',email:'kavitha.nair@infraco.com',department:'EHS & Risk',role:'EHS Director',seniority:'L6',location:'Mumbai',type:'Full-time',status:'Active',joinDate:'2014-05-30',manager:'Anand Mehta'},
+  {id:'EMP-010',firstName:'James',lastName:'Loh',email:'james.loh@infraco.com',department:'IT Infrastructure',role:'IT Director',seniority:'L6',location:'Singapore',type:'Full-time',status:'Active',joinDate:'2016-03-01',manager:'Vikram Nair'},
+  {id:'EMP-011',firstName:'Aisha',lastName:'Binti Rahman',email:'aisha.rahman@infraco.com',department:'Sustainability Advisory',role:'Sustainability Consultant',seniority:'L3',location:'Kuala Lumpur',type:'Full-time',status:'Active',joinDate:'2022-01-10',manager:'Kavitha Nair'},
+  {id:'EMP-012',firstName:'Vikram',lastName:'Nair',email:'vikram.nair@infraco.com',department:'Project Delivery',role:'Chief Operating Officer',seniority:'L7',location:'Singapore',type:'Full-time',status:'Active',joinDate:'2012-06-15',manager:'—'},
+  {id:'EMP-013',firstName:'Mei Ling',lastName:'Wong',email:'meiling.wong@infraco.com',department:'Human Resources',role:'CHRO',seniority:'L7',location:'Singapore',type:'Full-time',status:'Active',joinDate:'2013-09-01',manager:'—'},
+  {id:'EMP-014',firstName:'Arjun',lastName:'Desai',email:'arjun.desai@infraco.com',department:'Structural Engineering',role:'Structural Engineer',seniority:'L2',location:'Mumbai',type:'Full-time',status:'Probation',joinDate:'2025-11-18',manager:'Rajesh Kumar'},
+  {id:'EMP-015',firstName:'Nurul',lastName:'Hidayah',email:'nurul.hidayah@infraco.com',department:'BIM & Digital Delivery',role:'BIM Coordinator',seniority:'L2',location:'Kuala Lumpur',type:'Full-time',status:'Active',joinDate:'2023-03-20',manager:'Ahmed Al-Rashid'},
+  {id:'EMP-016',firstName:'Fatima',lastName:'Al-Sayed',email:'fatima.alsayed@infraco.com',department:'Legal & Compliance',role:'General Counsel',seniority:'L6',location:'Dubai',type:'Full-time',status:'Active',joinDate:'2015-12-01',manager:'Vikram Nair'},
+  {id:'EMP-017',firstName:'Ravi',lastName:'Krishnan',email:'ravi.krishnan@infraco.com',department:'Civil & Geotechnical',role:'Geotechnical Analyst',seniority:'L1',location:'Mumbai',type:'Intern',status:'Active',joinDate:'2026-01-06',manager:'Priya Sharma'},
+  {id:'EMP-018',firstName:'Cheng',lastName:'Wei',email:'cheng.wei@infraco.com',department:'Project Delivery',role:'Project Manager',seniority:'L4',location:'Singapore',type:'Full-time',status:'On Leave',joinDate:'2019-10-07',manager:'Wei Lin Tan'},
+  {id:'EMP-019',firstName:'Nisha',lastName:'Reddy',email:'nisha.reddy@infraco.com',department:'Finance & Procurement',role:'CFO',seniority:'L7',location:'Mumbai',type:'Full-time',status:'Active',joinDate:'2014-02-17',manager:'—'},
+  {id:'EMP-020',firstName:'Khalid',lastName:'Mansoor',email:'khalid.mansoor@infraco.com',department:'EHS & Risk',role:'Safety Officer',seniority:'L2',location:'Dubai',type:'Contract',status:'Active',joinDate:'2024-06-01',manager:'Kavitha Nair'},
+  {id:'EMP-021',firstName:'Anand',lastName:'Mehta',email:'anand.mehta@infraco.com',department:'Structural Engineering',role:'VP Engineering',seniority:'L7',location:'Mumbai',type:'Full-time',status:'Active',joinDate:'2013-04-10',manager:'—'},
+  {id:'EMP-022',firstName:'Li Wei',lastName:'Goh',email:'liwei.goh@infraco.com',department:'Sustainability Advisory',role:'Green Building Specialist',seniority:'L3',location:'Singapore',type:'Full-time',status:'Active',joinDate:'2021-08-23',manager:'Kavitha Nair'},
+  {id:'EMP-023',firstName:'Tanvi',lastName:'Joshi',email:'tanvi.joshi@infraco.com',department:'Training & Development',role:'L&D Manager',seniority:'L4',location:'Mumbai',type:'Full-time',status:'Active',joinDate:'2020-05-11',manager:'Mei Ling Wong'},
+  {id:'EMP-024',firstName:'Hassan',lastName:'Al-Farsi',email:'hassan.alfarsi@infraco.com',department:'Transport & Mobility',role:'Transport Planner',seniority:'L3',location:'Dubai',type:'Full-time',status:'Notice Period',joinDate:'2019-01-14',manager:'Wei Lin Tan'},
+  {id:'EMP-025',firstName:'Rachel',lastName:'Ng',email:'rachel.ng@infraco.com',department:'Corporate Strategy',role:'Strategy Analyst',seniority:'L2',location:'Singapore',type:'Full-time',status:'Active',joinDate:'2023-07-03',manager:'James Loh'},
+  {id:'EMP-026',firstName:'Suresh',lastName:'Iyer',email:'suresh.iyer@infraco.com',department:'Water & Environment',role:'Environmental Engineer',seniority:'L3',location:'Mumbai',type:'Full-time',status:'Active',joinDate:'2021-11-29',manager:'Kavitha Nair'},
+  {id:'EMP-027',firstName:'Nur Aisyah',lastName:'Zakaria',email:'aisyah.zakaria@infraco.com',department:'Facilities Management',role:'Facilities Coordinator',seniority:'L1',location:'Kuala Lumpur',type:'Part-time',status:'Active',joinDate:'2025-03-10',manager:'Siti Aminah'},
+  {id:'EMP-028',firstName:'David',lastName:'Tan',email:'david.tan@infraco.com',department:'IT Infrastructure',role:'DevOps Engineer',seniority:'L3',location:'Singapore',type:'Contract',status:'Active',joinDate:'2024-09-16',manager:'James Loh'}
+];
+
+function loadEmployees(){
+  // Try dataport import first (shared across tabs via localStorage)
+  var raw=null;
+  try{raw=sessionStorage.getItem('sip_dataport_import')}catch(e){}
+  if(!raw){try{raw=localStorage.getItem('sip_dataport_import')}catch(e){}}
+  if(raw){
+    try{
+      var imp=JSON.parse(raw);
+      if(imp.employees&&imp.employees.length){
+        // Map dataport employees to directory format
+        var mapped=imp.employees.map(function(e){
+          return {
+            id:e.id, firstName:e.firstName, lastName:e.lastName, email:e.email,
+            department:e.department, role:e.role, seniority:e.jobLevel||guessSeniority(e.role),
+            location:e.location||'',
+            type:e.employmentType||'Full-Time', status:e.status||'Active',
+            joinDate:e.joinDate, manager:e.reportsTo||'\u2014'
+          };
+        });
+        return mapped;
+      }
+    }catch(e){}
+  }
+  // Fallback to directory storage
+  var data = sessionStorage.getItem(STORAGE_KEY);
+  if(data){ try{ return JSON.parse(data); }catch(e){} }
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(DEMO_EMPLOYEES));
+  return DEMO_EMPLOYEES.slice();
+}
+
+function guessSeniority(role){
+  if(!role) return 'L2';
+  var r=role.toLowerCase();
+  if(r.indexOf('director')>-1||r.indexOf('manager')>-1) return 'L5';
+  if(r.indexOf('senior')>-1||r.indexOf('lead')>-1) return 'L4';
+  if(r.indexOf('coordinator')>-1||r.indexOf('analyst')>-1) return 'L3';
+  if(r.indexOf('supervisor')>-1) return 'L3';
+  return 'L2';
+}
+
+function saveEmployees(arr){
+  try{sessionStorage.setItem(STORAGE_KEY, JSON.stringify(arr))}catch(e){}
+  try{localStorage.setItem(STORAGE_KEY, JSON.stringify(arr))}catch(e){}
+}
+
+/* ── TABS ── */
+var tabs = document.querySelectorAll('.ed-tab');
+var panels = document.querySelectorAll('.ed-tab-panel');
+var chartInstances = {};
+
+function switchTab(name){
+  tabs.forEach(function(t){ t.classList.toggle('active', t.dataset.tab===name); });
+  panels.forEach(function(p){ p.classList.toggle('active', p.id==='tab-'+name); });
+  if(name==='dashboard') initCharts();
+  if(name==='all-employees') renderTable();
+}
+
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){ switchTab(t.dataset.tab); });
+});
+
+/* ── TOAST ── */
+function showToast(msg){
+  var t=document.getElementById('sip-toast');
+  if(!t){t=document.createElement('div');t.id='sip-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#ffffff;border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:var(--font-body);padding:10px 18px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)';},2400);
+}
+
+/* ── SENIORITY BAR ── */
+function renderSeniorityBar(){
+  var employees=loadEmployees();
+  var senMap={};
+  employees.forEach(function(e){var s=e.seniority||'L2';senMap[s]=(senMap[s]||0)+1});
+  var colors={'L1':'#6366F1','L2':'#0891B2','L3':'#16A34A','L4':'#D97706','L5':'#7C3AED','L6':'#DC2626','L7':'#0F1117'};
+  var allLevels=['L1','L2','L3','L4','L5','L6','L7'];
+  var levels=allLevels.filter(function(l){return senMap[l]>0}).map(function(l){return {label:l,count:senMap[l]||0,color:colors[l]||'#6B7280'}});
+  var total=employees.length||1;
+  var bar=document.getElementById('seniorityBar');
+  var legend=document.getElementById('seniorityLegend');
+  bar.innerHTML='';legend.innerHTML='';
+  levels.forEach(function(l){
+    var seg=document.createElement('div');seg.className='seg';seg.style.width=(l.count/total*100)+'%';seg.style.background=l.color;seg.title=l.label+': '+l.count;bar.appendChild(seg);
+    var sp=document.createElement('span');sp.innerHTML='<span class="dot" style="background:'+l.color+'"></span>'+l.label+' '+l.count;legend.appendChild(sp);
+  });
+}
+renderSeniorityBar();
+
+/* ── CHARTS ── */
+function destroyCharts(){
+  Object.keys(chartInstances).forEach(function(k){ if(chartInstances[k]){chartInstances[k].destroy();delete chartInstances[k];} });
+}
+
+function initCharts(){
+  destroyCharts();
+  var employees=loadEmployees();
+  var fontFamily = "'DM Sans', system-ui, sans-serif";
+  var gridColor = 'rgba(0,0,0,0.04)';
+  var chartColors=['#6366F1','#0891B2','#16A34A','#D97706','#7C3AED','#EC4899','#F59E0B','#2563EB','#DC2626','#059669'];
+
+  // Department chart - dynamic
+  var deptMap={};
+  employees.forEach(function(e){var d=e.department||'Other';deptMap[d]=(deptMap[d]||0)+1});
+  var deptEntries=Object.keys(deptMap).sort(function(a,b){return deptMap[b]-deptMap[a]});
+  var deptLabels=deptEntries.map(function(d){return d.length>20?d.substring(0,18)+'...':d});
+  var deptData=deptEntries.map(function(d){return deptMap[d]});
+  var deptColors=deptEntries.map(function(_,i){return chartColors[i%chartColors.length]});
+
+  var deptCtx = document.getElementById('chartDept').getContext('2d');
+  chartInstances.dept = new Chart(deptCtx, {
+    type:'bar',
+    data:{labels:deptLabels,datasets:[{data:deptData,backgroundColor:deptColors,borderRadius:4,borderSkipped:false,barThickness:20}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#0F1117',bodyColor:'#6B7280',borderColor:'rgba(0,0,0,0.08)',borderWidth:1,padding:10,titleFont:{family:fontFamily,size:12,weight:'600'},bodyFont:{family:fontFamily,size:11},cornerRadius:8,displayColors:false}},scales:{x:{grid:{color:gridColor,drawBorder:false},ticks:{font:{family:fontFamily,size:10},color:'#9CA3AF'},border:{display:false}},y:{grid:{display:false},ticks:{font:{family:fontFamily,size:11},color:'#6B7280'},border:{display:false}}}}
+  });
+
+  // Location doughnut - dynamic
+  var locMap={};
+  employees.forEach(function(e){var l=e.location||'Unknown';locMap[l]=(locMap[l]||0)+1});
+  var locEntries=Object.keys(locMap).sort(function(a,b){return locMap[b]-locMap[a]});
+  var locData=locEntries.map(function(l){return locMap[l]});
+  var locColors=locEntries.map(function(_,i){return chartColors[i%chartColors.length]});
+
+  var locCtx = document.getElementById('chartLoc').getContext('2d');
+  chartInstances.loc = new Chart(locCtx, {
+    type:'doughnut',
+    data:{labels:locEntries,datasets:[{data:locData,backgroundColor:locColors,borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'70%',plugins:{legend:{position:'bottom',labels:{font:{family:fontFamily,size:11},color:'#6B7280',padding:16,usePointStyle:true,pointStyleWidth:10}},tooltip:{backgroundColor:'#fff',titleColor:'#0F1117',bodyColor:'#6B7280',borderColor:'rgba(0,0,0,0.08)',borderWidth:1,padding:10,titleFont:{family:fontFamily,size:12,weight:'600'},bodyFont:{family:fontFamily,size:11},cornerRadius:8}}}
+  });
+}
+
+/* ── TABLE ── */
+function statusClass(s){
+  if(s==='Active') return 'active';
+  if(s==='On Leave') return 'on-leave';
+  if(s==='Probation') return 'probation';
+  if(s==='Notice Period') return 'notice';
+  if(s==='Terminated') return 'terminated';
+  return '';
+}
+
+function renderTable(){
+  var employees = loadEmployees();
+  var search = (document.getElementById('filterSearch').value||'').toLowerCase();
+  var dept = document.getElementById('filterDept').value;
+  var loc = document.getElementById('filterLoc').value;
+  var status = document.getElementById('filterStatus').value;
+  var seniority = document.getElementById('filterSeniority').value;
+  var empType = document.getElementById('filterType').value;
+
+  var filtered = employees.filter(function(e){
+    if(search && !(e.id+' '+e.firstName+' '+e.lastName+' '+e.email).toLowerCase().includes(search)) return false;
+    if(dept && e.department!==dept) return false;
+    if(loc && e.location!==loc) return false;
+    if(status && e.status!==status) return false;
+    if(seniority && e.seniority!==seniority) return false;
+    if(empType && e.type!==empType) return false;
+    return true;
+  });
+
+  var tbody = document.getElementById('empTableBody');
+  tbody.innerHTML = filtered.map(function(e){
+    return '<tr>'+
+      '<td>'+e.id+'</td>'+
+      '<td class="name-cell">'+e.firstName+' '+e.lastName+'</td>'+
+      '<td>'+e.email+'</td>'+
+      '<td>'+e.department+'</td>'+
+      '<td>'+e.role+'</td>'+
+      '<td><span style="font-family:var(--font-mono);font-size:10.5px">'+e.seniority+'</span></td>'+
+      '<td>'+e.location+'</td>'+
+      '<td>'+e.type+'</td>'+
+      '<td><span class="status-dot '+statusClass(e.status)+'">'+e.status+'</span></td>'+
+      '<td>'+e.joinDate+'</td>'+
+      '<td>'+(e.manager||'—')+'</td>'+
+    '</tr>';
+  }).join('');
+
+  document.getElementById('filterCount').textContent = 'Showing '+filtered.length+' of '+employees.length;
+}
+
+// Filter listeners
+['filterSearch','filterDept','filterLoc','filterStatus','filterSeniority','filterType'].forEach(function(id){
+  var el = document.getElementById(id);
+  el.addEventListener(el.tagName==='INPUT'?'input':'change', renderTable);
+});
+
+/* ── ADD EMPLOYEE FORM ── */
+function getNextEmpId(){
+  var employees = loadEmployees();
+  var maxNum = 812;
+  employees.forEach(function(e){
+    var m = e.id.match(/EMP-(\d+)/);
+    if(m){ var n=parseInt(m[1],10); if(n>maxNum) maxNum=n; }
+  });
+  return 'EMP-'+String(maxNum+1).padStart(3,'0');
+}
+
+function resetForm(){
+  document.getElementById('addEmployeeForm').reset();
+  document.getElementById('fEmpId').value = getNextEmpId();
+}
+
+function collectFormData(){
+  return {
+    id: document.getElementById('fEmpId').value || getNextEmpId(),
+    firstName: document.getElementById('fFirstName').value.trim(),
+    lastName: document.getElementById('fLastName').value.trim(),
+    email: document.getElementById('fEmail').value.trim(),
+    phone: document.getElementById('fPhone').value.trim(),
+    dob: document.getElementById('fDob').value,
+    gender: document.getElementById('fGender').value,
+    nationality: document.getElementById('fNationality').value,
+    department: document.getElementById('fDept').value,
+    role: document.getElementById('fRole').value.trim(),
+    seniority: document.getElementById('fSeniority').value || 'L1',
+    type: document.getElementById('fEmpType').value || 'Full-time',
+    manager: document.getElementById('fManager').value.trim(),
+    location: document.getElementById('fLocation').value,
+    joinDate: document.getElementById('fJoinDate').value,
+    probEnd: document.getElementById('fProbEnd').value,
+    status: document.getElementById('fStatus').value || 'Active',
+    qualification: document.getElementById('fQual').value,
+    university: document.getElementById('fUniversity').value.trim(),
+    yoe: document.getElementById('fYoe').value,
+    skills: document.getElementById('fSkills').value.trim(),
+    certs: document.getElementById('fCerts').value.trim(),
+    ctc: document.getElementById('fCtc').value,
+    currency: document.getElementById('fCurrency').value,
+    payBand: document.getElementById('fPayBand').value.trim()
+  };
+}
+
+function saveEmployee(andAnother){
+  var form = document.getElementById('addEmployeeForm');
+  if(!form.checkValidity()){ form.reportValidity(); return; }
+
+  var emp = collectFormData();
+  var employees = loadEmployees();
+  employees.push(emp);
+  saveEmployees(employees);
+
+  showToast('Employee '+emp.firstName+' '+emp.lastName+' saved successfully');
+
+  if(andAnother){
+    resetForm();
+  } else {
+    resetForm();
+    switchTab('all-employees');
+  }
+}
+
+document.getElementById('btnSave').addEventListener('click',function(e){
+  e.preventDefault();
+  saveEmployee(false);
+});
+
+document.getElementById('btnSaveAnother').addEventListener('click',function(){
+  saveEmployee(true);
+});
+
+document.getElementById('btnCancel').addEventListener('click',function(){
+  resetForm();
+  switchTab('all-employees');
+});
+
+/* ── INIT ── */
+loadEmployees();
+document.getElementById('fEmpId').value = getNextEmpId();
+initCharts();
+renderTable();
+updateKPIs();
+
+function updateKPIs(){
+  var employees=loadEmployees();
+  var total=employees.length;
+  var active=employees.filter(function(e){return e.status==='Active'}).length;
+  var depts={};employees.forEach(function(e){depts[e.department||'Other']=true});
+  var locs={};employees.forEach(function(e){locs[e.location||'Unknown']=true});
+  // Update KPI values if elements exist
+  var kpiEls=document.querySelectorAll('.kpi-value');
+  if(kpiEls.length>=6){
+    kpiEls[0].textContent=total;
+    kpiEls[1].textContent=active;
+    kpiEls[2].textContent=Object.keys(depts).length;
+    kpiEls[3].textContent=Object.keys(locs).length;
+  }
+}
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2 Reports · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   L2 REPORTS — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.content>*{flex-shrink:0}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+
+/* LEVEL BANNER */
+.level-banner{display:flex;align-items:center;gap:12px;padding:0 28px;height:36px;background:linear-gradient(90deg,var(--accent-lt) 0%,transparent 60%);border-bottom:1px solid var(--accent-bd);text-decoration:none;flex-shrink:0}
+.level-banner:hover{opacity:.92}
+.level-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite}
+.level-label{font-size:10px;font-family:var(--font-display);font-weight:700;letter-spacing:.08em;color:var(--accent)}
+.level-sep{width:1px;height:14px;background:var(--accent-bd)}
+.level-desc{font-size:11px;color:var(--text-secondary)}
+.level-link{margin-left:auto;font-size:10px;font-family:var(--font-display);font-weight:700;letter-spacing:.06em;color:var(--accent);text-transform:uppercase}
+
+/* REPORT CARDS */
+.report-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+@media(max-width:960px){.report-grid{grid-template-columns:1fr}}
+.report-card{background:var(--card);border:1px solid rgba(0,0,0,0.07);border-radius:12px;overflow:hidden;transition:border-color .2s,transform .2s}
+.report-card:hover{border-color:rgba(0,0,0,0.14);transform:translateY(-2px)}
+.rc-header{padding:20px;display:flex;align-items:flex-start;gap:14px}
+.rc-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rc-icon svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round}
+.rc-info{flex:1;min-width:0}
+.rc-title{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.rc-desc{font-size:11px;color:var(--text-secondary);line-height:1.5}
+.rc-status{padding:4px 10px;border-radius:100px;font-size:10px;font-weight:500;flex-shrink:0}
+.rc-body{padding:0 20px 16px}
+.rc-meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.rc-meta-item{font-size:10px;color:var(--text-muted)}
+.rc-meta-item strong{color:var(--text-secondary)}
+.rc-ai{padding:12px 14px;background:var(--accent-lt);border:1px solid var(--accent-bd);border-radius:8px;font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px}
+.rc-ai strong{color:var(--text-primary)}
+.rc-ai-label{font-size:9px;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.rc-actions{display:flex;gap:8px;padding:12px 20px;border-top:1px solid rgba(0,0,0,0.07)}
+.rc-btn{padding:6px 14px;border-radius:6px;border:1px solid rgba(0,0,0,0.10);background:transparent;color:var(--text-secondary);font-family:var(--font-body);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
+.rc-btn:hover{background:var(--card-hover);color:var(--text-primary)}
+.rc-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.rc-btn.primary:hover{opacity:.88}
+
+/* SECTIONS */
+.rc-section{margin-bottom:10px}
+.rc-section-title{font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.rc-kpi{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.rc-kpi:last-child{border-bottom:none}
+.rc-kpi-name{font-size:11px;color:var(--text-secondary);flex:1}
+.rc-kpi-val{font-family:var(--font-mono);font-size:12px;font-weight:500;flex-shrink:0}
+.rc-kpi-bar{width:60px;height:5px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden;flex-shrink:0}
+.rc-kpi-fill{height:100%;border-radius:3px}
+
+/* RECENT HISTORY */
+.history-panel{background:var(--card);border:1px solid rgba(0,0,0,0.07);border-radius:12px;overflow:hidden}
+.history-head{padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;gap:10px}
+.history-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1;min-width:120px}
+.history-body{padding:12px 20px}
+.history-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.history-row:last-child{border-bottom:none}
+.hist-date{font-family:var(--font-mono);font-size:10px;color:var(--text-muted);width:80px;flex-shrink:0}
+.hist-name{font-size:12px;color:var(--text-primary);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-type{padding:2px 8px;border-radius:100px;font-size:9px;font-weight:500;flex-shrink:0}
+.hist-dl{font-size:11px;color:var(--blue);cursor:pointer;flex-shrink:0}
+.hist-dl:hover{text-decoration:underline}
+
+/* FOOTER BAR */
+.page-footer{display:flex;align-items:center;gap:10px;padding:10px 28px;background:var(--accent-lt);border-top:1px solid var(--accent-bd);flex-shrink:0}
+.page-footer svg{width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.page-footer-text{font-size:11px;color:var(--accent);font-weight:500;letter-spacing:.03em}
+.page-footer-tag{margin-left:auto;font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.fade-up{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <a href="../level-journey.html" class="level-banner">
+    <div style="display:flex;align-items:center;gap:6px"><div class="level-dot"></div><span class="level-label">L2 ACTIVE</span></div>
+    <div class="level-sep"></div>
+    <div class="level-desc">AI-generated reports with executive summaries &amp; persona-adaptive rendering</div>
+    <div class="level-link">View journey &rarr;</div>
+  </a>
+
+  <div class="content">
+
+    <!-- 4 REPORT CARDS -->
+    <div class="report-grid fade-up">
+
+      <!-- LNA Report -->
+      <div class="report-card">
+        <div class="rc-header">
+          <div class="rc-icon" style="background:var(--blue-bg);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div class="rc-info"><div class="rc-title">LNA Report</div><div class="rc-desc">Learning Needs Analysis — org-wide gap summary with department breakdown, intervention recommendations, and budget projections.</div></div>
+          <div class="rc-status" style="background:var(--green-bg);color:var(--green)">Ready</div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-meta">
+            <div class="rc-meta-item">Period: <strong>Q1 2026</strong></div>
+            <div class="rc-meta-item">Pages: <strong>24</strong></div>
+            <div class="rc-meta-item">Scope: <strong>All BUs</strong></div>
+            <div class="rc-meta-item">Last generated: <strong>26 Mar 2026</strong></div>
+          </div>
+          <div class="rc-ai">
+            <div class="rc-ai-label"><svg style="width:10px;height:10px;stroke:var(--accent);fill:none;stroke-width:2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>AI Executive Summary</div>
+            Edstellar's Q1 2026 LNA reveals 142 skill gaps across 812 employees, with <strong>AI Literacy</strong> as the single universal deficit (all 10 departments below target). Engineering & Delivery carries 45% of total gap weight due to digital delivery transformation. Recommended total intervention budget: <strong>SGD 284,000</strong> across 18 programmes. Priority: front-load BIM and Data Analytics training before Q3 compliance deadline.
+          </div>
+          <div class="rc-section">
+            <div class="rc-section-title">Key Metrics</div>
+            <div class="rc-kpi"><span class="rc-kpi-name">Total Gaps</span><div class="rc-kpi-bar"><div class="rc-kpi-fill" style="width:71%;background:var(--red)"></div></div><span class="rc-kpi-val" style="color:var(--red)">142</span></div>
+            <div class="rc-kpi"><span class="rc-kpi-name">Avg Gap Score</span><div class="rc-kpi-bar"><div class="rc-kpi-fill" style="width:40%;background:var(--amber)"></div></div><span class="rc-kpi-val" style="color:var(--amber)">1.2</span></div>
+            <div class="rc-kpi"><span class="rc-kpi-name">Budget Required</span><div class="rc-kpi-bar"><div class="rc-kpi-fill" style="width:56%;background:var(--accent)"></div></div><span class="rc-kpi-val" style="color:var(--accent)">SGD 284K</span></div>
+          </div>
+        </div>
+        <div class="rc-actions">
+          <button class="rc-btn primary" onclick="showToast('Generating LNA Report PDF...')">Download PDF</button>
+          <button class="rc-btn" onclick="showToast('Regenerating with latest data...')">Regenerate</button>
+          <button class="rc-btn" onclick="showToast('Sharing with stakeholders...')">Share</button>
+        </div>
+      </div>
+
+      <!-- TNA Report -->
+      <div class="report-card">
+        <div class="rc-header">
+          <div class="rc-icon" style="background:var(--purple-bg);color:var(--purple)"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+          <div class="rc-info"><div class="rc-title">TNA Report</div><div class="rc-desc">Training Needs Analysis — maps gaps to specific training programmes, vendors, formats, and delivery timelines with cost-per-head calculations.</div></div>
+          <div class="rc-status" style="background:var(--green-bg);color:var(--green)">Ready</div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-meta">
+            <div class="rc-meta-item">Period: <strong>Q1 2026</strong></div>
+            <div class="rc-meta-item">Pages: <strong>18</strong></div>
+            <div class="rc-meta-item">Programmes: <strong>18</strong></div>
+            <div class="rc-meta-item">Last generated: <strong>26 Mar 2026</strong></div>
+          </div>
+          <div class="rc-ai">
+            <div class="rc-ai-label"><svg style="width:10px;height:10px;stroke:var(--accent);fill:none;stroke-width:2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>AI Executive Summary</div>
+            18 training programmes recommended across 4 delivery formats: Instructor-led (8), Self-paced (5), Blended (3), On-the-job (2). Top priority: <strong>BIM Advanced</strong> for 54 employees in Engineering (SGD 48K). AI Literacy enterprise-wide programme recommended for <strong>all 812 employees</strong> via blended format (SGD 96K). Total training hours: 2,840 hrs over 6 months.
+          </div>
+          <div class="rc-section">
+            <div class="rc-section-title">Top 3 Programmes</div>
+            <div class="rc-kpi"><span class="rc-kpi-name">AI Literacy (Enterprise)</span><div class="rc-kpi-bar"><div class="rc-kpi-fill" style="width:80%;background:var(--purple)"></div></div><span class="rc-kpi-val" style="color:var(--purple)">812 ppl</span></div>
+            <div class="rc-kpi"><span class="rc-kpi-name">BIM Advanced (Eng)</span><div class="rc-kpi-bar"><div class="rc-kpi-fill" style="width:45%;background:var(--blue)"></div></div><span class="rc-kpi-val" style="color:var(--blue)">54 ppl</span></div>
+            <div class="rc-kpi"><span class="rc-kpi-name">Data Analytics (Cross-func)</span><div class="rc-kpi-bar"><div class="rc-kpi-fill" style="width:55%;background:var(--amber)"></div></div><span class="rc-kpi-val" style="color:var(--amber)">186 ppl</span></div>
+          </div>
+        </div>
+        <div class="rc-actions">
+          <button class="rc-btn primary" onclick="showToast('Generating TNA Report PDF...')">Download PDF</button>
+          <button class="rc-btn" onclick="showToast('Regenerating...')">Regenerate</button>
+          <button class="rc-btn" onclick="showToast('Sharing...')">Share</button>
+        </div>
+      </div>
+
+      <!-- Skills Matrix Report -->
+      <div class="report-card">
+        <div class="rc-header">
+          <div class="rc-icon" style="background:var(--amber-bg);color:var(--amber)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg></div>
+          <div class="rc-info"><div class="rc-title">Skills Matrix Report</div><div class="rc-desc">Complete skill x department matrix with gap scores, proficiency distributions, perception gap analysis, and year-over-year trend comparisons.</div></div>
+          <div class="rc-status" style="background:var(--green-bg);color:var(--green)">Ready</div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-meta">
+            <div class="rc-meta-item">Period: <strong>Q1 2026</strong></div>
+            <div class="rc-meta-item">Pages: <strong>32</strong></div>
+            <div class="rc-meta-item">Skills: <strong>48</strong></div>
+            <div class="rc-meta-item">Last generated: <strong>26 Mar 2026</strong></div>
+          </div>
+          <div class="rc-ai">
+            <div class="rc-ai-label"><svg style="width:10px;height:10px;stroke:var(--accent);fill:none;stroke-width:2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>AI Executive Summary</div>
+            48 skills assessed across 10 departments reveal 14 critical gap cells (down from 19 in Q4 2025). <strong>Digital & Technology</strong> shows strongest improvement (+0.6 avg). <strong>Perception gap</strong> averaging 0.6 points — employees consistently over-rate vs managers. Structural Engineering has narrowest perception gap (0.2) indicating strong self-awareness in technical roles.
+          </div>
+          <div class="rc-section">
+            <div class="rc-section-title">Coverage</div>
+            <div class="rc-kpi"><span class="rc-kpi-name">Skills Assessed</span><div class="rc-kpi-bar"><div class="rc-kpi-fill" style="width:100%;background:var(--green)"></div></div><span class="rc-kpi-val" style="color:var(--green)">48/48</span></div>
+            <div class="rc-kpi"><span class="rc-kpi-name">Departments Covered</span><div class="rc-kpi-bar"><div class="rc-kpi-fill" style="width:100%;background:var(--green)"></div></div><span class="rc-kpi-val" style="color:var(--green)">10/10</span></div>
+            <div class="rc-kpi"><span class="rc-kpi-name">Perception Gap</span><div class="rc-kpi-bar"><div class="rc-kpi-fill" style="width:30%;background:var(--amber)"></div></div><span class="rc-kpi-val" style="color:var(--amber)">0.6 avg</span></div>
+          </div>
+        </div>
+        <div class="rc-actions">
+          <button class="rc-btn primary" onclick="showToast('Generating Skills Matrix Report...')">Download PDF</button>
+          <button class="rc-btn" onclick="showToast('Regenerating...')">Regenerate</button>
+          <button class="rc-btn" onclick="showToast('Sharing...')">Share</button>
+        </div>
+      </div>
+
+      <!-- Wellbeing Report -->
+      <div class="report-card">
+        <div class="rc-header">
+          <div class="rc-icon" style="background:var(--green-bg);color:var(--green)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+          <div class="rc-info"><div class="rc-title">Wellbeing Report</div><div class="rc-desc">Employee wellbeing pulse analysis — burnout risk indicators, workload capacity signals, and recommendations for learning pace adjustments.</div></div>
+          <div class="rc-status" style="background:var(--amber-bg);color:var(--amber)">Review</div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-meta">
+            <div class="rc-meta-item">Period: <strong>Q1 2026</strong></div>
+            <div class="rc-meta-item">Pages: <strong>12</strong></div>
+            <div class="rc-meta-item">Response Rate: <strong>78%</strong></div>
+            <div class="rc-meta-item">Last generated: <strong>25 Mar 2026</strong></div>
+          </div>
+          <div class="rc-ai">
+            <div class="rc-ai-label"><svg style="width:10px;height:10px;stroke:var(--accent);fill:none;stroke-width:2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>AI Executive Summary</div>
+            78% pulse response rate (up from 64% in Q4). <strong>12 employees</strong> flagged with elevated burnout risk — 8 in Project Delivery (high-intensity project phase), 4 in EHS during audit season. AI recommends deferring non-critical training for these individuals by 4-6 weeks. Overall workforce capacity: <strong>71%</strong> — adequate for planned learning programmes.
+          </div>
+          <div class="rc-section">
+            <div class="rc-section-title">Wellbeing Indicators</div>
+            <div class="rc-kpi"><span class="rc-kpi-name">Burnout Risk (Elevated)</span><div class="rc-kpi-bar"><div class="rc-kpi-fill" style="width:12%;background:var(--red)"></div></div><span class="rc-kpi-val" style="color:var(--red)">12</span></div>
+            <div class="rc-kpi"><span class="rc-kpi-name">Avg Capacity</span><div class="rc-kpi-bar"><div class="rc-kpi-fill" style="width:71%;background:var(--green)"></div></div><span class="rc-kpi-val" style="color:var(--green)">71%</span></div>
+            <div class="rc-kpi"><span class="rc-kpi-name">Pace Adjustments Needed</span><div class="rc-kpi-bar"><div class="rc-kpi-fill" style="width:15%;background:var(--amber)"></div></div><span class="rc-kpi-val" style="color:var(--amber)">12</span></div>
+          </div>
+        </div>
+        <div class="rc-actions">
+          <button class="rc-btn primary" onclick="showToast('Generating Wellbeing Report...')">Download PDF</button>
+          <button class="rc-btn" onclick="showToast('Regenerating...')">Regenerate</button>
+          <button class="rc-btn" onclick="showToast('Sharing...')">Share</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORT GENERATION HISTORY -->
+    <div class="history-panel fade-up">
+      <div class="history-head">
+        <span class="history-title">Recent Report History</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--text-muted)">Last 30 days</span>
+      </div>
+      <div class="history-body">
+        <div class="history-row"><div class="hist-date">26 Mar</div><div class="hist-name">LNA Report — Q1 2026 Full Org</div><div class="hist-type" style="background:var(--blue-bg);color:var(--blue)">LNA</div><span class="hist-dl" onclick="showToast('Downloading...')">Download</span></div>
+        <div class="history-row"><div class="hist-date">26 Mar</div><div class="hist-name">TNA Report — Q1 2026 Training Plan</div><div class="hist-type" style="background:var(--purple-bg);color:var(--purple)">TNA</div><span class="hist-dl" onclick="showToast('Downloading...')">Download</span></div>
+        <div class="history-row"><div class="hist-date">26 Mar</div><div class="hist-name">Skills Matrix — Q1 2026 Complete</div><div class="hist-type" style="background:var(--amber-bg);color:var(--amber)">Matrix</div><span class="hist-dl" onclick="showToast('Downloading...')">Download</span></div>
+        <div class="history-row"><div class="hist-date">25 Mar</div><div class="hist-name">Wellbeing Report — Q1 2026 Pulse Analysis</div><div class="hist-type" style="background:var(--green-bg);color:var(--green)">Wellbeing</div><span class="hist-dl" onclick="showToast('Downloading...')">Download</span></div>
+        <div class="history-row"><div class="hist-date">20 Mar</div><div class="hist-name">LNI Brief — Priya Menon (EMP-001)</div><div class="hist-type" style="background:var(--amber-bg);color:var(--amber)">LNI</div><span class="hist-dl" onclick="showToast('Downloading...')">Download</span></div>
+        <div class="history-row"><div class="hist-date">15 Mar</div><div class="hist-name">Gap Analysis — Engineering & Delivery Dept</div><div class="hist-type" style="background:var(--red-bg);color:var(--red)">Gap</div><span class="hist-dl" onclick="showToast('Downloading...')">Download</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="page-footer">
+    <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <span class="page-footer-text">AI-generated reports &middot; Persona-adaptive rendering &middot; 4 report types from L2 assessment data</span>
+    <span class="page-footer-tag">L2 Intelligence</span>
+  </div>
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal: 'manager',
+  activeNav: 'L2 Reports',
+  breadcrumbs: ['Reports', 'L2 Reports'],
+  topbarActions: []
+});
+</script>
+<script>
+function showToast(msg){var t=document.getElementById('sip-toast');if(!t){t=document.createElement('div');t.id='sip-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:var(--font-body);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.1)';document.body.appendChild(t)}t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)'},2400)}
+document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.getAttribute('href')==='#'){e.preventDefault();showToast((a.textContent||'').trim().substring(0,36)+' — available in full platform')}});
+</script>
+</body>
+</html>

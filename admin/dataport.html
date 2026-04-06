@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataPort — Data Import · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   DATAPORT — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── CONTENT ── */
+.content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
+
+/* ── WIZARD STEPS STRIP ── */
+.wizard-strip {
+  padding: 0 28px;
+  background: var(--card);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  display: flex; align-items: stretch;
+  flex-shrink: 0;
+  animation: fadeDown .4s ease both;
+}
+.wz-step {
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 10px;
+  position: relative; cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: border-color .2s;
+  flex-shrink: 0;
+}
+.wz-step.active { border-bottom-color: var(--teal); }
+.wz-step.done   { border-bottom-color: var(--green); }
+.wz-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  background: rgba(0,0,0,0.04); color: var(--text-muted);
+  border: 1px solid rgba(0,0,0,0.08); flex-shrink: 0;
+  transition: all .2s;
+}
+.wz-step.active .wz-num { background: var(--teal-bg); color: var(--teal); border-color: rgba(8,145,178,0.3); }
+.wz-step.done   .wz-num { background: var(--green-bg); color: var(--green); border-color: rgba(22,163,74,0.3); }
+.wz-label { font-size: 12px; color: var(--text-muted); transition: color .2s; white-space: nowrap; }
+.wz-step.active .wz-label { color: var(--text-primary); font-weight: 500; }
+.wz-step.done   .wz-label { color: var(--green); }
+.wz-arrow { width: 16px; color: rgba(0,0,0,0.12); font-size: 14px; flex-shrink: 0; }
+
+/* ── STEP PANELS ── */
+.step-panel { display: none; flex: 1; flex-direction: column; padding: 24px 28px; gap: 18px; animation: fadeUp .4s ease both; }
+.step-panel.active { display: flex; }
+
+/* ── STEP 1A — UPLOAD ── */
+.upload-zone {
+  border: 2px dashed rgba(8,145,178,0.3);
+  border-radius: 14px;
+  padding: 52px 32px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  text-align: center; cursor: pointer;
+  transition: border-color .2s, background .2s;
+  background: rgba(8,145,178,0.03);
+}
+.upload-zone:hover { border-color: rgba(8,145,178,0.5); background: rgba(8,145,178,0.06); }
+.upload-icon { width: 56px; height: 56px; border-radius: 14px; background: var(--teal-bg); border: 1px solid rgba(8,145,178,0.2); display: flex; align-items: center; justify-content: center; }
+.upload-icon svg { width: 26px; height: 26px; stroke: var(--teal); fill: none; stroke-width: 1.5; stroke-linecap: round; }
+.upload-title { font-family: var(--font-display); font-size: 18px; font-weight: 400; color: var(--text-primary); }
+.upload-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 420px; }
+.upload-formats { display: flex; gap: 8px; margin-top: 4px; }
+.fmt-chip { padding: 4px 10px; border-radius: 100px; font-size: 11px; border: 1px solid rgba(8,145,178,0.2); color: var(--teal); background: var(--teal-bg); font-family: var(--font-mono); }
+
+.hris-strip {
+  background: var(--card); border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px; padding: 18px 22px;
+  display: flex; align-items: center; gap: 20px;
+}
+.hris-label { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+.hris-options { display: flex; gap: 10px; flex-wrap: wrap; }
+.hris-btn { padding: 8px 16px; border-radius: 7px; border: 1px solid rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); font-size: 12px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 7px; transition: border-color .15s, color .15s, background .15s; font-family: var(--font-body); }
+.hris-btn:hover { border-color: rgba(8,145,178,0.3); color: var(--text-primary); background: var(--teal-bg); }
+.hris-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); }
+.hris-btn.connected .hris-dot { background: var(--green); }
+.hris-btn.connected { border-color: rgba(22,163,74,0.3); color: var(--green); background: var(--green-bg); }
+
+.template-card { background: var(--card); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; }
+.tc-icon { width: 40px; height: 40px; border-radius: 9px; background: var(--accent-lt); border: 1px solid var(--accent-bd); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.tc-icon svg { width: 19px; height: 19px; stroke: var(--accent); fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.tc-text { flex: 1; }
+.tc-title { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+.tc-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.tc-btn { padding: 8px 16px; border-radius: 6px; border: 1px solid var(--accent-bd); color: var(--accent); background: transparent; font-size: 12px; cursor: pointer; font-family: var(--font-body); white-space: nowrap; transition: background .15s; }
+.tc-btn:hover { background: var(--accent-lt); }
+
+/* ── STEP 1B — PARSING ── */
+.parse-header {
+  background: var(--card); border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px; padding: 18px 22px;
+  display: flex; align-items: center; gap: 16px;
+}
+.parse-file-icon { width: 40px; height: 40px; border-radius: 9px; background: var(--green-bg); border: 1px solid rgba(22,163,74,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.parse-file-icon svg { width: 19px; height: 19px; stroke: var(--green); fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.parse-info { flex: 1; }
+.parse-filename { font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); }
+.parse-meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.parse-status { font-size: 12px; color: var(--green); display: flex; align-items: center; gap: 6px; }
+
+.sheets-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.sheet-card {
+  background: var(--card); border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 10px; overflow: hidden;
+  cursor: pointer; transition: border-color .2s;
+}
+.sheet-card:hover { border-color: rgba(8,145,178,0.3); }
+.sheet-card.has-errors { border-color: rgba(220,38,38,0.3); }
+.sheet-card.clean { border-color: rgba(22,163,74,0.2); }
+.sc-head { padding: 12px 14px; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; gap: 9px; }
+.sheet-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sheet-icon svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; }
+.sc-name { font-size: 12px; color: var(--text-primary); font-weight: 500; flex: 1; }
+.sc-badge { padding: 2px 7px; border-radius: 100px; font-size: 9.5px; border: 1px solid; white-space: nowrap; }
+.scb-clean { border-color: rgba(22,163,74,0.3); color: var(--green); background: var(--green-bg); }
+.scb-warn  { border-color: rgba(220,38,38,0.3);  color: var(--red);   background: var(--red-bg); }
+.scb-ok    { border-color: rgba(201,168,76,0.3); color: var(--accent); background: var(--accent-lt); }
+.sc-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+.sc-stat { display: flex; justify-content: space-between; font-size: 11px; }
+.sc-stat-key { color: var(--text-muted); }
+.sc-stat-val { color: var(--text-secondary); font-family: var(--font-mono); }
+.sc-stat-val.red   { color: var(--red); }
+.sc-stat-val.green { color: var(--green); }
+
+/* ── STEP 1C — VALIDATION ── */
+.val-summary {
+  background: var(--card); border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px; padding: 16px 22px;
+  display: flex; gap: 28px; align-items: center;
+}
+.vs-item { display: flex; flex-direction: column; gap: 3px; }
+.vs-val { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--text-primary); }
+.vs-val.green { color: var(--green); }
+.vs-val.red   { color: var(--red); }
+.vs-val.amber { color: var(--amber); }
+.vs-key { font-size: 10px; color: var(--text-muted); letter-spacing: .07em; text-transform: uppercase; }
+.vs-div { width: 1px; background: rgba(0,0,0,0.08); align-self: stretch; }
+
+.error-table { width: 100%; border-collapse: collapse; }
+.error-table th { font-size: 10px; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase; text-align: left; padding: 10px 16px; font-weight: 400; border-bottom: 1px solid rgba(0,0,0,0.08); }
+.error-table th:nth-child(4) { text-align: center; }
+.error-table tr { border-bottom: 1px solid rgba(0,0,0,0.04); }
+.error-table tr:last-child { border-bottom: none; }
+.error-table td { padding: 10px 16px; font-size: 12px; color: var(--text-secondary); }
+.error-table td:first-child { font-family: var(--font-mono); color: var(--text-muted); font-size: 11px; }
+.err-sev { padding: 2px 7px; border-radius: 100px; font-size: 10px; border: 1px solid; }
+.es-err  { border-color: rgba(220,38,38,0.4); color: var(--red); background: var(--red-bg); }
+.es-warn { border-color: rgba(217,119,6,0.4); color: var(--amber); background: var(--amber-bg); }
+.err-action { display: flex; gap: 5px; justify-content: center; }
+.era-btn { padding: 3px 10px; border-radius: 5px; font-size: 11px; cursor: pointer; border: 1px solid; transition: opacity .15s; font-family: var(--font-body); }
+.era-fix  { border-color: rgba(37,99,235,0.3); color: var(--blue); background: var(--blue-bg); }
+.era-skip { border-color: rgba(0,0,0,0.08); color: var(--text-muted); background: transparent; }
+.era-btn:hover { opacity: .78; }
+
+/* ── STEP 1D — CONFIRM ── */
+.confirm-banner {
+  background: linear-gradient(135deg, rgba(22,163,74,0.08) 0%, transparent 60%);
+  border: 1px solid rgba(22,163,74,0.2);
+  border-radius: 14px; padding: 24px 28px;
+  display: flex; align-items: center; gap: 20px;
+}
+.conf-check { width: 52px; height: 52px; border-radius: 50%; background: var(--green-bg); border: 1px solid rgba(22,163,74,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.conf-check svg { width: 24px; height: 24px; stroke: var(--green); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.conf-info { flex: 1; }
+.conf-title { font-family: var(--font-display); font-size: 18px; font-weight: 400; color: var(--text-primary); margin-bottom: 5px; }
+.conf-sub   { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
+.conf-stats { display: flex; gap: 20px; }
+.conf-stat  { display: flex; flex-direction: column; gap: 3px; align-items: center; }
+.conf-stat-val { font-family: var(--font-display); font-size: 20px; font-weight: 400; color: var(--green); }
+.conf-stat-key { font-size: 10px; color: var(--text-muted); letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
+
+.meter-card { background: var(--card); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+.meter-title { font-family: var(--font-display); font-size: 13px; font-weight: 400; color: var(--text-primary); }
+.meter-bar-track { height: 10px; background: rgba(0,0,0,0.04); border-radius: 5px; overflow: hidden; }
+.meter-bar-fill  { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--teal), var(--green)); transition: width 1.4s ease; }
+.meter-labels { display: flex; justify-content: space-between; font-size: 11px; }
+.meter-label-key { color: var(--text-muted); }
+.meter-label-val { color: var(--teal); font-weight: 500; }
+
+.data-preview { background: var(--card); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; }
+.dp-head { padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; }
+.dp-title { font-family: var(--font-display); font-size: 12px; font-weight: 400; color: var(--text-primary); }
+.dp-count { font-size: 10px; color: var(--teal); background: var(--teal-bg); padding: 2px 8px; border-radius: 100px; }
+.preview-table { width: 100%; border-collapse: collapse; }
+.preview-table th { font-size: 10px; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase; text-align: left; padding: 9px 14px; font-weight: 400; border-bottom: 1px solid rgba(0,0,0,0.06); background: rgba(0,0,0,0.02); }
+.preview-table tr { border-bottom: 1px solid rgba(0,0,0,0.04); }
+.preview-table tr:last-child { border-bottom: none; }
+.preview-table td { padding: 9px 14px; font-size: 11.5px; color: var(--text-secondary); }
+.preview-table td:first-child { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); }
+.status-dot-cell { display: flex; align-items: center; gap: 5px; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+.import-actions { display: flex; gap: 10px; align-items: center; padding: 18px 22px; background: var(--card); border: 1px solid rgba(8,145,178,0.15); border-radius: 12px; }
+.import-note { flex: 1; font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.import-note strong { color: var(--text-primary); font-weight: 500; }
+.ia-btn { padding: 12px 28px; border-radius: 8px; font-family: var(--font-display); font-size: 13px; font-weight: 400; letter-spacing: .02em; cursor: pointer; border: 1px solid; transition: opacity .15s; white-space: nowrap; }
+.ia-btn.primary { background: var(--teal); border-color: var(--teal); color: #fff; box-shadow: 0 4px 20px rgba(8,145,178,0.2); }
+.ia-btn.primary:hover { opacity: .88; }
+.ia-btn.outline { background: transparent; border-color: rgba(0,0,0,0.1); color: var(--text-secondary); }
+.ia-btn.outline:hover { border-color: rgba(0,0,0,0.2); color: var(--text-primary); }
+
+/* ── CONTEXT METER ── */
+.context-meter {
+  background: var(--card); border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px; padding: 16px 20px;
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; gap: 20px;
+}
+.cm-label { font-size: 11px; color: var(--text-muted); letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
+.cm-bar-track { flex: 1; height: 7px; background: rgba(0,0,0,0.04); border-radius: 4px; overflow: hidden; }
+.cm-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--teal), var(--green)); }
+.cm-pct { font-family: var(--font-display); font-size: 15px; font-weight: 400; color: var(--teal); min-width: 36px; }
+.cm-segments { display: flex; gap: 12px; }
+.cm-seg { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+.cm-seg-val { font-family: var(--font-display); font-size: 14px; font-weight: 400; color: var(--text-primary); }
+.cm-seg-key { font-size: 9px; color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+
+/* ── WIZARD NAV ── */
+.wizard-nav {
+  padding: 16px 28px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  background: var(--card);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-shrink: 0;
+}
+.wn-info { font-size: 11px; color: var(--text-muted); }
+.wn-actions { display: flex; gap: 10px; }
+.wn-btn { padding: 9px 20px; border-radius: 7px; font-family: var(--font-body); font-size: 12.5px; cursor: pointer; border: 1px solid; transition: opacity .15s; font-weight: 500; }
+.wn-btn.back    { background: transparent; border-color: rgba(0,0,0,0.1); color: var(--text-secondary); }
+.wn-btn.back:hover { border-color: rgba(0,0,0,0.2); color: var(--text-primary); }
+.wn-btn.next    { background: var(--teal); border-color: var(--teal); color: #fff; font-family: var(--font-display); font-weight: 400; letter-spacing: .02em; font-size: 12px; }
+.wn-btn.next:hover { opacity: .88; }
+.wn-btn.finish  { background: var(--green); border-color: var(--green); color: #fff; font-family: var(--font-display); font-weight: 400; letter-spacing: .02em; font-size: 12px; }
+.wn-btn.finish:hover { opacity: .88; }
+
+/* ── DONE STATE ── */
+#doneScreen {
+  display: none; flex: 1; flex-direction: column;
+  align-items: center; justify-content: center; gap: 28px;
+  padding: 40px 28px; text-align: center;
+  animation: fadeUp .5s ease both;
+}
+.done-ring { position: relative; width: 100px; height: 100px; }
+.done-ring svg { width: 100%; height: 100%; }
+.done-icon-inner { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.done-icon-inner svg { width: 40px; height: 40px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.done-title { font-family: var(--font-display); font-size: 32px; font-weight: 400; color: var(--text-primary); line-height: 1.1; }
+.done-title span { color: var(--green); }
+.done-sub { font-size: 14px; color: var(--text-secondary); max-width: 480px; line-height: 1.7; }
+.done-stats { display: flex; gap: 32px; }
+.ds-item { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.ds-val { font-family: var(--font-display); font-size: 28px; font-weight: 400; color: var(--green); }
+.ds-key { font-size: 11px; color: var(--text-muted); letter-spacing: .07em; text-transform: uppercase; }
+.done-actions { display: flex; gap: 12px; }
+.done-btn { padding: 12px 28px; border-radius: 8px; font-family: var(--font-display); font-size: 13px; font-weight: 400; letter-spacing: .02em; cursor: pointer; border: 1px solid; transition: opacity .15s; }
+.done-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.done-btn.outline { background: transparent; border-color: rgba(0,0,0,0.12); color: var(--text-secondary); }
+.done-btn:hover { opacity: .84; }
+
+/* ── TOPBAR EXTRAS ── */
+.tb-pill { padding: 4px 11px; border-radius: 100px; font-size: 11px; border: 1px solid; white-space: nowrap; }
+.tb-pill.teal { border-color: rgba(8,145,178,0.25); color: var(--teal); }
+.tb-pill.gold { border-color: var(--accent-bd); color: var(--accent); }
+
+@keyframes fadeUp   { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes dashAnim { to { stroke-dashoffset: 0; } }
+
+.spinner-sm { width: 14px; height: 14px; border: 2px solid rgba(8,145,178,0.2); border-top-color: var(--teal); border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; }
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <!-- WIZARD STRIP -->
+  <div class="wizard-strip">
+    <div class="wz-step active" id="wz-1a" onclick="goStep('1a')">
+      <div class="wz-num">1A</div><div class="wz-label">Upload file</div>
+    </div>
+    <div class="wz-arrow">&rsaquo;</div>
+    <div class="wz-step" id="wz-1b" onclick="goStep('1b')">
+      <div class="wz-num">1B</div><div class="wz-label">Sheet preview</div>
+    </div>
+    <div class="wz-arrow">&rsaquo;</div>
+    <div class="wz-step" id="wz-1c" onclick="goStep('1c')">
+      <div class="wz-num">1C</div><div class="wz-label">Validation</div>
+    </div>
+    <div class="wz-arrow">&rsaquo;</div>
+    <div class="wz-step" id="wz-1d" onclick="goStep('1d')">
+      <div class="wz-num">1D</div><div class="wz-label">Confirm import</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ── STEP 1A — UPLOAD ── -->
+    <div class="step-panel active" id="panel-1a" style="justify-content:center;gap:16px">
+      <div class="upload-zone" onclick="goStep('1b')">
+        <div class="upload-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="upload-title">Drop your workforce file here</div>
+        <div class="upload-sub">Upload an Excel (.xlsx) file using the Edstellar DataPort template. The platform will parse all sheets automatically and flag any errors row by row.</div>
+        <div class="upload-formats">
+          <div class="fmt-chip">.xlsx</div>
+          <div class="fmt-chip">.xls</div>
+          <div class="fmt-chip">.csv</div>
+        </div>
+      </div>
+
+      <div class="hris-strip">
+        <div class="hris-label">Or sync from HRIS</div>
+        <div class="hris-options">
+          <button class="hris-btn connected"><div class="hris-dot"></div>Workday · Connected</button>
+          <button class="hris-btn"><div class="hris-dot"></div>BambooHR</button>
+          <button class="hris-btn"><div class="hris-dot"></div>SAP SuccessFactors</button>
+          <button class="hris-btn"><div class="hris-dot"></div>+ Add integration</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="tc-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="tc-text">
+          <div class="tc-title">Edstellar DataPort Template v3</div>
+          <div class="tc-sub">8 sheets · Employee Profile, Roles, Departments, Skills, Certifications, Training History, Teams, Org Chart</div>
+        </div>
+        <button class="tc-btn">Download template</button>
+      </div>
+
+      <div style="text-align:center;padding:16px 0 8px;border-top:1px dashed rgba(0,0,0,0.08);margin-top:8px">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">Or try with sample data</div>
+        <button onclick="demoFillDataport()" style="padding:10px 24px;font-size:13px;font-weight:600;background:linear-gradient(135deg,#C9A84C,#D4B65A);color:#fff;border:none;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .15s,box-shadow .15s;box-shadow:0 2px 8px rgba(201,168,76,0.3)" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Auto-Fill Demo Data
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 1B — SHEET PREVIEW ── -->
+    <div class="step-panel" id="panel-1b">
+      <div class="parse-header">
+        <div class="parse-file-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="parse-info">
+          <div class="parse-filename">Arcova_Workforce_DataPort_March2026.xlsx</div>
+          <div class="parse-meta">3.4 MB · Uploaded 18 Mar 2026 · 09:02 SGT · 8 sheets detected</div>
+        </div>
+        <div class="parse-status">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><polyline points="20 6 9 17 4 12"/></svg>
+          Parsed successfully
+        </div>
+      </div>
+
+      <div class="sheets-grid">
+        <div class="sheet-card clean">
+          <div class="sc-head">
+            <div class="sheet-icon" style="background:var(--green-bg);color:var(--green)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            <div class="sc-name">Employee Profile</div>
+            <div class="sc-badge scb-clean">Clean</div>
+          </div>
+          <div class="sc-body">
+            <div class="sc-stat"><span class="sc-stat-key">Rows</span><span class="sc-stat-val green">812</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Errors</span><span class="sc-stat-val green">0</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Columns mapped</span><span class="sc-stat-val">24 / 24</span></div>
+          </div>
+        </div>
+        <div class="sheet-card has-errors">
+          <div class="sc-head">
+            <div class="sheet-icon" style="background:var(--amber-bg);color:var(--amber)"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+            <div class="sc-name">Roles & Departments</div>
+            <div class="sc-badge scb-warn">7 errors</div>
+          </div>
+          <div class="sc-body">
+            <div class="sc-stat"><span class="sc-stat-key">Rows</span><span class="sc-stat-val">288</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Errors</span><span class="sc-stat-val red">7</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Columns mapped</span><span class="sc-stat-val">18 / 18</span></div>
+          </div>
+        </div>
+        <div class="sheet-card clean">
+          <div class="sc-head">
+            <div class="sheet-icon" style="background:var(--blue-bg);color:var(--blue)"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+            <div class="sc-name">Certifications</div>
+            <div class="sc-badge scb-clean">Clean</div>
+          </div>
+          <div class="sc-body">
+            <div class="sc-stat"><span class="sc-stat-key">Rows</span><span class="sc-stat-val green">1,204</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Errors</span><span class="sc-stat-val green">0</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Columns mapped</span><span class="sc-stat-val">12 / 12</span></div>
+          </div>
+        </div>
+        <div class="sheet-card clean">
+          <div class="sc-head">
+            <div class="sheet-icon" style="background:var(--purple-bg);color:var(--purple)"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+            <div class="sc-name">Training History</div>
+            <div class="sc-badge scb-clean">Clean</div>
+          </div>
+          <div class="sc-body">
+            <div class="sc-stat"><span class="sc-stat-key">Rows</span><span class="sc-stat-val green">3,841</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Errors</span><span class="sc-stat-val green">0</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Columns mapped</span><span class="sc-stat-val">16 / 16</span></div>
+          </div>
+        </div>
+        <div class="sheet-card has-errors">
+          <div class="sc-head">
+            <div class="sheet-icon" style="background:var(--teal-bg);color:var(--teal)"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <div class="sc-name">Skills (Self-Declared)</div>
+            <div class="sc-badge scb-warn">3 errors</div>
+          </div>
+          <div class="sc-body">
+            <div class="sc-stat"><span class="sc-stat-key">Rows</span><span class="sc-stat-val">4,218</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Errors</span><span class="sc-stat-val red">3</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Columns mapped</span><span class="sc-stat-val">10 / 10</span></div>
+          </div>
+        </div>
+        <div class="sheet-card clean">
+          <div class="sc-head">
+            <div class="sheet-icon" style="background:var(--accent-lt);color:var(--accent)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="sc-name">Teams & Cohorts</div>
+            <div class="sc-badge scb-ok">2 warnings</div>
+          </div>
+          <div class="sc-body">
+            <div class="sc-stat"><span class="sc-stat-key">Rows</span><span class="sc-stat-val">142</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Errors</span><span class="sc-stat-val" style="color:var(--amber)">2 warn</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Columns mapped</span><span class="sc-stat-val">8 / 8</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STEP 1C — VALIDATION ── -->
+    <div class="step-panel" id="panel-1c">
+      <div class="val-summary">
+        <div class="vs-item"><div class="vs-val">10,507</div><div class="vs-key">Total rows</div></div>
+        <div class="vs-div"></div>
+        <div class="vs-item"><div class="vs-val green">10,497</div><div class="vs-key">Valid rows</div></div>
+        <div class="vs-div"></div>
+        <div class="vs-item"><div class="vs-val red">7</div><div class="vs-key">Errors</div></div>
+        <div class="vs-div"></div>
+        <div class="vs-item"><div class="vs-val amber">5</div><div class="vs-key">Warnings</div></div>
+        <div class="vs-div"></div>
+        <div class="vs-item"><div class="vs-val">812</div><div class="vs-key">Employees</div></div>
+        <div class="vs-div"></div>
+        <div class="vs-item"><div class="vs-val green">99.9%</div><div class="vs-key">Data quality</div></div>
+      </div>
+
+      <div class="data-preview">
+        <div class="dp-head">
+          <div class="dp-title">Row-level errors — Fix or skip before importing</div>
+          <div class="dp-count">7 errors · 5 warnings</div>
+        </div>
+        <table class="error-table">
+          <thead>
+            <tr>
+              <th>Row ref</th>
+              <th>Sheet</th>
+              <th>Issue</th>
+              <th>Severity</th>
+              <th style="text-align:center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>R114</td>
+              <td>Roles & Depts</td>
+              <td style="color:var(--text-primary)">Department "Infra Solutions" not found in OrgSetup — no matching BU</td>
+              <td><span class="err-sev es-err">Error</span></td>
+              <td><div class="err-action"><button class="era-btn era-fix">Fix</button><button class="era-btn era-skip">Skip</button></div></td>
+            </tr>
+            <tr>
+              <td>R203</td>
+              <td>Roles & Depts</td>
+              <td style="color:var(--text-primary)">Job title "Snr BIM Engr" — abbreviation not mapped to role taxonomy</td>
+              <td><span class="err-sev es-err">Error</span></td>
+              <td><div class="err-action"><button class="era-btn era-fix">Fix</button><button class="era-btn era-skip">Skip</button></div></td>
+            </tr>
+            <tr>
+              <td>R441–R447</td>
+              <td>Roles & Depts</td>
+              <td style="color:var(--text-primary)">5 rows: Employee IDs duplicated across two departments</td>
+              <td><span class="err-sev es-err">Error</span></td>
+              <td><div class="err-action"><button class="era-btn era-fix">Fix</button><button class="era-btn era-skip">Skip row</button></div></td>
+            </tr>
+            <tr>
+              <td>R2871</td>
+              <td>Skills</td>
+              <td style="color:var(--text-primary)">Skill "Revit 2019" — not in framework taxonomy; nearest match "BIM"</td>
+              <td><span class="err-sev es-warn">Warning</span></td>
+              <td><div class="err-action"><button class="era-btn era-fix">Map &rarr;BIM</button><button class="era-btn era-skip">Skip</button></div></td>
+            </tr>
+            <tr>
+              <td>R3104</td>
+              <td>Skills</td>
+              <td style="color:var(--text-primary)">Proficiency value "5" out of range — scale is 1–4</td>
+              <td><span class="err-sev es-err">Error</span></td>
+              <td><div class="err-action"><button class="era-btn era-fix">Cap at 4</button><button class="era-btn era-skip">Skip</button></div></td>
+            </tr>
+            <tr>
+              <td>R78, R91</td>
+              <td>Teams</td>
+              <td style="color:var(--text-primary)">Team lead EMP-ID not found in Employee Profile sheet</td>
+              <td><span class="err-sev es-warn">Warning</span></td>
+              <td><div class="err-action"><button class="era-btn era-fix">Fix</button><button class="era-btn era-skip">Skip</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── STEP 1D — CONFIRM ── -->
+    <div class="step-panel" id="panel-1d">
+      <div class="confirm-banner">
+        <div class="conf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="conf-info">
+          <div class="conf-title">Ready to import — 10,497 valid rows</div>
+          <div class="conf-sub">5 errors fixed · 2 rows skipped · Data quality score: 99.9% · Workday sync active · SkillForge pipeline will be triggered automatically after import confirms.</div>
+        </div>
+        <div class="conf-stats">
+          <div class="conf-stat"><div class="conf-stat-val">812</div><div class="conf-stat-key">Employees</div></div>
+          <div class="conf-stat"><div class="conf-stat-val">32</div><div class="conf-stat-key">Roles</div></div>
+          <div class="conf-stat"><div class="conf-stat-val">1,204</div><div class="conf-stat-key">Certs</div></div>
+        </div>
+      </div>
+
+      <div class="meter-card">
+        <div class="meter-title">Data Context Meter — Post Import Estimate</div>
+        <div class="meter-bar-track">
+          <div class="meter-bar-fill" style="width:91%" id="meterFill"></div>
+        </div>
+        <div class="meter-labels">
+          <span class="meter-label-key">AI confidence · SkillForge pipeline readiness</span>
+          <span class="meter-label-val">91% — High confidence · Ready to generate</span>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:4px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green)"><div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div>Employee profiles complete</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green)"><div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div>Role architecture mapped</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green)"><div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div>Training history loaded</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--amber)"><div style="width:7px;height:7px;border-radius:50%;background:var(--amber)"></div>Skills self-declared only — assessment pending</div>
+        </div>
+      </div>
+
+      <div class="data-preview">
+        <div class="dp-head">
+          <div class="dp-title">Employee data preview — first 5 rows</div>
+          <div class="dp-count">812 employees total</div>
+        </div>
+        <table class="preview-table">
+          <thead>
+            <tr>
+              <th>Emp ID</th>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Location</th>
+              <th>Certs</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>EMP-001</td>
+              <td style="color:var(--text-primary)">Priya Menon</td>
+              <td>Sr Project Manager</td>
+              <td>Project Delivery</td>
+              <td>Singapore</td>
+              <td>2</td>
+              <td><div class="status-dot-cell"><div class="status-dot" style="background:var(--green)"></div>Ready</div></td>
+            </tr>
+            <tr>
+              <td>EMP-002</td>
+              <td style="color:var(--text-primary)">Tariq Al-Rashidi</td>
+              <td>BIM Manager</td>
+              <td>BIM & Digital Delivery</td>
+              <td>Dubai</td>
+              <td>1</td>
+              <td><div class="status-dot-cell"><div class="status-dot" style="background:var(--green)"></div>Ready</div></td>
+            </tr>
+            <tr>
+              <td>EMP-003</td>
+              <td style="color:var(--text-primary)">Ananya Krishnaswamy</td>
+              <td>EHS Auditor</td>
+              <td>EHS & Risk</td>
+              <td>Mumbai</td>
+              <td>2</td>
+              <td><div class="status-dot-cell"><div class="status-dot" style="background:var(--green)"></div>Ready</div></td>
+            </tr>
+            <tr>
+              <td>EMP-004</td>
+              <td style="color:var(--text-primary)">Darren Loh</td>
+              <td>Data Analyst</td>
+              <td>IT Infrastructure</td>
+              <td>Singapore</td>
+              <td>0</td>
+              <td><div class="status-dot-cell"><div class="status-dot" style="background:var(--green)"></div>Ready</div></td>
+            </tr>
+            <tr>
+              <td>EMP-005</td>
+              <td style="color:var(--text-primary)">Kavitha Ramachandran</td>
+              <td>L&D Manager</td>
+              <td>Human Resources</td>
+              <td>Singapore</td>
+              <td>2</td>
+              <td><div class="status-dot-cell"><div class="status-dot" style="background:var(--green)"></div>Ready</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="import-actions">
+        <div class="import-note">Confirming import will create <strong>812 Skill Passports</strong>, populate the DataPort layer, and queue the <strong>SkillForge 7-prompt pipeline</strong>. This action is logged and versioned — previous data is preserved as a snapshot.</div>
+        <button class="ia-btn outline" onclick="goStep('1c')">&#8592; Back to validation</button>
+        <button class="ia-btn primary" onclick="confirmImport()">
+          Confirm Import &#8594;
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- WIZARD NAV -->
+  <div class="wizard-nav" id="wizNav">
+    <div class="wn-info" id="wizNavInfo">Step 1A of 4 — Upload your workforce Excel file</div>
+    <div class="wn-actions">
+      <button class="wn-btn back" id="backBtn" onclick="stepBack()" style="display:none">&#8592; Back</button>
+      <button class="wn-btn next" id="nextBtn" onclick="stepNext()">Next &#8594;</button>
+    </div>
+  </div>
+
+  <!-- DONE SCREEN -->
+  <div id="doneScreen">
+    <div class="done-ring">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(22,163,74,0.15)" stroke-width="4"/>
+        <circle cx="50" cy="50" r="44" fill="none" stroke="#16A34A" stroke-width="4"
+          stroke-dasharray="276" stroke-dashoffset="276"
+          style="transform:rotate(-90deg);transform-origin:50% 50%;animation:dashAnim 1.2s ease .3s forwards"/>
+      </svg>
+      <div class="done-icon-inner">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+    </div>
+    <div class="done-title">&#127881; Import <span>complete!</span></div>
+    <div class="done-sub" id="doneSummary">812 employee records imported · 1,204 certificates loaded · 3,841 training history entries processed · 812 Skill Passports created</div>
+    <div class="done-stats" id="doneStats">
+      <div class="ds-item"><div class="ds-val">812</div><div class="ds-key">Employees</div></div>
+      <div class="ds-item"><div class="ds-val">1,204</div><div class="ds-key">Certificates</div></div>
+      <div class="ds-item"><div class="ds-val">3,841</div><div class="ds-key">Training entries</div></div>
+      <div class="ds-item"><div class="ds-val">91%</div><div class="ds-key">Data quality</div></div>
+    </div>
+    <div style="max-width:520px;margin:0 auto 20px;padding:16px 20px;background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.02));border:1px solid rgba(201,168,76,0.2);border-radius:10px;text-align:center">
+      <div style="font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:6px">Congratulations! Your workforce data is ready</div>
+      <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">All employee records have been imported successfully. Head to the <strong>Employee Directory</strong> to view, search, and manage your workforce.</div>
+    </div>
+    <div class="done-actions">
+      <button class="done-btn outline" onclick="resetWizard()">Import another file</button>
+      <a href="employee-directory.html" class="done-btn primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        View Employee Directory &#8594;
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'admin',
+    activeNav: 'Data Import',
+    breadcrumbs: ['Setup', 'Data Import'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+const STEPS = ['1a','1b','1c','1d'];
+const LABELS = {
+  '1a': 'Step 1A of 4 — Upload your workforce Excel file',
+  '1b': 'Step 1B of 4 — Review sheet-by-sheet parse results',
+  '1c': 'Step 1C of 4 — Fix or skip row-level validation errors',
+  '1d': 'Step 1D of 4 — Confirm import and queue SkillForge'
+};
+let currentStep = '1a';
+
+function goStep(s) {
+  // hide all panels
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.wz-step').forEach(w => {
+    w.classList.remove('active');
+    const idx = STEPS.indexOf(w.id.replace('wz-',''));
+    const cur = STEPS.indexOf(s);
+    if (idx < cur) w.classList.add('done'); else w.classList.remove('done');
+  });
+
+  document.getElementById('panel-' + s).classList.add('active');
+  document.getElementById('wz-' + s).classList.add('active');
+  document.getElementById('wz-' + s).classList.remove('done');
+  document.getElementById('wizNavInfo').textContent = LABELS[s];
+  currentStep = s;
+
+  // back/next buttons
+  const idx = STEPS.indexOf(s);
+  document.getElementById('backBtn').style.display = idx > 0 ? 'block' : 'none';
+  const nextBtn = document.getElementById('nextBtn');
+
+  nextBtn.className = 'wn-btn next';
+  nextBtn.textContent = 'Next \u2192';
+  nextBtn.onclick = stepNext;
+}
+
+function stepNext() {
+  const idx = STEPS.indexOf(currentStep);
+  if (idx < STEPS.length - 1) goStep(STEPS[idx + 1]);
+}
+
+function stepBack() {
+  const idx = STEPS.indexOf(currentStep);
+  if (idx > 0) goStep(STEPS[idx - 1]);
+}
+
+function confirmImport() {
+  // hide wizard UI
+  document.getElementById('wizNav').style.display = 'none';
+  document.querySelector('.wizard-strip').style.display = 'none';
+  document.querySelector('.content').style.display = 'none';
+  document.getElementById('doneScreen').style.display = 'flex';
+
+  // mark all steps done
+  document.querySelectorAll('.wz-step').forEach(w => {
+    w.classList.remove('active'); w.classList.add('done');
+  });
+}
+
+function resetWizard() {
+  document.getElementById('wizNav').style.display = 'flex';
+  document.querySelector('.wizard-strip').style.display = 'flex';
+  document.querySelector('.content').style.display = 'flex';
+  document.getElementById('doneScreen').style.display = 'none';
+  goStep('1a');
+}
+
+function demoFillDataport() {
+  var steps = ['1a','1b','1c','1d'];
+  var stepLabels = ['Uploading NovaTech employee file...','Parsing Employee_Master sheet...','Validating 50 employee records...','Importing employees...'];
+  var i = 0;
+  function nextStep() {
+    if (i < steps.length) {
+      goStep(steps[i]);
+      document.getElementById('wizNavInfo').textContent = stepLabels[i];
+      i++;
+      setTimeout(nextStep, 600);
+    } else {
+      var demoEmployees = [
+      {id:"EMP-0001",firstName:"Priya",lastName:"Menon",fullName:"Priya Menon",email:"priya.menon@novatechsolutions.com",phone:"+91-9906402157",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"DevOps Engineer",jobLevel:"L3",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2017-03-03",tenureYears:7.8,salary:63286,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:10,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
+      {id:"EMP-0002",firstName:"Rohan",lastName:"Krishnan",fullName:"Rohan Krishnan",email:"rohan.krishnan@novatechsolutions.com",phone:"+91-7027911967",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Software Engineer I",jobLevel:"L2",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2023-03-23",tenureYears:1.8,salary:48359,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:3,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Partial",careerPath:"IC Track"},
+      {id:"EMP-0003",firstName:"Anil",lastName:"Wang",fullName:"Anil Wang",email:"anil.wang@novatechsolutions.com",phone:"+91-9303082117",gender:"Male",locationId:"LOC-002",location:"Mumbai",department:"Product Engineering",role:"Software Engineer I",jobLevel:"L2",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2018-09-18",tenureYears:6.3,salary:41711,employmentType:"Contract",criticalRole:"Yes",status:"Active",totalExp:7,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Management Track"},
+      {id:"EMP-0004",firstName:"Harish",lastName:"Patel",fullName:"Harish Patel",email:"harish.patel@novatechsolutions.com",phone:"+91-7999829240",gender:"Male",locationId:"LOC-002",location:"Mumbai",department:"Product Engineering",role:"Senior QA Engineer",jobLevel:"L4",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2012-01-11",tenureYears:13,salary:90741,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:17,workMode:"On-site",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
+      {id:"EMP-0005",firstName:"Swathi",lastName:"Brown",fullName:"Swathi Brown",email:"swathi.brown@novatechsolutions.com",phone:"+91-8051454923",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Product Engineering",role:"Senior Software Engineer",jobLevel:"L4",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2012-08-07",tenureYears:12.4,salary:88803,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:16,workMode:"Remote",highPotential:"No",skillProfileStatus:"Partial",careerPath:"IC Track"},
+      {id:"EMP-0006",firstName:"Rahul",lastName:"Shetty",fullName:"Rahul Shetty",email:"rahul.shetty@novatechsolutions.com",phone:"+91-9436019774",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Senior Software Engineer",jobLevel:"L4",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2018-01-28",tenureYears:6.9,salary:87084,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:11,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
+      {id:"EMP-0007",firstName:"Vivek",lastName:"Malik",fullName:"Vivek Malik",email:"vivek.malik@novatechsolutions.com",phone:"+91-9506254832",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Software Engineer II",jobLevel:"L3",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2023-02-02",tenureYears:1.9,salary:70577,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:4,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"IC Track"},
+      {id:"EMP-0008",firstName:"Suresh",lastName:"Shetty",fullName:"Suresh Shetty",email:"suresh.shetty@novatechsolutions.com",phone:"+91-9010258946",gender:"Male",locationId:"LOC-002",location:"Mumbai",department:"Product Engineering",role:"Software Engineer II",jobLevel:"L3",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2020-06-20",tenureYears:4.5,salary:67304,employmentType:"Part-Time",criticalRole:"No",status:"Active",totalExp:6,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Specialist Track"},
+      {id:"EMP-0009",firstName:"Rohit",lastName:"Brown",fullName:"Rohit Brown",email:"rohit.brown@novatechsolutions.com",phone:"+91-7013938521",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Data Engineer",jobLevel:"L3",education:"PhD",reportsTo:"Engineering Manager",joinDate:"2018-08-18",tenureYears:6.4,salary:68123,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:8,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Draft",careerPath:"Specialist Track"},
+      {id:"EMP-0010",firstName:"Nikhil",lastName:"Khan",fullName:"Nikhil Khan",email:"nikhil.khan@novatechsolutions.com",phone:"+91-9277851678",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Senior Software Engineer",jobLevel:"L4",education:"PhD",reportsTo:"Engineering Manager",joinDate:"2015-06-18",tenureYears:9.5,salary:88646,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:14,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Draft",careerPath:"Management Track"},
+      {id:"EMP-0011",firstName:"Pooja",lastName:"Verma",fullName:"Pooja Verma",email:"pooja.verma@novatechsolutions.com",phone:"+91-7297265480",gender:"Female",locationId:"LOC-004",location:"Dubai",department:"Product Engineering",role:"Senior Software Engineer",jobLevel:"L4",education:"PhD",reportsTo:"Engineering Manager",joinDate:"2023-09-22",tenureYears:1.3,salary:87403,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:5,workMode:"Remote",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
+      {id:"EMP-0012",firstName:"Sara",lastName:"Kumar",fullName:"Sara Kumar",email:"sara.kumar@novatechsolutions.com",phone:"+91-8338811290",gender:"Female",locationId:"LOC-003",location:"Singapore",department:"Product Engineering",role:"ML Engineer",jobLevel:"L4",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2023-02-04",tenureYears:1.9,salary:97302,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:6,workMode:"On-site",highPotential:"No",skillProfileStatus:"Complete",careerPath:"IC Track"},
+      {id:"EMP-0013",firstName:"Uma",lastName:"Malik",fullName:"Uma Malik",email:"uma.malik@novatechsolutions.com",phone:"+91-9710566582",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Product Engineering",role:"Staff Engineer",jobLevel:"L5",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2016-02-29",tenureYears:8.8,salary:126117,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:16,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
+      {id:"EMP-0014",firstName:"Ananya",lastName:"Malik",fullName:"Ananya Malik",email:"ananya.malik@novatechsolutions.com",phone:"+91-8043665192",gender:"Female",locationId:"LOC-003",location:"Singapore",department:"Product Engineering",role:"DevOps Engineer",jobLevel:"L3",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2013-12-19",tenureYears:11,salary:70355,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:13,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
+      {id:"EMP-0015",firstName:"Sneha",lastName:"Davis",fullName:"Sneha Davis",email:"sneha.davis@novatechsolutions.com",phone:"+91-7469306919",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"ML Engineer",jobLevel:"L4",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2013-03-17",tenureYears:11.8,salary:97931,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:16,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"IC Track"},
+      {id:"EMP-0016",firstName:"Lakshmi",lastName:"Reddy",fullName:"Lakshmi Reddy",email:"lakshmi.reddy@novatechsolutions.com",phone:"+91-7400560567",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Product Engineering",role:"Director of Engineering",jobLevel:"L6",education:"PhD",reportsTo:"Engineering Manager",joinDate:"2012-02-19",tenureYears:12.9,salary:179856,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:23,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
+      {id:"EMP-0017",firstName:"Suresh",lastName:"Liu",fullName:"Suresh Liu",email:"suresh.liu@novatechsolutions.com",phone:"+91-8954246074",gender:"Male",locationId:"LOC-004",location:"Dubai",department:"Product Engineering",role:"UX Designer",jobLevel:"L3",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2011-01-18",tenureYears:14,salary:65345,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:16,workMode:"Remote",highPotential:"No",skillProfileStatus:"Complete",careerPath:"IC Track"},
+      {id:"EMP-0018",firstName:"Sneha",lastName:"Johnson",fullName:"Sneha Johnson",email:"sneha.johnson@novatechsolutions.com",phone:"+91-9509023674",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Senior Software Engineer",jobLevel:"L4",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2023-02-28",tenureYears:1.8,salary:91138,employmentType:"Contract",criticalRole:"No",status:"Active",totalExp:6,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Partial",careerPath:"IC Track"},
+      {id:"EMP-0019",firstName:"Swathi",lastName:"Kapoor",fullName:"Swathi Kapoor",email:"swathi.kapoor@novatechsolutions.com",phone:"+91-9553440342",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Senior QA Engineer",jobLevel:"L4",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2016-04-10",tenureYears:8.7,salary:95333,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:13,workMode:"Remote",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
+      {id:"EMP-0020",firstName:"Pooja",lastName:"Joshi",fullName:"Pooja Joshi",email:"pooja.joshi@novatechsolutions.com",phone:"+91-8357970698",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"DevOps Engineer",jobLevel:"L3",education:"PhD",reportsTo:"Engineering Manager",joinDate:"2019-11-17",tenureYears:5.1,salary:71575,employmentType:"Contract",criticalRole:"Yes",status:"Active",totalExp:7,workMode:"Remote",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
+      {id:"EMP-0021",firstName:"Amit",lastName:"Iyer",fullName:"Amit Iyer",email:"amit.iyer@novatechsolutions.com",phone:"+91-7677517496",gender:"Male",locationId:"LOC-004",location:"Dubai",department:"Customer Success",role:"Customer Success Manager",jobLevel:"L3",education:"Bachelor's",reportsTo:"Head of Customer Success",joinDate:"2018-10-30",tenureYears:6.2,salary:65002,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:8,workMode:"On-site",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
+      {id:"EMP-0022",firstName:"Sunita",lastName:"Shah",fullName:"Sunita Shah",email:"sunita.shah@novatechsolutions.com",phone:"+91-7459716009",gender:"Female",locationId:"LOC-004",location:"Dubai",department:"Customer Success",role:"Technical Support Specialist",jobLevel:"L2",education:"Master's",reportsTo:"Head of Customer Success",joinDate:"2013-04-28",tenureYears:11.7,salary:43200,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:13,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Management Track"},
+      {id:"EMP-0023",firstName:"Amit",lastName:"Verma",fullName:"Amit Verma",email:"amit.verma@novatechsolutions.com",phone:"+91-7189351213",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Customer Success",role:"Head of Customer Success",jobLevel:"L6",education:"Bachelor's",reportsTo:"Head of Customer Success",joinDate:"2012-02-21",tenureYears:12.9,salary:177939,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:23,workMode:"Remote",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Specialist Track"},
+      {id:"EMP-0024",firstName:"Lakshmi",lastName:"Sharma",fullName:"Lakshmi Sharma",email:"lakshmi.sharma@novatechsolutions.com",phone:"+91-9343292475",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Customer Success",role:"Technical Support Specialist",jobLevel:"L2",education:"Bachelor's",reportsTo:"Head of Customer Success",joinDate:"2013-07-05",tenureYears:11.5,salary:52321,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:12,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"IC Track"},
+      {id:"EMP-0025",firstName:"Ananya",lastName:"Davis",fullName:"Ananya Davis",email:"ananya.davis@novatechsolutions.com",phone:"+91-8745377599",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Customer Success",role:"Support Lead",jobLevel:"L4",education:"PhD",reportsTo:"Head of Customer Success",joinDate:"2016-08-06",tenureYears:8.4,salary:91794,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:12,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Partial",careerPath:"IC Track"},
+      {id:"EMP-0026",firstName:"Priya",lastName:"Gupta",fullName:"Priya Gupta",email:"priya.gupta@novatechsolutions.com",phone:"+91-8065870178",gender:"Female",locationId:"LOC-003",location:"Singapore",department:"Customer Success",role:"Support Lead",jobLevel:"L4",education:"Bachelor's",reportsTo:"Head of Customer Success",joinDate:"2018-06-14",tenureYears:6.6,salary:92745,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:11,workMode:"On-site",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
+      {id:"EMP-0027",firstName:"Sanjay",lastName:"Singh",fullName:"Sanjay Singh",email:"sanjay.singh@novatechsolutions.com",phone:"+91-7298159856",gender:"Male",locationId:"LOC-002",location:"Mumbai",department:"Customer Success",role:"Senior CSM",jobLevel:"L4",education:"PhD",reportsTo:"Head of Customer Success",joinDate:"2011-07-13",tenureYears:13.5,salary:92528,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:18,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"IC Track"},
+      {id:"EMP-0028",firstName:"Amit",lastName:"Gupta",fullName:"Amit Gupta",email:"amit.gupta@novatechsolutions.com",phone:"+91-8347233823",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Customer Success",role:"Customer Success Manager",jobLevel:"L3",education:"Bachelor's",reportsTo:"Head of Customer Success",joinDate:"2016-12-14",tenureYears:8.1,salary:70774,employmentType:"Part-Time",criticalRole:"Yes",status:"Active",totalExp:10,workMode:"On-site",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Management Track"},
+      {id:"EMP-0029",firstName:"Ravi",lastName:"Davis",fullName:"Ravi Davis",email:"ravi.davis@novatechsolutions.com",phone:"+91-8418198351",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Customer Success",role:"Customer Success Manager",jobLevel:"L3",education:"Master's",reportsTo:"Head of Customer Success",joinDate:"2015-06-03",tenureYears:9.6,salary:62146,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:12,workMode:"On-site",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Management Track"},
+      {id:"EMP-0030",firstName:"Rajesh",lastName:"Malik",fullName:"Rajesh Malik",email:"rajesh.malik@novatechsolutions.com",phone:"+91-9909058412",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Customer Success",role:"Customer Success Lead",jobLevel:"L5",education:"Master's",reportsTo:"Head of Customer Success",joinDate:"2013-11-08",tenureYears:11.2,salary:136894,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:18,workMode:"Remote",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Management Track"},
+      {id:"EMP-0031",firstName:"Sara",lastName:"Shetty",fullName:"Sara Shetty",email:"sara.shetty@novatechsolutions.com",phone:"+91-9195475598",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Customer Success",role:"Senior CSM",jobLevel:"L4",education:"Master's",reportsTo:"Head of Customer Success",joinDate:"2018-03-24",tenureYears:6.8,salary:93244,employmentType:"Contract",criticalRole:"No",status:"Active",totalExp:11,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
+      {id:"EMP-0032",firstName:"Divya",lastName:"Bose",fullName:"Divya Bose",email:"divya.bose@novatechsolutions.com",phone:"+91-7632880459",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Customer Success",role:"Technical Support Specialist",jobLevel:"L2",education:"Bachelor's",reportsTo:"Head of Customer Success",joinDate:"2016-04-08",tenureYears:8.7,salary:44680,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:10,workMode:"On-site",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
+      {id:"EMP-0033",firstName:"Harish",lastName:"Krishnan",fullName:"Harish Krishnan",email:"harish.krishnan@novatechsolutions.com",phone:"+91-9953315788",gender:"Male",locationId:"LOC-002",location:"Mumbai",department:"Sales & Marketing",role:"VP of Sales",jobLevel:"L6",education:"Bachelor's",reportsTo:"VP of Sales",joinDate:"2019-08-12",tenureYears:5.4,salary:174997,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:15,workMode:"Remote",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"IC Track"},
+      {id:"EMP-0034",firstName:"Karthik",lastName:"Khan",fullName:"Karthik Khan",email:"karthik.khan@novatechsolutions.com",phone:"+91-7521231222",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Sales & Marketing",role:"Senior Marketing Manager",jobLevel:"L5",education:"Master's",reportsTo:"VP of Sales",joinDate:"2021-06-02",tenureYears:3.6,salary:130082,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:11,workMode:"Remote",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Management Track"},
+      {id:"EMP-0035",firstName:"Bhavna",lastName:"Verma",fullName:"Bhavna Verma",email:"bhavna.verma@novatechsolutions.com",phone:"+91-7683577992",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Sales & Marketing",role:"Marketing Executive",jobLevel:"L3",education:"Master's",reportsTo:"VP of Sales",joinDate:"2022-04-28",tenureYears:2.7,salary:69976,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:5,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Specialist Track"},
+      {id:"EMP-0036",firstName:"Leila",lastName:"Patel",fullName:"Leila Patel",email:"leila.patel@novatechsolutions.com",phone:"+91-9319936135",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Sales & Marketing",role:"Sales Manager",jobLevel:"L5",education:"Bachelor's",reportsTo:"VP of Sales",joinDate:"2017-05-29",tenureYears:7.6,salary:131502,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:15,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Management Track"},
+      {id:"EMP-0037",firstName:"Ravi",lastName:"Lee",fullName:"Ravi Lee",email:"ravi.lee@novatechsolutions.com",phone:"+91-9508601974",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Sales & Marketing",role:"Senior Account Executive",jobLevel:"L4",education:"PhD",reportsTo:"VP of Sales",joinDate:"2020-04-29",tenureYears:4.7,salary:92883,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:9,workMode:"Remote",highPotential:"No",skillProfileStatus:"Draft",careerPath:"Management Track"},
+      {id:"EMP-0038",firstName:"Omar",lastName:"Malik",fullName:"Omar Malik",email:"omar.malik@novatechsolutions.com",phone:"+91-8172248246",gender:"Male",locationId:"LOC-003",location:"Singapore",department:"Sales & Marketing",role:"Marketing Executive",jobLevel:"L3",education:"Bachelor's",reportsTo:"VP of Sales",joinDate:"2023-04-01",tenureYears:1.8,salary:64613,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:4,workMode:"Remote",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
+      {id:"EMP-0039",firstName:"Chitra",lastName:"Malik",fullName:"Chitra Malik",email:"chitra.malik@novatechsolutions.com",phone:"+91-7116402431",gender:"Female",locationId:"LOC-004",location:"Dubai",department:"Sales & Marketing",role:"Content Strategist",jobLevel:"L3",education:"Bachelor's",reportsTo:"VP of Sales",joinDate:"2011-08-09",tenureYears:13.4,salary:70697,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:15,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
+      {id:"EMP-0040",firstName:"Tanya",lastName:"Verma",fullName:"Tanya Verma",email:"tanya.verma@novatechsolutions.com",phone:"+91-7351784589",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Sales & Marketing",role:"Account Executive",jobLevel:"L3",education:"Master's",reportsTo:"VP of Sales",joinDate:"2019-07-03",tenureYears:5.5,salary:67906,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:8,workMode:"On-site",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
+      {id:"EMP-0041",firstName:"Priya",lastName:"Singh",fullName:"Priya Singh",email:"priya.singh@novatechsolutions.com",phone:"+91-7542114964",gender:"Female",locationId:"LOC-003",location:"Singapore",department:"Sales & Marketing",role:"Business Development Rep",jobLevel:"L2",education:"Master's",reportsTo:"VP of Sales",joinDate:"2015-06-22",tenureYears:9.5,salary:51179,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:10,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
+      {id:"EMP-0042",firstName:"Vivek",lastName:"Krishnan",fullName:"Vivek Krishnan",email:"vivek.krishnan@novatechsolutions.com",phone:"+91-7464280597",gender:"Male",locationId:"LOC-003",location:"Singapore",department:"Sales & Marketing",role:"Marketing Executive",jobLevel:"L3",education:"Master's",reportsTo:"VP of Sales",joinDate:"2013-07-27",tenureYears:11.4,salary:63683,employmentType:"Contract",criticalRole:"No",status:"Active",totalExp:13,workMode:"On-site",highPotential:"No",skillProfileStatus:"Draft",careerPath:"IC Track"},
+      {id:"EMP-0043",firstName:"Karthik",lastName:"Bose",fullName:"Karthik Bose",email:"karthik.bose@novatechsolutions.com",phone:"+91-9578748240",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Sales & Marketing",role:"Business Development Rep",jobLevel:"L2",education:"Master's",reportsTo:"VP of Sales",joinDate:"2016-06-12",tenureYears:8.6,salary:45941,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:10,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Partial",careerPath:"IC Track"},
+      {id:"EMP-0044",firstName:"Li",lastName:"Sharma",fullName:"Li Sharma",email:"li.sharma@novatechsolutions.com",phone:"+91-8555585773",gender:"Female",locationId:"LOC-003",location:"Singapore",department:"Sales & Marketing",role:"Sales Manager",jobLevel:"L5",education:"Master's",reportsTo:"VP of Sales",joinDate:"2020-06-03",tenureYears:4.6,salary:127729,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:12,workMode:"Remote",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Specialist Track"},
+      {id:"EMP-0045",firstName:"Ravi",lastName:"Pillai",fullName:"Ravi Pillai",email:"ravi.pillai@novatechsolutions.com",phone:"+91-8384287616",gender:"Male",locationId:"LOC-002",location:"Mumbai",department:"Corporate Functions",role:"Talent Acquisition Specialist",jobLevel:"L3",education:"Master's",reportsTo:"Chief People Officer",joinDate:"2021-11-04",tenureYears:3.2,salary:72977,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:5,workMode:"On-site",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
+      {id:"EMP-0046",firstName:"James",lastName:"Kapoor",fullName:"James Kapoor",email:"james.kapoor@novatechsolutions.com",phone:"+91-8109615163",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Corporate Functions",role:"Senior Finance Analyst",jobLevel:"L4",education:"Bachelor's",reportsTo:"Chief People Officer",joinDate:"2018-04-16",tenureYears:6.7,salary:89475,employmentType:"Contract",criticalRole:"No",status:"Active",totalExp:11,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Draft",careerPath:"IC Track"},
+      {id:"EMP-0047",firstName:"Omar",lastName:"Al-Hassan",fullName:"Omar Al-Hassan",email:"omar.al-hassan@novatechsolutions.com",phone:"+91-9108061573",gender:"Male",locationId:"LOC-003",location:"Singapore",department:"Corporate Functions",role:"Talent Acquisition Specialist",jobLevel:"L3",education:"Bachelor's",reportsTo:"Chief People Officer",joinDate:"2023-06-15",tenureYears:1.5,salary:72314,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:4,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Partial",careerPath:"Management Track"},
+      {id:"EMP-0048",firstName:"Daniel",lastName:"Wang",fullName:"Daniel Wang",email:"daniel.wang@novatechsolutions.com",phone:"+91-8948821078",gender:"Male",locationId:"LOC-004",location:"Dubai",department:"Corporate Functions",role:"Finance Analyst",jobLevel:"L3",education:"Bachelor's",reportsTo:"Chief People Officer",joinDate:"2020-07-17",tenureYears:4.5,salary:70017,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:6,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
+      {id:"EMP-0049",firstName:"Ananya",lastName:"Menon",fullName:"Ananya Menon",email:"ananya.menon@novatechsolutions.com",phone:"+91-9253298195",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Corporate Functions",role:"Talent Acquisition Specialist",jobLevel:"L3",education:"Master's",reportsTo:"Chief People Officer",joinDate:"2021-11-10",tenureYears:3.1,salary:70659,employmentType:"Part-Time",criticalRole:"No",status:"Active",totalExp:5,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
+      {id:"EMP-0050",firstName:"Nisha",lastName:"Nair",fullName:"Nisha Nair",email:"nisha.nair@novatechsolutions.com",phone:"+91-9739629302",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Corporate Functions",role:"Finance Analyst",jobLevel:"L3",education:"Master's",reportsTo:"Chief People Officer",joinDate:"2012-03-22",tenureYears:12.8,salary:72426,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:15,workMode:"Remote",highPotential:"No",skillProfileStatus:"Complete",careerPath:"IC Track"}
+      ];
+
+      var totalCerts = 0;
+      var totalTrainingEntries = 0;
+      demoEmployees.forEach(function(e){
+        e.certCount = Math.floor(Math.random()*4)+1;
+        e.trainingHours = Math.floor(Math.random()*60)+20;
+        totalCerts += e.certCount;
+        totalTrainingEntries += Math.floor(e.trainingHours/8);
+      });
+
+      var importData = {
+        importedAt: new Date().toISOString(),
+        totalEmployees: demoEmployees.length,
+        totalCertificates: totalCerts,
+        totalTrainingEntries: totalTrainingEntries,
+        dataQuality: 94,
+        employees: demoEmployees
+      };
+
+      var json = JSON.stringify(importData);
+      try{sessionStorage.setItem('sip_dataport_import',json)}catch(ex){}
+      try{localStorage.setItem('sip_dataport_import',json)}catch(ex){}
+
+      document.getElementById('doneSummary').textContent =
+        importData.totalEmployees+' employee records imported \u00B7 '+
+        importData.totalCertificates+' certificates loaded \u00B7 '+
+        importData.totalTrainingEntries+' training history entries processed \u00B7 '+
+        importData.totalEmployees+' Skill Passports created';
+
+      document.getElementById('doneStats').innerHTML =
+        '<div class="ds-item"><div class="ds-val">'+importData.totalEmployees+'</div><div class="ds-key">Employees</div></div>'+
+        '<div class="ds-item"><div class="ds-val">'+importData.totalCertificates+'</div><div class="ds-key">Certificates</div></div>'+
+        '<div class="ds-item"><div class="ds-val">'+importData.totalTrainingEntries+'</div><div class="ds-key">Training entries</div></div>'+
+        '<div class="ds-item"><div class="ds-val">'+importData.dataQuality+'%</div><div class="ds-key">Data quality</div></div>';
+
+      confirmImport();
+    }
+  }
+  nextStep();
+}
+
+</script>
+
+<script>
+(function(){
+  var toast = document.createElement("div");
+  toast.id = "sip-toast";
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#ffffff;border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:'DM Sans',sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08);";
+  document.body.appendChild(toast);
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){
+      toast.style.opacity="0";
+      toast.style.transform="translateX(-50%) translateY(8px)";
+    }, 2400);
+  }
+  document.addEventListener("click", function(e){
+    var a = e.target.closest("a");
+    if(a && a.getAttribute("href") === "#"){
+      e.preventDefault();
+      var label = (a.textContent || "").trim().replace(/\s+/g," ").substring(0,36);
+      showToast(label + " \u2014 available in full platform");
+    }
+  });
+})();
+</script>
+</body>
+</html>

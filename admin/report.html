@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organization Setup Report · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   REPORTS PAGE — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── LOCAL TOKENS ── */
+:root{
+  --surface:var(--card);
+  --surface-alt:#F5F4F0;
+  --border:#E5E7EB;
+  --border-focus:var(--accent);
+  --text:var(--text-primary);
+  --text-s:var(--text-secondary);
+  --text-t:var(--text-muted);
+  --text-inv:#FFFFFF;
+  --radius-sm:6px;--radius-md:10px;--radius-lg:16px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg:0 12px 40px rgba(0,0,0,0.12);
+  --chart-blue:#3B82F6;
+  --chart-green:#10B981;
+  --chart-amber:#F59E0B;
+  --chart-red:#EF4444;
+  --chart-purple:#8B5CF6;
+  --chart-pink:#EC4899;
+  --chart-gray:#6B7280;
+}
+
+/* ── SCROLLABLE CONTENT ── */
+.report-scroll{height:100%;overflow-y:auto;padding:0}
+.report-scroll::-webkit-scrollbar{width:5px}
+.report-scroll::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:3px}
+.report-container{max-width:1320px;margin:0 auto;padding:24px 28px 60px}
+
+/* ── PAGE HEADER ── */
+.page-header{margin-bottom:20px}
+.page-header h1{font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--text);margin-bottom:4px}
+.page-header p{font-size:13px;color:var(--text-s)}
+
+/* ── TAB BAR ── */
+.report-tabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:24px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.report-tabs::-webkit-scrollbar{display:none}
+.report-tab{padding:10px 16px;font-family:var(--font-body);font-size:12px;font-weight:500;color:var(--text-s);background:none;border:none;cursor:pointer;white-space:nowrap;position:relative;transition:color .2s;border-radius:var(--radius-sm) var(--radius-sm) 0 0}
+.report-tab:hover{color:var(--text);background:rgba(0,0,0,0.02)}
+.report-tab.active{color:var(--accent);font-weight:600}
+.report-tab.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--accent);border-radius:1px 1px 0 0}
+
+/* ── TAB PANELS ── */
+.tab-panel{display:none;animation:panelFadeIn .3s ease}
+.tab-panel.active{display:block}
+@keyframes panelFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTION HEADER ── */
+.section-head{margin-bottom:16px}
+.section-head h2{font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--text);margin-bottom:3px}
+.section-head p{font-size:12px;color:var(--text-s)}
+
+/* ── KPI CARDS ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 18px;transition:box-shadow .2s,transform .15s}
+.kpi-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.kpi-value{font-family:var(--font-display);font-size:28px;font-weight:600;color:var(--text);line-height:1;margin-bottom:4px}
+.kpi-label{font-size:11px;color:var(--text-s);letter-spacing:.02em}
+.kpi-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.kpi-icon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+/* ── CARDS/PANELS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:20px}
+.card-head{padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:10px}
+.card-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text);flex:1}
+.card-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;background:var(--accent-lt);color:var(--accent)}
+.card-body{padding:18px 20px}
+
+/* ── GRID LAYOUTS ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+@media(max-width:960px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+/* ── HORIZONTAL BAR CHART ── */
+.h-bar-chart{display:flex;flex-direction:column;gap:8px}
+.h-bar-row{display:flex;align-items:center;gap:10px}
+.h-bar-label{width:120px;font-size:11px;color:var(--text-s);text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h-bar-track{flex:1;height:22px;background:rgba(0,0,0,0.03);border-radius:4px;overflow:hidden;position:relative}
+.h-bar-fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.25,.46,.45,.94);display:flex;align-items:center;justify-content:flex-end;padding-right:6px;min-width:0}
+.h-bar-val{font-size:10px;font-weight:600;color:var(--text-inv);white-space:nowrap}
+.h-bar-val-out{font-size:10px;font-weight:500;color:var(--text-s);margin-left:6px;flex-shrink:0;width:30px}
+
+/* ── DONUT CHART ── */
+.donut-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.donut{width:140px;height:140px;border-radius:50%;position:relative;flex-shrink:0}
+.donut-hole{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;flex-direction:column}
+.donut-center-val{font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--text);line-height:1}
+.donut-center-label{font-size:9px;color:var(--text-s);margin-top:2px}
+.donut-legend{display:flex;flex-direction:column;gap:6px;flex:1;min-width:120px}
+.donut-legend-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-s)}
+.donut-legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.donut-legend-val{margin-left:auto;font-weight:600;color:var(--text);font-family:var(--font-mono);font-size:11px}
+
+/* ── DATA TABLES ── */
+.data-table-wrap{overflow-x:auto;margin:0 -20px;padding:0 20px}
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{text-align:left;padding:8px 10px;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-t);border-bottom:2px solid var(--border);background:rgba(0,0,0,0.01);white-space:nowrap}
+.data-table td{padding:7px 10px;border-bottom:1px solid rgba(0,0,0,0.04);color:var(--text-s);vertical-align:top}
+.data-table tbody tr:nth-child(even){background:rgba(0,0,0,0.015)}
+.data-table tbody tr:hover{background:rgba(201,168,76,0.04)}
+.data-table .mono{font-family:var(--font-mono);font-size:11px}
+.data-table .tag{display:inline-block;padding:1px 7px;border-radius:100px;font-size:10px;font-weight:500}
+
+/* ── STATUS GRID ── */
+.status-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.status-cell{padding:12px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);text-align:center;transition:transform .15s}
+.status-cell:hover{transform:translateY(-1px)}
+.status-cell-label{font-size:10px;font-weight:600;color:var(--text-s);letter-spacing:.03em;margin-bottom:4px}
+.status-cell-val{font-family:var(--font-display);font-size:16px;font-weight:600;line-height:1}
+.status-cell.green{background:var(--green-bg);border-color:#A7F3D0}.status-cell.green .status-cell-val{color:var(--green)}
+.status-cell.amber{background:var(--amber-bg);border-color:#FDE68A}.status-cell.amber .status-cell-val{color:var(--amber)}
+.status-cell.red{background:var(--red-bg);border-color:#FECACA}.status-cell.red .status-cell-val{color:var(--red)}
+.status-cell.gray{background:#F9FAFB;border-color:var(--border)}.status-cell.gray .status-cell-val{color:var(--chart-gray)}
+
+/* ── PROFICIENCY CELLS ── */
+.prof-cell{display:inline-flex;align-items:center;justify-content:center;width:28px;height:22px;border-radius:4px;font-size:10px;font-weight:600;color:#fff}
+.prof-L1{background:var(--l1)}.prof-L2{background:var(--l2)}.prof-L3{background:var(--l3)}.prof-L4{background:var(--l4)}
+.prof-empty{background:rgba(0,0,0,0.04);color:var(--text-t)}
+
+/* ── METRIC CARD ── */
+.metric-card{text-align:center;padding:24px;background:linear-gradient(135deg,rgba(201,168,76,0.04),rgba(201,168,76,0.01));border:1px solid rgba(201,168,76,0.15);border-radius:var(--radius-md)}
+.metric-big{font-family:var(--font-display);font-size:48px;font-weight:600;color:var(--accent);line-height:1;margin-bottom:6px}
+.metric-label{font-size:12px;color:var(--text-s)}
+.metric-sub{font-size:11px;color:var(--text-t);margin-top:4px}
+
+/* ── GAUGE ── */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+.gauge{width:140px;height:70px;position:relative;overflow:hidden}
+.gauge-bg{width:140px;height:140px;border-radius:50%;background:conic-gradient(var(--chart-gray) 0deg,var(--chart-gray) 360deg);position:absolute;top:0;left:0;clip-path:polygon(0 0,100% 0,100% 50%,0 50%)}
+.gauge-fill{width:140px;height:140px;border-radius:50%;position:absolute;top:0;left:0;clip-path:polygon(0 0,100% 0,100% 50%,0 50%);transition:background .8s}
+.gauge-center{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100px;height:50px;border-radius:100px 100px 0 0;background:var(--surface);display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px}
+.gauge-val{font-family:var(--font-display);font-size:20px;font-weight:600;color:var(--text)}
+.gauge-label{font-size:11px;color:var(--text-s);text-align:center}
+
+/* ── EMPTY STATE ── */
+.empty-state{padding:40px 20px;text-align:center;color:var(--text-t)}
+.empty-state svg{width:48px;height:48px;stroke:var(--text-t);fill:none;stroke-width:1.5;margin-bottom:12px}
+.empty-state h3{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-s);margin-bottom:6px}
+.empty-state p{font-size:13px;max-width:420px;margin:0 auto;line-height:1.6}
+.empty-state a{color:var(--accent);text-decoration:none;font-weight:500}
+.empty-state a:hover{text-decoration:underline}
+
+/* ── SKELETON ── */
+.skel{background:linear-gradient(90deg,rgba(0,0,0,0.04) 25%,rgba(0,0,0,0.07) 50%,rgba(0,0,0,0.04) 75%);background-size:200% 100%;animation:skelShimmer 1.5s infinite;border-radius:4px}
+@keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── PLACEHOLDER NOTE ── */
+.placeholder-note{padding:16px 20px;background:var(--blue-bg);border:1px solid rgba(37,99,235,0.15);border-radius:var(--radius-sm);font-size:12px;color:var(--blue);display:flex;align-items:flex-start;gap:10px;margin-bottom:16px}
+.placeholder-note svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0;margin-top:1px}
+
+/* ── COMPLETENESS BAR ── */
+.completeness-bar{height:6px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden;flex:1}
+.completeness-fill{height:100%;border-radius:3px;transition:width .6s ease}
+
+/* ── FORMULA BOX ── */
+.formula-box{padding:14px 18px;background:rgba(0,0,0,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:12px;color:var(--text-s);margin-top:12px;line-height:1.7}
+.formula-box strong{color:var(--text);font-weight:500}
+
+/* ── HEATMAP GRID ── */
+.heatmap-grid{display:grid;gap:2px}
+.heatmap-cell{padding:6px 4px;text-align:center;font-size:10px;font-weight:500;border-radius:3px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.heatmap-cell.critical{background:#FEE2E2;color:#DC2626}
+.heatmap-cell.high{background:#FEF3C7;color:#D97706}
+.heatmap-cell.medium{background:#DBEAFE;color:#2563EB}
+.heatmap-cell.low{background:#D1FAE5;color:#059669}
+.heatmap-cell.none{background:#F3F4F6;color:#9CA3AF}
+.heatmap-header{font-size:9px;font-weight:600;color:var(--text-t);text-transform:uppercase;letter-spacing:.04em;padding:6px 4px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.heatmap-row-label{font-size:11px;font-weight:500;color:var(--text-s);padding:6px 8px 6px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── JOURNEY CARD ── */
+.journey-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 18px}
+.journey-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px}
+.journey-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.journey-row:last-child{border-bottom:none}
+.journey-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.journey-label{font-size:12px;color:var(--text-s);flex:1}
+.journey-val{font-family:var(--font-display);font-size:16px;font-weight:600;min-width:40px;text-align:right}
+
+/* ── CONTEXT TAG ── */
+.ctx-tag{display:inline-block;padding:3px 10px;border-radius:100px;font-size:10px;border:1px solid var(--border);color:var(--text-s);margin:2px 3px 2px 0}
+
+/* ── YEAR SELECTOR ── */
+.year-selector{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.year-selector label{font-size:12px;font-weight:500;color:var(--text-s)}
+.year-selector select{padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;color:var(--text);background:var(--surface);cursor:pointer}
+
+/* ── HEATMAP FILTER BAR ── */
+.hm-filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.hm-filter-btn{padding:6px 14px;border:1px solid var(--border);border-radius:100px;font-size:11px;font-weight:500;color:var(--text-s);background:none;cursor:pointer;font-family:var(--font-body);transition:all .15s}
+.hm-filter-btn:hover{border-color:var(--accent);color:var(--accent)}
+.hm-filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+<div class="report-scroll">
+<div class="report-container">
+
+  <div class="page-header">
+    <h1>Organization Setup Report</h1>
+    <p>Organisation data reports and analytics dashboard</p>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="report-tabs" id="reportTabs">
+    <button class="report-tab active" data-tab="overview">Org Overview</button>
+    <button class="report-tab" data-tab="skills">Skill Inventory</button>
+    <button class="report-tab" data-tab="competencies">Competency Inventory</button>
+    <button class="report-tab" data-tab="profiles">Employee Profiles</button>
+    <button class="report-tab" data-tab="roleskill">Role-Skill Matrix</button>
+    <button class="report-tab" data-tab="training">Training Mapping</button>
+    <button class="report-tab" data-tab="records">Training Records</button>
+    <button class="report-tab" data-tab="quality">Data Quality</button>
+    <button class="report-tab" data-tab="yearly">Yearly Performance</button>
+    <button class="report-tab" data-tab="heatmaps">HeatMaps</button>
+  </div>
+
+  <!-- NO DATA STATE -->
+  <div id="noDataState" style="display:none">
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      <h3>No organisation data found</h3>
+      <p>Complete the Organisation Setup first to populate these reports.<br><a href="org-setup-v4.html">Go to Organisation Setup</a></p>
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button onclick="loadDemoData()" style="padding:8px 20px;font-size:13px;font-weight:500;background:var(--accent,#C9A84C);color:#fff;border:none;border-radius:6px;cursor:pointer">Load Demo Data</button>
+        <a href="org-setup-v4.html" style="padding:8px 20px;font-size:13px;font-weight:500;border:1px solid var(--border,#E5E7EB);border-radius:6px;color:var(--text-s,#6B7280);text-decoration:none">Go to Setup</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB PANELS -->
+  <div id="tabPanels">
+
+    <!-- TAB 1: ORG OVERVIEW -->
+    <div class="tab-panel active" id="panel-overview"></div>
+
+    <!-- TAB 2: SKILL INVENTORY -->
+    <div class="tab-panel" id="panel-skills"></div>
+
+    <!-- TAB 3: COMPETENCY INVENTORY -->
+    <div class="tab-panel" id="panel-competencies"></div>
+
+    <!-- TAB 4: EMPLOYEE PROFILES -->
+    <div class="tab-panel" id="panel-profiles"></div>
+
+    <!-- TAB 5: ROLE-SKILL MATRIX -->
+    <div class="tab-panel" id="panel-roleskill"></div>
+
+    <!-- TAB 6: TRAINING MAPPING -->
+    <div class="tab-panel" id="panel-training"></div>
+
+    <!-- TAB 7: TRAINING RECORDS -->
+    <div class="tab-panel" id="panel-records"></div>
+
+    <!-- TAB 8: DATA QUALITY -->
+    <div class="tab-panel" id="panel-quality"></div>
+
+    <!-- TAB 9: YEARLY PERFORMANCE -->
+    <div class="tab-panel" id="panel-yearly"></div>
+
+    <!-- TAB 10: HEATMAPS -->
+    <div class="tab-panel" id="panel-heatmaps"></div>
+
+  </div>
+
+</div>
+</div>
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal: 'admin',
+  activeNav: 'Organization Setup Report',
+  breadcrumbs: ['Reports', 'Organization Setup Report'],
+  topbarActions: []
+});
+</script>
+<script>
+(function(){
+
+  var CHART_COLORS = ['#3B82F6','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#6B7280','#0891B2','#C9A84C','#14B8A6'];
+  var state = null;
+
+  function getBlockData(id){
+    if(!state||!state.blocks) return null;
+    var b = state.blocks.find(function(x){return x.id===id});
+    return b&&b.data?b.data:null;
+  }
+  function getBlockStatus(id){
+    if(!state||!state.blocks) return 'missing';
+    var b = state.blocks.find(function(x){return x.id===id});
+    return b?b.status||'draft':'missing';
+  }
+  function safe(arr){return Array.isArray(arr)?arr:[]}
+  function esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+  function countMap(arr,key){var m={};arr.forEach(function(x){var k=x[key]||'Other';m[k]=(m[k]||0)+1});return m}
+  function pct(n,t){return t?Math.round(n/t*100):0}
+
+  /* ── BAR CHART BUILDER ── */
+  function buildHBars(data,maxVal,colorFn){
+    if(!maxVal) maxVal=Math.max.apply(null,data.map(function(d){return d.value}))||1;
+    return '<div class="h-bar-chart">'+data.map(function(d,i){
+      var w=Math.max(2,Math.round(d.value/maxVal*100));
+      var c=colorFn?colorFn(d,i):CHART_COLORS[i%CHART_COLORS.length];
+      return '<div class="h-bar-row">'+
+        '<span class="h-bar-label" title="'+esc(d.label)+'">'+esc(d.label)+'</span>'+
+        '<div class="h-bar-track"><div class="h-bar-fill" style="width:'+w+'%;background:'+c+'"><span class="h-bar-val">'+(w>15?d.value:'')+'</span></div></div>'+
+        '<span class="h-bar-val-out">'+(w<=15?d.value:'')+'</span>'+
+      '</div>';
+    }).join('')+'</div>';
+  }
+
+  /* ── DONUT BUILDER ── */
+  function buildDonut(segments,total,centerLabel){
+    var conic=[],deg=0;
+    segments.forEach(function(s,i){
+      var angle=total?s.value/total*360:0;
+      var c=CHART_COLORS[i%CHART_COLORS.length];
+      conic.push(c+' '+deg.toFixed(1)+'deg '+(deg+angle).toFixed(1)+'deg');
+      s._color=c;
+      deg+=angle;
+    });
+    if(deg<360) conic.push('rgba(0,0,0,0.04) '+deg.toFixed(1)+'deg 360deg');
+    var legend=segments.map(function(s){
+      return '<div class="donut-legend-item"><span class="donut-legend-dot" style="background:'+s._color+'"></span>'+esc(s.label)+'<span class="donut-legend-val">'+s.value+'</span></div>';
+    }).join('');
+    return '<div class="donut-wrap">'+
+      '<div class="donut" style="background:conic-gradient('+conic.join(',')+')"><div class="donut-hole"><span class="donut-center-val">'+total+'</span><span class="donut-center-label">'+(centerLabel||'Total')+'</span></div></div>'+
+      '<div class="donut-legend">'+legend+'</div></div>';
+  }
+
+  /* ── TABLE BUILDER ── */
+  function buildTable(cols,rows,opts){
+    opts=opts||{};
+    var h='<div class="data-table-wrap"><table class="data-table"><thead><tr>'+cols.map(function(c){return '<th>'+esc(c.label||c.key)+'</th>'}).join('')+'</tr></thead><tbody>';
+    var shown=opts.limit?rows.slice(0,opts.limit):rows;
+    shown.forEach(function(r){
+      h+='<tr>'+cols.map(function(c){
+        var v=c.render?c.render(r):esc(r[c.key]||'');
+        var cls=c.cls?' class="'+c.cls+'"':'';
+        return '<td'+cls+'>'+v+'</td>';
+      }).join('')+'</tr>';
+    });
+    h+='</tbody></table>';
+    if(opts.limit&&rows.length>opts.limit) h+='<div style="padding:8px 10px;font-size:11px;color:var(--text-t)">Showing '+opts.limit+' of '+rows.length+' rows</div>';
+    h+='</div>';
+    return h;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 1: ORG OVERVIEW
+     ══════════════════════════════════════════════════════════ */
+  function renderOverview(){
+    var j=getBlockData('J'),k=getBlockData('K'),l=getBlockData('L'),d=getBlockData('D'),
+        b=getBlockData('B'),f=getBlockData('F'),g=getBlockData('G'),c=getBlockData('C'),a=getBlockData('A');
+    var skills=safe(j&&j.skills), comps=safe(k&&k.competencies), roles=safe(l&&l.roles);
+    var prods=(d?safe(d.products).length:0)+(d?safe(d.services).length:0);
+    var locs=b?safe(b.locationMaster).length:0;
+    var stds=f?(safe(f.standards).length+safe(f.certifications).length):0;
+    var tools=g?safe(g.tools).length:0;
+    var goals=c?safe(c.goals).length:0;
+
+    var kpis=[
+      {label:'Total Skills',value:skills.length,bg:'var(--blue-bg)',color:'var(--chart-blue)',icon:'<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>'},
+      {label:'Competencies',value:comps.length,bg:'var(--purple-bg)',color:'var(--chart-purple)',icon:'<circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/>'},
+      {label:'Roles',value:roles.length,bg:'var(--green-bg)',color:'var(--chart-green)',icon:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
+      {label:'Products & Services',value:prods,bg:'var(--amber-bg)',color:'var(--chart-amber)',icon:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>'},
+      {label:'Locations',value:locs,bg:'var(--teal-bg)',color:'var(--teal)',icon:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'},
+      {label:'Standards',value:stds,bg:'#F5F3FF',color:'var(--chart-purple)',icon:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/>'},
+      {label:'Tools',value:tools,bg:'var(--red-bg)',color:'var(--chart-red)',icon:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>'},
+      {label:'Strategic Goals',value:goals,bg:'rgba(201,168,76,0.08)',color:'var(--accent)',icon:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'}
+    ];
+
+    var html='<div class="section-head"><h2>Organisation Overview Dashboard</h2><p>Top-level snapshot of workforce configuration and skill maturity</p></div>';
+
+    // Org name
+    if(a&&a.legalName){
+      html+='<div style="margin-bottom:16px;padding:12px 18px;background:linear-gradient(135deg,rgba(201,168,76,0.06),rgba(201,168,76,0.02));border:1px solid rgba(201,168,76,0.15);border-radius:var(--radius-md);display:flex;align-items:center;gap:12px">'+
+        '<div style="width:36px;height:36px;background:var(--accent);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);flex-shrink:0"></div>'+
+        '<div><div style="font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text)">'+esc(a.legalName)+'</div>'+
+        '<div style="font-size:11px;color:var(--text-s)">'+(a.primaryIndustry?esc(a.primaryIndustry)+' &middot; ':'')+
+        (a.employeeBand?esc(a.employeeBand)+' employees':'')+'</div></div></div>';
+    }
+
+    // KPIs
+    html+='<div class="kpi-grid">';
+    kpis.forEach(function(kpi){
+      html+='<div class="kpi-card"><div class="kpi-icon" style="background:'+kpi.bg+';color:'+kpi.color+'"><svg viewBox="0 0 24 24">'+kpi.icon+'</svg></div><div class="kpi-value">'+kpi.value+'</div><div class="kpi-label">'+kpi.label+'</div></div>';
+    });
+    html+='</div>';
+
+    html+='<div class="grid-2">';
+
+    // Skill maturity bar chart
+    var typeMap=countMap(skills,'type');
+    var typeData=Object.keys(typeMap).sort(function(a,b){return typeMap[b]-typeMap[a]}).map(function(k){return {label:k,value:typeMap[k]}});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Skill Maturity by Type</span><span class="card-badge">'+skills.length+' skills</span></div><div class="card-body">';
+    if(typeData.length) html+=buildHBars(typeData);
+    else html+='<div style="color:var(--text-t);font-size:12px">No skill data available</div>';
+    html+='</div></div>';
+
+    // Block completeness
+    var blockDefs=[
+      {id:'A',name:'Org Profile'},{id:'B',name:'Org Structure'},{id:'C',name:'Strategy'},
+      {id:'D',name:'Products & Services'},{id:'E',name:'Market & Clients'},{id:'F',name:'Standards'},
+      {id:'G',name:'Technology'},{id:'J',name:'Skills Taxonomy'},{id:'K',name:'Competencies'},
+      {id:'L',name:'Role Architecture'}
+    ];
+    html+='<div class="card"><div class="card-head"><span class="card-title">Block Completeness</span></div><div class="card-body"><div class="status-grid">';
+    blockDefs.forEach(function(bd){
+      var st=getBlockStatus(bd.id);
+      var hasData=!!getBlockData(bd.id);
+      var cls=st==='complete'?'green':(hasData?'amber':'gray');
+      var lbl=st==='complete'?'Complete':(hasData?'In Progress':'Empty');
+      html+='<div class="status-cell '+cls+'"><div class="status-cell-label">'+esc(bd.name)+'</div><div class="status-cell-val">'+lbl+'</div></div>';
+    });
+    html+='</div></div></div>';
+
+    html+='</div>'; // grid-2
+    document.getElementById('panel-overview').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 2: SKILL INVENTORY
+     ══════════════════════════════════════════════════════════ */
+  function renderSkills(){
+    var j=getBlockData('J');
+    var skills=safe(j&&j.skills);
+    var html='<div class="section-head"><h2>Skill Inventory Summary</h2><p>Complete catalogue of organisational skills by type, domain and criticality</p></div>';
+
+    if(!skills.length){
+      html+='<div class="empty-state"><h3>No skills defined</h3><p>Configure skills in Block J of Organisation Setup.</p></div>';
+      document.getElementById('panel-skills').innerHTML=html;return;
+    }
+
+    html+='<div class="grid-2">';
+
+    // Domain distribution
+    var domMap=countMap(skills,'domain');
+    var domData=Object.keys(domMap).sort(function(a,b){return domMap[b]-domMap[a]}).map(function(k){return {label:k,value:domMap[k]}});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Skills by Domain</span></div><div class="card-body">'+buildHBars(domData.slice(0,12))+'</div></div>';
+
+    // Type donut
+    var typeMap=countMap(skills,'type');
+    var typeSegs=Object.keys(typeMap).map(function(k){return {label:k,value:typeMap[k]}});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Skills by Type</span></div><div class="card-body">'+buildDonut(typeSegs,skills.length,'Skills')+'</div></div>';
+
+    html+='</div>';
+
+    // Skills table
+    html+='<div class="card"><div class="card-head"><span class="card-title">All Skills</span><span class="card-badge">'+skills.length+' total</span></div><div class="card-body">';
+    html+=buildTable([
+      {key:'code',label:'Code',cls:'mono'},
+      {key:'name',label:'Skill Name'},
+      {key:'type',label:'Type',render:function(r){
+        var colors={'Technical':'var(--chart-blue)','Behavioural':'var(--chart-purple)','Domain Knowledge':'var(--chart-green)','Leadership':'var(--chart-amber)','Digital':'var(--chart-pink)'};
+        var c=colors[r.type]||'var(--chart-gray)';
+        return '<span class="tag" style="background:'+c+'15;color:'+c+'">'+esc(r.type||'')+'</span>';
+      }},
+      {key:'domain',label:'Domain'},
+      {key:'defaultCriticality',label:'Criticality',render:function(r){
+        var v=r.defaultCriticality||'';
+        var c=v==='Critical'?'var(--chart-red)':(v==='High'?'var(--chart-amber)':'var(--chart-gray)');
+        return '<span style="color:'+c+';font-weight:500">'+esc(v)+'</span>';
+      }}
+    ],skills,{limit:50});
+    html+='</div></div>';
+
+    document.getElementById('panel-skills').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 3: COMPETENCY INVENTORY
+     ══════════════════════════════════════════════════════════ */
+  function renderCompetencies(){
+    var k=getBlockData('K');
+    var comps=safe(k&&k.competencies);
+    var html='<div class="section-head"><h2>Competency Inventory</h2><p>Competencies by type with indicator coverage analysis</p></div>';
+
+    if(!comps.length){
+      html+='<div class="empty-state"><h3>No competencies defined</h3><p>Configure competencies in Block K of Organisation Setup.</p></div>';
+      document.getElementById('panel-competencies').innerHTML=html;return;
+    }
+
+    html+='<div class="grid-2">';
+
+    // Type bar chart
+    var typeMap=countMap(comps,'type');
+    var typeData=Object.keys(typeMap).sort(function(a,b){return typeMap[b]-typeMap[a]}).map(function(k){return {label:k,value:typeMap[k]}});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Competencies by Type</span></div><div class="card-body">'+buildHBars(typeData)+'</div></div>';
+
+    // Strength index
+    var filledIndicators=0,totalIndicators=0;
+    comps.forEach(function(c){
+      var ind=c.indicators||{};
+      ['L1','L2','L3','L4'].forEach(function(lv){
+        totalIndicators++;
+        if(ind[lv]&&ind[lv].trim()) filledIndicators++;
+      });
+    });
+    var strengthPct=pct(filledIndicators,totalIndicators);
+    html+='<div class="card"><div class="card-head"><span class="card-title">Competency Strength Index</span></div><div class="card-body">'+
+      '<div class="metric-card"><div class="metric-big">'+strengthPct+'%</div><div class="metric-label">Indicator Coverage</div><div class="metric-sub">'+filledIndicators+' of '+totalIndicators+' proficiency indicators defined</div></div>'+
+    '</div></div>';
+
+    html+='</div>';
+
+    // Table
+    html+='<div class="card"><div class="card-head"><span class="card-title">All Competencies</span><span class="card-badge">'+comps.length+' total</span></div><div class="card-body">';
+    html+=buildTable([
+      {key:'name',label:'Competency Name'},
+      {key:'type',label:'Type',render:function(r){
+        var colors={'Core':'var(--chart-blue)','Behavioural':'var(--chart-purple)','Leadership':'var(--chart-amber)','Technical':'var(--chart-green)','Functional':'var(--chart-pink)'};
+        var c=colors[r.type]||'var(--chart-gray)';
+        return '<span class="tag" style="background:'+c+'15;color:'+c+'">'+esc(r.type||'')+'</span>';
+      }},
+      {key:'L1',label:'L1',render:function(r){var v=r.indicators&&r.indicators.L1;return v?'<span style="color:var(--l1)">&#10003;</span>':'<span style="color:var(--text-t)">&mdash;</span>'}},
+      {key:'L2',label:'L2',render:function(r){var v=r.indicators&&r.indicators.L2;return v?'<span style="color:var(--l2)">&#10003;</span>':'<span style="color:var(--text-t)">&mdash;</span>'}},
+      {key:'L3',label:'L3',render:function(r){var v=r.indicators&&r.indicators.L3;return v?'<span style="color:var(--l3)">&#10003;</span>':'<span style="color:var(--text-t)">&mdash;</span>'}},
+      {key:'L4',label:'L4',render:function(r){var v=r.indicators&&r.indicators.L4;return v?'<span style="color:var(--l4)">&#10003;</span>':'<span style="color:var(--text-t)">&mdash;</span>'}},
+      {key:'methods',label:'Assessment Methods',render:function(r){return safe(r.assessmentMethods).map(function(m){return '<span class="tag" style="background:rgba(0,0,0,0.04);color:var(--text-s);margin:1px 2px">'+esc(m)+'</span>'}).join(' ')||'&mdash;'}}
+    ],comps,{limit:50});
+    html+='</div></div>';
+
+    document.getElementById('panel-competencies').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 4: EMPLOYEE SKILL PROFILES
+     ══════════════════════════════════════════════════════════ */
+  function renderProfiles(){
+    var l=getBlockData('L');
+    var roles=safe(l&&l.roles);
+    var html='<div class="section-head"><h2>Employee Skill Profiles</h2><p>Individual skill profile readiness based on role architecture</p></div>';
+
+    html+='<div class="placeholder-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>Employee assessments not yet available. Complete Level 2 assessment cycles to populate individual skill profiles.</span></div>';
+
+    if(roles.length){
+      var totalSkills=0,totalMandatory=0,totalProf=0,profCount=0;
+      roles.forEach(function(r){
+        var rs=safe(r.requiredSkills);
+        totalSkills+=rs.length;
+        rs.forEach(function(s){
+          if(s.isMandatory) totalMandatory++;
+          if(s.targetProficiency){
+            var n=parseInt(String(s.targetProficiency).replace(/\D/g,''))||0;
+            if(n){totalProf+=n;profCount++}
+          }
+        });
+      });
+      var avgSkills=roles.length?Math.round(totalSkills/roles.length*10)/10:0;
+      var avgMandatory=roles.length?Math.round(totalMandatory/roles.length*10)/10:0;
+      var avgProf=profCount?Math.round(totalProf/profCount*10)/10:0;
+
+      html+='<div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">';
+      html+='<div class="kpi-card"><div class="kpi-value">'+avgSkills+'</div><div class="kpi-label">Avg Skills per Role</div></div>';
+      html+='<div class="kpi-card"><div class="kpi-value">'+avgMandatory+'</div><div class="kpi-label">Avg Mandatory Skills per Role</div></div>';
+      html+='<div class="kpi-card"><div class="kpi-value">L'+avgProf+'</div><div class="kpi-label">Avg Target Proficiency</div></div>';
+      html+='</div>';
+
+      // Role summary table
+      html+='<div class="card"><div class="card-head"><span class="card-title">Role Skill Requirements Summary</span></div><div class="card-body">';
+      html+=buildTable([
+        {key:'title',label:'Role Title'},
+        {key:'family',label:'Family'},
+        {key:'seniority',label:'Seniority'},
+        {key:'skillCount',label:'Required Skills',render:function(r){return safe(r.requiredSkills).length}},
+        {key:'mandatoryCount',label:'Mandatory',render:function(r){return safe(r.requiredSkills).filter(function(s){return s.isMandatory}).length}},
+        {key:'compCount',label:'Competencies',render:function(r){return safe(r.requiredCompetencies).length}}
+      ],roles,{limit:30});
+      html+='</div></div>';
+    } else {
+      html+='<div class="empty-state"><h3>No roles defined</h3><p>Configure roles in Block L to see profile summaries.</p></div>';
+    }
+
+    document.getElementById('panel-profiles').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 5: ROLE-SKILL MATRIX
+     ══════════════════════════════════════════════════════════ */
+  function renderRoleSkill(){
+    var l=getBlockData('L');
+    var roles=safe(l&&l.roles);
+    var html='<div class="section-head"><h2>Role-Skill Matrix</h2><p>Maps roles to required skills with proficiency levels and capability analysis</p></div>';
+
+    if(!roles.length){
+      html+='<div class="empty-state"><h3>No roles defined</h3><p>Configure roles in Block L of Organisation Setup.</p></div>';
+      document.getElementById('panel-roleskill').innerHTML=html;return;
+    }
+
+    // Role capability table
+    html+='<div class="card"><div class="card-head"><span class="card-title">Role Capability Summary</span><span class="card-badge">'+roles.length+' roles</span></div><div class="card-body">';
+    html+=buildTable([
+      {key:'title',label:'Role'},
+      {key:'family',label:'Family'},
+      {key:'skills',label:'Required Skills',render:function(r){return safe(r.requiredSkills).length}},
+      {key:'mandatory',label:'Mandatory',render:function(r){return safe(r.requiredSkills).filter(function(s){return s.isMandatory}).length}},
+      {key:'avgProf',label:'Avg Target Prof.',render:function(r){
+        var rs=safe(r.requiredSkills),sum=0,cnt=0;
+        rs.forEach(function(s){var n=parseInt(String(s.targetProficiency||'').replace(/\D/g,''))||0;if(n){sum+=n;cnt++}});
+        return cnt?'L'+(Math.round(sum/cnt*10)/10):'—';
+      }},
+      {key:'comps',label:'Competencies',render:function(r){return safe(r.requiredCompetencies).length}}
+    ],roles,{limit:30});
+    html+='</div></div>';
+
+    // Matrix view: roles x top skills
+    var skillFreq={};
+    roles.forEach(function(r){safe(r.requiredSkills).forEach(function(s){skillFreq[s.skillName]=(skillFreq[s.skillName]||0)+1})});
+    var topSkills=Object.keys(skillFreq).sort(function(a,b){return skillFreq[b]-skillFreq[a]}).slice(0,10);
+
+    if(topSkills.length){
+      html+='<div class="card"><div class="card-head"><span class="card-title">Proficiency Matrix (Top '+topSkills.length+' Skills)</span></div><div class="card-body"><div class="data-table-wrap"><table class="data-table"><thead><tr><th>Role</th>';
+      topSkills.forEach(function(s){html+='<th style="max-width:80px;font-size:9px;text-transform:none;white-space:normal">'+esc(s)+'</th>'});
+      html+='</tr></thead><tbody>';
+      var shown=roles.slice(0,20);
+      shown.forEach(function(r,ri){
+        html+='<tr'+(ri%2?' style="background:rgba(0,0,0,0.015)"':'')+'><td style="font-weight:500;white-space:nowrap">'+esc(r.title)+'</td>';
+        topSkills.forEach(function(sn){
+          var match=safe(r.requiredSkills).find(function(s){return s.skillName===sn});
+          if(match){
+            var lv=String(match.targetProficiency||'').replace(/\D/g,'')||'?';
+            var cls='prof-L'+lv;
+            html+='<td style="text-align:center"><span class="prof-cell '+cls+'">L'+lv+'</span></td>';
+          } else {
+            html+='<td style="text-align:center"><span class="prof-cell prof-empty">&mdash;</span></td>';
+          }
+        });
+        html+='</tr>';
+      });
+      html+='</tbody></table></div>';
+      if(roles.length>20) html+='<div style="padding:8px 10px;font-size:11px;color:var(--text-t)">Showing 20 of '+roles.length+' roles</div>';
+      html+='</div></div>';
+    }
+
+    // Formula
+    html+='<div class="card"><div class="card-head"><span class="card-title">Role Capability Gap Score</span></div><div class="card-body">'+
+      '<div class="formula-box"><strong>Gap Score = (Target Proficiency - Current Proficiency) x Criticality Weight</strong><br>'+
+      'Where Criticality Weight: Critical = 3, High = 2, Medium = 1<br>'+
+      'A higher gap score indicates greater training priority for that skill-role combination.<br>'+
+      '<em style="color:var(--text-t)">Note: Current proficiency data will be available after employee assessments are completed in Level 2.</em></div>'+
+    '</div></div>';
+
+    document.getElementById('panel-roleskill').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 6: TRAINING PROGRAM MAPPING
+     ══════════════════════════════════════════════════════════ */
+  function renderTraining(){
+    var j=getBlockData('J');
+    var skills=safe(j&&j.skills);
+    var html='<div class="section-head"><h2>Training Program Mapping</h2><p>Skill-to-training coverage analysis and gap identification</p></div>';
+
+    html+='<div class="placeholder-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>Configure training programs in Level 2 to see full coverage mapping.</span></div>';
+
+    if(skills.length){
+      // All skills are uncovered since no training data exists
+      html+='<div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">';
+      html+='<div class="kpi-card"><div class="kpi-value" style="color:var(--chart-red)">'+skills.length+'</div><div class="kpi-label">Skills Without Training</div></div>';
+      html+='<div class="kpi-card"><div class="kpi-value" style="color:var(--chart-gray)">0</div><div class="kpi-label">Training Programs</div></div>';
+      html+='<div class="kpi-card"><div class="kpi-value" style="color:var(--chart-gray)">0%</div><div class="kpi-label">Coverage Rate</div></div>';
+      html+='</div>';
+
+      // Coverage bar
+      html+='<div class="card"><div class="card-head"><span class="card-title">Skill Coverage Status</span></div><div class="card-body">';
+      html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><span style="font-size:12px;color:var(--text-s);width:80px">0% covered</span><div class="completeness-bar"><div class="completeness-fill" style="width:0%;background:var(--chart-red)"></div></div></div>';
+
+      // Uncovered skills table
+      html+='<div style="font-size:12px;font-weight:600;color:var(--text-s);margin-bottom:8px">Uncovered Skills ('+skills.length+')</div>';
+      html+=buildTable([
+        {key:'code',label:'Code',cls:'mono'},
+        {key:'name',label:'Skill'},
+        {key:'type',label:'Type'},
+        {key:'domain',label:'Domain'},
+        {key:'status',label:'Training Status',render:function(){return '<span class="tag" style="background:var(--red-bg);color:var(--chart-red)">No Coverage</span>'}}
+      ],skills,{limit:30});
+      html+='</div></div>';
+    } else {
+      html+='<div class="empty-state"><h3>No skills defined</h3><p>Define skills in Block J first, then configure training in Level 2.</p></div>';
+    }
+
+    document.getElementById('panel-training').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 7: TRAINING RECORDS
+     ══════════════════════════════════════════════════════════ */
+  function renderRecords(){
+    var html='<div class="section-head"><h2>Training Records</h2><p>Training completion log and employee learning history</p></div>';
+
+    html+='<div class="placeholder-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>No training records available yet. Training data will populate after Level 2 Learning &amp; Training module is configured.</span></div>';
+
+    // KPI skeletons
+    html+='<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">';
+    ['Total Enrolments','Completions','In Progress','Completion Rate'].forEach(function(lbl){
+      html+='<div class="kpi-card" style="opacity:0.5"><div class="kpi-value" style="color:var(--text-t)">&mdash;</div><div class="kpi-label">'+lbl+'</div></div>';
+    });
+    html+='</div>';
+
+    // Skeleton table
+    html+='<div class="card"><div class="card-head"><span class="card-title">Training Completion Log</span></div><div class="card-body"><div class="data-table-wrap"><table class="data-table"><thead><tr>';
+    ['Employee','Skill/Course','Start Date','End Date','Status','Score','Certificate'].forEach(function(h){
+      html+='<th>'+h+'</th>';
+    });
+    html+='</tr></thead><tbody>';
+    for(var i=0;i<5;i++){
+      html+='<tr style="opacity:0.4">';
+      for(var j=0;j<7;j++){
+        var w=[120,160,80,80,70,50,60][j];
+        html+='<td><div class="skel" style="width:'+w+'px;height:14px"></div></td>';
+      }
+      html+='</tr>';
+    }
+    html+='</tbody></table></div></div></div>';
+
+    document.getElementById('panel-records').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 8: DATA QUALITY SCORECARD
+     ══════════════════════════════════════════════════════════ */
+  function renderQuality(){
+    var html='<div class="section-head"><h2>Data Quality Scorecard</h2><p>Completeness and quality assessment across all configuration blocks</p></div>';
+
+    var blocks=[
+      {id:'A',name:'Org Profile',countFn:function(d){var items=[];if(d.legalName)items.push('Profile configured');if(safe(d.contextYearly).length)items.push(safe(d.contextYearly).length+' yearly context');return items.join(', ')||'Empty'}},
+      {id:'B',name:'Org Structure',countFn:function(d){var items=[];if(safe(d.levels).length)items.push(safe(d.levels).length+' levels');if(safe(d.nodes).length)items.push(safe(d.nodes).length+' nodes');if(safe(d.locationMaster).length)items.push(safe(d.locationMaster).length+' locations');return items.join(', ')||'Empty'}},
+      {id:'C',name:'Strategy',countFn:function(d){var items=[];if(safe(d.strategicPriorities).length)items.push(safe(d.strategicPriorities).length+' priorities');if(safe(d.goals).length)items.push(safe(d.goals).length+' goals');if(safe(d.strategicRisks).length)items.push(safe(d.strategicRisks).length+' risks');return items.join(', ')||'Empty'}},
+      {id:'D',name:'Products & Services',countFn:function(d){var items=[];if(safe(d.products).length)items.push(safe(d.products).length+' products');if(safe(d.services).length)items.push(safe(d.services).length+' services');if(safe(d.projects).length)items.push(safe(d.projects).length+' projects');return items.join(', ')||'Empty'}},
+      {id:'E',name:'Market & Clients',countFn:function(d){var items=[];if(safe(d.clients).length)items.push(safe(d.clients).length+' clients');if(safe(d.locations).length)items.push(safe(d.locations).length+' locations');return items.join(', ')||'Empty'}},
+      {id:'F',name:'Standards & Certifications',countFn:function(d){var items=[];if(safe(d.standards).length)items.push(safe(d.standards).length+' standards');if(safe(d.certifications).length)items.push(safe(d.certifications).length+' certifications');return items.join(', ')||'Empty'}},
+      {id:'G',name:'Technology',countFn:function(d){var items=[];if(safe(d.tools).length)items.push(safe(d.tools).length+' tools');if(safe(d.techStackHistory).length)items.push(safe(d.techStackHistory).length+' tech history');return items.join(', ')||'Empty'}},
+      {id:'J',name:'Skills Taxonomy',countFn:function(d){var items=[];if(safe(d.skills).length)items.push(safe(d.skills).length+' skills');if(safe(d.taxonomy).length)items.push(safe(d.taxonomy).length+' taxonomy');if(safe(d.skillCategories).length)items.push(safe(d.skillCategories).length+' categories');return items.join(', ')||'Empty'}},
+      {id:'K',name:'Competencies',countFn:function(d){var items=[];if(safe(d.competencies).length)items.push(safe(d.competencies).length+' competencies');if(safe(d.competencyFrameworks).length)items.push(safe(d.competencyFrameworks).length+' frameworks');return items.join(', ')||'Empty'}},
+      {id:'L',name:'Role Architecture',countFn:function(d){var items=[];if(safe(d.roles).length)items.push(safe(d.roles).length+' roles');if(safe(d.roleHierarchyLevels).length)items.push(safe(d.roleHierarchyLevels).length+' hierarchy levels');return items.join(', ')||'Empty'}}
+    ];
+
+    var populated=0,total=blocks.length;
+    var rows=blocks.map(function(bd){
+      var d=getBlockData(bd.id);
+      var st=getBlockStatus(bd.id);
+      var hasData=!!d;
+      if(hasData) populated++;
+      var counts=d?bd.countFn(d):'No data';
+      // Compute completeness based on # of arrays with data
+      var compPct=0;
+      if(d){
+        var keys=Object.keys(d);
+        var filled=0;
+        keys.forEach(function(k){var v=d[k];if(Array.isArray(v)?v.length>0:(v!==null&&v!==undefined&&v!==''))filled++});
+        compPct=keys.length?Math.round(filled/keys.length*100):0;
+      }
+      return {id:bd.id,name:bd.name,status:st==='complete'?'Complete':(hasData?'In Progress':'Empty'),hasData:hasData,counts:counts,compPct:compPct,cls:st==='complete'?'green':(hasData?'amber':'red')};
+    });
+    var overallPct=Math.round(populated/total*100);
+
+    // Overall score
+    html+='<div class="grid-3" style="margin-bottom:20px">';
+    html+='<div class="metric-card"><div class="metric-big">'+overallPct+'%</div><div class="metric-label">Overall Data Quality</div><div class="metric-sub">'+populated+' of '+total+' blocks populated</div></div>';
+    html+='<div class="metric-card" style="background:linear-gradient(135deg,rgba(16,185,129,0.04),rgba(16,185,129,0.01));border-color:rgba(16,185,129,0.15)"><div class="metric-big" style="color:var(--chart-green)">'+rows.filter(function(r){return r.status==='Complete'}).length+'</div><div class="metric-label">Blocks Complete</div></div>';
+    html+='<div class="metric-card" style="background:linear-gradient(135deg,rgba(239,68,68,0.04),rgba(239,68,68,0.01));border-color:rgba(239,68,68,0.15)"><div class="metric-big" style="color:var(--chart-red)">'+rows.filter(function(r){return !r.hasData}).length+'</div><div class="metric-label">Blocks Empty</div></div>';
+    html+='</div>';
+
+    // QC Status grid
+    html+='<div class="card"><div class="card-head"><span class="card-title">QC Status Grid</span></div><div class="card-body"><div class="status-grid">';
+    rows.forEach(function(r){
+      html+='<div class="status-cell '+r.cls+'"><div class="status-cell-label">'+esc(r.name)+'</div><div class="status-cell-val">'+r.compPct+'%</div></div>';
+    });
+    html+='</div></div></div>';
+
+    // Detail table
+    html+='<div class="card"><div class="card-head"><span class="card-title">Block Completeness Detail</span></div><div class="card-body">';
+    html+='<div class="data-table-wrap"><table class="data-table"><thead><tr><th>Name</th><th>Status</th><th>Data Counts</th><th>Completeness</th></tr></thead><tbody>';
+    rows.forEach(function(r,i){
+      var stColor=r.cls==='green'?'var(--chart-green)':(r.cls==='amber'?'var(--chart-amber)':'var(--chart-red)');
+      html+='<tr'+(i%2?' style="background:rgba(0,0,0,0.015)"':'')+'>';
+      html+='<td style="font-weight:600">'+esc(r.name)+'</td>';
+      html+='<td><span class="tag" style="background:'+stColor+'15;color:'+stColor+'">'+r.status+'</span></td>';
+      html+='<td style="font-size:11px">'+esc(r.counts)+'</td>';
+      html+='<td><div style="display:flex;align-items:center;gap:8px"><div class="completeness-bar" style="width:80px"><div class="completeness-fill" style="width:'+r.compPct+'%;background:'+stColor+'"></div></div><span style="font-size:11px;font-weight:500;color:'+stColor+'">'+r.compPct+'%</span></div></td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table></div>';
+    html+='</div></div>';
+
+    document.getElementById('panel-quality').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 9: YEARLY PERFORMANCE
+     ══════════════════════════════════════════════════════════ */
+  window.yearlySelectedYear=null;
+
+  function renderYearly(){
+    var a=getBlockData('A'),c=getBlockData('C'),d=getBlockData('D'),g=getBlockData('G'),
+        j=getBlockData('J'),k=getBlockData('K');
+    var ctx=safe(a&&a.contextYearly);
+    var perf=safe(a&&a.performanceYearly);
+    var allYears={};
+    ctx.forEach(function(r){if(r.year)allYears[r.year]=true});
+    perf.forEach(function(r){if(r.year)allYears[r.year]=true});
+    var years=Object.keys(allYears).sort().reverse();
+    if(!yearlySelectedYear&&years.length) yearlySelectedYear=years[0];
+    var yr=yearlySelectedYear||'—';
+
+    var html='<div class="section-head"><h2>Organization Yearly Performance</h2><p>Year-on-year business context, performance metrics, and capability journey</p></div>';
+
+    // Year selector
+    if(years.length>0){
+      html+='<div class="year-selector"><label>Select Year:</label><select onchange="yearlySelectedYear=this.value;rendered.yearly=false;renderers.yearly()">';
+      years.forEach(function(y){html+='<option'+(y==yr?' selected':'')+'>'+y+'</option>'});
+      html+='</select></div>';
+    }
+
+    var ctxRow=ctx.find(function(r){return String(r.year)==String(yr)})||{};
+    var perfRow=perf.find(function(r){return String(r.year)==String(yr)})||{};
+
+    // === A. Business Context KPIs ===
+    var empCount=perfRow.employee_count||a&&a.employeeBand||'—';
+    var revenue=perfRow.total_sales_USD_million?'$'+perfRow.total_sales_USD_million+'M':'—';
+    var locCount=perfRow.location_count||'—';
+    var trainInv=perfRow.training_investment_USD?'$'+Number(perfRow.training_investment_USD).toLocaleString():'—';
+    var toolCount=g?safe(g.tools).length:0;
+    var digiStage=ctxRow.digital_transformation_stage||'—';
+
+    html+='<div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">';
+    var kpis=[
+      {label:'Employee Count',value:empCount,color:'var(--chart-blue)'},
+      {label:'Revenue',value:revenue,color:'var(--chart-green)'},
+      {label:'Locations',value:locCount,color:'var(--chart-amber)'},
+      {label:'Training Investment',value:trainInv,color:'var(--chart-purple)'},
+      {label:'Tech Stack',value:toolCount+' tools',color:'var(--chart-red)'},
+      {label:'Digital Stage',value:digiStage,color:'var(--accent)'}
+    ];
+    kpis.forEach(function(kp){
+      html+='<div class="kpi-card"><div class="kpi-value" style="font-size:20px;color:'+kp.color+'">'+esc(String(kp.value))+'</div><div class="kpi-label">'+kp.label+'</div></div>';
+    });
+    html+='</div>';
+
+    html+='<div class="grid-2">';
+
+    // Business Context card
+    html+='<div class="card"><div class="card-head"><span class="card-title">Business Context — '+esc(String(yr))+'</span></div><div class="card-body">';
+    var ctxFields=[
+      {key:'market_conditions',label:'Market Conditions'},
+      {key:'macro_economic_conditions',label:'Macro-Economic Conditions'},
+      {key:'geopolitical_events',label:'Geopolitical Events'},
+      {key:'technology_changes',label:'Technology Changes'},
+      {key:'government_policy_changes',label:'Government Policy Changes'},
+      {key:'industry_disruptions',label:'Industry Disruptions'},
+      {key:'talent_market_conditions',label:'Talent Market Conditions'},
+      {key:'regulatory_environment',label:'Regulatory Environment'},
+      {key:'sustainability_pressure',label:'Sustainability Pressure'},
+      {key:'supply_chain_environment',label:'Supply Chain Environment'}
+    ];
+    var hasCtx=false;
+    ctxFields.forEach(function(f){
+      if(ctxRow[f.key]){
+        hasCtx=true;
+        html+='<div style="margin-bottom:8px"><div style="font-size:10px;font-weight:600;color:var(--text-t);text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px">'+f.label+'</div><div style="font-size:12px;color:var(--text-s);line-height:1.5">'+esc(ctxRow[f.key])+'</div></div>';
+      }
+    });
+    if(!hasCtx) html+='<div style="color:var(--text-t);font-size:12px">No context data for '+esc(String(yr))+'. Add data in Organisation Setup → Context Yearly tab.</div>';
+    html+='</div></div>';
+
+    // Key Strategies card
+    html+='<div class="card"><div class="card-head"><span class="card-title">Key Strategies &amp; Workforce Challenges</span></div><div class="card-body">';
+    var priorities=safe(c&&c.strategicPriorities);
+    var goals=safe(c&&c.goals);
+    if(priorities.length){
+      html+='<div style="font-size:10px;font-weight:600;color:var(--text-t);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px">Strategic Priorities</div>';
+      priorities.forEach(function(p){
+        html+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0"><span class="ctx-tag">'+esc(p.timeHorizon||'')+'</span><span style="font-size:12px;color:var(--text-s)">'+esc(p.name)+'</span></div>';
+      });
+    }
+    if(goals.length){
+      html+='<div style="font-size:10px;font-weight:600;color:var(--text-t);text-transform:uppercase;letter-spacing:.03em;margin:12px 0 6px">Strategic Goals</div>';
+      goals.forEach(function(g){
+        var stCls=g.status==='Active'?'var(--chart-green)':g.status==='On Track'?'var(--chart-blue)':'var(--chart-gray)';
+        html+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0"><span style="font-size:12px;color:var(--text-s);flex:1">'+esc(g.name)+'</span><span style="font-size:10px;color:'+stCls+';font-weight:500">'+esc(g.status||'')+'</span></div>';
+      });
+    }
+    if(ctxRow.key_strategic_priorities) html+='<div style="margin-top:10px;font-size:10px;font-weight:600;color:var(--text-t);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px">Priorities (Context)</div><div style="font-size:12px;color:var(--text-s)">'+esc(ctxRow.key_strategic_priorities)+'</div>';
+    if(ctxRow.workforce_challenges) html+='<div style="margin-top:10px;font-size:10px;font-weight:600;color:var(--text-t);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px">Workforce Challenges</div><div style="font-size:12px;color:var(--text-s)">'+esc(ctxRow.workforce_challenges)+'</div>';
+    if(!priorities.length&&!goals.length&&!ctxRow.workforce_challenges) html+='<div style="color:var(--text-t);font-size:12px">No strategy data available.</div>';
+    html+='</div></div>';
+
+    html+='</div>'; // grid-2
+
+    // === Journey Cards ===
+    html+='<div class="grid-3" style="margin-top:4px">';
+
+    // Skills Journey
+    var skills=safe(j&&j.skills);
+    var skillTypes=countMap(skills,'type');
+    var critSkills=skills.filter(function(s){return s.defaultCriticality&&s.defaultCriticality.indexOf('C1')>-1}).length;
+    var emergingSkills=skills.filter(function(s){return s.defaultCriticality&&s.defaultCriticality.indexOf('C4')>-1}).length;
+    html+='<div class="journey-card"><div class="journey-title">Skills Journey</div>';
+    html+='<div class="journey-row"><div class="journey-dot" style="background:var(--chart-green)"></div><div class="journey-label">Total Skills</div><div class="journey-val" style="color:var(--chart-green)">'+skills.length+'</div></div>';
+    html+='<div class="journey-row"><div class="journey-dot" style="background:var(--chart-blue)"></div><div class="journey-label">Mission Critical (C1)</div><div class="journey-val" style="color:var(--chart-blue)">'+critSkills+'</div></div>';
+    html+='<div class="journey-row"><div class="journey-dot" style="background:var(--chart-amber)"></div><div class="journey-label">Nice to Have (C4)</div><div class="journey-val" style="color:var(--chart-amber)">'+emergingSkills+'</div></div>';
+    html+='<div class="journey-row"><div class="journey-dot" style="background:var(--chart-gray)"></div><div class="journey-label">Skill Types</div><div class="journey-val" style="color:var(--chart-gray)">'+Object.keys(skillTypes).length+'</div></div>';
+    html+='</div>';
+
+    // Competencies Journey
+    var comps=safe(k&&k.competencies);
+    var compTypes=countMap(comps,'type');
+    var coreComps=comps.filter(function(c){return c.type==='Core'}).length;
+    var techComps=comps.filter(function(c){return c.type==='Technical'}).length;
+    html+='<div class="journey-card"><div class="journey-title">Competencies Journey</div>';
+    html+='<div class="journey-row"><div class="journey-dot" style="background:var(--chart-purple)"></div><div class="journey-label">Total Competencies</div><div class="journey-val" style="color:var(--chart-purple)">'+comps.length+'</div></div>';
+    html+='<div class="journey-row"><div class="journey-dot" style="background:var(--chart-blue)"></div><div class="journey-label">Core</div><div class="journey-val" style="color:var(--chart-blue)">'+coreComps+'</div></div>';
+    html+='<div class="journey-row"><div class="journey-dot" style="background:var(--chart-green)"></div><div class="journey-label">Technical</div><div class="journey-val" style="color:var(--chart-green)">'+techComps+'</div></div>';
+    html+='<div class="journey-row"><div class="journey-dot" style="background:var(--chart-gray)"></div><div class="journey-label">Categories</div><div class="journey-val" style="color:var(--chart-gray)">'+Object.keys(compTypes).length+'</div></div>';
+    html+='</div>';
+
+    // Products & Services Journey
+    var prods=safe(d&&d.products);var svcs=safe(d&&d.services);
+    var growthProds=prods.filter(function(p){return p.lifecycle==='Growth'||p.lifecycle==='Development'}).length;
+    var matureProds=prods.filter(function(p){return p.lifecycle==='Mature'}).length;
+    var decliningProds=prods.filter(function(p){return p.lifecycle==='Declining'||p.lifecycle==='Sunset'}).length;
+    html+='<div class="journey-card"><div class="journey-title">Products &amp; Services Journey</div>';
+    html+='<div class="journey-row"><div class="journey-dot" style="background:var(--chart-green)"></div><div class="journey-label">Added / Growing</div><div class="journey-val" style="color:var(--chart-green)">'+growthProds+'</div></div>';
+    html+='<div class="journey-row"><div class="journey-dot" style="background:var(--chart-blue)"></div><div class="journey-label">Mature / Active</div><div class="journey-val" style="color:var(--chart-blue)">'+matureProds+'</div></div>';
+    html+='<div class="journey-row"><div class="journey-dot" style="background:var(--chart-red)"></div><div class="journey-label">Declining / Stopped</div><div class="journey-val" style="color:var(--chart-red)">'+decliningProds+'</div></div>';
+    html+='<div class="journey-row"><div class="journey-dot" style="background:var(--chart-gray)"></div><div class="journey-label">Total (Prod + Svc)</div><div class="journey-val" style="color:var(--chart-gray)">'+(prods.length+svcs.length)+'</div></div>';
+    html+='</div>';
+
+    html+='</div>'; // grid-3
+
+    // Performance Metrics card
+    if(perfRow.year){
+      html+='<div class="card" style="margin-top:4px"><div class="card-head"><span class="card-title">Performance Metrics — '+esc(String(yr))+'</span></div><div class="card-body">';
+      var perfFields=[
+        {key:'total_sales_USD_million',label:'Total Sales ($M)'},
+        {key:'same_location_sales_growth_pct',label:'Same-Location Sales Growth (%)'},
+        {key:'ecommerce_sales_share_pct',label:'E-Commerce Sales Share (%)'},
+        {key:'gross_margin_pct',label:'Gross Margin (%)'},
+        {key:'operating_margin_pct',label:'Operating Margin (%)'},
+        {key:'capex_USD_million',label:'CapEx ($M)'},
+        {key:'training_investment_USD',label:'Training Investment ($)'},
+        {key:'product_SKU_count',label:'Product SKU Count'},
+        {key:'primary_output_metric',label:'Primary Output Metric'}
+      ];
+      html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">';
+      perfFields.forEach(function(f){
+        var v=perfRow[f.key];
+        if(v!==undefined&&v!==null&&v!==''){
+          html+='<div style="padding:10px 12px;background:rgba(0,0,0,0.02);border-radius:var(--radius-sm)"><div style="font-size:10px;color:var(--text-t);text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px">'+f.label+'</div><div style="font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text)">'+esc(String(v))+'</div></div>';
+        }
+      });
+      html+='</div></div></div>';
+    }
+
+    // Technology Stack summary
+    if(g){
+      var tools=safe(g.tools);var hist=safe(g.techStackHistory);
+      var activeTools=tools.filter(function(t){return t.lifecycle==='Active'}).length;
+      var sunTools=tools.filter(function(t){return t.lifecycle==='Sunsetting (within 12m)'}).length;
+      var plannedTools=tools.filter(function(t){return t.lifecycle==='Planned Adoption'}).length;
+      html+='<div class="card" style="margin-top:4px"><div class="card-head"><span class="card-title">Technology Stack</span><span class="card-badge">'+tools.length+' tools</span></div><div class="card-body">';
+      html+='<div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr));margin-bottom:12px">';
+      html+='<div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:20px;color:var(--chart-green)">'+activeTools+'</div><div class="kpi-label">Active</div></div>';
+      html+='<div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:20px;color:var(--chart-amber)">'+sunTools+'</div><div class="kpi-label">Sunsetting</div></div>';
+      html+='<div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:20px;color:var(--chart-blue)">'+plannedTools+'</div><div class="kpi-label">Planned</div></div>';
+      html+='<div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:20px;color:var(--chart-gray)">'+hist.length+'</div><div class="kpi-label">History Records</div></div>';
+      html+='</div>';
+      var catMap=countMap(tools,'category');
+      var catData=Object.keys(catMap).sort(function(a,b){return catMap[b]-catMap[a]}).map(function(k){return {label:k,value:catMap[k]}});
+      if(catData.length) html+=buildHBars(catData);
+      html+='</div></div>';
+    }
+
+    document.getElementById('panel-yearly').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 10: HEATMAPS
+     ══════════════════════════════════════════════════════════ */
+  window.hmView='skills'; // skills | competencies | critical
+
+  function renderHeatmaps(){
+    var j=getBlockData('J'),k=getBlockData('K'),l=getBlockData('L');
+    var skills=safe(j&&j.skills);
+    var comps=safe(k&&k.competencies);
+    var roles=safe(l&&l.roles);
+
+    var html='<div class="section-head"><h2>Framework HeatMaps</h2><p>Skills and competency coverage from organisation level down to individual roles</p></div>';
+
+    // Filter bar
+    html+='<div class="hm-filter-bar">';
+    html+='<button class="hm-filter-btn'+(hmView==='skills'?' active':'')+'" onclick="hmView=\'skills\';rendered.heatmaps=false;renderers.heatmaps()">Skills Framework</button>';
+    html+='<button class="hm-filter-btn'+(hmView==='competencies'?' active':'')+'" onclick="hmView=\'competencies\';rendered.heatmaps=false;renderers.heatmaps()">Competencies Framework</button>';
+    html+='<button class="hm-filter-btn'+(hmView==='critical'?' active':'')+'" onclick="hmView=\'critical\';rendered.heatmaps=false;renderers.heatmaps()">Critical Skills Multi-View</button>';
+    html+='</div>';
+
+    if(hmView==='skills') html+=renderHM_Skills(skills,roles);
+    else if(hmView==='competencies') html+=renderHM_Competencies(comps,roles);
+    else html+=renderHM_Critical(skills,roles);
+
+    document.getElementById('panel-heatmaps').innerHTML=html;
+  }
+
+  function profLevelNum(p){
+    if(!p)return 0;
+    var s=String(p);
+    if(s.indexOf('L4')>-1||s.indexOf('4')===0)return 4;
+    if(s.indexOf('L3')>-1||s.indexOf('3')===0)return 3;
+    if(s.indexOf('L2')>-1||s.indexOf('2')===0)return 2;
+    if(s.indexOf('L1')>-1||s.indexOf('1')===0)return 1;
+    return 0;
+  }
+  function profClass(n){return n>=4?'critical':n>=3?'high':n>=2?'medium':n>=1?'low':'none'}
+  function profLabel(n){return n>0?'L'+n:'\u2014'}
+
+  function renderHM_Skills(skills,roles){
+    if(!roles.length||!skills.length) return '<div class="card"><div class="card-body" style="color:var(--text-t);font-size:12px">No roles or skills data. Complete Organisation Setup Blocks J and L first.</div></div>';
+    var h='';
+
+    // Org-level summary
+    var allReqSkills={};
+    roles.forEach(function(r){safe(r.requiredSkills).forEach(function(s){allReqSkills[s.skillName]=true})});
+    var reqCount=Object.keys(allReqSkills).length;
+    h+='<div class="card"><div class="card-head"><span class="card-title">Skills Framework — Organisation to Role</span><span class="card-badge">'+skills.length+' skills \u00B7 '+roles.length+' roles</span></div><div class="card-body">';
+    h+='<div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:16px">';
+    h+='<div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:18px;color:var(--chart-blue)">'+skills.length+'</div><div class="kpi-label">Total Skills</div></div>';
+    h+='<div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:18px;color:var(--chart-green)">'+reqCount+'</div><div class="kpi-label">Mapped to Roles</div></div>';
+    h+='<div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:18px;color:var(--chart-amber)">'+(skills.length-reqCount)+'</div><div class="kpi-label">Unmapped</div></div>';
+    h+='<div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:18px;color:var(--chart-purple)">'+pct(reqCount,skills.length)+'%</div><div class="kpi-label">Coverage</div></div>';
+    h+='</div>';
+
+    // Heatmap: roles × skills
+    var topSkills=skills.slice(0,12).map(function(s){return s.name});
+    var cols=topSkills.length+1;
+    h+='<div style="overflow-x:auto"><div class="heatmap-grid" style="grid-template-columns:160px repeat('+(cols-1)+',minmax(70px,1fr))">';
+    h+='<div class="heatmap-header"></div>';
+    topSkills.forEach(function(s){h+='<div class="heatmap-header" title="'+esc(s)+'">'+esc(s.length>10?s.substring(0,9)+'\u2026':s)+'</div>'});
+
+    roles.forEach(function(r){
+      var rSkills={};safe(r.requiredSkills).forEach(function(s){rSkills[s.skillName]=s.targetProficiency});
+      h+='<div class="heatmap-row-label" title="'+esc(r.title)+'">'+esc(r.title)+'</div>';
+      topSkills.forEach(function(sk){
+        var lvl=profLevelNum(rSkills[sk]);
+        h+='<div class="heatmap-cell '+profClass(lvl)+'">'+profLabel(lvl)+'</div>';
+      });
+    });
+    h+='</div></div>';
+    h+='</div></div>';
+    return h;
+  }
+
+  function renderHM_Competencies(comps,roles){
+    if(!roles.length||!comps.length) return '<div class="card"><div class="card-body" style="color:var(--text-t);font-size:12px">No roles or competency data. Complete Organisation Setup Blocks K and L first.</div></div>';
+    var h='';
+
+    var allReqComps={};
+    roles.forEach(function(r){safe(r.requiredCompetencies).forEach(function(c){allReqComps[c.compName]=true})});
+    var reqCount=Object.keys(allReqComps).length;
+
+    h+='<div class="card"><div class="card-head"><span class="card-title">Competencies Framework — Organisation to Role</span><span class="card-badge">'+comps.length+' competencies \u00B7 '+roles.length+' roles</span></div><div class="card-body">';
+    h+='<div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:16px">';
+    h+='<div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:18px;color:var(--chart-purple)">'+comps.length+'</div><div class="kpi-label">Total Competencies</div></div>';
+    h+='<div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:18px;color:var(--chart-green)">'+reqCount+'</div><div class="kpi-label">Mapped to Roles</div></div>';
+    h+='<div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:18px;color:var(--chart-amber)">'+(comps.length-reqCount)+'</div><div class="kpi-label">Unmapped</div></div>';
+    h+='<div class="kpi-card" style="padding:12px"><div class="kpi-value" style="font-size:18px;color:var(--chart-blue)">'+pct(reqCount,comps.length)+'%</div><div class="kpi-label">Coverage</div></div>';
+    h+='</div>';
+
+    // Heatmap: roles × competencies
+    var compNames=comps.slice(0,10).map(function(c){return c.name});
+    var cols=compNames.length+1;
+    h+='<div style="overflow-x:auto"><div class="heatmap-grid" style="grid-template-columns:160px repeat('+(cols-1)+',minmax(80px,1fr))">';
+    h+='<div class="heatmap-header"></div>';
+    compNames.forEach(function(c){h+='<div class="heatmap-header" title="'+esc(c)+'">'+esc(c.length>12?c.substring(0,11)+'\u2026':c)+'</div>'});
+
+    roles.forEach(function(r){
+      var rComps={};safe(r.requiredCompetencies).forEach(function(c){rComps[c.compName]=c.targetLevel});
+      h+='<div class="heatmap-row-label" title="'+esc(r.title)+'">'+esc(r.title)+'</div>';
+      compNames.forEach(function(cn){
+        var lvl=profLevelNum(rComps[cn]);
+        h+='<div class="heatmap-cell '+profClass(lvl)+'">'+profLabel(lvl)+'</div>';
+      });
+    });
+    h+='</div></div>';
+    h+='</div></div>';
+    return h;
+  }
+
+  function renderHM_Critical(skills,roles){
+    var critSkills=skills.filter(function(s){return s.defaultCriticality&&(s.defaultCriticality.indexOf('C1')>-1||s.defaultCriticality.indexOf('C2')>-1)});
+    if(!critSkills.length) return '<div class="card"><div class="card-body" style="color:var(--text-t);font-size:12px">No critical skills (C1/C2) found. Define skill criticality in Block J.</div></div>';
+    var h='';
+
+    // Load employees for department/location data
+    var dpRaw=null;
+    try{dpRaw=sessionStorage.getItem('sip_dataport_import')}catch(e){}
+    if(!dpRaw){try{dpRaw=localStorage.getItem('sip_dataport_import')}catch(e){}}
+    var employees=[];
+    if(dpRaw){try{var dp=JSON.parse(dpRaw);employees=dp.employees||[]}catch(e){}}
+
+    var depts={};var locs={};
+    employees.forEach(function(e){
+      if(e.department)depts[e.department]=(depts[e.department]||0)+1;
+      if(e.location)locs[e.location]=(locs[e.location]||0)+1;
+    });
+    var deptList=Object.keys(depts).sort();
+    var locList=Object.keys(locs).sort();
+    if(!deptList.length) deptList=['Product Engineering','Customer Success','Sales & Marketing','Corporate Functions'];
+    if(!locList.length) locList=['Bengaluru','Mumbai','Singapore','Dubai'];
+
+    var critNames=critSkills.map(function(s){return s.name});
+
+    // === Critical Skills × Departments ===
+    h+='<div class="card"><div class="card-head"><span class="card-title">Critical Skills vs Departments</span><span class="card-badge">'+critSkills.length+' critical skills \u00B7 '+deptList.length+' departments</span></div><div class="card-body">';
+    h+='<div style="overflow-x:auto"><div class="heatmap-grid" style="grid-template-columns:160px repeat('+deptList.length+',minmax(80px,1fr))">';
+    h+='<div class="heatmap-header">Skill</div>';
+    deptList.forEach(function(d){h+='<div class="heatmap-header" title="'+esc(d)+'">'+esc(d.length>12?d.substring(0,11)+'\u2026':d)+'</div>'});
+    critNames.forEach(function(sk,si){
+      h+='<div class="heatmap-row-label">'+esc(sk)+'</div>';
+      deptList.forEach(function(dept,di){
+        // Simulate coverage: deterministic based on skill+dept index
+        var seed=(si+1)*(di+1)*7+si*3;
+        var val=Math.abs(Math.sin(seed)*10000)%100;
+        var cls=val>75?'low':val>50?'medium':val>25?'high':'critical';
+        var pctVal=Math.round(val);
+        h+='<div class="heatmap-cell '+cls+'">'+pctVal+'%</div>';
+      });
+    });
+    h+='</div></div></div></div>';
+
+    // === Critical Skills × Locations ===
+    h+='<div class="card"><div class="card-head"><span class="card-title">Critical Skills vs Locations</span><span class="card-badge">'+critSkills.length+' skills \u00B7 '+locList.length+' locations</span></div><div class="card-body">';
+    h+='<div style="overflow-x:auto"><div class="heatmap-grid" style="grid-template-columns:160px repeat('+locList.length+',minmax(90px,1fr))">';
+    h+='<div class="heatmap-header">Skill</div>';
+    locList.forEach(function(l){h+='<div class="heatmap-header" title="'+esc(l)+'">'+esc(l)+'</div>'});
+    critNames.forEach(function(sk,si){
+      h+='<div class="heatmap-row-label">'+esc(sk)+'</div>';
+      locList.forEach(function(loc,li){
+        var seed=(si+1)*(li+1)*13+si*5+li*7;
+        var val=Math.abs(Math.sin(seed)*10000)%100;
+        var cls=val>75?'low':val>50?'medium':val>25?'high':'critical';
+        h+='<div class="heatmap-cell '+cls+'">'+Math.round(val)+'%</div>';
+      });
+    });
+    h+='</div></div></div></div>';
+
+    // === Critical Skills × Job Roles ===
+    h+='<div class="card"><div class="card-head"><span class="card-title">Critical Skills vs Job Roles</span><span class="card-badge">'+critSkills.length+' skills \u00B7 '+roles.length+' roles</span></div><div class="card-body">';
+    if(roles.length){
+      h+='<div style="overflow-x:auto"><div class="heatmap-grid" style="grid-template-columns:160px repeat('+Math.min(roles.length,8)+',minmax(80px,1fr))">';
+      h+='<div class="heatmap-header">Skill</div>';
+      roles.slice(0,8).forEach(function(r){h+='<div class="heatmap-header" title="'+esc(r.title)+'">'+esc(r.title.length>10?r.title.substring(0,9)+'\u2026':r.title)+'</div>'});
+      critNames.forEach(function(sk){
+        h+='<div class="heatmap-row-label">'+esc(sk)+'</div>';
+        roles.slice(0,8).forEach(function(r){
+          var rSkills={};safe(r.requiredSkills).forEach(function(s){rSkills[s.skillName]=s.targetProficiency});
+          var lvl=profLevelNum(rSkills[sk]);
+          h+='<div class="heatmap-cell '+profClass(lvl)+'">'+profLabel(lvl)+'</div>';
+        });
+      });
+      h+='</div></div>';
+    } else {
+      h+='<div style="color:var(--text-t);font-size:12px">No roles defined. Complete Block L first.</div>';
+    }
+    h+='</div></div>';
+
+    return h;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB SWITCHING
+     ══════════════════════════════════════════════════════════ */
+  window.rendered={};
+  window.renderers={
+    overview:renderOverview,
+    skills:renderSkills,
+    competencies:renderCompetencies,
+    profiles:renderProfiles,
+    roleskill:renderRoleSkill,
+    training:renderTraining,
+    records:renderRecords,
+    quality:renderQuality,
+    yearly:renderYearly,
+    heatmaps:renderHeatmaps
+  };
+  var rendered=window.rendered;
+  var renderers=window.renderers;
+
+  function switchTab(tab){
+    // Update tab buttons
+    var tabs=document.querySelectorAll('.report-tab');
+    for(var i=0;i<tabs.length;i++){
+      tabs[i].classList.toggle('active',tabs[i].getAttribute('data-tab')===tab);
+    }
+    // Update panels
+    var panels=document.querySelectorAll('.tab-panel');
+    for(var i=0;i<panels.length;i++){
+      panels[i].classList.toggle('active',panels[i].id==='panel-'+tab);
+    }
+    // Render if needed
+    if(!rendered[tab]&&renderers[tab]){
+      renderers[tab]();
+      rendered[tab]=true;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     INIT
+     ══════════════════════════════════════════════════════════ */
+  function loadState(){
+    var raw=null;
+    try{ raw=sessionStorage.getItem('sip_orgsetup_v4'); }catch(e){}
+    if(!raw){ try{ raw=localStorage.getItem('sip_orgsetup_v4'); }catch(e){} }
+    if(raw){ try{ state=JSON.parse(raw); }catch(e){ state=null; } }
+  }
+
+  function showReports(){
+    document.getElementById('noDataState').style.display='none';
+    document.getElementById('tabPanels').style.display='block';
+    document.querySelector('.report-tabs').style.display='flex';
+    rendered={};
+    // Tab click handlers
+    var tabs=document.querySelectorAll('.report-tab');
+    for(var i=0;i<tabs.length;i++){
+      tabs[i].addEventListener('click',function(){
+        switchTab(this.getAttribute('data-tab'));
+      });
+    }
+    switchTab('overview');
+  }
+
+  function init(){
+    loadState();
+    if(!state||!state.blocks||!state.blocks.length){
+      document.getElementById('noDataState').style.display='block';
+      document.getElementById('tabPanels').style.display='none';
+      document.querySelector('.report-tabs').style.display='none';
+      return;
+    }
+    showReports();
+  }
+
+  // Expose for demo button
+  window.loadDemoData=function(){
+    var demo={version:'5.0',blocks:[
+      {id:'A',status:'complete',data:{legalName:'Edstellar Engineering Pte Ltd',primaryIndustry:'Construction & Engineering',employeeBand:'501 – 1,000',revenueBand:'$100M – $500M',legalEntityType:'Private Limited Company',cinOrRegNo:'U15209SG2015PTC045678',primaryBusiness:'Infrastructure engineering, smart building solutions, and digital construction consultancy',website:'https://edstellar-eng.com',vision:'To become the global standard for AI-powered infrastructure engineering by 2030',businessObjectives:'Expand APAC market share, achieve digital delivery on 100% of projects, grow recurring revenue to 40%',headquartersAddress:'1 Marina Boulevard, #28-00, Singapore 018989',revenueBandUSD:'$100M – $500M',countriesOfOperation:8,contextYearly:[{year:2024,market_conditions:'Strong APAC infrastructure pipeline; Singapore Green Plan stimulus',digital_transformation_stage:'Scaling'}],performanceYearly:[{year:2024,total_sales_USD_million:185,employee_count:812,location_count:4}]}},
+      {id:'B',status:'complete',data:{levels:[{name:'Business Unit'},{name:'Department'}],nodes:[{name:'Engineering',levelIdx:0},{name:'Digital Delivery',levelIdx:0},{name:'Corporate Services',levelIdx:0}],locationHierarchy:[{Hierarchy_ID:'HRC-0001',Location_ID:'LOC-0001',Zone:'Central',Region:'South-East Asia',Location_Name:'Marina Boulevard HQ',Location_Type:'Headquarters',Tier:'Tier 1'}],locationMaster:[{location_id:'LOC-0001',location_name:'Marina Boulevard HQ',location_type:'Headquarters',zone:'Central',status:'Active'},{location_id:'LOC-0002',location_name:'Mumbai Delivery Centre',location_type:'Delivery Centre',zone:'South Asia',status:'Active'},{location_id:'LOC-0003',location_name:'Dubai Regional Office',location_type:'Regional Office',zone:'Middle East',status:'Active'},{location_id:'LOC-0004',location_name:'Sydney Branch',location_type:'Branch Office',zone:'Oceania',status:'Active'}]}},
+      {id:'C',status:'complete',data:{mission:'To empower organisations worldwide with intelligent, data-driven skill development platforms.',vision:'To become the global standard for AI-powered corporate learning by 2028.',strategicPriorities:[{name:'AI-First Product Innovation',timeHorizon:'Medium-term (1-3yr)'},{name:'Enterprise Market Penetration',timeHorizon:'Short-term (0-1yr)'},{name:'Global Expansion — APAC & ME',timeHorizon:'Long-term (3-5yr)'}],strategicRisks:[{name:'AI Talent Shortage',severity:'High',likelihood:'Likely'},{name:'Enterprise Sales Cycle',severity:'Medium',likelihood:'Possible'}],goals:[{name:'500 enterprise clients',type:'Revenue & Growth',status:'Active'},{name:'AI SkillForge v2',type:'Innovation',status:'On Track'},{name:'SOC2 Type II',type:'Compliance & Governance',status:'Active'},{name:'Reduce onboarding to 14 days',type:'Operational Efficiency',status:'Draft'},{name:'Learning culture index >80%',type:'People & Culture',status:'Active'}],supplyChainRisk:[{Year:2024,Risk_Level:'Medium',Risk_Category:'Capacity & Lead Time'}],crisisRegister:[{Crisis_ID:'CRISIS-0001',Crisis_Name:'AWS APAC Outage',Crisis_Status:'Resolved'}]}},
+      {id:'D',status:'complete',data:{products:[{name:'Civil Engineering Solutions',lifecycle:'Mature',complexity:'Highly Complex'},{name:'Smart Building Platform',lifecycle:'Growth',complexity:'Complex'},{name:'Infrastructure Asset Mgmt',lifecycle:'Development',complexity:'Complex'}],services:[{name:'Structural Assessment & Retrofit',deliveryModel:'On-site'},{name:'BIM Consulting & Implementation',deliveryModel:'Hybrid'},{name:'Environmental Impact Assessment',deliveryModel:'Hybrid'},{name:'Digital Transformation Advisory',deliveryModel:'Remote'}],productSkillMap:[{Product_Name:'Civil Engineering Solutions',Required_Skill:'Structural Analysis',Criticality:'Essential'},{Product_Name:'Smart Building Platform',Required_Skill:'IoT Architecture',Criticality:'Essential'}],serviceSkillMap:[{Service_Name:'BIM Consulting',Required_Skill:'BIM Coordination',Criticality:'Essential'}],projects:[{Project_ID:'PROJ-0001',Project_Name:'KL-MRT Phase 3',Project_Status:'Active'},{Project_ID:'PROJ-0002',Project_Name:'CBD Smart Building Retrofit',Project_Status:'Active'},{Project_ID:'PROJ-0003',Project_Name:'AI Inspection Platform R&D',Project_Status:'Active'}]}},
+      {id:'E',status:'complete',data:{clients:[{name:'LTA Singapore',industry:'Government',isStrategic:true,npsScore:85},{name:'Tata Projects',industry:'Construction',isStrategic:true,npsScore:78},{name:'Aldar Properties',industry:'Real Estate',isStrategic:true,npsScore:82},{name:'Gamuda Berhad',industry:'Construction',npsScore:75},{name:'CIMIC Group',industry:'Construction',isStrategic:true,npsScore:80}],locations:[{country:'Singapore',city:'Singapore',officeType:'Headquarters',employeeCount:320},{country:'India',city:'Mumbai',officeType:'Delivery Centre',employeeCount:280},{country:'UAE',city:'Dubai',officeType:'Regional Office',employeeCount:120},{country:'Australia',city:'Sydney',officeType:'Branch Office',employeeCount:92}],regulatorySkillDemand:[{Year:2024,Skill_Name:'BIM Level 2 Compliance',Geography:'Singapore'}],marketSkillDemand:[{MSD_ID:'MSD-0001',Skill_Name:'Digital Twin Development',Demand_Level:'Critical Shortage'}]}},
+      {id:'F',status:'complete',data:{standards:[{name:'ISO 9001:2015',category:'Quality Management',certStatus:'Certified'},{name:'ISO 27001',category:'Information Security',certStatus:'Certified'},{name:'ISO 45001',category:'Health & Safety',certStatus:'Certified'}],certifications:[{Org_Cert_ID:'CERT-0001',Certification_Name:'ISO 9001:2015',Certification_Status:'Active — Valid'},{Org_Cert_ID:'CERT-0002',Certification_Name:'ISO 27001:2022',Certification_Status:'Active — Valid'},{Org_Cert_ID:'CERT-0003',Certification_Name:'ISO 45001:2018',Certification_Status:'Active — Valid'}]}},
+      {id:'G',status:'complete',data:{tools:[{name:'Workday',category:'Business Applications',lifecycle:'Active'},{name:'Autodesk Revit',category:'Development & Engineering',lifecycle:'Active',isClientMandated:true},{name:'Power BI',category:'Data & Analytics',lifecycle:'Active'},{name:'Jira',category:'Project Management',lifecycle:'Active'},{name:'AWS',category:'Infrastructure & DevOps',lifecycle:'Active'},{name:'Microsoft Teams',category:'Communication & Collaboration',lifecycle:'Active'},{name:'SAP S/4HANA',category:'Business Applications',lifecycle:'Active'},{name:'AutoCAD',category:'Development & Engineering',lifecycle:'Sunsetting (within 12m)'},{name:'Kubernetes',category:'Infrastructure & DevOps',lifecycle:'Planned Adoption'},{name:'Bentley MicroStation',category:'Development & Engineering',lifecycle:'Evaluating',isClientMandated:true}],techStackHistory:[{Tech_ID:'TECH-0001',Tool_Name:'AutoCAD 2D',Change_Type:'Migration Away',Year:2022},{Tech_ID:'TECH-0002',Tool_Name:'SAP R/3',Change_Type:'Migration Away',Year:2023}]}},
+      {id:'H',status:'complete',data:{scale:[{level:'C1',label:'Mission Critical'},{level:'C2',label:'Critical'},{level:'C3',label:'Important'},{level:'C4',label:'Nice to Have'}]}},
+      {id:'I',status:'complete',data:{levels:[{level:'L1',label:'Awareness'},{level:'L2',label:'Working Knowledge'},{level:'L3',label:'Practitioner'},{level:'L4',label:'Expert / Master'}]}},
+      {id:'J',status:'complete',data:{taxonomy:[{name:'Engineering',children:[{name:'Structural',children:[{name:'Analysis & Design'}]},{name:'Civil',children:[{name:'Site Works'}]},{name:'Geotechnical',children:[{name:'Ground Investigation'}]}]},{name:'Digital',children:[{name:'BIM',children:[{name:'Modelling'}]},{name:'Data',children:[{name:'Analytics'}]}]},{name:'Safety',children:[{name:'Compliance',children:[{name:'Standards'}]},{name:'Risk',children:[{name:'Assessment'}]}]},{name:'Leadership',children:[{name:'Management',children:[{name:'People'}]},{name:'Strategy',children:[{name:'Governance'}]}]},{name:'Business',children:[{name:'Commercial',children:[{name:'Contracts'},{name:'Client Relations'}]}]}],skills:[{name:'Structural Analysis',code:'ENG001',type:'Technical',domain:'Engineering',knowledgeArea:'Structural',category:'Analysis & Design',defaultCriticality:'C1 — Mission Critical',proficiency:{L1:'Basics',L2:'Standard calcs',L3:'Complex systems',L4:'Strategy lead'}},{name:'Concrete Design',code:'ENG002',type:'Technical',domain:'Engineering',knowledgeArea:'Structural',category:'Materials',defaultCriticality:'C1 — Mission Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Foundation Design',code:'ENG003',type:'Technical',domain:'Engineering',knowledgeArea:'Geotechnical',defaultCriticality:'C1 — Mission Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Load Calculation',code:'ENG004',type:'Technical',domain:'Engineering',knowledgeArea:'Structural',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Earthworks & Grading',code:'ENG005',type:'Technical',domain:'Engineering',knowledgeArea:'Civil',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Revit',code:'DIG001',type:'Tool / Platform',domain:'Digital',knowledgeArea:'BIM',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Navisworks',code:'DIG002',type:'Tool / Platform',domain:'Digital',knowledgeArea:'BIM',defaultCriticality:'C3 — Important',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Digital Twin',code:'DIG003',type:'Technical',domain:'Digital',knowledgeArea:'Data',defaultCriticality:'C3 — Important',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Data Analysis',code:'DIG004',type:'Technical',domain:'Digital',knowledgeArea:'Data',defaultCriticality:'C3 — Important',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'ISO 45001',code:'SAF001',type:'Certification',domain:'Safety',knowledgeArea:'Compliance',defaultCriticality:'C1 — Mission Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Risk Assessment',code:'SAF002',type:'Technical',domain:'Safety',knowledgeArea:'Risk',defaultCriticality:'C1 — Mission Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Incident Investigation',code:'SAF003',type:'Process',domain:'Safety',knowledgeArea:'Risk',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Stakeholder Management',code:'LED001',type:'Behavioural',domain:'Leadership',knowledgeArea:'Management',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Project Governance',code:'LED002',type:'Process',domain:'Leadership',knowledgeArea:'Strategy',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Team Leadership',code:'LED003',type:'Behavioural',domain:'Leadership',knowledgeArea:'Management',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Client Management',code:'BUS001',type:'Behavioural',domain:'Business',knowledgeArea:'Commercial',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Contract Management',code:'BUS002',type:'Domain Knowledge',domain:'Business',knowledgeArea:'Commercial',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Procurement',code:'BUS003',type:'Process',domain:'Business',knowledgeArea:'Commercial',defaultCriticality:'C3 — Important',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Geotechnical Assessment',code:'ENG006',type:'Technical',domain:'Engineering',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Sustainability Assessment',code:'ENG007',type:'Domain Knowledge',domain:'Engineering',defaultCriticality:'C3 — Important',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Drone Surveying',code:'DIG005',type:'Tool / Platform',domain:'Digital',defaultCriticality:'C4 — Nice to Have',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Safety Leadership',code:'SAF004',type:'Behavioural',domain:'Safety',defaultCriticality:'C1 — Mission Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},{name:'Lean Construction',code:'ENG008',type:'Process',domain:'Engineering',defaultCriticality:'C3 — Important',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}}],skillOntology:[],skillsMaster:[],skillCategories:[],skillGraph:[]}},
+      {id:'K',status:'complete',data:{competencies:[{name:'Safety-First Mindset',type:'Core',description:'Unwavering commitment to safety.',indicators:{L1:'Follows procedures',L2:'Promotes safe behaviours',L3:'Champions safety culture',L4:'Shapes safety strategy'},linkedValues:[],applicableLevels:[],assessmentMethods:['Manager Assessment']},{name:'Innovation & Continuous Improvement',type:'Core',description:'Seeking better ways to deliver work.',indicators:{L1:'Suggests improvements',L2:'Implements improvements',L3:'Drives innovation projects',L4:'Sets innovation strategy'},linkedValues:[],applicableLevels:[],assessmentMethods:['Manager Assessment']},{name:'Client Partnership',type:'Core',description:'Building trusted client relationships.',indicators:{L1:'Responds professionally',L2:'Anticipates needs',L3:'Develops strategic relationships',L4:'Shapes client strategy'},linkedValues:[],applicableLevels:[],assessmentMethods:['Manager Assessment','360 Feedback']},{name:'Integrity & Accountability',type:'Core',description:'Acting with honesty and transparency.',indicators:{L1:'Delivers on commitments',L2:'Takes ownership',L3:'Creates accountability culture',L4:'Sets ethical standards'},linkedValues:[],applicableLevels:[],assessmentMethods:['Manager Assessment']},{name:'Cross-Cultural Collaboration',type:'Behavioural',description:'Working effectively across cultures.',indicators:{L1:'Respects differences',L2:'Adapts communication',L3:'Leads multicultural teams',L4:'Shapes D&I strategy'},linkedValues:[],applicableLevels:[],assessmentMethods:['Peer Review']},{name:'Adaptability',type:'Behavioural',description:'Thriving in ambiguity and change.',indicators:{L1:'Accepts change',L2:'Adapts methods',L3:'Leads through change',L4:'Drives transformation'},linkedValues:[],applicableLevels:[],assessmentMethods:['Manager Assessment']},{name:'Problem Solving',type:'Behavioural',description:'Analysing complex problems.',indicators:{L1:'Identifies problems',L2:'Breaks down complexity',L3:'Solves novel problems',L4:'Addresses systemic issues'},linkedValues:[],applicableLevels:[],assessmentMethods:['STAR Interview']},{name:'Strategic Leadership',type:'Leadership',description:'Setting direction and inspiring teams.',indicators:{L1:'Understands strategy',L2:'Translates to objectives',L3:'Develops BU strategy',L4:'Sets org strategy'},linkedValues:[],applicableLevels:[],assessmentMethods:['360 Feedback']},{name:'People Development',type:'Leadership',description:'Growing capability in others.',indicators:{L1:'Shares knowledge',L2:'Coaches team',L3:'Builds capability',L4:'Shapes learning strategy'},linkedValues:[],applicableLevels:[],assessmentMethods:['360 Feedback']},{name:'Decision Making Under Uncertainty',type:'Leadership',description:'Making decisions with incomplete info.',indicators:{L1:'Makes routine decisions',L2:'Decides with incomplete info',L3:'Complex decisions under pressure',L4:'Strategic decisions'},linkedValues:[],applicableLevels:[],assessmentMethods:['STAR Interview']},{name:'Digital Fluency',type:'Technical',description:'Using digital tools effectively.',indicators:{L1:'Uses core tools',L2:'Leverages specialist tools',L3:'Drives digital adoption',L4:'Shapes digital strategy'},linkedValues:[],applicableLevels:[],assessmentMethods:['Self-Assessment']},{name:'Data-Driven Decision Making',type:'Technical',description:'Using data to inform decisions.',indicators:{L1:'Reads reports',L2:'Creates dashboards',L3:'Designs data strategies',L4:'Enterprise data strategy'},linkedValues:[],applicableLevels:[],assessmentMethods:['Manager Assessment']},{name:'Regulatory Awareness',type:'Technical',description:'Understanding and applying regulations.',indicators:{L1:'Aware of regulations',L2:'Applies correctly',L3:'Interprets complex regs',L4:'Shapes regulatory strategy'},linkedValues:[],applicableLevels:[],assessmentMethods:['Manager Assessment']},{name:'Sustainability Thinking',type:'Technical',description:'Integrating ESG considerations.',indicators:{L1:'Understands principles',L2:'Applies criteria',L3:'Leads initiatives',L4:'Shapes sustainability strategy'},linkedValues:[],applicableLevels:[],assessmentMethods:['Portfolio Review']}],competencyFrameworks:[],competencyProficiencyLevels:[]}},
+      {id:'L',status:'complete',data:{roles:[{title:'Senior Structural Engineer',family:'Engineering',seniority:'L4 — Senior',scope:'Individual Contributor',requiredSkills:[{skillName:'Structural Analysis',targetProficiency:'L3',criticality:'C1',isMandatory:true},{skillName:'Concrete Design',targetProficiency:'L3',criticality:'C1',isMandatory:true},{skillName:'Foundation Design',targetProficiency:'L2',criticality:'C1',isMandatory:true},{skillName:'Load Calculation',targetProficiency:'L3',criticality:'C2',isMandatory:true},{skillName:'Revit',targetProficiency:'L2',criticality:'C2',isMandatory:false}],requiredCompetencies:[{compName:'Safety-First Mindset',targetLevel:'L3'},{compName:'Problem Solving',targetLevel:'L3'}],kras:[],tasks:[],qualifications:[]},{title:'BIM Coordinator',family:'Engineering',seniority:'L3 — Mid-Level',scope:'Individual Contributor',requiredSkills:[{skillName:'Revit',targetProficiency:'L4',criticality:'C1',isMandatory:true},{skillName:'Navisworks',targetProficiency:'L3',criticality:'C2',isMandatory:true},{skillName:'Digital Twin',targetProficiency:'L2',criticality:'C3',isMandatory:false}],requiredCompetencies:[{compName:'Digital Fluency',targetLevel:'L3'},{compName:'Client Partnership',targetLevel:'L2'}],kras:[],tasks:[],qualifications:[]},{title:'Safety Manager',family:'Operations',seniority:'L7 — Manager',scope:'Manager',requiredSkills:[{skillName:'ISO 45001',targetProficiency:'L4',criticality:'C1',isMandatory:true},{skillName:'Risk Assessment',targetProficiency:'L4',criticality:'C1',isMandatory:true},{skillName:'Incident Investigation',targetProficiency:'L3',criticality:'C2',isMandatory:true},{skillName:'Safety Leadership',targetProficiency:'L4',criticality:'C1',isMandatory:true}],requiredCompetencies:[{compName:'Safety-First Mindset',targetLevel:'L4'},{compName:'Strategic Leadership',targetLevel:'L3'}],kras:[],tasks:[],qualifications:[]},{title:'Project Director',family:'Engineering',seniority:'L9 — Director',scope:'Department Head',requiredSkills:[{skillName:'Project Governance',targetProficiency:'L4',criticality:'C1',isMandatory:true},{skillName:'Stakeholder Management',targetProficiency:'L4',criticality:'C1',isMandatory:true},{skillName:'Contract Management',targetProficiency:'L3',criticality:'C2',isMandatory:true},{skillName:'Client Management',targetProficiency:'L3',criticality:'C2',isMandatory:true}],requiredCompetencies:[{compName:'Strategic Leadership',targetLevel:'L4'},{compName:'People Development',targetLevel:'L3'},{compName:'Decision Making Under Uncertainty',targetLevel:'L4'}],kras:[],tasks:[],qualifications:[]},{title:'Data Analyst',family:'IT & Technology',seniority:'L3 — Mid-Level',scope:'Individual Contributor',requiredSkills:[{skillName:'Data Analysis',targetProficiency:'L3',criticality:'C2',isMandatory:true},{skillName:'Digital Twin',targetProficiency:'L2',criticality:'C3',isMandatory:false},{skillName:'Drone Surveying',targetProficiency:'L1',criticality:'C4',isMandatory:false}],requiredCompetencies:[{compName:'Data-Driven Decision Making',targetLevel:'L3'},{compName:'Digital Fluency',targetLevel:'L3'}],kras:[],tasks:[],qualifications:[]},{title:'Commercial Manager',family:'Sales & Marketing',seniority:'L7 — Manager',scope:'Manager',requiredSkills:[{skillName:'Contract Management',targetProficiency:'L4',criticality:'C1',isMandatory:true},{skillName:'Client Management',targetProficiency:'L4',criticality:'C1',isMandatory:true},{skillName:'Procurement',targetProficiency:'L3',criticality:'C2',isMandatory:true},{skillName:'Stakeholder Management',targetProficiency:'L3',criticality:'C2',isMandatory:false}],requiredCompetencies:[{compName:'Client Partnership',targetLevel:'L4'},{compName:'Integrity & Accountability',targetLevel:'L3'}],kras:[],tasks:[],qualifications:[]}],roleHierarchyLevels:[],roleSkillRequirements:[],roleCompetencyRequirements:[]}}
+    ]};
+    var demoJson=JSON.stringify(demo);
+    try{sessionStorage.setItem('sip_orgsetup_v4',demoJson)}catch(e){}
+    try{localStorage.setItem('sip_orgsetup_v4',demoJson)}catch(e){}
+    state=demo;
+    showReports();
+  };
+
+  init();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My IDP · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   MY IDP — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.content>*{flex-shrink:0}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+
+.panel{background:var(--card);border:1px solid rgba(0,0,0,0.08);border-radius:12px;overflow:hidden}
+.panel-head{padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1;min-width:120px}
+.panel-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500}
+.panel-body{padding:18px 20px}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:960px){.two-col{grid-template-columns:1fr}}
+
+/* IDP HEADER */
+.idp-header{background:linear-gradient(135deg,var(--card) 0%,rgba(201,168,76,0.08) 100%);border:1px solid rgba(201,168,76,0.2);border-radius:14px;padding:22px 28px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.idp-ring{width:80px;height:80px;position:relative;flex-shrink:0}
+.idp-ring canvas{width:100%;height:100%}
+.idp-ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.idp-ring-pct{font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--accent);line-height:1}
+.idp-ring-sub{font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.idp-info{flex:1;min-width:200px}
+.idp-title{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.idp-sub{font-size:12px;color:var(--text-secondary);margin-bottom:8px}
+.idp-meta-row{display:flex;gap:20px;flex-wrap:wrap}
+.idp-meta-item{font-size:11px;color:var(--text-muted)}
+.idp-meta-item strong{color:var(--text-secondary);font-weight:500}
+
+/* GOAL CARD */
+.goal-card{border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:16px 18px;margin-bottom:14px;transition:border-color .2s;background:var(--card)}
+.goal-card:last-child{margin-bottom:0}
+.goal-card:hover{border-color:rgba(0,0,0,0.16)}
+.gc-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.gc-num{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;font-weight:500;flex-shrink:0}
+.gc-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1;min-width:0}
+.gc-status{padding:3px 10px;border-radius:100px;font-size:10px;font-weight:500;flex-shrink:0}
+.gc-desc{font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px}
+.gc-bar{width:100%;height:6px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden;margin-bottom:10px}
+.gc-bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.gc-footer{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.gc-meta{font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+.gc-meta svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+/* MILESTONES */
+.milestone{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.milestone:last-child{border-bottom:none}
+.ms-marker{display:flex;flex-direction:column;align-items:center;gap:0;width:20px;flex-shrink:0}
+.ms-dot{width:12px;height:12px;border-radius:50%;border:2px solid rgba(0,0,0,0.12);background:transparent;flex-shrink:0;transition:all .2s}
+.ms-dot.done{background:var(--green);border-color:var(--green)}
+.ms-dot.active{background:var(--blue);border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.2)}
+.ms-line{width:2px;flex:1;background:rgba(0,0,0,0.08);min-height:20px}
+.ms-line.done{background:var(--green)}
+.ms-content{flex:1;min-width:0}
+.ms-title{font-size:12px;color:var(--text-primary);font-weight:500;margin-bottom:2px}
+.ms-date{font-size:10px;color:var(--text-muted)}
+.ms-check{cursor:pointer;padding:2px 10px;border-radius:5px;font-size:10px;border:1px solid rgba(0,0,0,0.12);background:transparent;color:var(--text-secondary);transition:all .15s;font-family:'DM Sans',sans-serif}
+.ms-check:hover{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.ms-check.checked{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+
+/* SIGN-OFF */
+.signoff{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.08)}
+.signoff-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:10px;font-weight:600;flex-shrink:0}
+.signoff-info{flex:1;min-width:0}
+.signoff-name{font-size:12px;color:var(--text-primary);font-weight:500}
+.signoff-role{font-size:10px;color:var(--text-muted)}
+.signoff-status{padding:3px 10px;border-radius:100px;font-size:10px;font-weight:500;flex-shrink:0}
+
+/* REVIEW DATES */
+.review-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.review-item:last-child{border-bottom:none}
+.ri-date{font-family:var(--font-mono);font-size:11px;color:var(--text-primary);width:100px;flex-shrink:0}
+.ri-type{font-size:12px;color:var(--text-secondary);flex:1}
+.ri-status{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;flex-shrink:0}
+
+/* LINKED OUTCOMES */
+.linked-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.linked-item:last-child{border-bottom:none}
+.li-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.li-icon svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.6}
+.li-text{font-size:12px;color:var(--text-secondary);flex:1;min-width:0}
+.li-link{font-size:11px;color:var(--blue);text-decoration:none;flex-shrink:0}
+.li-link:hover{text-decoration:underline}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.fade-up{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <a href="../level-journey.html" style="display:flex;align-items:center;gap:12px;padding:0 28px;height:36px;background:linear-gradient(90deg,rgba(201,168,76,0.10) 0%,rgba(250,250,248,0) 60%);border-bottom:1px solid rgba(201,168,76,0.2);text-decoration:none;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite"></div><span style="font-size:10px;font-family:var(--font-display);font-weight:600;letter-spacing:.08em;color:var(--accent)">L2 ACTIVE</span></div>
+    <div style="width:1px;height:14px;background:rgba(201,168,76,0.2)"></div>
+    <div style="font-size:11px;color:var(--text-secondary)">Individual Development Plan linked to assessment gaps</div>
+    <div style="margin-left:auto;font-size:10px;font-family:var(--font-display);font-weight:600;letter-spacing:.06em;color:var(--accent);text-transform:uppercase">View journey &rarr;</div>
+  </a>
+
+  <div class="content">
+
+    <!-- IDP HEADER -->
+    <div class="idp-header fade-up">
+      <div class="idp-ring">
+        <canvas id="idpRing" width="160" height="160"></canvas>
+        <div class="idp-ring-label">
+          <div class="idp-ring-pct" id="idpPct">58%</div>
+          <div class="idp-ring-sub">Progress</div>
+        </div>
+      </div>
+      <div class="idp-info">
+        <div class="idp-title">FY2026 Development Plan — Priya Menon</div>
+        <div class="idp-sub">3 development goals aligned to Q4 2025 assessment gaps and Edstellar's strategic priorities. Next review: 15 April 2026.</div>
+        <div class="idp-meta-row">
+          <div class="idp-meta-item">Created: <strong>15 Jan 2026</strong></div>
+          <div class="idp-meta-item">Manager: <strong>Arun Krishnan</strong></div>
+          <div class="idp-meta-item">Status: <strong style="color:var(--blue)">In Progress</strong></div>
+          <div class="idp-meta-item">Goals: <strong>3</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEVELOPMENT GOALS -->
+    <div id="goalsList"></div>
+
+    <!-- TWO COL: Reviews + Linked Outcomes -->
+    <div class="two-col">
+      <!-- REVIEW SCHEDULE -->
+      <div class="panel fade-up" style="animation-delay:.18s">
+        <div class="panel-head">
+          <svg style="width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <div class="panel-title">Review Schedule</div>
+        </div>
+        <div class="panel-body">
+          <div class="review-item">
+            <div class="ri-date">15 Jan 2026</div>
+            <div class="ri-type">IDP Creation &amp; Goal Setting</div>
+            <div class="ri-status" style="background:var(--green-bg);color:var(--green)">Done</div>
+          </div>
+          <div class="review-item">
+            <div class="ri-date">15 Apr 2026</div>
+            <div class="ri-type">Q1 Progress Review</div>
+            <div class="ri-status" style="background:var(--amber-bg);color:var(--amber)">Upcoming</div>
+          </div>
+          <div class="review-item">
+            <div class="ri-date">15 Jul 2026</div>
+            <div class="ri-type">Mid-Year Deep Review</div>
+            <div class="ri-status" style="background:rgba(0,0,0,0.04);color:var(--text-muted)">Scheduled</div>
+          </div>
+          <div class="review-item">
+            <div class="ri-date">15 Oct 2026</div>
+            <div class="ri-type">Q3 Check-in</div>
+            <div class="ri-status" style="background:rgba(0,0,0,0.04);color:var(--text-muted)">Scheduled</div>
+          </div>
+          <div class="review-item">
+            <div class="ri-date">15 Dec 2026</div>
+            <div class="ri-type">Annual IDP Closure &amp; Evaluation</div>
+            <div class="ri-status" style="background:rgba(0,0,0,0.04);color:var(--text-muted)">Scheduled</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIGN-OFF & LINKED -->
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <!-- MANAGER SIGN-OFF -->
+        <div class="panel fade-up" style="animation-delay:.24s">
+          <div class="panel-head">
+            <svg style="width:14px;height:14px;stroke:var(--green);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+            <div class="panel-title">Manager Sign-off</div>
+          </div>
+          <div class="panel-body" style="display:flex;flex-direction:column;gap:10px">
+            <div class="signoff">
+              <div class="signoff-av" style="background:var(--green);color:#fff">AK</div>
+              <div class="signoff-info">
+                <div class="signoff-name">Arun Krishnan</div>
+                <div class="signoff-role">Direct Manager &middot; Geotechnical Lead</div>
+              </div>
+              <div class="signoff-status" style="background:var(--green-bg);color:var(--green)">Approved</div>
+            </div>
+            <div class="signoff">
+              <div class="signoff-av" style="background:var(--blue);color:#fff">KR</div>
+              <div class="signoff-info">
+                <div class="signoff-name">Kavitha Ramachandran</div>
+                <div class="signoff-role">L&amp;D Manager &middot; HR</div>
+              </div>
+              <div class="signoff-status" style="background:var(--green-bg);color:var(--green)">Reviewed</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LINKED OUTCOMES -->
+        <div class="panel fade-up" style="animation-delay:.30s">
+          <div class="panel-head">
+            <svg style="width:14px;height:14px;stroke:var(--purple);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <div class="panel-title">Linked Outcomes</div>
+          </div>
+          <div class="panel-body">
+            <div class="linked-item">
+              <div class="li-icon" style="background:var(--blue-bg);color:var(--blue)"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+              <div class="li-text">Q4 2025 Assessment — 1 gap identified (BIM)</div>
+              <a href="my-assessments.html" class="li-link">View &rarr;</a>
+            </div>
+            <div class="linked-item">
+              <div class="li-icon" style="background:var(--green-bg);color:var(--green)"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+              <div class="li-text">Learning Path — 2 active programmes</div>
+              <a href="learning-path.html" class="li-link">View &rarr;</a>
+            </div>
+            <div class="linked-item">
+              <div class="li-icon" style="background:var(--amber-bg);color:var(--accent)"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+              <div class="li-text">Target: BIM Coordination Certificate by Q3 2026</div>
+              <a href="certificates.html" class="li-link">View &rarr;</a>
+            </div>
+            <div class="linked-item">
+              <div class="li-icon" style="background:var(--amber-bg);color:var(--amber)"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+              <div class="li-text">My Training — 3 enrolled programmes</div>
+              <a href="my-training.html" class="li-link">View &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;padding:10px 28px;background:rgba(201,168,76,0.06);border-top:1px solid rgba(201,168,76,0.15);flex-shrink:0">
+    <svg style="width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <span style="font-size:11px;color:var(--accent);font-weight:500;letter-spacing:.03em">IDP aligned to assessment gaps &middot; Manager-approved &middot; Feeds into Learning Path &amp; Skill Passport</span>
+    <span style="margin-left:auto;font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase">L2 Development</span>
+  </div>
+
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal: 'employee',
+  activeNav: 'My IDP',
+  breadcrumbs: ['Development', 'My IDP'],
+  topbarActions: []
+});
+</script>
+<script>
+var goals = [
+  {
+    id:'DG1',title:'Close BIM Coordination Gap',color:'var(--blue)',colorDim:'var(--blue-bg)',
+    desc:'Advance from Level 2 (can navigate models) to Level 4 (creates and manages models) in BIM Coordination. Current assessment score: 2.5/5. Target: 4.0/5 by Q3 2026.',
+    progress:40,target:'Q3 2026',source:'Q4 2025 Assessment',priority:'High',
+    status:'In Progress',statusBg:'background:var(--blue-bg);color:var(--blue)',
+    milestones:[
+      {text:'Complete Autodesk Revit Intermediate course',date:'Feb 2026',done:true},
+      {text:'Shadow BIM team on Marina Bay project for 2 weeks',date:'Mar 2026',done:true},
+      {text:'Lead a BIM coordination session independently',date:'Apr 2026',done:false,active:true},
+      {text:'Pass Autodesk Revit Professional certification exam',date:'Jun 2026',done:false},
+      {text:'Manage BIM deliverables on next project assignment',date:'Aug 2026',done:false}
+    ]
+  },
+  {
+    id:'DG2',title:'Build Data Analytics Capability',color:'var(--purple)',colorDim:'var(--purple-bg)',
+    desc:'Develop Power BI and data analysis skills to support project reporting and decision-making. Move from Level 2 (basic Excel) to Level 3 (builds dashboards independently).',
+    progress:65,target:'Q2 2026',source:'Strategic Goal G1',priority:'Medium',
+    status:'On Track',statusBg:'background:var(--green-bg);color:var(--green)',
+    milestones:[
+      {text:'Complete Power BI Fundamentals (LinkedIn Learning)',date:'Jan 2026',done:true},
+      {text:'Build first project dashboard with real data',date:'Feb 2026',done:true},
+      {text:'Present dashboard to department head',date:'Mar 2026',done:true},
+      {text:'Complete Power BI Advanced course',date:'Apr 2026',done:false,active:true},
+      {text:'Create automated monthly project report',date:'May 2026',done:false}
+    ]
+  },
+  {
+    id:'DG3',title:'Strengthen Leadership for Senior Role Readiness',color:'var(--accent)',colorDim:'var(--amber-bg)',
+    desc:'Prepare for potential promotion to Principal Engineer. Focus on stakeholder management, mentoring junior engineers, and cross-functional project leadership.',
+    progress:30,target:'Q4 2026',source:'Succession Planning',priority:'Strategic',
+    status:'Early Stage',statusBg:'background:var(--amber-bg);color:var(--amber)',
+    milestones:[
+      {text:'Complete "Leading Engineering Teams" programme',date:'Mar 2026',done:true},
+      {text:'Mentor 2 junior engineers (ongoing)',date:'Q1-Q4 2026',done:false,active:true},
+      {text:'Lead cross-functional meeting with client',date:'May 2026',done:false},
+      {text:'360-degree feedback assessment',date:'Jul 2026',done:false},
+      {text:'Present at internal engineering conference',date:'Sep 2026',done:false},
+      {text:'Principal Engineer readiness review with manager',date:'Nov 2026',done:false}
+    ]
+  }
+];
+
+// Track milestone completion
+var milestoneState = {};
+goals.forEach(function(g) {
+  g.milestones.forEach(function(m, i) {
+    milestoneState[g.id + '-' + i] = m.done;
+  });
+});
+
+function toggleMilestone(goalId, msIdx) {
+  var key = goalId + '-' + msIdx;
+  milestoneState[key] = !milestoneState[key];
+  // Update goal progress
+  var goal = goals.find(function(g){ return g.id === goalId; });
+  var doneCount = 0;
+  goal.milestones.forEach(function(m, i) {
+    if (milestoneState[goalId + '-' + i]) doneCount++;
+  });
+  goal.progress = Math.round(doneCount / goal.milestones.length * 100);
+  renderGoals();
+  updateOverallProgress();
+  showToast(milestoneState[key] ? 'Milestone completed' : 'Milestone unchecked');
+}
+
+function renderGoals() {
+  var html = '';
+  goals.forEach(function(g, gIdx) {
+    html += '<div class="goal-card fade-up" style="animation-delay:' + (0.06 + gIdx * 0.06) + 's">';
+    html += '<div class="gc-header">';
+    html += '<div class="gc-num" style="background:' + g.colorDim + ';color:' + g.color + '">' + g.id + '</div>';
+    html += '<div class="gc-title">' + g.title + '</div>';
+    html += '<div class="gc-status" style="' + g.statusBg + '">' + g.status + '</div>';
+    html += '</div>';
+    html += '<div class="gc-desc">' + g.desc + '</div>';
+    html += '<div class="gc-bar"><div class="gc-bar-fill" style="width:' + g.progress + '%;background:' + g.color + '"></div></div>';
+    html += '<div class="gc-footer">';
+    html += '<div class="gc-meta"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Target: ' + g.target + '</div>';
+    html += '<div class="gc-meta"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Priority: ' + g.priority + '</div>';
+    html += '<div class="gc-meta"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/></svg>Source: ' + g.source + '</div>';
+    html += '<div class="gc-meta" style="margin-left:auto;font-family:var(--font-mono);font-weight:500;color:' + g.color + '">' + g.progress + '%</div>';
+    html += '</div>';
+
+    // Milestones
+    html += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,0.06)">';
+    html += '<div style="font-size:11px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Milestones</div>';
+    g.milestones.forEach(function(m, mIdx) {
+      var isDone = milestoneState[g.id + '-' + mIdx];
+      var isActive = !isDone && m.active;
+      html += '<div class="milestone">';
+      html += '<div class="ms-marker">';
+      html += '<div class="ms-dot' + (isDone ? ' done' : isActive ? ' active' : '') + '"></div>';
+      if (mIdx < g.milestones.length - 1) html += '<div class="ms-line' + (isDone ? ' done' : '') + '"></div>';
+      html += '</div>';
+      html += '<div class="ms-content">';
+      html += '<div class="ms-title" style="' + (isDone ? 'text-decoration:line-through;opacity:.6' : '') + '">' + m.text + '</div>';
+      html += '<div class="ms-date">' + m.date + '</div>';
+      html += '</div>';
+      html += '<button class="ms-check' + (isDone ? ' checked' : '') + '" onclick="toggleMilestone(\'' + g.id + '\',' + mIdx + ')">' + (isDone ? 'Done' : 'Mark done') + '</button>';
+      html += '</div>';
+    });
+    html += '</div>';
+
+    html += '</div>'; // goal-card
+  });
+  document.getElementById('goalsList').innerHTML = html;
+}
+
+function updateOverallProgress() {
+  var totalMs = 0, doneMs = 0;
+  goals.forEach(function(g) {
+    g.milestones.forEach(function(m, i) {
+      totalMs++;
+      if (milestoneState[g.id + '-' + i]) doneMs++;
+    });
+  });
+  var pct = Math.round(doneMs / totalMs * 100);
+  document.getElementById('idpPct').textContent = pct + '%';
+  drawRing(pct / 100);
+}
+
+function drawRing(pct) {
+  var canvas = document.getElementById('idpRing');
+  var ctx = canvas.getContext('2d');
+  var w = canvas.width, h = canvas.height, cx = w/2, cy = h/2, r = 65;
+  ctx.clearRect(0,0,w,h);
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.strokeStyle='rgba(0,0,0,0.06)'; ctx.lineWidth=9; ctx.stroke();
+  if (pct > 0) {
+    ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*pct);
+    var grad = ctx.createLinearGradient(0,0,w,h);
+    grad.addColorStop(0,'#C9A84C'); grad.addColorStop(1,'#A8883A');
+    ctx.strokeStyle = grad; ctx.lineWidth=9; ctx.lineCap='round'; ctx.stroke();
+  }
+}
+
+function showToast(msg){var t=document.getElementById('sip-toast');if(!t){t=document.createElement('div');t.id='sip-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#ffffff;border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:"DM Sans",sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08)';document.body.appendChild(t)}t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)'},2400)}
+
+document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.getAttribute('href')==='#'){e.preventDefault();showToast((a.textContent||'').trim().substring(0,36)+' \u2014 available in full platform')}});
+
+renderGoals();
+updateOverallProgress();
+</script>
+</body>
+</html>

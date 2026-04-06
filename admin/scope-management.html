@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scope Management · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<style>
+/* ── PAGE-SPECIFIC STYLES ── */
+
+/* PANELS */
+.panel{background:var(--card);border:1px solid #E5E7EB;border-radius:12px;overflow:hidden}
+.panel-head{padding:14px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1;min-width:120px}
+.panel-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500}
+.panel-body{padding:18px 20px}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:960px){.two-col{grid-template-columns:1fr}}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:960px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+
+.stat-card{background:var(--card);border:1px solid #E5E7EB;border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.stat-label{font-size:11px;color:var(--text-muted);white-space:nowrap}
+.stat-val{font-family:var(--font-display);font-size:24px;font-weight:600;line-height:1}
+.stat-sub{font-size:11px;color:var(--text-muted)}
+
+/* RULE CARD */
+.rule-card{border:1px solid #E5E7EB;border-radius:10px;padding:16px 18px;margin-bottom:12px;transition:border-color .2s}
+.rule-card:hover{border-color:rgba(0,0,0,0.15)}
+.rule-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.rule-name{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1}
+.rule-status{padding:3px 10px;border-radius:100px;font-size:10px;font-weight:500;flex-shrink:0}
+.rule-toggle{width:40px;height:22px;border-radius:11px;background:rgba(0,0,0,0.08);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s}
+.rule-toggle.on{background:var(--green)}
+.rule-toggle-dot{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,0.12)}
+.rule-toggle.on .rule-toggle-dot{left:20px}
+.rule-body{font-size:12px;color:var(--text-secondary);line-height:1.5}
+.rule-meta{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+.rule-meta-item{font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+.rule-scope{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.rule-scope-tag{padding:3px 10px;border-radius:5px;font-size:10px;border:1px solid #E5E7EB;color:var(--text-secondary)}
+
+/* OVERRIDE TABLE */
+.ov-tbl{width:100%;border-collapse:collapse;min-width:600px}
+.ov-tbl th{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:8px 10px;border-bottom:1px solid #E5E7EB;font-weight:500;white-space:nowrap}
+.ov-tbl td{font-size:12px;padding:9px 10px;border-bottom:1px solid rgba(0,0,0,0.04);color:var(--text-secondary);white-space:nowrap}
+.ov-tbl tr:hover td{background:rgba(0,0,0,0.02)}
+.ov-name{color:var(--text-primary);font-weight:500}
+.ov-reason{max-width:200px;white-space:normal;font-size:11px;color:var(--text-muted);line-height:1.4}
+.ov-btn{padding:3px 10px;border-radius:5px;font-size:10px;border:1px solid #E5E7EB;color:var(--text-secondary);cursor:pointer;background:transparent;font-family:var(--font-body);transition:all .15s}
+.ov-btn:hover{border-color:var(--blue);color:var(--blue)}
+
+/* PREVIEW BAR */
+.preview-bar{display:flex;align-items:center;gap:14px;padding:14px 20px;background:linear-gradient(135deg,var(--card) 0%,var(--blue-bg) 100%);border:1px solid rgba(59,130,246,0.2);border-radius:12px}
+.pv-ring{width:50px;height:50px;position:relative;flex-shrink:0}
+.pv-ring canvas{width:100%;height:100%}
+.pv-ring-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--blue)}
+.pv-info{flex:1;min-width:0}
+.pv-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+.pv-sub{font-size:11px;color:var(--text-secondary)}
+.pv-counts{display:flex;gap:16px;margin-top:6px}
+.pv-count{font-size:10px;color:var(--text-muted)}
+.pv-count strong{color:var(--text-secondary)}
+
+/* AUDIT LOG */
+.audit-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.audit-row:last-child{border-bottom:none}
+.audit-time{font-family:var(--font-mono);font-size:10px;color:var(--text-muted);width:80px;flex-shrink:0}
+.audit-action{font-size:11px;color:var(--text-secondary);flex:1;min-width:0}
+.audit-action strong{color:var(--text-primary);font-weight:500}
+.audit-user{font-size:10px;color:var(--text-muted);flex-shrink:0}
+.audit-badge{padding:2px 6px;border-radius:4px;font-size:9px;flex-shrink:0}
+
+/* ADD OVERRIDE FORM */
+.add-ov{border:1px dashed #E5E7EB;border-radius:10px;padding:14px 18px;margin-top:12px}
+
+/* FORM INPUTS */
+.form-select,.form-input{padding:6px 10px;border-radius:6px;border:1px solid #E5E7EB;background:#fff;color:var(--text-primary);font-size:11px;font-family:var(--font-body);outline:none;transition:border-color .2s}
+.form-select:focus,.form-input:focus{border-color:var(--blue)}
+.form-input::placeholder{color:var(--text-muted)}
+
+.btn-gold{padding:6px 14px;border-radius:6px;background:var(--accent);border:none;color:#0F1117;font-family:var(--font-body);font-size:11px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn-gold:hover{opacity:.88}
+
+.content-area{display:flex;flex-direction:column;gap:20px}
+.content-area>*{flex-shrink:0}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.fade-up{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+  <div class="content-area">
+
+    <!-- SCOPE PREVIEW -->
+    <div class="preview-bar fade-up">
+      <div class="pv-ring"><canvas id="pvCanvas" width="100" height="100"></canvas><div class="pv-ring-label" id="pvPct">96%</div></div>
+      <div class="pv-info">
+        <div class="pv-title">Scope Preview: <span id="pvInScope">780</span> of 812 employees in scope</div>
+        <div class="pv-sub">Employees in scope will receive assessments, learning paths, and skill passports.</div>
+        <div class="pv-counts">
+          <div class="pv-count">In Scope: <strong id="pvIn">780</strong></div>
+          <div class="pv-count">Exempted by Rules: <strong id="pvRuleEx">24</strong></div>
+          <div class="pv-count">Individual Overrides: <strong id="pvOverride">8</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row fade-up" style="animation-delay:.06s">
+      <div class="stat-card"><div class="stat-label">Total Employees</div><div class="stat-val" style="color:var(--text-primary)">812</div><div class="stat-sub">Across 4 BUs</div></div>
+      <div class="stat-card"><div class="stat-label">In Scope</div><div class="stat-val" style="color:var(--green)" id="statIn">780</div><div class="stat-sub">Will receive assessments</div></div>
+      <div class="stat-card"><div class="stat-label">Exempted</div><div class="stat-val" style="color:var(--amber)" id="statEx">32</div><div class="stat-sub">24 by rule + 8 exempt overrides</div></div>
+      <div class="stat-card"><div class="stat-label">Active Rules</div><div class="stat-val" style="color:var(--blue)">5</div><div class="stat-sub">Auto-assignment</div></div>
+    </div>
+
+    <div class="two-col">
+      <!-- SCOPE RULES -->
+      <div class="panel fade-up" style="animation-delay:.12s">
+        <div class="panel-head">
+          <svg style="width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div class="panel-title">Scope Rules</div>
+          <div class="panel-badge" style="background:var(--blue-bg);color:var(--blue)">5 active</div>
+        </div>
+        <div class="panel-body" id="rulesContainer"></div>
+      </div>
+
+      <!-- INDIVIDUAL OVERRIDES -->
+      <div class="panel fade-up" style="animation-delay:.18s">
+        <div class="panel-head">
+          <svg style="width:14px;height:14px;stroke:var(--amber);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <div class="panel-title">Individual Overrides</div>
+          <div class="panel-badge" style="background:var(--amber-bg);color:var(--amber)">8 overrides</div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="ov-tbl">
+            <thead><tr><th>Employee</th><th>Department</th><th>Action</th><th>Reason</th><th>By</th><th></th></tr></thead>
+            <tbody id="overrideBody"></tbody>
+          </table>
+        </div>
+        <div class="add-ov">
+          <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:8px">Add Individual Override</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <select id="ovEmp" class="form-select" style="flex:1;min-width:140px">
+              <option value="">Select employee to exempt...</option>
+            </select>
+            <select id="ovAction" class="form-select" style="width:120px">
+              <option>Exempt</option>
+              <option>Include</option>
+            </select>
+            <input id="ovReason" class="form-input" placeholder="Mandatory reason..." style="flex:2;min-width:160px">
+            <button class="btn-gold" onclick="addOverride()">Add Override</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUDIT TRAIL -->
+    <div class="panel fade-up" style="animation-delay:.24s">
+      <div class="panel-head">
+        <svg style="width:14px;height:14px;stroke:var(--text-muted);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <div class="panel-title">Audit Trail</div>
+        <div class="panel-badge" style="background:rgba(0,0,0,0.04);color:var(--text-muted)">Last 30 days</div>
+      </div>
+      <div class="panel-body" id="auditLog"></div>
+    </div>
+
+  </div>
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal: 'admin',
+  activeNav: 'Scope Management',
+  breadcrumbs: ['People', 'Scope Management'],
+  topbarActions: []
+});
+</script>
+
+<script>
+// SCOPE RULES
+var rules = [
+  {name:'Full-Time Employees',desc:'All full-time employees are automatically in scope for assessment and development programmes.',on:true,scope:['Full-Time'],affects:724,type:'Include'},
+  {name:'Contract Workers (>6 months)',desc:'Contract workers with tenure exceeding 6 months are included in scope. Shorter contracts are excluded.',on:true,scope:['Contract','>6 months'],affects:42,type:'Include'},
+  {name:'Probation Period Exclusion',desc:'Employees in their first 90 days (probation) are excluded from formal assessment cycles. They receive onboarding assessments only.',on:true,scope:['<90 days tenure'],affects:14,type:'Exempt'},
+  {name:'Intern Exclusion',desc:'Interns are excluded from the formal skill framework. They follow the internship-specific development track.',on:true,scope:['Intern'],affects:8,type:'Exempt'},
+  {name:'Long-Term Leave Deferral',desc:'Employees on maternity, medical, or sabbatical leave >30 days are deferred until return. Assessment deadlines auto-extend.',on:true,scope:['Maternity','Medical Leave','Sabbatical'],affects:2,type:'Exempt'}
+];
+
+function loadDataportEmployees(){
+  var raw=null;
+  try{raw=sessionStorage.getItem('sip_dataport_import')}catch(e){}
+  if(!raw){try{raw=localStorage.getItem('sip_dataport_import')}catch(e){}}
+  if(raw){
+    try{
+      var imp=JSON.parse(raw);
+      if(imp.employees&&imp.employees.length) return imp.employees;
+    }catch(e){}
+  }
+  return null;
+}
+
+var dpEmployees = loadDataportEmployees();
+var TOTAL_EMPLOYEES = dpEmployees ? dpEmployees.length : 812;
+
+var ALL_EMPLOYEES = (function(){
+  if(dpEmployees){
+    return dpEmployees.map(function(e){ return e.id + ' \u2014 ' + e.firstName + ' ' + e.lastName; });
+  }
+  return [
+  'EMP-001 \u2014 Priya Nair','EMP-002 \u2014 Wei Liang Tan','EMP-003 \u2014 Rajan Patel','EMP-004 \u2014 Aisha Al-Rashid',
+  'EMP-005 \u2014 James Morrison','EMP-006 \u2014 Mei Lin Wong','EMP-007 \u2014 Arjun Sharma','EMP-008 \u2014 Sarah Williams',
+  'EMP-009 \u2014 Yusuf Hassan','EMP-010 \u2014 Kavitha Raghavan','EMP-011 \u2014 Chen Liu','EMP-012 \u2014 Fatima Khoury',
+  'EMP-013 \u2014 David Thompson','EMP-014 \u2014 Ananya Iyer','EMP-015 \u2014 Liam O\'Brien','EMP-016 \u2014 Noor Ahmad',
+  'EMP-017 \u2014 Hiroshi Tanaka','EMP-018 \u2014 Maria Santos','EMP-019 \u2014 Sanjay Gupta','EMP-020 \u2014 Emma Clarke',
+  'EMP-034 \u2014 Anil Mehta','EMP-045 \u2014 Rajan Nair','EMP-067 \u2014 Sanjay Puri','EMP-089 \u2014 Lina Tan',
+  'EMP-102 \u2014 Siti Ahmad','EMP-112 \u2014 Farhan Ali','EMP-145 \u2014 Priti Shah','EMP-156 \u2014 Thomas Lee',
+  'EMP-201 \u2014 David Lim','EMP-334 \u2014 Nisha Gupta','EMP-401 \u2014 Wei Chen',
+  'EMP-050 \u2014 Rahul Desai','EMP-075 \u2014 Alice Ng','EMP-088 \u2014 Omar Basri','EMP-120 \u2014 Jennifer Wu',
+  'EMP-180 \u2014 Vikram Singh','EMP-210 \u2014 Linda Park','EMP-250 \u2014 Ahmed Zayed','EMP-300 \u2014 Sophie Martin',
+  'EMP-350 \u2014 Karthik Raman','EMP-400 \u2014 Hannah Kim','EMP-450 \u2014 Robert Tan','EMP-500 \u2014 Deepa Menon'
+  ];
+})();
+
+function renderRules(){
+  var h='';
+  rules.forEach(function(r,i){
+    h+='<div class="rule-card">';
+    h+='<div class="rule-head">';
+    h+='<span class="rule-name">'+r.name+'</span>';
+    h+='<span class="rule-status" style="background:'+(r.type==='Include'?'var(--green-bg);color:var(--green)':'var(--amber-bg);color:var(--amber)')+'">'+r.type+'</span>';
+    h+='<div class="rule-toggle'+(r.on?' on':'')+'" onclick="toggleRule('+i+')"><div class="rule-toggle-dot"></div></div>';
+    h+='</div>';
+    h+='<div class="rule-body">'+r.desc+'</div>';
+    h+='<div class="rule-scope">';
+    r.scope.forEach(function(s){h+='<span class="rule-scope-tag">'+s+'</span>'});
+    h+='</div>';
+    h+='<div class="rule-meta"><div class="rule-meta-item">Affects: <strong style="color:var(--text-secondary)">'+r.affects+' employees</strong></div><div class="rule-meta-item">Status: <strong style="color:'+(r.on?'var(--green)':'var(--text-muted)')+'">'+( r.on?'Active':'Disabled')+'</strong></div></div>';
+    h+='</div>';
+  });
+  document.getElementById('rulesContainer').innerHTML=h;
+}
+
+function toggleRule(i){
+  rules[i].on=!rules[i].on;
+  renderRules();
+  updatePreview();
+  showToast(rules[i].name+' — '+(rules[i].on?'Enabled':'Disabled'));
+}
+
+// OVERRIDES
+var overrides = [
+  {emp:'EMP-034 — Anil Mehta',dept:'Project Delivery',action:'Exempt',reason:'Seconded to client site (Dubai) — no platform access until Q3',by:'Kavitha R.'},
+  {emp:'EMP-067 — Sanjay Puri',dept:'Finance',action:'Exempt',reason:'Resignation accepted — last day 15 Apr 2026',by:'Kavitha R.'},
+  {emp:'EMP-089 — Lina Tan',dept:'HR',action:'Exempt',reason:'Long-term medical leave — return date TBD',by:'Kavitha R.'},
+  {emp:'EMP-112 — Farhan Ali',dept:'EHS & Risk',action:'Include',reason:'Contract extended to 18 months — now in scope per rule',by:'Kavitha R.'},
+  {emp:'EMP-145 — Priti Shah',dept:'Legal',action:'Exempt',reason:'Maternity leave — deferred until return Aug 2026',by:'Kavitha R.'},
+  {emp:'EMP-201 — David Lim',dept:'IT Infrastructure',action:'Exempt',reason:'Notice period — transitioning to new role externally',by:'Kavitha R.'},
+  {emp:'EMP-334 — Nisha Gupta',dept:'Sustainability',action:'Exempt',reason:'Part-time researcher — below minimum hours threshold',by:'Kavitha R.'},
+  {emp:'EMP-401 — Wei Chen',dept:'BIM & Digital',action:'Include',reason:'Intern converted to full-time — now in scope',by:'Kavitha R.'}
+];
+
+var editingOverride = -1;
+
+function renderOverrides(){
+  var h='';
+  overrides.forEach(function(o,i){
+    var actStyle=o.action==='Exempt'?'background:var(--amber-bg);color:var(--amber)':'background:var(--green-bg);color:var(--green)';
+    if(editingOverride === i){
+      // Edit mode row
+      h+='<tr style="background:rgba(201,168,76,0.04)">';
+      h+='<td><select id="editOvEmp_'+i+'" class="form-select" style="width:180px;font-size:11px">';
+      ALL_EMPLOYEES.forEach(function(e){h+='<option'+(o.emp===e?' selected':'')+'>'+e+'</option>'});
+      h+='</select></td>';
+      h+='<td><input id="editOvDept_'+i+'" class="form-input" value="'+o.dept+'" style="width:100px;font-size:11px"></td>';
+      h+='<td><select id="editOvAction_'+i+'" class="form-select" style="width:90px;font-size:11px"><option'+(o.action==='Exempt'?' selected':'')+'>Exempt</option><option'+(o.action==='Include'?' selected':'')+'>Include</option></select></td>';
+      h+='<td><input id="editOvReason_'+i+'" class="form-input" value="'+o.reason+'" style="width:100%;min-width:140px;font-size:11px"></td>';
+      h+='<td style="font-size:10px;color:var(--text-muted)">'+o.by+'</td>';
+      h+='<td style="white-space:nowrap"><button class="ov-btn" style="border-color:var(--green);color:var(--green)" onclick="saveOverrideEdit('+i+')">Save</button> <button class="ov-btn" onclick="editingOverride=-1;renderOverrides()">Cancel</button></td>';
+      h+='</tr>';
+    } else {
+      h+='<tr>';
+      h+='<td class="ov-name">'+o.emp+'</td>';
+      h+='<td>'+o.dept+'</td>';
+      h+='<td><span style="padding:2px 8px;border-radius:100px;font-size:9px;'+actStyle+'">'+o.action+'</span></td>';
+      h+='<td class="ov-reason">'+o.reason+'</td>';
+      h+='<td style="font-size:10px;color:var(--text-muted)">'+o.by+'</td>';
+      h+='<td style="white-space:nowrap"><button class="ov-btn" onclick="editingOverride='+i+';renderOverrides()">Edit</button> <button class="ov-btn" onclick="overrides.splice('+i+',1);renderOverrides();updatePreview();populateEmpDropdown();showToast(\'Override removed\')">Remove</button></td>';
+      h+='</tr>';
+    }
+  });
+  document.getElementById('overrideBody').innerHTML=h;
+}
+
+function saveOverrideEdit(i){
+  overrides[i].emp=document.getElementById('editOvEmp_'+i).value;
+  overrides[i].dept=document.getElementById('editOvDept_'+i).value.trim()||'\u2014';
+  overrides[i].action=document.getElementById('editOvAction_'+i).value;
+  overrides[i].reason=document.getElementById('editOvReason_'+i).value.trim();
+  editingOverride=-1;
+  renderOverrides();updatePreview();
+  showToast('Override updated');
+}
+
+function addOverride(){
+  var emp=document.getElementById('ovEmp').value;
+  var reason=document.getElementById('ovReason').value.trim();
+  if(!emp||!reason){showToast('Select employee and enter mandatory reason');return}
+  var action=document.getElementById('ovAction').value;
+  overrides.push({emp:emp,dept:'—',action:action,reason:reason,by:'Kavitha R.'});
+  renderOverrides();updatePreview();populateEmpDropdown();
+  document.getElementById('ovReason').value='';
+  showToast('Override added: '+emp.split('\u2014')[1].trim()+' \u2192 '+action);
+}
+
+// AUDIT LOG
+function renderAudit(){
+  var logs=[
+    {time:'28 Mar 10:42',action:'<strong>Rule toggled</strong> — "Probation Period Exclusion" enabled',user:'Kavitha R.',badge:'Rule',badgeStyle:'background:var(--blue-bg);color:var(--blue)'},
+    {time:'27 Mar 16:18',action:'<strong>Override added</strong> — EMP-401 Wei Chen included (intern converted)',user:'Kavitha R.',badge:'Override',badgeStyle:'background:var(--amber-bg);color:var(--amber)'},
+    {time:'25 Mar 09:30',action:'<strong>Rules applied</strong> — 780 in scope, 32 excluded. Preview confirmed.',user:'Kavitha R.',badge:'Apply',badgeStyle:'background:var(--green-bg);color:var(--green)'},
+    {time:'24 Mar 14:55',action:'<strong>Override added</strong> — EMP-034 Anil Mehta excluded (seconded to client)',user:'Kavitha R.',badge:'Override',badgeStyle:'background:var(--amber-bg);color:var(--amber)'},
+    {time:'22 Mar 11:20',action:'<strong>Rule created</strong> — "Long-Term Leave Deferral" with 30-day threshold',user:'Kavitha R.',badge:'Rule',badgeStyle:'background:var(--blue-bg);color:var(--blue)'},
+    {time:'20 Mar 09:00',action:'<strong>Initial scope setup</strong> — 5 rules configured, baseline 812 employees',user:'Kavitha R.',badge:'Setup',badgeStyle:'background:var(--accent-lt);color:var(--accent)'},
+  ];
+  var h='';
+  logs.forEach(function(l){
+    h+='<div class="audit-row">';
+    h+='<div class="audit-time">'+l.time+'</div>';
+    h+='<div class="audit-action">'+l.action+'</div>';
+    h+='<span class="audit-badge" style="'+l.badgeStyle+'">'+l.badge+'</span>';
+    h+='<div class="audit-user">'+l.user+'</div>';
+    h+='</div>';
+  });
+  document.getElementById('auditLog').innerHTML=h;
+}
+
+// PREVIEW
+function updatePreview(){
+  var excluded=0;
+  rules.forEach(function(r){if(r.on&&r.type==='Exempt')excluded+=r.affects});
+  var ovExclude=overrides.filter(function(o){return o.action==='Exempt'}).length;
+  var ovInclude=overrides.filter(function(o){return o.action==='Include'}).length;
+  var inScope=TOTAL_EMPLOYEES-excluded-ovExclude+ovInclude;
+  var pct=Math.round(inScope/TOTAL_EMPLOYEES*100);
+  document.getElementById('pvPct').textContent=pct+'%';
+  document.getElementById('pvInScope').textContent=inScope;
+  document.getElementById('pvIn').textContent=inScope;
+  document.getElementById('pvRuleEx').textContent=excluded;
+  document.getElementById('pvOverride').textContent=ovExclude+ovInclude;
+  document.getElementById('statIn').textContent=inScope;
+  document.getElementById('statEx').textContent=(TOTAL_EMPLOYEES-inScope);
+  drawPv(pct/100);
+}
+
+function drawPv(pct){
+  var c=document.getElementById('pvCanvas');if(!c)return;
+  var ctx=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,r=40;
+  ctx.clearRect(0,0,w,h);
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='rgba(0,0,0,0.08)';ctx.lineWidth=6;ctx.stroke();
+  if(pct>0){ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*pct);ctx.strokeStyle='#2563EB';ctx.lineWidth=6;ctx.lineCap='round';ctx.stroke()}
+}
+
+function applyRules(){
+  updatePreview();
+  showToast('Rules applied — '+document.getElementById('pvIn').textContent+' employees now in scope');
+}
+
+// TOAST
+function showToast(msg){var t=document.getElementById('sip-toast');if(!t){t=document.createElement('div');t.id='sip-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#ffffff;border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:var(--font-body),sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08)';document.body.appendChild(t)}t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)'},2400)}
+
+document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.getAttribute('href')==='#'){e.preventDefault();showToast((a.textContent||'').trim().substring(0,36)+' — available in full platform')}});
+
+function populateEmpDropdown(){
+  var sel=document.getElementById('ovEmp');
+  var existing=overrides.map(function(o){return o.emp});
+  var h='<option value="">Select employee to exempt...</option>';
+  ALL_EMPLOYEES.forEach(function(e){
+    if(existing.indexOf(e)===-1) h+='<option>'+e+'</option>';
+  });
+  sel.innerHTML=h;
+}
+
+// INIT
+renderRules();renderOverrides();renderAudit();drawPv(0.96);populateEmpDropdown();
+
+// Update totals from dataport data
+(function(){
+  var t=TOTAL_EMPLOYEES;
+  document.getElementById('pvInScope').textContent=t;
+  document.getElementById('pvIn').textContent=t;
+  // Update stat cards
+  var statCards=document.querySelectorAll('.stat-val');
+  if(statCards.length>=1) statCards[0].textContent=t;
+  // Update stat sub text
+  var deptCount=dpEmployees?Object.keys(dpEmployees.reduce(function(m,e){m[e.department]=true;return m},{})).length:4;
+  var statSubs=document.querySelectorAll('.stat-sub');
+  if(statSubs.length>=1) statSubs[0].textContent='Across '+deptCount+' departments';
+  // Recalculate preview
+  updatePreview();
+})();
+</script>
+</body>
+</html>

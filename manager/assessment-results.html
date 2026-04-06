@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assessment Results · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════════════════════
+   ASSESSMENT RESULTS — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── STATS ROW ── */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media (max-width: 960px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .stats-row { grid-template-columns: 1fr; } }
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  animation: fadeUp 0.4s ease both;
+}
+.stat-card:nth-child(1) { animation-delay: 0.05s; }
+.stat-card:nth-child(2) { animation-delay: 0.10s; }
+.stat-card:nth-child(3) { animation-delay: 0.15s; }
+.stat-card:nth-child(4) { animation-delay: 0.20s; }
+
+.stat-label { font-size: 11px; color: var(--text-secondary); letter-spacing: 0.04em; }
+.stat-val { font-family: var(--font-display); font-size: 26px; font-weight: 600; line-height: 1; }
+.stat-sub { font-size: 11px; display: flex; align-items: center; gap: 5px; }
+.stat-up { color: var(--green); }
+.stat-down { color: var(--red); }
+.stat-neutral { color: var(--text-secondary); }
+
+/* ── TWO COL ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 960px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ── PANEL ── */
+.panel {
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeUp 0.4s ease both;
+}
+.panel-head {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+  min-width: 120px;
+}
+.panel-badge {
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 500;
+}
+.panel-body { padding: 18px 20px; }
+
+/* ── CYCLE SELECTOR ── */
+.cycle-bar {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 10px;
+  align-self: flex-start;
+}
+.cycle-btn {
+  padding: 7px 16px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.cycle-btn.active {
+  background: var(--card-hover);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.cycle-btn:hover:not(.active) { color: var(--text-primary); }
+
+/* ── TABLE ── */
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+.tbl { width: 100%; border-collapse: collapse; min-width: 900px; table-layout: auto; }
+.tbl th {
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.tbl td {
+  font-size: 12px;
+  padding: 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: rgba(0,0,0,0.015); }
+.tbl .emp-name { color: var(--text-primary); font-weight: 500; min-width: 140px; }
+.tbl .score-badge {
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  display: inline-block;
+}
+.sb-high { background: var(--green-bg); color: var(--green); }
+.sb-mid  { background: var(--blue-bg); color: var(--blue); }
+.sb-low  { background: var(--amber-bg); color: var(--amber); }
+.sb-crit { background: var(--red-bg); color: var(--red); }
+
+.prof-cell { display: flex; align-items: center; gap: 6px; min-width: 160px; }
+.prof-bar { width: 60px; height: 6px; background: rgba(0,0,0,0.06); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+.prof-fill { height: 100%; border-radius: 3px; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 5px; flex-shrink: 0; }
+
+/* ── DISTRIBUTION BAR ── */
+.dist-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+.dist-label { font-size: 11px; color: var(--text-secondary); width: 110px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dist-bar { flex: 1; height: 22px; background: rgba(0,0,0,0.04); border-radius: 5px; overflow: hidden; display: flex; min-width: 120px; }
+.dist-seg {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 500;
+  transition: width 0.6s ease;
+  overflow: hidden;
+  white-space: nowrap;
+  min-width: 0;
+  color: #fff;
+}
+.dist-count { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); width: 56px; text-align: right; flex-shrink: 0; }
+
+/* ── CHART ── */
+.chart-wrap { position: relative; height: 220px; width: 100%; min-width: 0; }
+
+/* ── TOOLBAR BUTTON ── */
+.tb-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,0.10);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s, color 0.15s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.tb-btn:hover { background: var(--card-hover); color: var(--text-primary); }
+
+/* ── FILTER SELECT ── */
+.filter-select {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,0.10);
+  background: var(--card);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+/* ── SCOPE PILL ── */
+.tb-pill {
+  padding: 4px 11px;
+  border-radius: 100px;
+  font-size: 11px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.tb-pill.gold  { border-color: var(--accent-bd); color: var(--accent); }
+
+/* ── CONFIDENCE BAR ── */
+.confidence-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 28px;
+  background: var(--accent-lt);
+  border-top: 1px solid var(--accent-bd);
+  flex-shrink: 0;
+}
+.confidence-bar svg { width: 13px; height: 13px; stroke: var(--accent); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.confidence-bar .cb-text { font-size: 11px; color: var(--accent); font-weight: 500; letter-spacing: 0.03em; }
+.confidence-bar .cb-tag { margin-left: auto; font-size: 10px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* ── SCOPE TOGGLE ── */
+.scope-toggle {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,0.10);
+  background: var(--card);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+/* ── CONTENT AREA ── */
+.content { display: flex; flex-direction: column; gap: 20px; }
+
+/* ── ANIMATION ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.3); } }
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <!-- level-banner -->
+  <a href="../level-journey.html" style="display:flex;align-items:center;gap:12px;padding:0 28px;height:36px;background:var(--accent-lt);border-bottom:1px solid var(--accent-bd);text-decoration:none;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite"></div><span style="font-size:10px;font-family:var(--font-display);font-weight:600;letter-spacing:.08em;color:var(--accent)">L2 ACTIVE</span></div>
+    <div style="width:1px;height:14px;background:var(--accent-bd)"></div>
+    <div style="font-size:11px;color:var(--text-secondary)">Assessment &amp; Gap Intelligence</div>
+    <div style="margin-left:auto;font-size:10px;font-family:var(--font-display);font-weight:600;letter-spacing:.06em;color:var(--accent);text-transform:uppercase">View full journey &rarr;</div>
+  </a>
+
+  <!-- CONTENT -->
+  <div class="content" style="padding:24px 28px;flex:1;overflow-y:auto">
+
+    <!-- TOOLBAR ROW: Cycle + Scope + Export -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div class="cycle-bar">
+        <button class="cycle-btn active" onclick="switchCycle('q1')">Q1 2026 Cycle</button>
+        <button class="cycle-btn" onclick="switchCycle('q4')">Q4 2025 Cycle</button>
+        <button class="cycle-btn" onclick="switchCycle('q3')">Q3 2025 Cycle</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="scopeToggle" onchange="switchScope(this.value)" class="scope-toggle">
+          <option value="manager">Manager View (My BU)</option>
+          <option value="admin">Admin View (Cross-Department)</option>
+        </select>
+        <div class="tb-pill gold" id="scopePill">L2 Assessment</div>
+        <button class="tb-btn" style="font-size:11px;padding:5px 11px" onclick="showToast('Export triggered')">
+          <svg style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Completion Rate</div>
+        <div class="stat-val" style="color:var(--green)" id="statCompletion">87%</div>
+        <div class="stat-sub stat-up">
+          <svg style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+          +12% vs Q4 2025
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Proficiency Score</div>
+        <div class="stat-val" style="color:var(--blue)" id="statAvgScore">3.4 / 5</div>
+        <div class="stat-sub stat-up">
+          <svg style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+          +0.3 vs Q4 2025
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Employees Assessed</div>
+        <div class="stat-val" style="color:var(--text-primary)" id="statAssessed">706 / 812</div>
+        <div class="stat-sub stat-neutral">106 pending</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Critical Gaps Found</div>
+        <div class="stat-val" style="color:var(--red)" id="statGaps">23</div>
+        <div class="stat-sub stat-down">
+          <svg style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          +5 new this cycle
+        </div>
+      </div>
+    </div>
+
+    <!-- TWO COL: Score Distribution + BU Completion -->
+    <div class="two-col">
+      <!-- Score Distribution -->
+      <div class="panel" style="animation-delay:.06s">
+        <div class="panel-head">
+          <svg style="width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <div class="panel-title">Score Distribution</div>
+          <div class="panel-badge" style="background:var(--blue-bg);color:var(--blue)">706 assessed</div>
+        </div>
+        <div class="panel-body">
+          <div class="chart-wrap"><canvas id="scoreChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- BU Completion -->
+      <div class="panel" style="animation-delay:.12s">
+        <div class="panel-head">
+          <svg style="width:14px;height:14px;stroke:var(--green);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <div class="panel-title">Completion by Business Unit</div>
+        </div>
+        <div class="panel-body">
+          <div class="dist-row">
+            <div class="dist-label">Engineering</div>
+            <div class="dist-bar">
+              <div class="dist-seg" style="width:92%;background:var(--green)">92%</div>
+            </div>
+            <div class="dist-count">298/324</div>
+          </div>
+          <div class="dist-row">
+            <div class="dist-label">Digital & Tech</div>
+            <div class="dist-bar">
+              <div class="dist-seg" style="width:95%;background:var(--blue)">95%</div>
+            </div>
+            <div class="dist-count">112/118</div>
+          </div>
+          <div class="dist-row">
+            <div class="dist-label">Corporate</div>
+            <div class="dist-bar">
+              <div class="dist-seg" style="width:82%;background:var(--amber)">82%</div>
+            </div>
+            <div class="dist-count">162/198</div>
+          </div>
+          <div class="dist-row">
+            <div class="dist-label">Sustainability</div>
+            <div class="dist-bar">
+              <div class="dist-seg" style="width:78%;background:var(--amber)">78%</div>
+            </div>
+            <div class="dist-count">134/172</div>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,0.06)">
+            <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px">Proficiency Outcome Split</div>
+            <div class="dist-row" style="padding:2px 0">
+              <div class="dist-label" style="width:auto;flex:none;font-size:10px">All BUs</div>
+              <div class="dist-bar" style="height:28px;border-radius:7px">
+                <div class="dist-seg" style="width:18%;background:var(--green)">Expert</div>
+                <div class="dist-seg" style="width:32%;background:var(--blue)">Proficient</div>
+                <div class="dist-seg" style="width:28%;background:var(--amber)">Developing</div>
+                <div class="dist-seg" style="width:15%;background:var(--red)">Novice</div>
+                <div class="dist-seg" style="width:7%;background:var(--text-muted);color:#fff">N/A</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPLOYEE DRILL-DOWN TABLE -->
+    <div class="panel" style="animation-delay:.18s">
+      <div class="panel-head">
+        <svg style="width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <div class="panel-title">Per-Employee Results</div>
+        <div class="panel-badge" style="background:var(--accent-lt);color:var(--accent)">Top 15 shown</div>
+      </div>
+      <div style="display:flex;gap:6px;padding:10px 20px;border-bottom:1px solid rgba(0,0,0,0.06);flex-wrap:wrap">
+        <select id="filterBU" onchange="filterTable()" class="filter-select">
+          <option value="all">All BUs</option>
+          <option value="Engineering & Delivery">Engineering</option>
+          <option value="Digital & Technology">Digital & Tech</option>
+          <option value="Corporate Functions">Corporate</option>
+          <option value="Sustainability & EHS">Sustainability</option>
+        </select>
+        <select id="filterStatus" onchange="filterTable()" class="filter-select">
+          <option value="all">All Statuses</option>
+          <option value="Completed">Completed</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Not Started">Not Started</option>
+        </select>
+      </div>
+      <div class="tbl-wrap" style="padding:0">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Department</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Self Score</th>
+              <th>Manager Score</th>
+              <th>Final Score</th>
+              <th>Proficiency</th>
+              <th>Gaps</th>
+            </tr>
+          </thead>
+          <tbody id="empTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SKILL-LEVEL HEATMAP -->
+    <div class="panel" style="animation-delay:.24s">
+      <div class="panel-head">
+        <svg style="width:14px;height:14px;stroke:var(--purple);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        <div class="panel-title">Skill Category Heatmap</div>
+        <div class="panel-badge" style="background:var(--purple-bg);color:var(--purple)">6 categories</div>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl" id="heatmapTable" style="min-width:600px">
+          <thead>
+            <tr>
+              <th>Skill Category</th>
+              <th>Engineering</th>
+              <th>Digital & Tech</th>
+              <th>Corporate</th>
+              <th>Sustainability</th>
+              <th>Org Avg</th>
+            </tr>
+          </thead>
+          <tbody id="heatmapBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- confidence -->
+  <div class="confidence-bar">
+    <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <span class="cb-text">Assessment data from Q1 2026 cycle &middot; Dual-rating validated &middot; Feeds into Skills Matrix &amp; Gap Analysis</span>
+    <span class="cb-tag">L2 Intelligence</span>
+  </div>
+
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'manager',
+    activeNav: 'Assessment Results',
+    breadcrumbs: ['Analysis', 'Assessment Results'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+// ── EMPLOYEE DATA ──
+var employees = [
+  { name:'Priya Menon', dept:'Structural Engineering', bu:'Engineering & Delivery', role:'Senior Structural Engineer', status:'Completed', self:4.2, mgr:3.8, final:4.0, prof:'Proficient', gaps:1 },
+  { name:'Arun Krishnan', dept:'Civil & Geotechnical', bu:'Engineering & Delivery', role:'Geotechnical Lead', status:'Completed', self:3.8, mgr:3.5, final:3.6, prof:'Proficient', gaps:2 },
+  { name:'Deepa Nair', dept:'BIM & Digital Delivery', bu:'Digital & Technology', role:'BIM Coordinator', status:'Completed', self:4.5, mgr:4.6, final:4.5, prof:'Expert', gaps:0 },
+  { name:'Rahul Sharma', dept:'Project Delivery', bu:'Engineering & Delivery', role:'Project Manager', status:'Completed', self:3.2, mgr:2.8, final:3.0, prof:'Developing', gaps:3 },
+  { name:'Kavitha Ramachandran', dept:'Human Resources', bu:'Corporate Functions', role:'L&D Manager', status:'Completed', self:4.0, mgr:4.2, final:4.1, prof:'Proficient', gaps:1 },
+  { name:'Vikram Patel', dept:'IT Infrastructure', bu:'Digital & Technology', role:'Cloud Architect', status:'Completed', self:4.8, mgr:4.5, final:4.6, prof:'Expert', gaps:0 },
+  { name:'Meera Sundaram', dept:'EHS & Risk', bu:'Sustainability & EHS', role:'Safety Manager', status:'Completed', self:3.5, mgr:3.0, final:3.2, prof:'Developing', gaps:2 },
+  { name:'Suresh Iyer', dept:'Finance & Procurement', bu:'Corporate Functions', role:'Finance Controller', status:'In Progress', self:3.1, mgr:0, final:0, prof:'Pending', gaps:0 },
+  { name:'Anita Desai', dept:'Sustainability Advisory', bu:'Sustainability & EHS', role:'ESG Analyst', status:'Completed', self:3.9, mgr:3.7, final:3.8, prof:'Proficient', gaps:1 },
+  { name:'Karthik Subramanian', dept:'Structural Engineering', bu:'Engineering & Delivery', role:'Design Engineer', status:'Completed', self:2.8, mgr:2.5, final:2.6, prof:'Novice', gaps:4 },
+  { name:'Lakshmi Venkatesh', dept:'Legal & Compliance', bu:'Corporate Functions', role:'Compliance Officer', status:'Not Started', self:0, mgr:0, final:0, prof:'Pending', gaps:0 },
+  { name:'Rajesh Gupta', dept:'Project Delivery', bu:'Engineering & Delivery', role:'Site Supervisor', status:'Completed', self:3.4, mgr:3.6, final:3.5, prof:'Proficient', gaps:2 },
+  { name:'Divya Ramesh', dept:'BIM & Digital Delivery', bu:'Digital & Technology', role:'Digital Twin Engineer', status:'Completed', self:4.1, mgr:4.3, final:4.2, prof:'Proficient', gaps:0 },
+  { name:'Mohan Das', dept:'EHS & Risk', bu:'Sustainability & EHS', role:'EHS Auditor', status:'In Progress', self:2.9, mgr:0, final:0, prof:'Pending', gaps:0 },
+  { name:'Sneha Pillai', dept:'Human Resources', bu:'Corporate Functions', role:'Talent Acquisition Lead', status:'Completed', self:3.6, mgr:3.4, final:3.5, prof:'Proficient', gaps:1 }
+];
+
+// ── RENDER TABLE ──
+function renderTable(data) {
+  var html = '';
+  data.forEach(function(e) {
+    var statusColor = e.status === 'Completed' ? 'var(--green)' : e.status === 'In Progress' ? 'var(--amber)' : 'var(--red)';
+    var scoreClass = e.final >= 4.0 ? 'sb-high' : e.final >= 3.0 ? 'sb-mid' : e.final > 0 ? 'sb-low' : '';
+    var profColor = e.prof === 'Expert' ? 'var(--green)' : e.prof === 'Proficient' ? 'var(--blue)' : e.prof === 'Developing' ? 'var(--amber)' : e.prof === 'Novice' ? 'var(--red)' : 'var(--text-muted)';
+    var barWidth = e.final > 0 ? (e.final / 5 * 100) + '%' : '0%';
+    var barColor = e.final >= 4.0 ? 'var(--green)' : e.final >= 3.0 ? 'var(--blue)' : e.final > 0 ? 'var(--amber)' : 'var(--text-muted)';
+
+    html += '<tr>';
+    html += '<td class="emp-name">' + e.name + '</td>';
+    html += '<td>' + e.dept + '</td>';
+    html += '<td>' + e.role + '</td>';
+    html += '<td><span class="status-dot" style="background:' + statusColor + '"></span>' + e.status + '</td>';
+    html += '<td>' + (e.self > 0 ? e.self.toFixed(1) : '\u2014') + '</td>';
+    html += '<td>' + (e.mgr > 0 ? e.mgr.toFixed(1) : '\u2014') + '</td>';
+    html += '<td>' + (e.final > 0 ? '<span class="score-badge ' + scoreClass + '">' + e.final.toFixed(1) + '</span>' : '\u2014') + '</td>';
+    html += '<td><div class="prof-cell"><div class="prof-bar"><div class="prof-fill" style="width:' + barWidth + ';background:' + barColor + '"></div></div><span style="font-size:11px;color:' + profColor + '">' + e.prof + '</span></div></td>';
+    html += '<td>' + (e.gaps > 0 ? '<span style="color:var(--red);font-weight:500">' + e.gaps + '</span>' : '<span style="color:var(--green)">0</span>') + '</td>';
+    html += '</tr>';
+  });
+  document.getElementById('empTable').innerHTML = html;
+}
+
+function filterTable() {
+  var bu = document.getElementById('filterBU').value;
+  var status = document.getElementById('filterStatus').value;
+  var filtered = employees.filter(function(e) {
+    if (bu !== 'all' && e.bu !== bu) return false;
+    if (status !== 'all' && e.status !== status) return false;
+    return true;
+  });
+  renderTable(filtered);
+}
+
+// ── HEATMAP ──
+var heatData = [
+  { cat:'Technical / Domain', eng:3.8, dig:4.2, corp:3.1, sus:3.4, avg:3.6 },
+  { cat:'Leadership & Mgmt', eng:3.2, dig:3.0, corp:3.8, sus:3.1, avg:3.3 },
+  { cat:'Digital & Data', eng:2.8, dig:4.5, corp:2.6, sus:2.4, avg:3.1 },
+  { cat:'Safety & Compliance', eng:4.1, dig:3.2, corp:3.6, sus:4.4, avg:3.8 },
+  { cat:'Communication', eng:3.4, dig:3.6, corp:4.0, sus:3.5, avg:3.6 },
+  { cat:'Innovation & Problem Solving', eng:3.0, dig:4.0, corp:2.8, sus:2.9, avg:3.2 }
+];
+
+function heatColor(v) {
+  if (v >= 4.0) return 'background:var(--green-bg);color:var(--green)';
+  if (v >= 3.5) return 'background:var(--blue-bg);color:var(--blue)';
+  if (v >= 3.0) return 'background:var(--amber-bg);color:var(--amber)';
+  return 'background:var(--red-bg);color:var(--red)';
+}
+
+function renderHeatmap() {
+  var html = '';
+  heatData.forEach(function(row) {
+    html += '<tr>';
+    html += '<td style="color:var(--text-primary);font-weight:500">' + row.cat + '</td>';
+    [row.eng, row.dig, row.corp, row.sus, row.avg].forEach(function(v) {
+      html += '<td><span class="score-badge" style="' + heatColor(v) + '">' + v.toFixed(1) + '</span></td>';
+    });
+    html += '</tr>';
+  });
+  document.getElementById('heatmapBody').innerHTML = html;
+}
+
+// ── SCORE CHART ──
+function renderScoreChart() {
+  if (typeof Chart === 'undefined') { console.warn('Chart.js not loaded'); return; }
+  var ctx = document.getElementById('scoreChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['1.0-1.9','2.0-2.4','2.5-2.9','3.0-3.4','3.5-3.9','4.0-4.4','4.5-5.0'],
+      datasets: [{
+        label: 'Employees',
+        data: [12, 34, 78, 186, 204, 142, 50],
+        backgroundColor: [
+          'rgba(220,38,38,0.5)','rgba(220,38,38,0.35)',
+          'rgba(217,119,6,0.5)','rgba(37,99,235,0.35)',
+          'rgba(37,99,235,0.5)','rgba(22,163,74,0.45)',
+          'rgba(22,163,74,0.65)'
+        ],
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#ffffff',
+          titleColor: '#0F1117',
+          bodyColor: '#6B7280',
+          borderColor: 'rgba(0,0,0,0.1)',
+          borderWidth: 1,
+          cornerRadius: 8,
+          callbacks: {
+            label: function(c) { return c.raw + ' employees'; }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: '#6B7280', font: { family: 'DM Mono', size: 10 } }
+        },
+        y: {
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { color: '#6B7280', font: { family: 'DM Mono', size: 10 } }
+        }
+      }
+    }
+  });
+}
+
+// ── CYCLE SWITCHER ──
+function switchCycle(cycle) {
+  document.querySelectorAll('.cycle-btn').forEach(function(b){ b.classList.remove('active'); });
+  event.target.classList.add('active');
+  if (cycle === 'q4') {
+    document.getElementById('statCompletion').textContent = '75%';
+    document.getElementById('statAvgScore').textContent = '3.1 / 5';
+    document.getElementById('statAssessed').textContent = '610 / 812';
+    document.getElementById('statGaps').textContent = '18';
+  } else if (cycle === 'q3') {
+    document.getElementById('statCompletion').textContent = '62%';
+    document.getElementById('statAvgScore').textContent = '2.9 / 5';
+    document.getElementById('statAssessed').textContent = '504 / 812';
+    document.getElementById('statGaps').textContent = '31';
+  } else {
+    document.getElementById('statCompletion').textContent = '87%';
+    document.getElementById('statAvgScore').textContent = '3.4 / 5';
+    document.getElementById('statAssessed').textContent = '706 / 812';
+    document.getElementById('statGaps').textContent = '23';
+  }
+  showToast('Viewing ' + event.target.textContent.trim() + ' results');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  var t = document.getElementById('sip-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'sip-toast';
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:"DM Sans",sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.1)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(t._t);
+  t._t = setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(8px)'; }, 2400);
+}
+
+// ── # LINK HANDLER ──
+document.addEventListener('click', function(e){
+  var a = e.target.closest('a');
+  if (a && a.getAttribute('href') === '#') {
+    e.preventDefault();
+    var label = (a.textContent||'').trim().replace(/\s+/g,' ').substring(0,36);
+    showToast(label + ' \u2014 available in full platform');
+  }
+});
+
+// ── SCOPE TOGGLE (Manager vs Admin) ──
+function switchScope(scope) {
+  var pill = document.getElementById('scopePill');
+  if (scope === 'admin') {
+    pill.textContent = 'Admin \u2014 All Departments';
+    pill.style.borderColor = 'rgba(220,38,38,0.3)';
+    pill.style.color = 'var(--red)';
+    showToast('Admin view \u2014 cross-department access enabled. Showing all 812 employees across 10 departments.');
+  } else {
+    pill.textContent = 'L2 Assessment';
+    pill.style.borderColor = 'var(--accent-bd)';
+    pill.style.color = 'var(--accent)';
+    showToast('Manager view \u2014 scoped to your Business Unit');
+  }
+}
+
+// ── INIT ──
+try { renderTable(employees); } catch(e) { console.error('Table render error:', e); }
+try { renderHeatmap(); } catch(e) { console.error('Heatmap render error:', e); }
+try { renderScoreChart(); } catch(e) { console.error('Chart render error:', e); }
+</script>
+</body>
+</html>

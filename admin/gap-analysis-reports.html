@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gap Analysis Reports · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   GAP ANALYSIS REPORTS — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── LOCAL TOKENS ── */
+:root{
+  --surface:var(--card);
+  --surface-alt:#F5F4F0;
+  --border:#E5E7EB;
+  --border-focus:var(--accent);
+  --text:var(--text-primary);
+  --text-s:var(--text-secondary);
+  --text-t:var(--text-muted);
+  --text-inv:#FFFFFF;
+  --radius-sm:6px;--radius-md:10px;--radius-lg:16px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg:0 12px 40px rgba(0,0,0,0.12);
+  --chart-blue:#3B82F6;
+  --chart-green:#10B981;
+  --chart-amber:#F59E0B;
+  --chart-red:#EF4444;
+  --chart-purple:#8B5CF6;
+  --chart-pink:#EC4899;
+  --chart-gray:#6B7280;
+}
+
+/* ── SCROLLABLE CONTENT ── */
+.report-scroll{height:100%;overflow-y:auto;padding:0}
+.report-scroll::-webkit-scrollbar{width:5px}
+.report-scroll::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:3px}
+.report-container{max-width:1320px;margin:0 auto;padding:24px 28px 60px}
+
+/* ── PAGE HEADER ── */
+.page-header{margin-bottom:20px}
+.page-header h1{font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--text);margin-bottom:4px}
+.page-header p{font-size:13px;color:var(--text-s)}
+
+/* ── TAB BAR ── */
+.report-tabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:24px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.report-tabs::-webkit-scrollbar{display:none}
+.report-tab{padding:10px 16px;font-family:var(--font-body);font-size:12px;font-weight:500;color:var(--text-s);background:none;border:none;cursor:pointer;white-space:nowrap;position:relative;transition:color .2s;border-radius:var(--radius-sm) var(--radius-sm) 0 0}
+.report-tab:hover{color:var(--text);background:rgba(0,0,0,0.02)}
+.report-tab.active{color:var(--accent);font-weight:600}
+.report-tab.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--accent);border-radius:1px 1px 0 0}
+
+/* ── TAB PANELS ── */
+.tab-panel{display:none;animation:panelFadeIn .3s ease}
+.tab-panel.active{display:block}
+@keyframes panelFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTION HEADER ── */
+.section-head{margin-bottom:16px}
+.section-head h2{font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--text);margin-bottom:3px}
+.section-head p{font-size:12px;color:var(--text-s)}
+
+/* ── KPI CARDS ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 18px;transition:box-shadow .2s,transform .15s}
+.kpi-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.kpi-value{font-family:var(--font-display);font-size:28px;font-weight:600;color:var(--text);line-height:1;margin-bottom:4px}
+.kpi-label{font-size:11px;color:var(--text-s);letter-spacing:.02em}
+.kpi-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.kpi-icon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+/* ── CARDS/PANELS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:20px}
+.card-head{padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:10px}
+.card-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text);flex:1}
+.card-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500;background:var(--accent-lt);color:var(--accent)}
+.card-body{padding:18px 20px}
+
+/* ── GRID LAYOUTS ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+@media(max-width:960px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+/* ── HORIZONTAL BAR CHART ── */
+.h-bar-chart{display:flex;flex-direction:column;gap:8px}
+.h-bar-row{display:flex;align-items:center;gap:10px}
+.h-bar-label{width:120px;font-size:11px;color:var(--text-s);text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h-bar-track{flex:1;height:22px;background:rgba(0,0,0,0.03);border-radius:4px;overflow:hidden;position:relative}
+.h-bar-fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.25,.46,.45,.94);display:flex;align-items:center;justify-content:flex-end;padding-right:6px;min-width:0}
+.h-bar-val{font-size:10px;font-weight:600;color:var(--text-inv);white-space:nowrap}
+.h-bar-val-out{font-size:10px;font-weight:500;color:var(--text-s);margin-left:6px;flex-shrink:0;width:30px}
+
+/* ── STACKED BAR ── */
+.stacked-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.stacked-bar-label{width:120px;font-size:11px;color:var(--text-s);text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stacked-bar-track{flex:1;height:22px;background:rgba(0,0,0,0.03);border-radius:4px;overflow:hidden;display:flex}
+.stacked-bar-seg{height:100%;transition:width .6s ease}
+
+/* ── DONUT CHART ── */
+.donut-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.donut{width:140px;height:140px;border-radius:50%;position:relative;flex-shrink:0}
+.donut-hole{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;flex-direction:column}
+.donut-center-val{font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--text);line-height:1}
+.donut-center-label{font-size:9px;color:var(--text-s);margin-top:2px}
+.donut-legend{display:flex;flex-direction:column;gap:6px;flex:1;min-width:120px}
+.donut-legend-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-s)}
+.donut-legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.donut-legend-val{margin-left:auto;font-weight:600;color:var(--text);font-family:var(--font-mono);font-size:11px}
+
+/* ── DATA TABLES ── */
+.data-table-wrap{overflow-x:auto;margin:0 -20px;padding:0 20px}
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{text-align:left;padding:8px 10px;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-t);border-bottom:2px solid var(--border);background:rgba(0,0,0,0.01);white-space:nowrap}
+.data-table td{padding:7px 10px;border-bottom:1px solid rgba(0,0,0,0.04);color:var(--text-s);vertical-align:top}
+.data-table tbody tr:nth-child(even){background:rgba(0,0,0,0.015)}
+.data-table tbody tr:hover{background:rgba(201,168,76,0.04)}
+.data-table .mono{font-family:var(--font-mono);font-size:11px}
+.data-table .tag{display:inline-block;padding:1px 7px;border-radius:100px;font-size:10px;font-weight:500}
+
+/* ── STATUS GRID ── */
+.status-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.status-cell{padding:12px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);text-align:center;transition:transform .15s}
+.status-cell:hover{transform:translateY(-1px)}
+.status-cell-label{font-size:10px;font-weight:600;color:var(--text-s);letter-spacing:.03em;margin-bottom:4px}
+.status-cell-val{font-family:var(--font-display);font-size:16px;font-weight:600;line-height:1}
+.status-cell.green{background:var(--green-bg);border-color:#A7F3D0}.status-cell.green .status-cell-val{color:var(--green)}
+.status-cell.amber{background:var(--amber-bg);border-color:#FDE68A}.status-cell.amber .status-cell-val{color:var(--amber)}
+.status-cell.red{background:var(--red-bg);border-color:#FECACA}.status-cell.red .status-cell-val{color:var(--red)}
+.status-cell.gray{background:#F9FAFB;border-color:var(--border)}.status-cell.gray .status-cell-val{color:var(--chart-gray)}
+
+/* ── PROFICIENCY CELLS ── */
+.prof-cell{display:inline-flex;align-items:center;justify-content:center;width:28px;height:22px;border-radius:4px;font-size:10px;font-weight:600;color:#fff}
+.prof-L1{background:var(--l1,#3B82F6)}.prof-L2{background:var(--l2,#10B981)}.prof-L3{background:var(--l3,#F59E0B)}.prof-L4{background:var(--l4,#EF4444)}
+.prof-empty{background:rgba(0,0,0,0.04);color:var(--text-t)}
+
+/* ── METRIC CARD ── */
+.metric-card{text-align:center;padding:24px;background:linear-gradient(135deg,rgba(201,168,76,0.04),rgba(201,168,76,0.01));border:1px solid rgba(201,168,76,0.15);border-radius:var(--radius-md)}
+.metric-big{font-family:var(--font-display);font-size:48px;font-weight:600;color:var(--accent);line-height:1;margin-bottom:6px}
+.metric-label{font-size:12px;color:var(--text-s)}
+.metric-sub{font-size:11px;color:var(--text-t);margin-top:4px}
+
+/* ── EMPTY STATE ── */
+.empty-state{padding:40px 20px;text-align:center;color:var(--text-t)}
+.empty-state svg{width:48px;height:48px;stroke:var(--text-t);fill:none;stroke-width:1.5;margin-bottom:12px}
+.empty-state h3{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-s);margin-bottom:6px}
+.empty-state p{font-size:13px;max-width:420px;margin:0 auto;line-height:1.6}
+.empty-state a{color:var(--accent);text-decoration:none;font-weight:500}
+.empty-state a:hover{text-decoration:underline}
+
+/* ── FORMULA BOX ── */
+.formula-box{padding:14px 18px;background:rgba(0,0,0,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:12px;color:var(--text-s);margin-top:12px;line-height:1.7}
+.formula-box strong{color:var(--text);font-weight:500}
+
+/* ── HEATMAP GRID ── */
+.heatmap-grid{display:grid;gap:2px}
+.heatmap-cell{padding:6px 4px;text-align:center;font-size:10px;font-weight:500;border-radius:3px}
+.heatmap-cell.critical{background:#FEE2E2;color:#DC2626}
+.heatmap-cell.high{background:#FEF3C7;color:#D97706}
+.heatmap-cell.medium{background:#DBEAFE;color:#2563EB}
+.heatmap-cell.low{background:#D1FAE5;color:#059669}
+.heatmap-cell.none{background:#F3F4F6;color:#9CA3AF}
+.heatmap-header{font-size:9px;font-weight:600;color:var(--text-t);text-transform:uppercase;letter-spacing:.04em;padding:6px 4px}
+
+/* ── COMPLETENESS BAR ── */
+.completeness-bar{height:6px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden;flex:1}
+.completeness-fill{height:100%;border-radius:3px;transition:width .6s ease}
+
+/* ── PLACEHOLDER NOTE ── */
+.placeholder-note{padding:16px 20px;background:var(--blue-bg,#EFF6FF);border:1px solid rgba(37,99,235,0.15);border-radius:var(--radius-sm);font-size:12px;color:var(--blue,#2563EB);display:flex;align-items:flex-start;gap:10px;margin-bottom:16px}
+.placeholder-note svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0;margin-top:1px}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+<div class="report-scroll">
+<div class="report-container">
+
+  <div class="page-header">
+    <h1>Gap Analysis Reports</h1>
+    <p>Skill and competency gap analytics across departments, roles, and workforce</p>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="report-tabs" id="reportTabs">
+    <button class="report-tab active" data-tab="skillgap">Skill Gap Analysis</button>
+    <button class="report-tab" data-tab="skillheatmap">Skill Gap Heatmap</button>
+    <button class="report-tab" data-tab="compgap">Competency Gap</button>
+    <button class="report-tab" data-tab="compheatmap">Competency Heatmap</button>
+    <button class="report-tab" data-tab="rolecomp">Role-Competency Matrix</button>
+    <button class="report-tab" data-tab="rolecap">Role Capability Score</button>
+    <button class="report-tab" data-tab="workforce">Workforce Capability</button>
+    <button class="report-tab" data-tab="skilldist">Skill Distribution</button>
+    <button class="report-tab" data-tab="health">Workforce Health</button>
+    <button class="report-tab" data-tab="training">Training Coverage</button>
+    <button class="report-tab" data-tab="depttraining">Dept Training Needs</button>
+    <button class="report-tab" data-tab="readiness">Org Skill Readiness</button>
+  </div>
+
+  <!-- NO DATA STATE -->
+  <div id="noDataState" style="display:none">
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24"><path d="M2 20V4h3v16M9 20V8h3v12M16 20V2h3v18M23 20H1"/></svg>
+      <h3>No data found</h3>
+      <p>Complete the Organisation Setup and Data Import first to populate these gap analysis reports.<br><a href="org-setup-v4.html">Go to Organisation Setup</a> &middot; <a href="dataport.html">Go to Data Import</a></p>
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button onclick="loadDemoData()" style="padding:8px 20px;font-size:13px;font-weight:500;background:var(--accent,#C9A84C);color:#fff;border:none;border-radius:6px;cursor:pointer">Load Demo Data</button>
+        <a href="org-setup-v4.html" style="padding:8px 20px;font-size:13px;font-weight:500;border:1px solid var(--border,#E5E7EB);border-radius:6px;color:var(--text-s,#6B7280);text-decoration:none">Go to Setup</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB PANELS -->
+  <div id="tabPanels">
+    <div class="tab-panel active" id="panel-skillgap"></div>
+    <div class="tab-panel" id="panel-skillheatmap"></div>
+    <div class="tab-panel" id="panel-compgap"></div>
+    <div class="tab-panel" id="panel-compheatmap"></div>
+    <div class="tab-panel" id="panel-rolecomp"></div>
+    <div class="tab-panel" id="panel-rolecap"></div>
+    <div class="tab-panel" id="panel-workforce"></div>
+    <div class="tab-panel" id="panel-skilldist"></div>
+    <div class="tab-panel" id="panel-health"></div>
+    <div class="tab-panel" id="panel-training"></div>
+    <div class="tab-panel" id="panel-depttraining"></div>
+    <div class="tab-panel" id="panel-readiness"></div>
+  </div>
+
+</div>
+</div>
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal: 'admin',
+  activeNav: 'Gap Analysis Reports',
+  breadcrumbs: ['Reports', 'Gap Analysis Reports'],
+  topbarActions: []
+});
+</script>
+<script>
+(function(){
+
+  var CHART_COLORS = ['#3B82F6','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#6B7280','#0891B2','#C9A84C','#14B8A6'];
+  var orgState = null;
+  var empData = null;
+
+  /* ── UTILITIES ── */
+  function stableRandom(seed){ var x=Math.sin(seed)*10000; return x-Math.floor(x); }
+  function stableInt(seed,min,max){ return min+Math.floor(stableRandom(seed)*(max-min+1)); }
+  function safe(arr){return Array.isArray(arr)?arr:[]}
+  function esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+  function countMap(arr,key){var m={};arr.forEach(function(x){var k=x[key]||'Other';m[k]=(m[k]||0)+1});return m}
+  function pct(n,t){return t?Math.round(n/t*100):0}
+  function hashStr(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return Math.abs(h)}
+  function profToNum(p){if(!p)return 0;var s=String(p);var m=s.match(/(\d)/);return m?parseInt(m[1]):0}
+
+  function getBlockData(id){
+    if(!orgState||!orgState.blocks) return null;
+    var blocks=orgState.blocks;
+    if(Array.isArray(blocks)){
+      var b=blocks.find(function(x){return x.id===id});
+      return b&&b.data?b.data:null;
+    }
+    if(blocks[id]&&blocks[id].data) return blocks[id].data;
+    return null;
+  }
+
+  function getSkills(){var j=getBlockData('J');return safe(j&&j.skills)}
+  function getCompetencies(){var k=getBlockData('K');return safe(k&&k.competencies)}
+  function getRoles(){var l=getBlockData('L');return safe(l&&l.roles)}
+  function getEmployees(){return safe(empData&&empData.employees)}
+  function getDepartments(){
+    var emps=getEmployees();
+    var m={};emps.forEach(function(e){if(e.department)m[e.department]=true});
+    var keys=Object.keys(m);
+    return keys.length?keys:['Product Engineering','Customer Success','Sales & Marketing','Corporate Functions'];
+  }
+
+  /* ── BAR CHART BUILDER ── */
+  function buildHBars(data,maxVal,colorFn){
+    if(!maxVal) maxVal=Math.max.apply(null,data.map(function(d){return d.value}))||1;
+    return '<div class="h-bar-chart">'+data.map(function(d,i){
+      var w=Math.max(2,Math.round(d.value/maxVal*100));
+      var c=colorFn?colorFn(d,i):CHART_COLORS[i%CHART_COLORS.length];
+      return '<div class="h-bar-row">'+
+        '<span class="h-bar-label" title="'+esc(d.label)+'">'+esc(d.label)+'</span>'+
+        '<div class="h-bar-track"><div class="h-bar-fill" style="width:'+w+'%;background:'+c+'"><span class="h-bar-val">'+(w>15?d.value:'')+'</span></div></div>'+
+        '<span class="h-bar-val-out">'+(w<=15?d.value:'')+'</span>'+
+      '</div>';
+    }).join('')+'</div>';
+  }
+
+  /* ── DUAL BAR BUILDER ── */
+  function buildDualBars(data,maxVal){
+    if(!maxVal) maxVal=Math.max.apply(null,data.map(function(d){return Math.max(d.required||0,d.current||0)}))||1;
+    return data.map(function(d){
+      var wR=Math.max(2,Math.round((d.required||0)/maxVal*100));
+      var wC=Math.max(2,Math.round((d.current||0)/maxVal*100));
+      return '<div style="margin-bottom:10px">'+
+        '<div style="font-size:11px;color:var(--text-s);margin-bottom:4px">'+esc(d.label)+'</div>'+
+        '<div class="h-bar-row" style="margin-bottom:2px"><span class="h-bar-label" style="width:60px;font-size:10px">Required</span><div class="h-bar-track"><div class="h-bar-fill" style="width:'+wR+'%;background:var(--chart-blue)"><span class="h-bar-val">'+(wR>15?d.required:'')+'</span></div></div><span class="h-bar-val-out">'+d.required+'</span></div>'+
+        '<div class="h-bar-row"><span class="h-bar-label" style="width:60px;font-size:10px">Current</span><div class="h-bar-track"><div class="h-bar-fill" style="width:'+wC+'%;background:var(--chart-green)"><span class="h-bar-val">'+(wC>15?d.current:'')+'</span></div></div><span class="h-bar-val-out">'+d.current+'</span></div>'+
+      '</div>';
+    }).join('');
+  }
+
+  /* ── DONUT BUILDER ── */
+  function buildDonut(segments,total,centerLabel){
+    var conic=[],deg=0;
+    segments.forEach(function(s,i){
+      var angle=total?s.value/total*360:0;
+      var c=s.color||CHART_COLORS[i%CHART_COLORS.length];
+      conic.push(c+' '+deg.toFixed(1)+'deg '+(deg+angle).toFixed(1)+'deg');
+      s._color=c;
+      deg+=angle;
+    });
+    if(deg<360) conic.push('rgba(0,0,0,0.04) '+deg.toFixed(1)+'deg 360deg');
+    var legend=segments.map(function(s){
+      return '<div class="donut-legend-item"><span class="donut-legend-dot" style="background:'+s._color+'"></span>'+esc(s.label)+'<span class="donut-legend-val">'+s.value+'</span></div>';
+    }).join('');
+    return '<div class="donut-wrap">'+
+      '<div class="donut" style="background:conic-gradient('+conic.join(',')+')"><div class="donut-hole"><span class="donut-center-val">'+total+'</span><span class="donut-center-label">'+(centerLabel||'Total')+'</span></div></div>'+
+      '<div class="donut-legend">'+legend+'</div></div>';
+  }
+
+  /* ── TABLE BUILDER ── */
+  function buildTable(cols,rows,opts){
+    opts=opts||{};
+    var h='<div class="data-table-wrap"><table class="data-table"><thead><tr>'+cols.map(function(c){return '<th>'+esc(c.label||c.key)+'</th>'}).join('')+'</tr></thead><tbody>';
+    var shown=opts.limit?rows.slice(0,opts.limit):rows;
+    shown.forEach(function(r){
+      h+='<tr>'+cols.map(function(c){
+        var v=c.render?c.render(r):esc(r[c.key]||'');
+        var cls=c.cls?' class="'+c.cls+'"':'';
+        return '<td'+cls+'>'+v+'</td>';
+      }).join('')+'</tr>';
+    });
+    h+='</tbody></table>';
+    if(opts.limit&&rows.length>opts.limit) h+='<div style="padding:8px 10px;font-size:11px;color:var(--text-t)">Showing '+opts.limit+' of '+rows.length+' rows</div>';
+    h+='</div>';
+    return h;
+  }
+
+  /* ── HEATMAP BUILDER ── */
+  function buildHeatmap(rowLabels,colLabels,cells){
+    var cols=colLabels.length+1;
+    var html='<div class="heatmap-grid" style="grid-template-columns:120px repeat('+(cols-1)+',1fr)">';
+    html+='<div class="heatmap-header"></div>';
+    colLabels.forEach(function(c){html+='<div class="heatmap-header">'+esc(c)+'</div>'});
+    rowLabels.forEach(function(r,ri){
+      html+='<div class="heatmap-header" style="text-align:right">'+esc(r)+'</div>';
+      colLabels.forEach(function(c,ci){
+        var cell=cells[ri]&&cells[ri][ci]?cells[ri][ci]:{value:'-',severity:'none'};
+        html+='<div class="heatmap-cell '+cell.severity+'">'+cell.value+'</div>';
+      });
+    });
+    html+='</div>';
+    return html;
+  }
+
+  /* ── GAP SEVERITY ── */
+  function gapSeverity(gap){
+    if(gap>=3) return 'critical';
+    if(gap>=2) return 'high';
+    if(gap>=1) return 'medium';
+    if(gap>0) return 'low';
+    return 'none';
+  }
+  function gapSeverityLabel(gap){
+    if(gap>=3) return 'Critical';
+    if(gap>=2) return 'High';
+    if(gap>=1) return 'Medium';
+    if(gap>0) return 'Low';
+    return 'No Gap';
+  }
+  function severityColor(sev){
+    var m={critical:'var(--chart-red)',high:'var(--chart-amber)',medium:'var(--chart-blue)',low:'var(--chart-green)',none:'var(--chart-gray)'};
+    return m[sev]||m.none;
+  }
+
+  /* ── SIMULATE CURRENT LEVEL ── */
+  function simulateCurrent(skillName,targetProf,deptOrRole){
+    var seed=hashStr(skillName+(deptOrRole||''));
+    var target=profToNum(targetProf);
+    var sub=stableInt(seed,0,2);
+    return Math.max(0,target-sub);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 1: SKILL GAP ANALYSIS REPORT
+     ══════════════════════════════════════════════════════════ */
+  function renderSkillGap(){
+    var skills=getSkills(), roles=getRoles(), depts=getDepartments();
+    var html='<div class="section-head"><h2>Skill Gap Analysis Report</h2><p>Employee-level comparison of current vs required skill proficiency</p></div>';
+
+    // Compute per-skill gap data
+    var skillGaps=[];
+    var sevCounts={critical:0,high:0,medium:0,low:0,none:0};
+    var allRoleSkills=[];
+    roles.forEach(function(role){
+      safe(role.requiredSkills).forEach(function(rs){
+        var target=profToNum(rs.targetProficiency);
+        var current=simulateCurrent(rs.skillName,rs.targetProficiency,role.title);
+        var gap=Math.max(0,target-current);
+        allRoleSkills.push({skill:rs.skillName,role:role.title,target:target,current:current,gap:gap});
+        sevCounts[gapSeverity(gap)]++;
+      });
+    });
+
+    // Aggregate per skill
+    var skillMap={};
+    allRoleSkills.forEach(function(rs){
+      if(!skillMap[rs.skill]) skillMap[rs.skill]={totalTarget:0,totalCurrent:0,count:0,totalGap:0};
+      skillMap[rs.skill].totalTarget+=rs.target;
+      skillMap[rs.skill].totalCurrent+=rs.current;
+      skillMap[rs.skill].totalGap+=rs.gap;
+      skillMap[rs.skill].count++;
+    });
+    var skillAgg=Object.keys(skillMap).map(function(k){
+      var s=skillMap[k];
+      return {label:k,required:Math.round(s.totalTarget/s.count*10)/10,current:Math.round(s.totalCurrent/s.count*10)/10,gap:Math.round(s.totalGap/s.count*10)/10};
+    }).sort(function(a,b){return b.gap-a.gap});
+
+    var totalGapScore=skillAgg.reduce(function(s,x){return s+x.gap},0);
+    var avgGap=skillAgg.length?Math.round(totalGapScore/skillAgg.length*10)/10:0;
+
+    // KPIs
+    html+='<div class="kpi-grid">';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--red-bg,#FEF2F2);color:var(--chart-red)"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div><div class="kpi-value">'+avgGap+'</div><div class="kpi-label">Avg Skill Gap Score</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--blue-bg,#EFF6FF);color:var(--chart-blue)"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg></div><div class="kpi-value">'+skillAgg.length+'</div><div class="kpi-label">Skills Assessed</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:#FEE2E2;color:#DC2626"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div><div class="kpi-value">'+sevCounts.critical+'</div><div class="kpi-label">Critical Gaps</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:#FEF3C7;color:#D97706"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/></svg></div><div class="kpi-value">'+sevCounts.high+'</div><div class="kpi-label">High Gaps</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--green-bg,#ECFDF5);color:var(--chart-green)"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div class="kpi-value">'+sevCounts.none+'</div><div class="kpi-label">No Gap</div></div>';
+    html+='</div>';
+
+    html+='<div class="placeholder-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> Gap scores are simulated from role requirements. Actual assessment data will replace these when available.</div>';
+
+    html+='<div class="grid-2">';
+
+    // Chart: Skill Gap Comparison
+    html+='<div class="card"><div class="card-head"><span class="card-title">Skill Gap Comparison</span><span class="card-badge">Required vs Current</span></div><div class="card-body">';
+    html+=buildDualBars(skillAgg.slice(0,12),4);
+    html+='</div></div>';
+
+    // Chart: Gap Severity Distribution
+    var sevSegs=[
+      {label:'Critical',value:sevCounts.critical,color:'#EF4444'},
+      {label:'High',value:sevCounts.high,color:'#F59E0B'},
+      {label:'Medium',value:sevCounts.medium,color:'#3B82F6'},
+      {label:'Low',value:sevCounts.low,color:'#10B981'},
+      {label:'No Gap',value:sevCounts.none,color:'#6B7280'}
+    ];
+    var sevTotal=sevSegs.reduce(function(s,x){return s+x.value},0);
+    html+='<div class="card"><div class="card-head"><span class="card-title">Gap Severity Distribution</span><span class="card-badge">'+sevTotal+' assessments</span></div><div class="card-body">';
+    html+=buildDonut(sevSegs,sevTotal,'Assessments');
+    html+='</div></div>';
+
+    html+='</div>'; // grid-2
+
+    // Heatmap: Department x Skill Gap
+    var topSkills=skillAgg.slice(0,10).map(function(s){return s.label});
+    var heatCells=[];
+    depts.forEach(function(dept,di){
+      var row=[];
+      topSkills.forEach(function(sk,si){
+        var seed=hashStr(dept+sk);
+        var target=3;
+        skillAgg.forEach(function(sa){if(sa.label===sk)target=Math.round(sa.required)});
+        var current=simulateCurrent(sk,target,dept);
+        var gap=Math.max(0,target-current);
+        row.push({value:gap.toFixed(1),severity:gapSeverity(gap)});
+      });
+      heatCells.push(row);
+    });
+    html+='<div class="card"><div class="card-head"><span class="card-title">Department x Skill Gap Heatmap</span></div><div class="card-body">';
+    html+=buildHeatmap(depts,topSkills,heatCells);
+    html+='</div></div>';
+
+    html+='<div class="formula-box"><strong>Skill Gap Score</strong> = Demand Score (Required Proficiency) - Supply Score (Estimated Current Proficiency)</div>';
+
+    document.getElementById('panel-skillgap').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 2: SKILL GAP HEATMAP
+     ══════════════════════════════════════════════════════════ */
+  function renderSkillHeatmap(){
+    var skills=getSkills(), roles=getRoles(), depts=getDepartments();
+    var html='<div class="section-head"><h2>Skill Gap Heatmap</h2><p>Department-by-skill view of gap concentration</p></div>';
+
+    // Get top skills from roles
+    var skillSet={};
+    roles.forEach(function(r){safe(r.requiredSkills).forEach(function(rs){skillSet[rs.skillName]=true})});
+    var topSkills=Object.keys(skillSet).slice(0,15);
+
+    // Build heatmap cells
+    var heatCells=[];
+    var deptGaps={};
+    depts.forEach(function(dept,di){
+      var row=[];
+      var totalGap=0;
+      topSkills.forEach(function(sk,si){
+        var target=3;
+        roles.forEach(function(r){safe(r.requiredSkills).forEach(function(rs){if(rs.skillName===sk)target=profToNum(rs.targetProficiency)})});
+        var current=simulateCurrent(sk,target,dept);
+        var gap=Math.max(0,target-current);
+        totalGap+=gap;
+        row.push({value:gap.toFixed(1),severity:gapSeverity(gap)});
+      });
+      heatCells.push(row);
+      deptGaps[dept]=Math.round(totalGap*10)/10;
+    });
+
+    // Department gap bar chart
+    var deptGapData=Object.keys(deptGaps).map(function(k){return{label:k,value:deptGaps[k]}}).sort(function(a,b){return b.value-a.value});
+    html+='<div class="grid-2">';
+    html+='<div class="card"><div class="card-head"><span class="card-title">Department Gap Scores</span></div><div class="card-body">';
+    html+=buildHBars(deptGapData,null,function(d){return d.value>15?'var(--chart-red)':d.value>8?'var(--chart-amber)':'var(--chart-green)'});
+    html+='</div></div>';
+
+    // Gap severity ranking
+    var skillRank=[];
+    topSkills.forEach(function(sk){
+      var totalGap=0,count=0;
+      depts.forEach(function(dept){
+        var target=3;
+        roles.forEach(function(r){safe(r.requiredSkills).forEach(function(rs){if(rs.skillName===sk)target=profToNum(rs.targetProficiency)})});
+        var current=simulateCurrent(sk,target,dept);
+        totalGap+=Math.max(0,target-current);
+        count++;
+      });
+      skillRank.push({label:sk,value:Math.round(totalGap/count*10)/10});
+    });
+    skillRank.sort(function(a,b){return b.value-a.value});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Skill Gap Severity Ranking</span></div><div class="card-body">';
+    html+=buildHBars(skillRank.slice(0,10),null,function(d){return severityColor(gapSeverity(Math.round(d.value)))});
+    html+='</div></div>';
+    html+='</div>';
+
+    // Full heatmap
+    html+='<div class="card"><div class="card-head"><span class="card-title">Department x Skill Gap Heatmap</span><span class="card-badge">Color-coded severity</span></div><div class="card-body" style="overflow-x:auto">';
+    html+=buildHeatmap(depts,topSkills,heatCells);
+    html+='<div style="margin-top:12px;display:flex;gap:12px;font-size:10px;color:var(--text-t)">';
+    html+='<span><span class="heatmap-cell critical" style="display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:3px"></span>Critical (3+)</span>';
+    html+='<span><span class="heatmap-cell high" style="display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:3px"></span>High (2-3)</span>';
+    html+='<span><span class="heatmap-cell medium" style="display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:3px"></span>Medium (1-2)</span>';
+    html+='<span><span class="heatmap-cell low" style="display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:3px"></span>Low (0-1)</span>';
+    html+='<span><span class="heatmap-cell none" style="display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:3px"></span>No Gap</span>';
+    html+='</div>';
+    html+='</div></div>';
+
+    document.getElementById('panel-skillheatmap').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 3: COMPETENCY GAP ANALYSIS
+     ══════════════════════════════════════════════════════════ */
+  function renderCompGap(){
+    var comps=getCompetencies(), roles=getRoles();
+    var html='<div class="section-head"><h2>Competency Gap Analysis</h2><p>Organisation competency scores vs industry benchmarks</p></div>';
+
+    // Build competency gap data
+    var compGaps=[];
+    comps.forEach(function(comp,ci){
+      var benchmark=stableInt(hashStr(comp.name+'bench'),65,90);
+      var orgScore=stableInt(hashStr(comp.name+'org'),45,85);
+      var csi=Math.round(orgScore/benchmark*100)/100;
+      compGaps.push({name:comp.name,type:comp.type||'Core',orgScore:orgScore,benchmark:benchmark,gap:benchmark-orgScore,csi:csi});
+    });
+
+    var avgCSI=compGaps.length?Math.round(compGaps.reduce(function(s,c){return s+c.csi},0)/compGaps.length*100)/100:0;
+    var belowBench=compGaps.filter(function(c){return c.orgScore<c.benchmark}).length;
+
+    // KPIs
+    html+='<div class="kpi-grid">';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--blue-bg,#EFF6FF);color:var(--chart-blue)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg></div><div class="kpi-value">'+avgCSI+'</div><div class="kpi-label">Avg CSI (Competency Strength Index)</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--purple-bg,#F5F3FF);color:var(--chart-purple)"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg></div><div class="kpi-value">'+comps.length+'</div><div class="kpi-label">Competencies Assessed</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--red-bg,#FEF2F2);color:var(--chart-red)"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div><div class="kpi-value">'+belowBench+'</div><div class="kpi-label">Below Benchmark</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--green-bg,#ECFDF5);color:var(--chart-green)"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div class="kpi-value">'+(comps.length-belowBench)+'</div><div class="kpi-label">At or Above Benchmark</div></div>';
+    html+='</div>';
+
+    // Chart: Competency Gap Bar
+    html+='<div class="card"><div class="card-head"><span class="card-title">Competency Gap: Org Score vs Industry Benchmark</span></div><div class="card-body">';
+    var compBarData=compGaps.map(function(c){return{label:c.name,required:c.benchmark,current:c.orgScore}});
+    html+=buildDualBars(compBarData,100);
+    html+='</div></div>';
+
+    // Table
+    html+='<div class="card"><div class="card-head"><span class="card-title">Competency Details</span><span class="card-badge">'+compGaps.length+' competencies</span></div><div class="card-body">';
+    html+=buildTable([
+      {key:'name',label:'Competency'},
+      {key:'type',label:'Type'},
+      {key:'orgScore',label:'Org Score',cls:'mono'},
+      {key:'benchmark',label:'Benchmark',cls:'mono'},
+      {key:'gap',label:'Gap',render:function(r){var c=r.gap>15?'color:var(--chart-red)':r.gap>5?'color:var(--chart-amber)':'color:var(--chart-green)';return '<span class="mono" style="'+c+'">'+r.gap+'</span>'}},
+      {key:'csi',label:'CSI',render:function(r){var c=r.csi<0.8?'background:var(--red-bg,#FEF2F2);color:var(--chart-red)':r.csi<1?'background:var(--amber-bg,#FFFBEB);color:var(--chart-amber)':'background:var(--green-bg,#ECFDF5);color:var(--chart-green)';return '<span class="tag" style="'+c+'">'+r.csi+'</span>'}}
+    ],compGaps);
+    html+='</div></div>';
+
+    html+='<div class="formula-box"><strong>Competency Strength Index (CSI)</strong> = Org Score / Industry Benchmark<br>CSI >= 1.0 = Meets/Exceeds benchmark &middot; CSI < 0.8 = Critical gap</div>';
+
+    document.getElementById('panel-compgap').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 4: COMPETENCY GAP HEATMAP
+     ══════════════════════════════════════════════════════════ */
+  function renderCompHeatmap(){
+    var comps=getCompetencies(), depts=getDepartments();
+    var html='<div class="section-head"><h2>Competency Gap Heatmap</h2><p>Department-wise competency coverage</p></div>';
+
+    var compNames=comps.map(function(c){return c.name}).slice(0,12);
+
+    // Strength by department bars
+    var deptStrength=[];
+    depts.forEach(function(dept){
+      var total=0;
+      compNames.forEach(function(cn){total+=stableInt(hashStr(dept+cn+'cov'),40,95)});
+      deptStrength.push({label:dept,value:Math.round(total/compNames.length)});
+    });
+    html+='<div class="card"><div class="card-head"><span class="card-title">Competency Strength by Department</span></div><div class="card-body">';
+    html+=buildHBars(deptStrength,100,function(d){return d.value>=75?'var(--chart-green)':d.value>=55?'var(--chart-amber)':'var(--chart-red)'});
+    html+='</div></div>';
+
+    // Heatmap
+    var heatCells=[];
+    depts.forEach(function(dept){
+      var row=[];
+      compNames.forEach(function(cn){
+        var cov=stableInt(hashStr(dept+cn+'cov'),40,95);
+        var sev=cov>=80?'low':cov>=60?'medium':cov>=45?'high':'critical';
+        row.push({value:cov+'%',severity:sev});
+      });
+      heatCells.push(row);
+    });
+    html+='<div class="card"><div class="card-head"><span class="card-title">Competency x Department Coverage</span><span class="card-badge">% coverage</span></div><div class="card-body" style="overflow-x:auto">';
+    html+=buildHeatmap(depts,compNames,heatCells);
+    html+='<div style="margin-top:12px;display:flex;gap:12px;font-size:10px;color:var(--text-t)">';
+    html+='<span><span class="heatmap-cell low" style="display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:3px"></span>80%+ (Strong)</span>';
+    html+='<span><span class="heatmap-cell medium" style="display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:3px"></span>60-79% (Moderate)</span>';
+    html+='<span><span class="heatmap-cell high" style="display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:3px"></span>45-59% (Weak)</span>';
+    html+='<span><span class="heatmap-cell critical" style="display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:3px"></span>&lt;45% (Critical)</span>';
+    html+='</div>';
+    html+='</div></div>';
+
+    document.getElementById('panel-compheatmap').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 5: ROLE-COMPETENCY MATRIX
+     ══════════════════════════════════════════════════════════ */
+  function renderRoleComp(){
+    var roles=getRoles(), comps=getCompetencies();
+    var html='<div class="section-head"><h2>Role-Competency Matrix</h2><p>Each role with required competencies and proficiency levels</p></div>';
+
+    var compNames=comps.map(function(c){return c.name});
+
+    html+='<div class="card"><div class="card-head"><span class="card-title">Role-Competency Proficiency Matrix</span><span class="card-badge">'+roles.length+' roles x '+compNames.length+' competencies</span></div><div class="card-body" style="overflow-x:auto">';
+
+    html+='<table class="data-table"><thead><tr><th>Role</th>';
+    compNames.forEach(function(cn){html+='<th style="font-size:8px;max-width:60px;white-space:normal;line-height:1.3">'+esc(cn)+'</th>'});
+    html+='</tr></thead><tbody>';
+
+    roles.forEach(function(role){
+      html+='<tr><td style="font-weight:500;white-space:nowrap">'+esc(role.title)+'</td>';
+      var reqMap={};
+      safe(role.requiredCompetencies).forEach(function(rc){reqMap[rc.compName]=rc.targetLevel||'L1'});
+      compNames.forEach(function(cn){
+        if(reqMap[cn]){
+          var lev=reqMap[cn];
+          html+='<td style="text-align:center"><span class="prof-cell prof-'+lev+'">'+lev+'</span></td>';
+        } else {
+          html+='<td style="text-align:center"><span class="prof-cell prof-empty">-</span></td>';
+        }
+      });
+      html+='</tr>';
+    });
+
+    html+='</tbody></table></div></div>';
+
+    // Legend
+    html+='<div style="display:flex;gap:16px;font-size:11px;color:var(--text-s);margin-top:8px">';
+    html+='<span><span class="prof-cell prof-L1" style="display:inline-flex;vertical-align:middle;margin-right:4px">L1</span>Awareness</span>';
+    html+='<span><span class="prof-cell prof-L2" style="display:inline-flex;vertical-align:middle;margin-right:4px">L2</span>Working</span>';
+    html+='<span><span class="prof-cell prof-L3" style="display:inline-flex;vertical-align:middle;margin-right:4px">L3</span>Practitioner</span>';
+    html+='<span><span class="prof-cell prof-L4" style="display:inline-flex;vertical-align:middle;margin-right:4px">L4</span>Expert</span>';
+    html+='</div>';
+
+    document.getElementById('panel-rolecomp').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 6: ROLE CAPABILITY SCORE
+     ══════════════════════════════════════════════════════════ */
+  function renderRoleCap(){
+    var roles=getRoles();
+    var html='<div class="section-head"><h2>Role Capability Score</h2><p>Overall capability readiness per role</p></div>';
+
+    var roleScores=[];
+    roles.forEach(function(role){
+      var reqSkills=safe(role.requiredSkills);
+      var met=0;
+      reqSkills.forEach(function(rs){
+        var target=profToNum(rs.targetProficiency);
+        var current=simulateCurrent(rs.skillName,rs.targetProficiency,role.title);
+        if(current>=target) met++;
+      });
+      var total=reqSkills.length||1;
+      var score=Math.round(met/total*100);
+      roleScores.push({title:role.title,family:role.family||'-',seniority:role.seniority||'-',met:met,total:reqSkills.length,score:score});
+    });
+    roleScores.sort(function(a,b){return b.score-a.score});
+
+    var avgScore=roleScores.length?Math.round(roleScores.reduce(function(s,r){return s+r.score},0)/roleScores.length):0;
+    var readyRoles=roleScores.filter(function(r){return r.score>=75}).length;
+
+    // KPIs
+    html+='<div class="kpi-grid">';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--blue-bg,#EFF6FF);color:var(--chart-blue)"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div class="kpi-value">'+avgScore+'%</div><div class="kpi-label">Avg Role Readiness Score</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--green-bg,#ECFDF5);color:var(--chart-green)"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div class="kpi-value">'+readyRoles+'</div><div class="kpi-label">Roles Ready (75%+)</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--red-bg,#FEF2F2);color:var(--chart-red)"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/></svg></div><div class="kpi-value">'+(roleScores.length-readyRoles)+'</div><div class="kpi-label">Roles with Gaps</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--purple-bg,#F5F3FF);color:var(--chart-purple)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="kpi-value">'+roles.length+'</div><div class="kpi-label">Total Roles</div></div>';
+    html+='</div>';
+
+    // Chart: Role capability score bar
+    html+='<div class="card"><div class="card-head"><span class="card-title">Role Capability Scores</span><span class="card-badge">sorted by readiness</span></div><div class="card-body">';
+    var barData=roleScores.map(function(r){return{label:r.title,value:r.score}});
+    html+=buildHBars(barData,100,function(d){return d.value>=75?'var(--chart-green)':d.value>=50?'var(--chart-amber)':'var(--chart-red)'});
+    html+='</div></div>';
+
+    // Table
+    html+='<div class="card"><div class="card-head"><span class="card-title">Role Readiness Details</span></div><div class="card-body">';
+    html+=buildTable([
+      {key:'title',label:'Role'},
+      {key:'family',label:'Family'},
+      {key:'seniority',label:'Seniority'},
+      {key:'met',label:'Skills Met',cls:'mono'},
+      {key:'total',label:'Total Skills',cls:'mono'},
+      {key:'score',label:'Score',render:function(r){var c=r.score>=75?'background:var(--green-bg,#ECFDF5);color:var(--chart-green)':r.score>=50?'background:var(--amber-bg,#FFFBEB);color:var(--chart-amber)':'background:var(--red-bg,#FEF2F2);color:var(--chart-red)';return '<span class="tag" style="'+c+'">'+r.score+'%</span>'}},
+      {key:'status',label:'Status',render:function(r){return r.score>=75?'<span class="tag" style="background:var(--green-bg,#ECFDF5);color:var(--chart-green)">Ready</span>':r.score>=50?'<span class="tag" style="background:var(--amber-bg,#FFFBEB);color:var(--chart-amber)">Developing</span>':'<span class="tag" style="background:var(--red-bg,#FEF2F2);color:var(--chart-red)">Critical Gap</span>'}}
+    ],roleScores);
+    html+='</div></div>';
+
+    html+='<div class="formula-box"><strong>Role Readiness Score</strong> = (Skills where Estimated Current >= Target) / Total Required Skills x 100</div>';
+
+    document.getElementById('panel-rolecap').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 7: WORKFORCE CAPABILITY SCORE
+     ══════════════════════════════════════════════════════════ */
+  function renderWorkforce(){
+    var emps=getEmployees(), roles=getRoles(), depts=getDepartments();
+    var html='<div class="section-head"><h2>Workforce Capability Score</h2><p>Aggregated capability across all employees</p></div>';
+
+    // Simulate per-employee capability
+    var empScores=[];
+    emps.forEach(function(emp,ei){
+      var score=stableInt(hashStr(emp.id||emp.fullName||('emp'+ei)+'cap'),35,95);
+      empScores.push({name:emp.fullName||emp.firstName+' '+emp.lastName,department:emp.department,role:emp.role,score:score});
+    });
+
+    var wci=empScores.length?Math.round(empScores.reduce(function(s,e){return s+e.score},0)/empScores.length):0;
+    var highCap=empScores.filter(function(e){return e.score>=80}).length;
+    var lowCap=empScores.filter(function(e){return e.score<50}).length;
+
+    // KPIs
+    html+='<div class="kpi-grid">';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:rgba(201,168,76,0.08);color:var(--accent)"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div class="kpi-value">'+wci+'%</div><div class="kpi-label">Workforce Capability Index</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--green-bg,#ECFDF5);color:var(--chart-green)"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div class="kpi-value">'+highCap+'</div><div class="kpi-label">High Capability (80%+)</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--red-bg,#FEF2F2);color:var(--chart-red)"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/></svg></div><div class="kpi-value">'+lowCap+'</div><div class="kpi-label">Low Capability (&lt;50%)</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--blue-bg,#EFF6FF);color:var(--chart-blue)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="kpi-value">'+emps.length+'</div><div class="kpi-label">Total Employees</div></div>';
+    html+='</div>';
+
+    html+='<div class="grid-2">';
+
+    // Capability distribution (bell curve as bar chart)
+    var buckets=[{label:'0-20%',min:0,max:20},{label:'21-40%',min:21,max:40},{label:'41-60%',min:41,max:60},{label:'61-80%',min:61,max:80},{label:'81-100%',min:81,max:100}];
+    var distData=buckets.map(function(b){
+      var count=empScores.filter(function(e){return e.score>=b.min&&e.score<=b.max}).length;
+      return{label:b.label,value:count};
+    });
+    html+='<div class="card"><div class="card-head"><span class="card-title">Capability Distribution</span></div><div class="card-body">';
+    html+=buildHBars(distData,null,function(d,i){return CHART_COLORS[i]});
+    html+='</div></div>';
+
+    // Department capability comparison
+    var deptCap={};
+    empScores.forEach(function(e){
+      if(!deptCap[e.department]) deptCap[e.department]={total:0,count:0};
+      deptCap[e.department].total+=e.score;
+      deptCap[e.department].count++;
+    });
+    var deptCapData=Object.keys(deptCap).map(function(k){return{label:k,value:Math.round(deptCap[k].total/deptCap[k].count)}}).sort(function(a,b){return b.value-a.value});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Department Capability Comparison</span></div><div class="card-body">';
+    html+=buildHBars(deptCapData,100,function(d){return d.value>=70?'var(--chart-green)':d.value>=50?'var(--chart-amber)':'var(--chart-red)'});
+    html+='</div></div>';
+
+    html+='</div>';
+
+    html+='<div class="formula-box"><strong>Workforce Capability Index (WCI)</strong> = Average Capability Score across all employees</div>';
+
+    document.getElementById('panel-workforce').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 8: SKILL DISTRIBUTION BY DEPARTMENT
+     ══════════════════════════════════════════════════════════ */
+  function renderSkillDist(){
+    var skills=getSkills(), roles=getRoles(), depts=getDepartments();
+    var html='<div class="section-head"><h2>Skill Distribution by Department</h2><p>How skills distribute across departments</p></div>';
+
+    // Get all required skills
+    var allSkillNames={};
+    roles.forEach(function(r){safe(r.requiredSkills).forEach(function(rs){allSkillNames[rs.skillName]=true})});
+    var skillNames=Object.keys(allSkillNames);
+    var totalRequired=skillNames.length;
+
+    // Per department coverage
+    var deptCoverage={};
+    depts.forEach(function(dept){
+      var covered=0;
+      skillNames.forEach(function(sk){
+        var seed=hashStr(dept+sk+'dist');
+        if(stableRandom(seed)>0.3) covered++;
+      });
+      deptCoverage[dept]={covered:covered,total:totalRequired,ratio:Math.round(covered/totalRequired*100)};
+    });
+
+    var avgCoverage=depts.length?Math.round(depts.reduce(function(s,d){return s+deptCoverage[d].ratio},0)/depts.length):0;
+
+    // KPIs
+    html+='<div class="kpi-grid">';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--blue-bg,#EFF6FF);color:var(--chart-blue)"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg></div><div class="kpi-value">'+totalRequired+'</div><div class="kpi-label">Total Required Skills</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--green-bg,#ECFDF5);color:var(--chart-green)"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div class="kpi-value">'+avgCoverage+'%</div><div class="kpi-label">Avg Skill Coverage Ratio</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--purple-bg,#F5F3FF);color:var(--chart-purple)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div class="kpi-value">'+depts.length+'</div><div class="kpi-label">Departments</div></div>';
+    html+='</div>';
+
+    // Department skill balance bars
+    var deptBalData=depts.map(function(d){return{label:d,value:deptCoverage[d].ratio}}).sort(function(a,b){return b.value-a.value});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Department Skill Coverage Balance</span><span class="card-badge">% skills covered</span></div><div class="card-body">';
+    html+=buildHBars(deptBalData,100,function(d){return d.value>=75?'var(--chart-green)':d.value>=55?'var(--chart-amber)':'var(--chart-red)'});
+    html+='</div></div>';
+
+    // Heatmap: Department x Skill distribution
+    var topSkills=skillNames.slice(0,12);
+    var heatCells=[];
+    depts.forEach(function(dept){
+      var row=[];
+      topSkills.forEach(function(sk){
+        var seed=hashStr(dept+sk+'dist');
+        var hasCoverage=stableRandom(seed)>0.3;
+        var level=hasCoverage?stableInt(seed+1,1,4):0;
+        var sev=level>=3?'low':level>=2?'medium':level>=1?'high':'none';
+        row.push({value:level?'L'+level:'-',severity:sev});
+      });
+      heatCells.push(row);
+    });
+    html+='<div class="card"><div class="card-head"><span class="card-title">Department x Skill Distribution Grid</span></div><div class="card-body" style="overflow-x:auto">';
+    html+=buildHeatmap(depts,topSkills,heatCells);
+    html+='</div></div>';
+
+    html+='<div class="formula-box"><strong>Skill Coverage Ratio</strong> = Skills Covered in Department / Total Required Skills x 100</div>';
+
+    document.getElementById('panel-skilldist').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 9: WORKFORCE HEALTH DASHBOARD
+     ══════════════════════════════════════════════════════════ */
+  function renderHealth(){
+    var emps=getEmployees();
+    var html='<div class="section-head"><h2>Workforce Health Dashboard</h2><p>Year-on-year workforce health view from employee data</p></div>';
+
+    if(!emps.length){
+      html+='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><h3>No employee data</h3><p>Import employee data via Dataport to see workforce health metrics.</p></div>';
+      document.getElementById('panel-health').innerHTML=html;
+      return;
+    }
+
+    // KPIs
+    var activeCount=emps.filter(function(e){return e.status==='Active'}).length;
+    var avgTenure=emps.length?Math.round(emps.reduce(function(s,e){return s+(e.tenureYears||0)},0)/emps.length*10)/10:0;
+    var avgSalary=emps.length?Math.round(emps.reduce(function(s,e){return s+(e.salary||0)},0)/emps.length):0;
+
+    html+='<div class="kpi-grid">';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--blue-bg,#EFF6FF);color:var(--chart-blue)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="kpi-value">'+emps.length+'</div><div class="kpi-label">Total Employees</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--green-bg,#ECFDF5);color:var(--chart-green)"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div class="kpi-value">'+activeCount+'</div><div class="kpi-label">Active</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--amber-bg,#FFFBEB);color:var(--chart-amber)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div class="kpi-value">'+avgTenure+'y</div><div class="kpi-label">Avg Tenure</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--purple-bg,#F5F3FF);color:var(--chart-purple)"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="kpi-value">'+avgSalary.toLocaleString()+'</div><div class="kpi-label">Avg Salary</div></div>';
+    html+='</div>';
+
+    html+='<div class="grid-2">';
+
+    // Tenure distribution
+    var tenureBuckets=[{label:'0-2 yrs',min:0,max:2},{label:'2-5 yrs',min:2,max:5},{label:'5-8 yrs',min:5,max:8},{label:'8-12 yrs',min:8,max:12},{label:'12+ yrs',min:12,max:99}];
+    var tenureData=tenureBuckets.map(function(b){
+      var count=emps.filter(function(e){var t=e.tenureYears||0;return t>=b.min&&t<b.max}).length;
+      return{label:b.label,value:count};
+    });
+    html+='<div class="card"><div class="card-head"><span class="card-title">Tenure Distribution</span></div><div class="card-body">';
+    html+=buildHBars(tenureData);
+    html+='</div></div>';
+
+    // Job level distribution
+    var levelMap=countMap(emps,'jobLevel');
+    var levelData=Object.keys(levelMap).sort().map(function(k){return{label:k,value:levelMap[k]}});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Job Level Distribution</span></div><div class="card-body">';
+    html+=buildHBars(levelData);
+    html+='</div></div>';
+
+    // Employment type
+    var empTypeMap=countMap(emps,'employmentType');
+    var empTypeData=Object.keys(empTypeMap).map(function(k){return{label:k,value:empTypeMap[k]}});
+    var empTypeTotal=emps.length;
+    html+='<div class="card"><div class="card-head"><span class="card-title">Employment Type</span></div><div class="card-body">';
+    html+=buildDonut(empTypeData,empTypeTotal,'Employees');
+    html+='</div></div>';
+
+    // Gender split
+    var genderMap=countMap(emps,'gender');
+    var genderData=Object.keys(genderMap).map(function(k){return{label:k,value:genderMap[k]}});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Gender Split</span></div><div class="card-body">';
+    html+=buildDonut(genderData,emps.length,'Employees');
+    html+='</div></div>';
+
+    // Location distribution
+    var locMap=countMap(emps,'location');
+    var locData=Object.keys(locMap).map(function(k){return{label:k,value:locMap[k]}}).sort(function(a,b){return b.value-a.value});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Location Distribution</span></div><div class="card-body">';
+    html+=buildHBars(locData);
+    html+='</div></div>';
+
+    // Work mode distribution
+    var wmMap=countMap(emps,'workMode');
+    var wmData=Object.keys(wmMap).map(function(k){return{label:k,value:wmMap[k]}});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Work Mode Distribution</span></div><div class="card-body">';
+    html+=buildDonut(wmData,emps.length,'Employees');
+    html+='</div></div>';
+
+    html+='</div>';
+
+    document.getElementById('panel-health').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 10: TRAINING COVERAGE REPORT
+     ══════════════════════════════════════════════════════════ */
+  function renderTraining(){
+    var emps=getEmployees(), depts=getDepartments();
+    var html='<div class="section-head"><h2>Training Coverage Report</h2><p>Training coverage gaps by department</p></div>';
+
+    if(!emps.length){
+      html+='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg><h3>No employee data</h3><p>Import employee data to view training coverage.</p></div>';
+      document.getElementById('panel-training').innerHTML=html;
+      return;
+    }
+
+    var complete=emps.filter(function(e){return e.skillProfileStatus==='Complete'}).length;
+    var partial=emps.filter(function(e){return e.skillProfileStatus==='Partial'}).length;
+    var draft=emps.length-complete-partial;
+    var coverageRate=pct(complete,emps.length);
+
+    // KPIs
+    html+='<div class="kpi-grid">';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--green-bg,#ECFDF5);color:var(--chart-green)"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div class="kpi-value">'+coverageRate+'%</div><div class="kpi-label">Training Coverage Rate</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--blue-bg,#EFF6FF);color:var(--chart-blue)"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div class="kpi-value">'+complete+'</div><div class="kpi-label">Complete Profiles</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--amber-bg,#FFFBEB);color:var(--chart-amber)"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/></svg></div><div class="kpi-value">'+partial+'</div><div class="kpi-label">Partial Profiles</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--red-bg,#FEF2F2);color:var(--chart-red)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div><div class="kpi-value">'+draft+'</div><div class="kpi-label">Draft/Incomplete</div></div>';
+    html+='</div>';
+
+    html+='<div class="grid-2">';
+
+    // Coverage by department bar
+    var deptCov={};
+    emps.forEach(function(e){
+      var d=e.department||'Other';
+      if(!deptCov[d]) deptCov[d]={complete:0,total:0};
+      deptCov[d].total++;
+      if(e.skillProfileStatus==='Complete') deptCov[d].complete++;
+    });
+    var deptCovData=Object.keys(deptCov).map(function(k){return{label:k,value:pct(deptCov[k].complete,deptCov[k].total)}}).sort(function(a,b){return b.value-a.value});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Coverage by Department</span><span class="card-badge">% complete</span></div><div class="card-body">';
+    html+=buildHBars(deptCovData,100,function(d){return d.value>=75?'var(--chart-green)':d.value>=50?'var(--chart-amber)':'var(--chart-red)'});
+    html+='</div></div>';
+
+    // Skill profile status distribution
+    var statusSegs=[
+      {label:'Complete',value:complete,color:'#10B981'},
+      {label:'Partial',value:partial,color:'#F59E0B'},
+      {label:'Draft/Incomplete',value:draft,color:'#EF4444'}
+    ];
+    html+='<div class="card"><div class="card-head"><span class="card-title">Skill Profile Status Distribution</span></div><div class="card-body">';
+    html+=buildDonut(statusSegs,emps.length,'Employees');
+    html+='</div></div>';
+
+    html+='</div>';
+
+    html+='<div class="formula-box"><strong>Training Coverage Rate</strong> = Employees with skillProfileStatus = "Complete" / Total Employees x 100</div>';
+
+    document.getElementById('panel-training').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 11: DEPARTMENT TRAINING NEEDS
+     ══════════════════════════════════════════════════════════ */
+  function renderDeptTraining(){
+    var emps=getEmployees(), depts=getDepartments();
+    var html='<div class="section-head"><h2>Department Training Needs</h2><p>Training needs per department</p></div>';
+
+    if(!emps.length){
+      html+='<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg><h3>No employee data</h3><p>Import employee data to view training needs.</p></div>';
+      document.getElementById('panel-depttraining').innerHTML=html;
+      return;
+    }
+
+    html+='<div class="grid-2">';
+
+    // Department gap bar (employees needing training per dept)
+    var deptNeed={};
+    emps.forEach(function(e){
+      var d=e.department||'Other';
+      if(!deptNeed[d]) deptNeed[d]={needTraining:0,total:0,critical:0};
+      deptNeed[d].total++;
+      if(e.skillProfileStatus!=='Complete') deptNeed[d].needTraining++;
+      if(e.criticalRole==='Yes'&&e.skillProfileStatus!=='Complete') deptNeed[d].critical++;
+    });
+    var deptNeedData=Object.keys(deptNeed).map(function(k){return{label:k,value:deptNeed[k].needTraining}}).sort(function(a,b){return b.value-a.value});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Employees Needing Training by Department</span></div><div class="card-body">';
+    html+=buildHBars(deptNeedData,null,function(d){return d.value>10?'var(--chart-red)':d.value>5?'var(--chart-amber)':'var(--chart-green)'});
+    html+='</div></div>';
+
+    // Critical roles by department needing upskilling
+    var critData=Object.keys(deptNeed).map(function(k){return{label:k,value:deptNeed[k].critical}}).sort(function(a,b){return b.value-a.value});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Critical Roles Needing Upskilling</span><span class="card-badge">by department</span></div><div class="card-body">';
+    if(critData.some(function(d){return d.value>0})){
+      html+=buildHBars(critData,null,function(){return 'var(--chart-red)'});
+    } else {
+      html+='<div style="color:var(--text-t);font-size:12px;padding:20px 0;text-align:center">No critical role gaps detected. All critical roles have complete skill profiles.</div>';
+    }
+    html+='</div></div>';
+
+    html+='</div>';
+
+    // Detail table
+    html+='<div class="card"><div class="card-head"><span class="card-title">Department Training Summary</span></div><div class="card-body">';
+    var deptRows=Object.keys(deptNeed).map(function(k){
+      var d=deptNeed[k];
+      return{department:k,total:d.total,needTraining:d.needTraining,critical:d.critical,coveragePct:pct(d.total-d.needTraining,d.total)};
+    });
+    html+=buildTable([
+      {key:'department',label:'Department'},
+      {key:'total',label:'Headcount',cls:'mono'},
+      {key:'needTraining',label:'Need Training',cls:'mono'},
+      {key:'critical',label:'Critical Gaps',render:function(r){return r.critical?'<span class="tag" style="background:var(--red-bg,#FEF2F2);color:var(--chart-red)">'+r.critical+'</span>':'<span class="tag" style="background:var(--green-bg,#ECFDF5);color:var(--chart-green)">0</span>'}},
+      {key:'coveragePct',label:'Coverage',render:function(r){var c=r.coveragePct>=75?'background:var(--green-bg,#ECFDF5);color:var(--chart-green)':r.coveragePct>=50?'background:var(--amber-bg,#FFFBEB);color:var(--chart-amber)':'background:var(--red-bg,#FEF2F2);color:var(--chart-red)';return '<span class="tag" style="'+c+'">'+r.coveragePct+'%</span>'}}
+    ],deptRows);
+    html+='</div></div>';
+
+    document.getElementById('panel-depttraining').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB 12: ORG SKILL READINESS INDEX
+     ══════════════════════════════════════════════════════════ */
+  function renderReadiness(){
+    var depts=getDepartments(), roles=getRoles();
+    var html='<div class="section-head"><h2>Org Skill Readiness Index</h2><p>Quarterly readiness score per department</p></div>';
+
+    // Simulate SRI per department
+    var deptSRI={};
+    depts.forEach(function(dept){
+      var sri=stableInt(hashStr(dept+'SRI2024'),45,92);
+      deptSRI[dept]=sri;
+    });
+
+    var avgSRI=depts.length?Math.round(depts.reduce(function(s,d){return s+deptSRI[d]},0)/depts.length):0;
+    var readyDepts=depts.filter(function(d){return deptSRI[d]>=75}).length;
+
+    // KPIs
+    html+='<div class="kpi-grid">';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:rgba(201,168,76,0.08);color:var(--accent)"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div class="kpi-value">'+avgSRI+'%</div><div class="kpi-label">Org Skill Readiness Index</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--green-bg,#ECFDF5);color:var(--chart-green)"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div class="kpi-value">'+readyDepts+'</div><div class="kpi-label">Ready Departments (75%+)</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--red-bg,#FEF2F2);color:var(--chart-red)"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/></svg></div><div class="kpi-value">'+(depts.length-readyDepts)+'</div><div class="kpi-label">Departments Below Target</div></div>';
+    html+='<div class="kpi-card"><div class="kpi-icon" style="background:var(--blue-bg,#EFF6FF);color:var(--chart-blue)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div class="kpi-value">'+depts.length+'</div><div class="kpi-label">Total Departments</div></div>';
+    html+='</div>';
+
+    // Department readiness comparison bar
+    var sriData=depts.map(function(d){return{label:d,value:deptSRI[d]}}).sort(function(a,b){return b.value-a.value});
+    html+='<div class="card"><div class="card-head"><span class="card-title">Department Readiness Comparison</span><span class="card-badge">Q1 2026</span></div><div class="card-body">';
+    html+=buildHBars(sriData,100,function(d){return d.value>=75?'var(--chart-green)':d.value>=55?'var(--chart-amber)':'var(--chart-red)'});
+    html+='</div></div>';
+
+    // Heatmap: Department x Readiness status grid
+    var quarters=['Q2 2025','Q3 2025','Q4 2025','Q1 2026'];
+    var heatCells=[];
+    depts.forEach(function(dept,di){
+      var row=[];
+      quarters.forEach(function(q,qi){
+        var base=deptSRI[dept];
+        var delta=stableInt(hashStr(dept+q),-(8+qi*2),(5+qi));
+        var val=Math.max(20,Math.min(100,base+delta-((3-qi)*5)));
+        var sev=val>=75?'low':val>=55?'medium':val>=40?'high':'critical';
+        row.push({value:val+'%',severity:sev});
+      });
+      heatCells.push(row);
+    });
+    html+='<div class="card"><div class="card-head"><span class="card-title">Quarterly Readiness Trend</span><span class="card-badge">simulated</span></div><div class="card-body">';
+    html+=buildHeatmap(depts,quarters,heatCells);
+    html+='</div></div>';
+
+    // Status grid
+    html+='<div class="card"><div class="card-head"><span class="card-title">Department Readiness Status</span></div><div class="card-body"><div class="status-grid">';
+    depts.forEach(function(dept){
+      var val=deptSRI[dept];
+      var cls=val>=75?'green':val>=55?'amber':'red';
+      html+='<div class="status-cell '+cls+'"><div class="status-cell-label">'+esc(dept)+'</div><div class="status-cell-val">'+val+'%</div></div>';
+    });
+    html+='</div></div></div>';
+
+    html+='<div class="formula-box"><strong>Skill Readiness Index (SRI)</strong> = Simulated readiness score per department based on skill coverage, gap severity, and training completion</div>';
+
+    document.getElementById('panel-readiness').innerHTML=html;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TAB & RENDER MANAGEMENT
+     ══════════════════════════════════════════════════════════ */
+  var rendered={};
+  var renderers={
+    skillgap:renderSkillGap,
+    skillheatmap:renderSkillHeatmap,
+    compgap:renderCompGap,
+    compheatmap:renderCompHeatmap,
+    rolecomp:renderRoleComp,
+    rolecap:renderRoleCap,
+    workforce:renderWorkforce,
+    skilldist:renderSkillDist,
+    health:renderHealth,
+    training:renderTraining,
+    depttraining:renderDeptTraining,
+    readiness:renderReadiness
+  };
+
+  function switchTab(tab){
+    var tabs=document.querySelectorAll('.report-tab');
+    for(var i=0;i<tabs.length;i++){
+      tabs[i].classList.toggle('active',tabs[i].getAttribute('data-tab')===tab);
+    }
+    var panels=document.querySelectorAll('.tab-panel');
+    for(var i=0;i<panels.length;i++){
+      panels[i].classList.toggle('active',panels[i].id==='panel-'+tab);
+    }
+    if(!rendered[tab]&&renderers[tab]){
+      renderers[tab]();
+      rendered[tab]=true;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     INIT
+     ══════════════════════════════════════════════════════════ */
+  function loadState(){
+    // Load org setup data
+    var raw=null;
+    try{raw=sessionStorage.getItem('sip_orgsetup_v4')}catch(e){}
+    if(!raw){try{raw=localStorage.getItem('sip_orgsetup_v4')}catch(e){}}
+    if(raw){try{orgState=JSON.parse(raw)}catch(e){orgState=null}}
+
+    // Load employee data
+    var rawEmp=null;
+    try{rawEmp=sessionStorage.getItem('sip_dataport_import')}catch(e){}
+    if(!rawEmp){try{rawEmp=localStorage.getItem('sip_dataport_import')}catch(e){}}
+    if(rawEmp){try{empData=JSON.parse(rawEmp)}catch(e){empData=null}}
+  }
+
+  function hasData(){
+    var hasOrg=orgState&&orgState.blocks&&(Array.isArray(orgState.blocks)?orgState.blocks.length>0:Object.keys(orgState.blocks).length>0);
+    return hasOrg;
+  }
+
+  function showReports(){
+    document.getElementById('noDataState').style.display='none';
+    document.getElementById('tabPanels').style.display='block';
+    document.querySelector('.report-tabs').style.display='flex';
+    rendered={};
+    var tabs=document.querySelectorAll('.report-tab');
+    for(var i=0;i<tabs.length;i++){
+      tabs[i].addEventListener('click',function(){
+        switchTab(this.getAttribute('data-tab'));
+      });
+    }
+    switchTab('skillgap');
+  }
+
+  function init(){
+    loadState();
+    if(!hasData()){
+      document.getElementById('noDataState').style.display='block';
+      document.getElementById('tabPanels').style.display='none';
+      document.querySelector('.report-tabs').style.display='none';
+      return;
+    }
+    showReports();
+  }
+
+  // Expose for demo button
+  window.loadDemoData=function(){
+    // Demo org setup data
+    var demoOrg={version:'5.0',blocks:[
+      {id:'A',status:'complete',data:{legalName:'Edstellar Technologies Pvt Ltd',primaryIndustry:'Technology & SaaS',employeeBand:'51 – 200'}},
+      {id:'J',status:'complete',data:{skills:[
+        {name:'JavaScript',code:'TECH001',type:'Technical',domain:'Engineering',knowledgeArea:'Frontend',defaultCriticality:'C1 — Mission Critical',proficiency:{L1:'Basics',L2:'Intermediate',L3:'Advanced',L4:'Expert'}},
+        {name:'Python',code:'TECH002',type:'Technical',domain:'Engineering',knowledgeArea:'Backend',defaultCriticality:'C1 — Mission Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'React',code:'TECH003',type:'Tool / Platform',domain:'Engineering',knowledgeArea:'Frontend',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'Node.js',code:'TECH004',type:'Tool / Platform',domain:'Engineering',knowledgeArea:'Backend',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'AWS',code:'TECH005',type:'Tool / Platform',domain:'Engineering',knowledgeArea:'Cloud',defaultCriticality:'C1 — Mission Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'Docker',code:'TECH006',type:'Tool / Platform',domain:'Engineering',knowledgeArea:'DevOps',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'Kubernetes',code:'TECH007',type:'Tool / Platform',domain:'Engineering',knowledgeArea:'DevOps',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'SQL',code:'TECH008',type:'Technical',domain:'Engineering',knowledgeArea:'Data',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'Data Analysis',code:'TECH009',type:'Technical',domain:'Analytics',knowledgeArea:'Data',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'Machine Learning',code:'TECH010',type:'Technical',domain:'Engineering',knowledgeArea:'AI',defaultCriticality:'C3 — Important',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'UI/UX Design',code:'TECH011',type:'Technical',domain:'Design',knowledgeArea:'Product',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'Product Management',code:'BUS001',type:'Domain Knowledge',domain:'Business',knowledgeArea:'Product',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'Agile/Scrum',code:'PROC001',type:'Process',domain:'Engineering',knowledgeArea:'Project',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'Communication',code:'BEH001',type:'Behavioural',domain:'Leadership',knowledgeArea:'Soft Skills',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'Stakeholder Management',code:'BEH002',type:'Behavioural',domain:'Leadership',knowledgeArea:'Management',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'CRM Tools',code:'TOOL001',type:'Tool / Platform',domain:'Sales',knowledgeArea:'Sales',defaultCriticality:'C3 — Important',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'Customer Success',code:'BUS002',type:'Domain Knowledge',domain:'Business',knowledgeArea:'CS',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'Financial Analysis',code:'BUS003',type:'Technical',domain:'Business',knowledgeArea:'Finance',defaultCriticality:'C3 — Important',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'HR Operations',code:'BUS004',type:'Process',domain:'Business',knowledgeArea:'HR',defaultCriticality:'C3 — Important',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}},
+        {name:'Digital Marketing',code:'MKT001',type:'Technical',domain:'Marketing',knowledgeArea:'Marketing',defaultCriticality:'C2 — Critical',proficiency:{L1:'x',L2:'x',L3:'x',L4:'x'}}
+      ]}},
+      {id:'K',status:'complete',data:{competencies:[
+        {name:'Innovation Mindset',type:'Core',indicators:{L1:'Suggests improvements',L2:'Implements improvements',L3:'Drives innovation',L4:'Sets innovation strategy'},assessmentMethods:['Manager Assessment']},
+        {name:'Customer Centricity',type:'Core',indicators:{L1:'Responds to needs',L2:'Anticipates needs',L3:'Shapes CX strategy',L4:'Drives CX transformation'},assessmentMethods:['360 Feedback']},
+        {name:'Collaboration',type:'Behavioural',indicators:{L1:'Works in teams',L2:'Facilitates teamwork',L3:'Builds cross-functional bridges',L4:'Creates collaborative culture'},assessmentMethods:['Peer Review']},
+        {name:'Adaptability',type:'Behavioural',indicators:{L1:'Accepts change',L2:'Adapts methods',L3:'Leads through change',L4:'Drives transformation'},assessmentMethods:['Manager Assessment']},
+        {name:'Problem Solving',type:'Behavioural',indicators:{L1:'Identifies problems',L2:'Analyses root causes',L3:'Solves complex problems',L4:'Addresses systemic issues'},assessmentMethods:['STAR Interview']},
+        {name:'Strategic Thinking',type:'Leadership',indicators:{L1:'Understands strategy',L2:'Translates to objectives',L3:'Develops strategy',L4:'Sets org direction'},assessmentMethods:['360 Feedback']},
+        {name:'People Development',type:'Leadership',indicators:{L1:'Shares knowledge',L2:'Coaches team',L3:'Builds capability',L4:'Shapes talent strategy'},assessmentMethods:['360 Feedback']},
+        {name:'Decision Making',type:'Leadership',indicators:{L1:'Makes routine decisions',L2:'Handles ambiguity',L3:'Complex decisions',L4:'Strategic decisions'},assessmentMethods:['STAR Interview']},
+        {name:'Technical Excellence',type:'Technical',indicators:{L1:'Follows standards',L2:'Applies best practices',L3:'Sets standards',L4:'Industry thought leader'},assessmentMethods:['Technical Review']},
+        {name:'Data Literacy',type:'Technical',indicators:{L1:'Reads reports',L2:'Creates analyses',L3:'Designs data strategies',L4:'Enterprise data vision'},assessmentMethods:['Manager Assessment']},
+        {name:'Accountability',type:'Core',indicators:{L1:'Delivers on commitments',L2:'Takes ownership',L3:'Creates accountability culture',L4:'Sets ethical standards'},assessmentMethods:['Manager Assessment']},
+        {name:'Communication',type:'Behavioural',indicators:{L1:'Clear verbal/written',L2:'Adapts to audience',L3:'Influences stakeholders',L4:'Shapes org narrative'},assessmentMethods:['360 Feedback']}
+      ]}},
+      {id:'L',status:'complete',data:{roles:[
+        {title:'Senior Frontend Engineer',family:'Engineering',seniority:'L4',requiredSkills:[{skillName:'JavaScript',targetProficiency:'L4',criticality:'C1'},{skillName:'React',targetProficiency:'L3',criticality:'C1'},{skillName:'Node.js',targetProficiency:'L2',criticality:'C2'},{skillName:'UI/UX Design',targetProficiency:'L2',criticality:'C3'}],requiredCompetencies:[{compName:'Technical Excellence',targetLevel:'L3'},{compName:'Problem Solving',targetLevel:'L3'},{compName:'Collaboration',targetLevel:'L2'}]},
+        {title:'Backend Engineer',family:'Engineering',seniority:'L3',requiredSkills:[{skillName:'Python',targetProficiency:'L3',criticality:'C1'},{skillName:'Node.js',targetProficiency:'L3',criticality:'C1'},{skillName:'SQL',targetProficiency:'L3',criticality:'C2'},{skillName:'AWS',targetProficiency:'L2',criticality:'C2'}],requiredCompetencies:[{compName:'Technical Excellence',targetLevel:'L3'},{compName:'Problem Solving',targetLevel:'L2'}]},
+        {title:'DevOps Engineer',family:'Engineering',seniority:'L3',requiredSkills:[{skillName:'AWS',targetProficiency:'L4',criticality:'C1'},{skillName:'Docker',targetProficiency:'L3',criticality:'C1'},{skillName:'Kubernetes',targetProficiency:'L3',criticality:'C2'},{skillName:'Python',targetProficiency:'L2',criticality:'C3'}],requiredCompetencies:[{compName:'Technical Excellence',targetLevel:'L3'},{compName:'Adaptability',targetLevel:'L2'}]},
+        {title:'Data Analyst',family:'Engineering',seniority:'L3',requiredSkills:[{skillName:'SQL',targetProficiency:'L3',criticality:'C1'},{skillName:'Data Analysis',targetProficiency:'L3',criticality:'C1'},{skillName:'Python',targetProficiency:'L2',criticality:'C2'},{skillName:'Machine Learning',targetProficiency:'L1',criticality:'C3'}],requiredCompetencies:[{compName:'Data Literacy',targetLevel:'L3'},{compName:'Problem Solving',targetLevel:'L2'}]},
+        {title:'Product Manager',family:'Product',seniority:'L4',requiredSkills:[{skillName:'Product Management',targetProficiency:'L4',criticality:'C1'},{skillName:'Data Analysis',targetProficiency:'L2',criticality:'C2'},{skillName:'Agile/Scrum',targetProficiency:'L3',criticality:'C2'},{skillName:'Stakeholder Management',targetProficiency:'L3',criticality:'C1'}],requiredCompetencies:[{compName:'Strategic Thinking',targetLevel:'L3'},{compName:'Customer Centricity',targetLevel:'L3'},{compName:'Decision Making',targetLevel:'L3'}]},
+        {title:'Engineering Manager',family:'Engineering',seniority:'L5',requiredSkills:[{skillName:'Agile/Scrum',targetProficiency:'L4',criticality:'C1'},{skillName:'Stakeholder Management',targetProficiency:'L4',criticality:'C1'},{skillName:'Python',targetProficiency:'L2',criticality:'C3'},{skillName:'AWS',targetProficiency:'L2',criticality:'C3'}],requiredCompetencies:[{compName:'People Development',targetLevel:'L4'},{compName:'Strategic Thinking',targetLevel:'L3'},{compName:'Decision Making',targetLevel:'L3'}]},
+        {title:'Customer Success Manager',family:'Customer Success',seniority:'L4',requiredSkills:[{skillName:'Customer Success',targetProficiency:'L4',criticality:'C1'},{skillName:'CRM Tools',targetProficiency:'L3',criticality:'C2'},{skillName:'Stakeholder Management',targetProficiency:'L3',criticality:'C1'},{skillName:'Data Analysis',targetProficiency:'L2',criticality:'C3'}],requiredCompetencies:[{compName:'Customer Centricity',targetLevel:'L4'},{compName:'Communication',targetLevel:'L3'}]},
+        {title:'Sales Executive',family:'Sales',seniority:'L3',requiredSkills:[{skillName:'CRM Tools',targetProficiency:'L3',criticality:'C1'},{skillName:'Communication',targetProficiency:'L3',criticality:'C1'},{skillName:'Stakeholder Management',targetProficiency:'L2',criticality:'C2'},{skillName:'Digital Marketing',targetProficiency:'L1',criticality:'C3'}],requiredCompetencies:[{compName:'Customer Centricity',targetLevel:'L3'},{compName:'Adaptability',targetLevel:'L2'}]},
+        {title:'Marketing Specialist',family:'Marketing',seniority:'L3',requiredSkills:[{skillName:'Digital Marketing',targetProficiency:'L4',criticality:'C1'},{skillName:'Data Analysis',targetProficiency:'L2',criticality:'C2'},{skillName:'Communication',targetProficiency:'L3',criticality:'C1'},{skillName:'CRM Tools',targetProficiency:'L2',criticality:'C3'}],requiredCompetencies:[{compName:'Innovation Mindset',targetLevel:'L3'},{compName:'Customer Centricity',targetLevel:'L2'}]},
+        {title:'HR Manager',family:'Corporate',seniority:'L5',requiredSkills:[{skillName:'HR Operations',targetProficiency:'L4',criticality:'C1'},{skillName:'Stakeholder Management',targetProficiency:'L3',criticality:'C1'},{skillName:'Communication',targetProficiency:'L3',criticality:'C2'},{skillName:'Data Analysis',targetProficiency:'L2',criticality:'C3'}],requiredCompetencies:[{compName:'People Development',targetLevel:'L4'},{compName:'Accountability',targetLevel:'L3'},{compName:'Communication',targetLevel:'L3'}]},
+        {title:'Finance Analyst',family:'Corporate',seniority:'L3',requiredSkills:[{skillName:'Financial Analysis',targetProficiency:'L3',criticality:'C1'},{skillName:'SQL',targetProficiency:'L2',criticality:'C2'},{skillName:'Data Analysis',targetProficiency:'L2',criticality:'C2'}],requiredCompetencies:[{compName:'Data Literacy',targetLevel:'L3'},{compName:'Accountability',targetLevel:'L2'}]}
+      ]}}
+    ]};
+
+    // Demo employee data
+    var demoEmp={employees:[
+      {id:'EMP-0001',firstName:'Priya',lastName:'Menon',fullName:'Priya Menon',email:'priya.m@edstellar.com',phone:'+91-9876543001',gender:'Female',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'DevOps Engineer',jobLevel:'L3',education:"Master's",reportsTo:'Engineering Manager',joinDate:'2017-03-03',tenureYears:7.8,salary:63286,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:10,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0002',firstName:'Arjun',lastName:'Sharma',fullName:'Arjun Sharma',email:'arjun.s@edstellar.com',phone:'+91-9876543002',gender:'Male',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'Senior Frontend Engineer',jobLevel:'L4',education:"Bachelor's",reportsTo:'Engineering Manager',joinDate:'2018-06-15',tenureYears:6.5,salary:72000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:9,workMode:'Remote',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0003',firstName:'Sneha',lastName:'Patel',fullName:'Sneha Patel',email:'sneha.p@edstellar.com',phone:'+91-9876543003',gender:'Female',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'Backend Engineer',jobLevel:'L3',education:"Master's",reportsTo:'Engineering Manager',joinDate:'2019-01-10',tenureYears:5.9,salary:65000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:8,workMode:'Hybrid',highPotential:'No',skillProfileStatus:'Partial',careerPath:'Specialist Track'},
+      {id:'EMP-0004',firstName:'Rahul',lastName:'Kumar',fullName:'Rahul Kumar',email:'rahul.k@edstellar.com',phone:'+91-9876543004',gender:'Male',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'Data Analyst',jobLevel:'L3',education:"Master's",reportsTo:'Engineering Manager',joinDate:'2020-04-20',tenureYears:4.7,salary:58000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:6,workMode:'Office',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0005',firstName:'Divya',lastName:'Reddy',fullName:'Divya Reddy',email:'divya.r@edstellar.com',phone:'+91-9876543005',gender:'Female',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'Product Manager',jobLevel:'L4',education:"MBA",reportsTo:'VP Product',joinDate:'2016-08-01',tenureYears:8.4,salary:85000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:12,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0006',firstName:'Vikram',lastName:'Singh',fullName:'Vikram Singh',email:'vikram.s@edstellar.com',phone:'+91-9876543006',gender:'Male',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'Engineering Manager',jobLevel:'L5',education:"Master's",reportsTo:'VP Engineering',joinDate:'2015-02-14',tenureYears:9.9,salary:105000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:15,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0007',firstName:'Ananya',lastName:'Iyer',fullName:'Ananya Iyer',email:'ananya.i@edstellar.com',phone:'+91-9876543007',gender:'Female',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'Senior Frontend Engineer',jobLevel:'L4',education:"Bachelor's",reportsTo:'Engineering Manager',joinDate:'2019-07-22',tenureYears:5.5,salary:70000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:8,workMode:'Remote',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0008',firstName:'Karthik',lastName:'Nair',fullName:'Karthik Nair',email:'karthik.n@edstellar.com',phone:'+91-9876543008',gender:'Male',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'Backend Engineer',jobLevel:'L3',education:"Bachelor's",reportsTo:'Engineering Manager',joinDate:'2021-01-05',tenureYears:3.9,salary:55000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:5,workMode:'Hybrid',highPotential:'No',skillProfileStatus:'Partial',careerPath:'Specialist Track'},
+      {id:'EMP-0009',firstName:'Meera',lastName:'Joshi',fullName:'Meera Joshi',email:'meera.j@edstellar.com',phone:'+91-9876543009',gender:'Female',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'DevOps Engineer',jobLevel:'L3',education:"Bachelor's",reportsTo:'Engineering Manager',joinDate:'2020-09-15',tenureYears:4.3,salary:60000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:6,workMode:'Office',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0010',firstName:'Aditya',lastName:'Gupta',fullName:'Aditya Gupta',email:'aditya.g@edstellar.com',phone:'+91-9876543010',gender:'Male',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'Data Analyst',jobLevel:'L3',education:"Master's",reportsTo:'Engineering Manager',joinDate:'2021-06-01',tenureYears:3.5,salary:52000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:4,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0011',firstName:'Roshni',lastName:'Das',fullName:'Roshni Das',email:'roshni.d@edstellar.com',phone:'+91-9876543011',gender:'Female',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'Backend Engineer',jobLevel:'L3',education:"Master's",reportsTo:'Engineering Manager',joinDate:'2022-02-14',tenureYears:2.9,salary:50000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:4,workMode:'Office',highPotential:'No',skillProfileStatus:'Draft',careerPath:'Specialist Track'},
+      {id:'EMP-0012',firstName:'Sanjay',lastName:'Rao',fullName:'Sanjay Rao',email:'sanjay.r@edstellar.com',phone:'+91-9876543012',gender:'Male',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'Senior Frontend Engineer',jobLevel:'L4',education:"Bachelor's",reportsTo:'Engineering Manager',joinDate:'2017-11-20',tenureYears:7.1,salary:75000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:10,workMode:'Hybrid',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0013',firstName:'Lakshmi',lastName:'Venkat',fullName:'Lakshmi Venkat',email:'lakshmi.v@edstellar.com',phone:'+91-9876543013',gender:'Female',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'DevOps Engineer',jobLevel:'L3',education:"Bachelor's",reportsTo:'Engineering Manager',joinDate:'2022-08-01',tenureYears:2.4,salary:48000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:3,workMode:'Office',highPotential:'No',skillProfileStatus:'Partial',careerPath:'Specialist Track'},
+      {id:'EMP-0014',firstName:'Nikhil',lastName:'Banerjee',fullName:'Nikhil Banerjee',email:'nikhil.b@edstellar.com',phone:'+91-9876543014',gender:'Male',locationId:'LOC-002',location:'Mumbai',department:'Product Engineering',role:'Backend Engineer',jobLevel:'L3',education:"Master's",reportsTo:'Engineering Manager',joinDate:'2019-05-10',tenureYears:5.6,salary:62000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:7,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0015',firstName:'Pooja',lastName:'Agarwal',fullName:'Pooja Agarwal',email:'pooja.a@edstellar.com',phone:'+91-9876543015',gender:'Female',locationId:'LOC-002',location:'Mumbai',department:'Product Engineering',role:'Data Analyst',jobLevel:'L2',education:"Bachelor's",reportsTo:'Engineering Manager',joinDate:'2023-01-15',tenureYears:1.9,salary:42000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:2,workMode:'Office',highPotential:'No',skillProfileStatus:'Draft',careerPath:'Specialist Track'},
+      {id:'EMP-0016',firstName:'Rohan',lastName:'Mehta',fullName:'Rohan Mehta',email:'rohan.m@edstellar.com',phone:'+91-9876543016',gender:'Male',locationId:'LOC-002',location:'Mumbai',department:'Product Engineering',role:'Senior Frontend Engineer',jobLevel:'L4',education:"Master's",reportsTo:'Engineering Manager',joinDate:'2018-03-01',tenureYears:6.8,salary:72000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:9,workMode:'Remote',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0017',firstName:'Tanvi',lastName:'Deshmukh',fullName:'Tanvi Deshmukh',email:'tanvi.d@edstellar.com',phone:'+91-9876543017',gender:'Female',locationId:'LOC-002',location:'Mumbai',department:'Product Engineering',role:'Product Manager',jobLevel:'L4',education:"MBA",reportsTo:'VP Product',joinDate:'2017-09-01',tenureYears:7.3,salary:88000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:11,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0018',firstName:'Amit',lastName:'Jha',fullName:'Amit Jha',email:'amit.j@edstellar.com',phone:'+91-9876543018',gender:'Male',locationId:'LOC-002',location:'Mumbai',department:'Product Engineering',role:'DevOps Engineer',jobLevel:'L3',education:"Bachelor's",reportsTo:'Engineering Manager',joinDate:'2021-04-15',tenureYears:3.7,salary:56000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:5,workMode:'Hybrid',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0019',firstName:'Kavita',lastName:'Pillai',fullName:'Kavita Pillai',email:'kavita.p@edstellar.com',phone:'+91-9876543019',gender:'Female',locationId:'LOC-002',location:'Mumbai',department:'Product Engineering',role:'Backend Engineer',jobLevel:'L2',education:"Bachelor's",reportsTo:'Engineering Manager',joinDate:'2023-06-01',tenureYears:1.5,salary:40000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:2,workMode:'Office',highPotential:'No',skillProfileStatus:'Partial',careerPath:'Specialist Track'},
+      {id:'EMP-0020',firstName:'Suresh',lastName:'Kulkarni',fullName:'Suresh Kulkarni',email:'suresh.k@edstellar.com',phone:'+91-9876543020',gender:'Male',locationId:'LOC-003',location:'Singapore',department:'Product Engineering',role:'Engineering Manager',jobLevel:'L5',education:"Master's",reportsTo:'CTO',joinDate:'2014-10-01',tenureYears:10.2,salary:120000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:16,workMode:'Office',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0021',firstName:'Neha',lastName:'Saxena',fullName:'Neha Saxena',email:'neha.s@edstellar.com',phone:'+91-9876543021',gender:'Female',locationId:'LOC-001',location:'Bengaluru',department:'Customer Success',role:'Customer Success Manager',jobLevel:'L4',education:"MBA",reportsTo:'VP CS',joinDate:'2018-01-15',tenureYears:6.9,salary:78000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:10,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0022',firstName:'Raj',lastName:'Malhotra',fullName:'Raj Malhotra',email:'raj.m@edstellar.com',phone:'+91-9876543022',gender:'Male',locationId:'LOC-001',location:'Bengaluru',department:'Customer Success',role:'Customer Success Manager',jobLevel:'L4',education:"Bachelor's",reportsTo:'VP CS',joinDate:'2019-03-20',tenureYears:5.8,salary:72000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:8,workMode:'Hybrid',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0023',firstName:'Sita',lastName:'Raman',fullName:'Sita Raman',email:'sita.r@edstellar.com',phone:'+91-9876543023',gender:'Female',locationId:'LOC-001',location:'Bengaluru',department:'Customer Success',role:'Customer Success Manager',jobLevel:'L3',education:"Bachelor's",reportsTo:'CS Manager',joinDate:'2020-07-01',tenureYears:4.5,salary:55000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:5,workMode:'Office',highPotential:'No',skillProfileStatus:'Partial',careerPath:'Specialist Track'},
+      {id:'EMP-0024',firstName:'Deepak',lastName:'Verma',fullName:'Deepak Verma',email:'deepak.v@edstellar.com',phone:'+91-9876543024',gender:'Male',locationId:'LOC-002',location:'Mumbai',department:'Customer Success',role:'Customer Success Manager',jobLevel:'L3',education:"Bachelor's",reportsTo:'CS Manager',joinDate:'2021-02-15',tenureYears:3.9,salary:52000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:5,workMode:'Hybrid',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0025',firstName:'Aarti',lastName:'Bhat',fullName:'Aarti Bhat',email:'aarti.b@edstellar.com',phone:'+91-9876543025',gender:'Female',locationId:'LOC-002',location:'Mumbai',department:'Customer Success',role:'Customer Success Manager',jobLevel:'L4',education:"MBA",reportsTo:'VP CS',joinDate:'2017-05-10',tenureYears:7.6,salary:80000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:11,workMode:'Remote',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0026',firstName:'Manish',lastName:'Tiwari',fullName:'Manish Tiwari',email:'manish.t@edstellar.com',phone:'+91-9876543026',gender:'Male',locationId:'LOC-002',location:'Mumbai',department:'Customer Success',role:'Customer Success Manager',jobLevel:'L2',education:"Bachelor's",reportsTo:'CS Manager',joinDate:'2023-04-01',tenureYears:1.7,salary:42000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:2,workMode:'Office',highPotential:'No',skillProfileStatus:'Draft',careerPath:'Specialist Track'},
+      {id:'EMP-0027',firstName:'Swati',lastName:'Goyal',fullName:'Swati Goyal',email:'swati.g@edstellar.com',phone:'+91-9876543027',gender:'Female',locationId:'LOC-003',location:'Singapore',department:'Customer Success',role:'Customer Success Manager',jobLevel:'L4',education:"Master's",reportsTo:'VP CS',joinDate:'2016-12-01',tenureYears:8.1,salary:92000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:12,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0028',firstName:'Varun',lastName:'Kapoor',fullName:'Varun Kapoor',email:'varun.k@edstellar.com',phone:'+91-9876543028',gender:'Male',locationId:'LOC-003',location:'Singapore',department:'Customer Success',role:'Customer Success Manager',jobLevel:'L3',education:"Bachelor's",reportsTo:'CS Manager',joinDate:'2021-09-01',tenureYears:3.3,salary:65000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:5,workMode:'Office',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0029',firstName:'Preeti',lastName:'Choudhary',fullName:'Preeti Choudhary',email:'preeti.c@edstellar.com',phone:'+91-9876543029',gender:'Female',locationId:'LOC-003',location:'Singapore',department:'Customer Success',role:'Customer Success Manager',jobLevel:'L3',education:"Bachelor's",reportsTo:'CS Manager',joinDate:'2022-03-15',tenureYears:2.8,salary:60000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:4,workMode:'Office',highPotential:'No',skillProfileStatus:'Partial',careerPath:'Specialist Track'},
+      {id:'EMP-0030',firstName:'Ajay',lastName:'Mishra',fullName:'Ajay Mishra',email:'ajay.m@edstellar.com',phone:'+91-9876543030',gender:'Male',locationId:'LOC-004',location:'Dubai',department:'Customer Success',role:'Customer Success Manager',jobLevel:'L5',education:"MBA",reportsTo:'CRO',joinDate:'2015-06-01',tenureYears:9.5,salary:110000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:14,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0031',firstName:'Nisha',lastName:'Pandey',fullName:'Nisha Pandey',email:'nisha.p@edstellar.com',phone:'+91-9876543031',gender:'Female',locationId:'LOC-004',location:'Dubai',department:'Customer Success',role:'Customer Success Manager',jobLevel:'L2',education:"Bachelor's",reportsTo:'CS Manager',joinDate:'2023-08-01',tenureYears:1.4,salary:45000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:2,workMode:'Office',highPotential:'No',skillProfileStatus:'Draft',careerPath:'Specialist Track'},
+      {id:'EMP-0032',firstName:'Gaurav',lastName:'Chopra',fullName:'Gaurav Chopra',email:'gaurav.c@edstellar.com',phone:'+91-9876543032',gender:'Male',locationId:'LOC-001',location:'Bengaluru',department:'Sales & Marketing',role:'Sales Executive',jobLevel:'L3',education:"Bachelor's",reportsTo:'Sales Manager',joinDate:'2019-11-01',tenureYears:5.1,salary:55000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:7,workMode:'Hybrid',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0033',firstName:'Anjali',lastName:'Srivastava',fullName:'Anjali Srivastava',email:'anjali.s@edstellar.com',phone:'+91-9876543033',gender:'Female',locationId:'LOC-001',location:'Bengaluru',department:'Sales & Marketing',role:'Marketing Specialist',jobLevel:'L3',education:"MBA",reportsTo:'Marketing Manager',joinDate:'2020-02-15',tenureYears:4.9,salary:58000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:6,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0034',firstName:'Prakash',lastName:'Hegde',fullName:'Prakash Hegde',email:'prakash.h@edstellar.com',phone:'+91-9876543034',gender:'Male',locationId:'LOC-001',location:'Bengaluru',department:'Sales & Marketing',role:'Sales Executive',jobLevel:'L4',education:"MBA",reportsTo:'VP Sales',joinDate:'2016-04-01',tenureYears:8.7,salary:82000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:12,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0035',firstName:'Simran',lastName:'Kaur',fullName:'Simran Kaur',email:'simran.k@edstellar.com',phone:'+91-9876543035',gender:'Female',locationId:'LOC-002',location:'Mumbai',department:'Sales & Marketing',role:'Marketing Specialist',jobLevel:'L3',education:"Bachelor's",reportsTo:'Marketing Manager',joinDate:'2021-07-01',tenureYears:3.5,salary:50000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:4,workMode:'Office',highPotential:'No',skillProfileStatus:'Partial',careerPath:'Specialist Track'},
+      {id:'EMP-0036',firstName:'Abhishek',lastName:'Roy',fullName:'Abhishek Roy',email:'abhishek.r@edstellar.com',phone:'+91-9876543036',gender:'Male',locationId:'LOC-002',location:'Mumbai',department:'Sales & Marketing',role:'Sales Executive',jobLevel:'L3',education:"Bachelor's",reportsTo:'Sales Manager',joinDate:'2020-10-15',tenureYears:4.2,salary:52000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:5,workMode:'Hybrid',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0037',firstName:'Isha',lastName:'Mukherjee',fullName:'Isha Mukherjee',email:'isha.m@edstellar.com',phone:'+91-9876543037',gender:'Female',locationId:'LOC-002',location:'Mumbai',department:'Sales & Marketing',role:'Sales Executive',jobLevel:'L2',education:"Bachelor's",reportsTo:'Sales Manager',joinDate:'2023-03-01',tenureYears:1.8,salary:40000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:2,workMode:'Office',highPotential:'No',skillProfileStatus:'Draft',careerPath:'Specialist Track'},
+      {id:'EMP-0038',firstName:'Vivek',lastName:'Dubey',fullName:'Vivek Dubey',email:'vivek.d@edstellar.com',phone:'+91-9876543038',gender:'Male',locationId:'LOC-003',location:'Singapore',department:'Sales & Marketing',role:'Sales Executive',jobLevel:'L4',education:"MBA",reportsTo:'VP Sales',joinDate:'2017-01-15',tenureYears:7.9,salary:90000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:11,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0039',firstName:'Pallavi',lastName:'Shetty',fullName:'Pallavi Shetty',email:'pallavi.s@edstellar.com',phone:'+91-9876543039',gender:'Female',locationId:'LOC-003',location:'Singapore',department:'Sales & Marketing',role:'Marketing Specialist',jobLevel:'L3',education:"Master's",reportsTo:'Marketing Manager',joinDate:'2020-05-01',tenureYears:4.6,salary:68000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:6,workMode:'Remote',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0040',firstName:'Rajesh',lastName:'Nambiar',fullName:'Rajesh Nambiar',email:'rajesh.n@edstellar.com',phone:'+91-9876543040',gender:'Male',locationId:'LOC-004',location:'Dubai',department:'Sales & Marketing',role:'Sales Executive',jobLevel:'L5',education:"MBA",reportsTo:'CRO',joinDate:'2014-08-01',tenureYears:10.4,salary:115000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:16,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0041',firstName:'Aparna',lastName:'Krishnan',fullName:'Aparna Krishnan',email:'aparna.k@edstellar.com',phone:'+91-9876543041',gender:'Female',locationId:'LOC-004',location:'Dubai',department:'Sales & Marketing',role:'Marketing Specialist',jobLevel:'L3',education:"Bachelor's",reportsTo:'Marketing Manager',joinDate:'2022-01-15',tenureYears:2.9,salary:55000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:4,workMode:'Office',highPotential:'No',skillProfileStatus:'Partial',careerPath:'Specialist Track'},
+      {id:'EMP-0042',firstName:'Mohan',lastName:'Yadav',fullName:'Mohan Yadav',email:'mohan.y@edstellar.com',phone:'+91-9876543042',gender:'Male',locationId:'LOC-004',location:'Dubai',department:'Sales & Marketing',role:'Sales Executive',jobLevel:'L2',education:"Bachelor's",reportsTo:'Sales Manager',joinDate:'2023-09-01',tenureYears:1.3,salary:38000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:2,workMode:'Office',highPotential:'No',skillProfileStatus:'Draft',careerPath:'Specialist Track'},
+      {id:'EMP-0043',firstName:'Sunita',lastName:'Thakur',fullName:'Sunita Thakur',email:'sunita.t@edstellar.com',phone:'+91-9876543043',gender:'Female',locationId:'LOC-003',location:'Singapore',department:'Sales & Marketing',role:'Sales Executive',jobLevel:'L3',education:"Bachelor's",reportsTo:'Sales Manager',joinDate:'2021-11-01',tenureYears:3.1,salary:62000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:5,workMode:'Hybrid',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0044',firstName:'Harish',lastName:'Bhatt',fullName:'Harish Bhatt',email:'harish.b@edstellar.com',phone:'+91-9876543044',gender:'Male',locationId:'LOC-001',location:'Bengaluru',department:'Corporate Functions',role:'HR Manager',jobLevel:'L5',education:"MBA",reportsTo:'CHRO',joinDate:'2015-11-01',tenureYears:9.1,salary:98000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:14,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0045',firstName:'Deepika',lastName:'Shah',fullName:'Deepika Shah',email:'deepika.s@edstellar.com',phone:'+91-9876543045',gender:'Female',locationId:'LOC-001',location:'Bengaluru',department:'Corporate Functions',role:'Finance Analyst',jobLevel:'L3',education:"CA",reportsTo:'CFO',joinDate:'2019-08-01',tenureYears:5.4,salary:65000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:7,workMode:'Office',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Specialist Track'},
+      {id:'EMP-0046',firstName:'Ravi',lastName:'Shankar',fullName:'Ravi Shankar',email:'ravi.s@edstellar.com',phone:'+91-9876543046',gender:'Male',locationId:'LOC-002',location:'Mumbai',department:'Corporate Functions',role:'Finance Analyst',jobLevel:'L3',education:"CA",reportsTo:'CFO',joinDate:'2020-12-01',tenureYears:3.8,salary:60000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:5,workMode:'Office',highPotential:'No',skillProfileStatus:'Partial',careerPath:'Specialist Track'},
+      {id:'EMP-0047',firstName:'Geeta',lastName:'Mathur',fullName:'Geeta Mathur',email:'geeta.m@edstellar.com',phone:'+91-9876543047',gender:'Female',locationId:'LOC-002',location:'Mumbai',department:'Corporate Functions',role:'HR Manager',jobLevel:'L4',education:"MBA",reportsTo:'CHRO',joinDate:'2018-04-15',tenureYears:6.7,salary:82000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:9,workMode:'Hybrid',highPotential:'No',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0048',firstName:'Santosh',lastName:'Patil',fullName:'Santosh Patil',email:'santosh.p@edstellar.com',phone:'+91-9876543048',gender:'Male',locationId:'LOC-003',location:'Singapore',department:'Corporate Functions',role:'Finance Analyst',jobLevel:'L2',education:"Bachelor's",reportsTo:'Finance Manager',joinDate:'2023-05-01',tenureYears:1.6,salary:48000,employmentType:'Full-Time',criticalRole:'No',status:'Active',totalExp:2,workMode:'Office',highPotential:'No',skillProfileStatus:'Draft',careerPath:'Specialist Track'},
+      {id:'EMP-0049',firstName:'Usha',lastName:'Raghavan',fullName:'Usha Raghavan',email:'usha.r@edstellar.com',phone:'+91-9876543049',gender:'Female',locationId:'LOC-004',location:'Dubai',department:'Corporate Functions',role:'HR Manager',jobLevel:'L6',education:"MBA",reportsTo:'CEO',joinDate:'2013-07-01',tenureYears:11.5,salary:135000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:18,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'},
+      {id:'EMP-0050',firstName:'Manoj',lastName:'Dixit',fullName:'Manoj Dixit',email:'manoj.d@edstellar.com',phone:'+91-9876543050',gender:'Male',locationId:'LOC-001',location:'Bengaluru',department:'Product Engineering',role:'Senior Frontend Engineer',jobLevel:'L6',education:"Master's",reportsTo:'CTO',joinDate:'2013-01-15',tenureYears:12.0,salary:140000,employmentType:'Full-Time',criticalRole:'Yes',status:'Active',totalExp:18,workMode:'Hybrid',highPotential:'Yes',skillProfileStatus:'Complete',careerPath:'Management Track'}
+    ]};
+
+    var orgJson=JSON.stringify(demoOrg);
+    var empJson=JSON.stringify(demoEmp);
+    try{sessionStorage.setItem('sip_orgsetup_v4',orgJson)}catch(e){}
+    try{localStorage.setItem('sip_orgsetup_v4',orgJson)}catch(e){}
+    try{sessionStorage.setItem('sip_dataport_import',empJson)}catch(e){}
+    try{localStorage.setItem('sip_dataport_import',empJson)}catch(e){}
+    orgState=demoOrg;
+    empData=demoEmp;
+    showReports();
+  };
+
+  init();
+
+})();
+</script>
+</body>
+</html>

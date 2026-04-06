@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Path · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   LEARNING PATH — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── CONTENT ── */
+.content { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.10); border-radius: 2px; }
+
+/* ── SUMMARY STRIP ── */
+.summary-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.sum-card { background: var(--card); border: 1px solid rgba(0,0,0,0.06); border-radius: 10px; padding: 16px; animation: fadeUp .5s ease both; }
+.sum-val { font-family: var(--font-display); font-size: 22px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
+.sum-label { font-size: 11px; color: var(--text-secondary); }
+.sum-sub { font-size: 10px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4; }
+
+/* ── AI BANNER ── */
+.ai-banner { background: linear-gradient(135deg, rgba(8,145,178,.08) 0%, rgba(37,99,235,.06) 50%, rgba(201,168,76,.04) 100%); border: 1px solid rgba(8,145,178,.20); border-radius: 12px; padding: 20px 22px; animation: fadeUp .5s ease .1s both; }
+.ai-banner-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.ai-banner-icon { width: 38px; height: 38px; border-radius: 9px; background: var(--teal-bg); border: 1px solid rgba(8,145,178,.20); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ai-banner-icon svg { width: 18px; height: 18px; stroke: var(--teal); fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.ai-banner-title { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.ai-banner-sub { font-size: 10.5px; color: var(--teal); }
+.ai-banner-text { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; }
+.ai-banner-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+.ai-meta-item { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+.ai-meta-item svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+
+/* ── TWO COLUMN LAYOUT ── */
+.two-col { display: flex; gap: 20px; min-height: 0; }
+.col-timeline { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.col-side { width: 340px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; }
+
+/* ── TIMELINE ── */
+.timeline { position: relative; padding-left: 32px; }
+.timeline::before { content: ''; position: absolute; left: 15px; top: 24px; bottom: 24px; width: 2px; background: rgba(0,0,0,0.06); border-radius: 1px; }
+
+.tl-item { position: relative; margin-bottom: 20px; animation: fadeUp .5s ease both; }
+.tl-item:last-child { margin-bottom: 0; }
+
+.tl-dot { position: absolute; left: -32px; top: 18px; width: 30px; height: 30px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; z-index: 1; }
+.tl-dot svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.tl-dot.done     { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+.tl-dot.active   { border-color: var(--teal);  background: var(--teal-bg);  color: var(--teal); }
+.tl-dot.upcoming { border-color: var(--amber);  background: var(--amber-bg); color: var(--amber); }
+
+.tl-card { background: var(--card); border: 1px solid rgba(0,0,0,0.06); border-radius: 12px; overflow: hidden; }
+.tl-card.card-done   { border-color: rgba(22,163,74,.18); }
+.tl-card.card-active { border-color: rgba(8,145,178,.20); }
+.tl-card.card-upcoming { border-color: rgba(217,119,6,.18); }
+
+.tl-card-head { padding: 16px 18px 12px; display: flex; align-items: flex-start; gap: 14px; }
+.tl-status { padding: 3px 10px; border-radius: 100px; font-size: 10px; font-weight: 500; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+.tl-status.s-done   { border-color: rgba(22,163,74,.30); color: var(--green); background: var(--green-bg); }
+.tl-status.s-active { border-color: rgba(8,145,178,.30); color: var(--teal); background: var(--teal-bg); }
+.tl-status.s-upcoming { border-color: rgba(217,119,6,.30); color: var(--amber); background: var(--amber-bg); }
+
+.tl-prog-name { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+.tl-prog-meta { font-size: 11px; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+.tl-prog-meta span { display: flex; align-items: center; gap: 4px; }
+.tl-prog-meta svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+
+.tl-card-body { padding: 0 18px 16px; }
+
+/* Progress bar */
+.prog-track { height: 6px; background: rgba(0,0,0,.06); border-radius: 3px; overflow: hidden; margin: 10px 0 6px; }
+.prog-fill { height: 100%; border-radius: 3px; transition: width 1.2s ease; }
+.prog-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); }
+
+/* Skills pill */
+.skill-pills { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+.skill-pill { padding: 3px 9px; border-radius: 100px; font-size: 10px; border: 1px solid rgba(0,0,0,.08); color: var(--text-secondary); }
+.skill-pill.closed { border-color: rgba(22,163,74,.25); color: var(--green); }
+
+/* Module list */
+.module-list { margin-top: 12px; display: flex; flex-direction: column; gap: 0; }
+.mod-item { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,.05); font-size: 12px; }
+.mod-item:last-child { border-bottom: none; }
+.mod-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+.mod-icon.done   { background: var(--green-bg); color: var(--green); border: 1px solid rgba(22,163,74,.20); }
+.mod-icon.current { background: var(--teal-bg); color: var(--teal); border: 1px solid rgba(8,145,178,.20); }
+.mod-icon.pending { background: rgba(0,0,0,.03); color: var(--text-muted); border: 1px solid rgba(0,0,0,.06); }
+.mod-name { color: var(--text-secondary); flex: 1; }
+.mod-name.done-text { color: var(--text-muted); text-decoration: line-through; text-decoration-color: rgba(0,0,0,.15); }
+.mod-name.current-text { color: var(--teal); font-weight: 500; }
+.mod-num { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); width: 18px; flex-shrink: 0; }
+
+/* Next session banner */
+.next-session { margin-top: 12px; padding: 10px 14px; background: linear-gradient(135deg, rgba(8,145,178,.06), rgba(8,145,178,.02)); border: 1px solid rgba(8,145,178,.18); border-radius: 8px; display: flex; align-items: center; gap: 10px; }
+.next-session svg { width: 14px; height: 14px; stroke: var(--teal); fill: none; stroke-width: 1.6; stroke-linecap: round; flex-shrink: 0; }
+.next-session-text { font-size: 11.5px; color: var(--teal); font-weight: 500; }
+.next-session-sub { font-size: 10px; color: var(--text-muted); margin-left: auto; }
+
+/* Cert badge */
+.cert-inline { margin-top: 10px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--green-bg); border: 1px solid rgba(22,163,74,.15); border-radius: 7px; }
+.cert-inline svg { width: 14px; height: 14px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
+.cert-inline-text { font-size: 11.5px; color: var(--green); font-weight: 500; }
+.cert-inline-badge { font-size: 10px; color: var(--green); margin-left: auto; padding: 2px 8px; border-radius: 100px; border: 1px solid rgba(22,163,74,.25); }
+
+/* Cohort info */
+.cohort-info { margin-top: 10px; display: flex; gap: 14px; flex-wrap: wrap; }
+.cohort-item { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+.cohort-item svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+
+/* ── CARD GENERIC ── */
+.panel-card { background: var(--card); border: 1px solid rgba(0,0,0,0.06); border-radius: 12px; overflow: hidden; animation: fadeUp .5s ease both; }
+.panel-head { padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; }
+.panel-title { font-family: var(--font-display); font-size: 12px; font-weight: 600; color: var(--text-primary); }
+.panel-count { font-size: 10px; color: var(--accent); background: var(--accent-lt); padding: 2px 7px; border-radius: 100px; }
+
+/* ── GAP CLOSURE TABLE ── */
+.gc-head { display: grid; grid-template-columns: 1.2fr 60px 60px 60px 1fr 90px; gap: 0; padding: 10px 14px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.gc-th { font-size: 9.5px; color: var(--text-muted); letter-spacing: .07em; text-transform: uppercase; font-weight: 400; }
+.gc-row { display: grid; grid-template-columns: 1.2fr 60px 60px 60px 1fr 90px; padding: 10px 14px; border-bottom: 1px solid rgba(0,0,0,.04); align-items: center; }
+.gc-row:last-child { border-bottom: none; }
+.gc-skill { font-size: 12px; color: var(--text-primary); }
+.gc-num { font-size: 11px; font-family: var(--font-mono); text-align: center; }
+.gc-prog { font-size: 11px; }
+
+/* Gap bar */
+.gap-bar-wrap { display: flex; align-items: center; gap: 6px; }
+.gap-bar-track { flex: 1; height: 5px; background: rgba(0,0,0,.05); border-radius: 3px; overflow: hidden; position: relative; }
+.gap-bar-original { position: absolute; top: 0; left: 0; height: 100%; border-radius: 3px; opacity: .3; }
+.gap-bar-current { position: absolute; top: 0; left: 0; height: 100%; border-radius: 3px; }
+
+/* Status chips */
+.gc-status { padding: 3px 8px; border-radius: 100px; font-size: 10px; border: 1px solid; white-space: nowrap; text-align: center; }
+.gc-closed    { border-color: rgba(22,163,74,.30); color: var(--green); }
+.gc-inprog    { border-color: rgba(8,145,178,.30); color: var(--teal); }
+.gc-notstart  { border-color: rgba(217,119,6,.30); color: var(--amber); }
+.gc-none      { border-color: rgba(0,0,0,.08); color: var(--text-muted); }
+
+/* ── PACE SELECTOR ── */
+.pace-btns { display: flex; gap: 2px; padding: 4px; background: rgba(0,0,0,.03); border-radius: 8px; margin-bottom: 10px; }
+.pace-btn { flex: 1; padding: 8px 12px; border-radius: 6px; border: none; background: transparent; font-family: var(--font-body); font-size: 12px; color: var(--text-secondary); cursor: pointer; transition: background .15s, color .15s; text-align: center; }
+.pace-btn.active { background: var(--teal-bg); color: var(--teal); border: 1px solid rgba(8,145,178,.20); font-weight: 500; }
+.pace-btn:hover:not(.active) { color: var(--text-primary); background: rgba(0,0,0,.03); }
+.pace-desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+/* ── IDP GOALS ── */
+.idp-goal-row { padding: 12px 14px; border-bottom: 1px solid rgba(0,0,0,.05); display: flex; align-items: flex-start; gap: 10px; }
+.idp-goal-row:last-child { border-bottom: none; }
+.idp-icon { width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.idp-icon svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.idp-goal-text { flex: 1; font-size: 12px; color: var(--text-primary); line-height: 1.5; }
+.idp-goal-status { padding: 3px 8px; border-radius: 100px; font-size: 10px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+.s-on-track  { border-color: rgba(22,163,74,.30); color: var(--green); }
+.s-in-prog   { border-color: rgba(217,119,6,.30); color: var(--amber); }
+
+.idp-link { padding: 12px 14px; border-top: 1px solid rgba(0,0,0,0.06); }
+.idp-link a { font-size: 12px; color: var(--teal); text-decoration: none; font-weight: 500; transition: opacity .15s; }
+.idp-link a:hover { opacity: .8; }
+
+/* ── LEVEL BANNER ── */
+.level-banner { display: flex; align-items: center; gap: 12px; padding: 0 28px; height: 36px; background: linear-gradient(90deg, rgba(201,168,76,0.08) 0%, transparent 60%); border-bottom: 1px solid rgba(201,168,76,0.12); flex-shrink: 0; }
+.level-banner .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease-in-out infinite; }
+.level-banner .level-tag { font-size: 10px; font-family: var(--font-display); font-weight: 600; letter-spacing: 0.08em; color: var(--accent); }
+.level-banner .sep { width: 1px; height: 14px; background: rgba(201,168,76,0.15); }
+.level-banner .info { font-size: 11px; color: var(--text-secondary); }
+.level-banner .prog-mini { width: 80px; height: 4px; background: rgba(0,0,0,0.06); border-radius: 2px; overflow: hidden; }
+.level-banner .prog-mini-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+.level-banner .pct { font-size: 11px; color: var(--accent); font-weight: 500; }
+.level-banner .trail { margin-left: auto; font-size: 10px; font-family: var(--font-display); font-weight: 600; letter-spacing: 0.06em; color: var(--accent); text-transform: uppercase; }
+
+/* ── CONFIDENCE FOOTER ── */
+.confidence-footer { display: flex; align-items: center; gap: 10px; padding: 10px 28px; background: rgba(201,168,76,0.04); border-top: 1px solid rgba(201,168,76,0.10); flex-shrink: 0; }
+.confidence-footer svg { width: 13px; height: 13px; stroke: var(--accent); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.confidence-footer .cf-text { font-size: 11px; color: var(--accent); font-weight: 500; letter-spacing: 0.03em; }
+.confidence-footer .cf-trail { margin-left: auto; font-size: 10px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.5} }
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <!-- Level banner strip -->
+  <a href="../level-journey.html" class="level-banner" style="text-decoration:none;transition:background .15s" onmouseover="this.style.background='linear-gradient(90deg,rgba(201,168,76,0.12) 0%,transparent 70%)'" onmouseout="this.style.background='linear-gradient(90deg,rgba(201,168,76,0.08) 0%,transparent 60%)'">
+    <div style="display:flex;align-items:center;gap:6px"><div class="dot"></div><span class="level-tag">L3 ACTIVE</span></div>
+    <div class="sep"></div>
+    <div class="info">AI-Personalised Learning Path</div>
+    <div class="prog-mini"><div class="prog-mini-fill" style="width:64%"></div></div>
+    <div class="pct">64% in progress</div>
+    <div class="sep"></div>
+    <div class="info">4 gaps targeted &middot; 1 closed</div>
+    <div class="trail">View full journey &rarr;</div>
+  </a>
+
+  <div class="content">
+
+    <!-- 1. LEARNING SUMMARY STRIP -->
+    <div class="summary-strip">
+      <div class="sum-card" style="animation-delay:.05s">
+        <div class="sum-val" style="color:var(--teal)">1</div>
+        <div class="sum-label">Active Programme</div>
+        <div class="sum-sub">AI &amp; Data Literacy &mdash; 64% complete</div>
+      </div>
+      <div class="sum-card" style="animation-delay:.1s">
+        <div class="sum-val" style="color:var(--green)">1</div>
+        <div class="sum-label">Completed</div>
+        <div class="sum-sub">Digital Project Delivery &mdash; Dec 2025</div>
+      </div>
+      <div class="sum-card" style="animation-delay:.15s">
+        <div class="sum-val" style="color:var(--amber)">1</div>
+        <div class="sum-label">Upcoming</div>
+        <div class="sum-sub">Adv Risk &amp; Contract Mgmt &mdash; Jun 2026</div>
+      </div>
+      <div class="sum-card" style="animation-delay:.2s">
+        <div class="sum-val" style="color:var(--text-primary)">4</div>
+        <div class="sum-label">Skills Addressed</div>
+        <div class="sum-sub">4 gaps being closed across 3 programmes</div>
+      </div>
+      <div class="sum-card" style="animation-delay:.25s">
+        <div class="sum-val" style="color:var(--blue)">Aug 2026</div>
+        <div class="sum-label">Est. Completion</div>
+        <div class="sum-sub">All active &amp; upcoming programmes</div>
+      </div>
+    </div>
+
+    <!-- 2. AI PERSONALIZATION BANNER -->
+    <div class="ai-banner">
+      <div class="ai-banner-head">
+        <div class="ai-banner-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 014 4c0 1.95-1.4 3.58-3.25 3.93"/><path d="M8 6a4 4 0 018 0"/><path d="M12 18v4"/><path d="M8 22h8"/><circle cx="12" cy="12" r="3"/><path d="M3 12h2"/><path d="M19 12h2"/><path d="M12 3v2"/></svg>
+        </div>
+        <div>
+          <div class="ai-banner-title">AI-Personalised Learning Path</div>
+          <div class="ai-banner-sub">Generated from assessment data, role requirements &amp; career goals</div>
+        </div>
+      </div>
+      <div class="ai-banner-text">
+        This learning path was generated by AI based on your L2 assessment results, role requirements, career aspirations, and your manager's input. <strong style="color:var(--text-primary)">Pace: Standard.</strong> Wellbeing-adjusted: No capacity reduction.
+      </div>
+      <div class="ai-banner-meta">
+        <div class="ai-meta-item">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+          Generated 18 Nov 2025
+        </div>
+        <div class="ai-meta-item">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Manager approved: Rahul Kapoor
+        </div>
+        <div class="ai-meta-item">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Next review: June 2026
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN TWO COLUMN LAYOUT -->
+    <div class="two-col">
+
+      <!-- LEFT: TIMELINE -->
+      <div class="col-timeline">
+
+        <!-- 3. LEARNING TIMELINE -->
+        <div style="font-family:var(--font-display);font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:2px">Learning Timeline</div>
+
+        <div class="timeline">
+
+          <!-- Programme 1: COMPLETED -->
+          <div class="tl-item" style="animation-delay:.15s">
+            <div class="tl-dot done">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="tl-card card-done">
+              <div class="tl-card-head">
+                <div style="flex:1">
+                  <div class="tl-prog-name">Digital Project Delivery</div>
+                  <div class="tl-prog-meta">
+                    <span><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Completed &middot; Dec 2025</span>
+                    <span><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/></svg> Score: 72%</span>
+                  </div>
+                </div>
+                <div class="tl-status s-done">Completed</div>
+              </div>
+              <div class="tl-card-body">
+                <div class="prog-track">
+                  <div class="prog-fill" style="width:100%;background:var(--green)"></div>
+                </div>
+                <div class="prog-label">
+                  <span>100% complete</span>
+                  <span>Score: 72%</span>
+                </div>
+                <div class="skill-pills">
+                  <span class="skill-pill closed">Digital Project Delivery (gap closed: 1.0 &rarr; 0.3)</span>
+                </div>
+                <div class="cert-inline">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+                  <span class="cert-inline-text">Digital Project Delivery &mdash; L2</span>
+                  <span class="cert-inline-badge">Issued</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Programme 2: IN PROGRESS -->
+          <div class="tl-item" style="animation-delay:.25s">
+            <div class="tl-dot active">
+              <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+            <div class="tl-card card-active">
+              <div class="tl-card-head">
+                <div style="flex:1">
+                  <div class="tl-prog-name">AI &amp; Data Literacy for Engineers</div>
+                  <div class="tl-prog-meta">
+                    <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> In Progress &middot; Due Apr 2026</span>
+                    <span><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M4 4.5A2.5 2.5 0 016.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15z"/></svg> 5 of 8 modules</span>
+                  </div>
+                </div>
+                <div class="tl-status s-active">In Progress</div>
+              </div>
+              <div class="tl-card-body">
+                <div class="prog-track">
+                  <div class="prog-fill" style="width:64%;background:var(--teal)"></div>
+                </div>
+                <div class="prog-label">
+                  <span>64% complete</span>
+                  <span>5 of 8 modules</span>
+                </div>
+                <div class="skill-pills">
+                  <span class="skill-pill" style="border-color:rgba(8,145,178,.20);color:var(--teal)">AI &amp; ML Literacy (gap: 1.2 &rarr; est. 0.4)</span>
+                </div>
+
+                <div class="module-list">
+                  <div class="mod-item">
+                    <div class="mod-num">1</div>
+                    <div class="mod-icon done"><svg style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div class="mod-name done-text">AI Fundamentals</div>
+                  </div>
+                  <div class="mod-item">
+                    <div class="mod-num">2</div>
+                    <div class="mod-icon done"><svg style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div class="mod-name done-text">Data Literacy for Engineers</div>
+                  </div>
+                  <div class="mod-item">
+                    <div class="mod-num">3</div>
+                    <div class="mod-icon done"><svg style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div class="mod-name done-text">Machine Learning Concepts</div>
+                  </div>
+                  <div class="mod-item">
+                    <div class="mod-num">4</div>
+                    <div class="mod-icon done"><svg style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div class="mod-name done-text">AI in Construction &amp; Infrastructure</div>
+                  </div>
+                  <div class="mod-item">
+                    <div class="mod-num">5</div>
+                    <div class="mod-icon done"><svg style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div class="mod-name done-text">Data Visualisation with Power BI</div>
+                  </div>
+                  <div class="mod-item">
+                    <div class="mod-num">6</div>
+                    <div class="mod-icon current"><svg style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+                    <div class="mod-name current-text">Python for Data Analysis</div>
+                  </div>
+                  <div class="mod-item">
+                    <div class="mod-num">7</div>
+                    <div class="mod-icon pending"><span style="font-size:8px">&cir;</span></div>
+                    <div class="mod-name">AI-Assisted Project Planning</div>
+                  </div>
+                  <div class="mod-item">
+                    <div class="mod-num">8</div>
+                    <div class="mod-icon pending"><span style="font-size:8px">&cir;</span></div>
+                    <div class="mod-name">Capstone: AI Strategy Proposal</div>
+                  </div>
+                </div>
+
+                <div class="next-session">
+                  <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <span class="next-session-text">Python for Data Analysis &mdash; Module 6 of 8</span>
+                  <span class="next-session-sub">Next session</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Programme 3: UPCOMING -->
+          <div class="tl-item" style="animation-delay:.35s">
+            <div class="tl-dot upcoming">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="tl-card card-upcoming">
+              <div class="tl-card-head">
+                <div style="flex:1">
+                  <div class="tl-prog-name">Advanced Risk &amp; Contract Management</div>
+                  <div class="tl-prog-meta">
+                    <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Not Started &middot; Due Jun 2026</span>
+                  </div>
+                </div>
+                <div class="tl-status s-upcoming">Upcoming</div>
+              </div>
+              <div class="tl-card-body">
+                <div class="prog-track">
+                  <div class="prog-fill" style="width:0%;background:var(--amber)"></div>
+                </div>
+                <div class="prog-label">
+                  <span>0% complete</span>
+                  <span>Not started</span>
+                </div>
+                <div class="skill-pills">
+                  <span class="skill-pill" style="border-color:rgba(217,119,6,.20);color:var(--amber)">Risk Management (gap: 0.8)</span>
+                </div>
+                <div class="cohort-info">
+                  <div class="cohort-item">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                    Prerequisites: None
+                  </div>
+                  <div class="cohort-item">
+                    <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+                    Blended: 3 days classroom + 4 weeks online
+                  </div>
+                  <div class="cohort-item">
+                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                    44 employees in this cohort
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /timeline -->
+      </div><!-- /col-timeline -->
+
+      <!-- RIGHT: SIDE PANELS -->
+      <div class="col-side">
+
+        <!-- 4. GAP CLOSURE TRACKER -->
+        <div class="panel-card" style="animation-delay:.2s">
+          <div class="panel-head">
+            <div class="panel-title">Gap Closure Tracker</div>
+            <div class="panel-count">4 gaps</div>
+          </div>
+          <div class="gc-head">
+            <div class="gc-th">Skill</div>
+            <div class="gc-th" style="text-align:center">Gap</div>
+            <div class="gc-th" style="text-align:center">Now</div>
+            <div class="gc-th" style="text-align:center">Target</div>
+            <div class="gc-th">Programme</div>
+            <div class="gc-th" style="text-align:center">Status</div>
+          </div>
+
+          <!-- Row 1 -->
+          <div class="gc-row">
+            <div class="gc-skill">Digital Project Delivery</div>
+            <div class="gc-num" style="color:var(--green)">1.0</div>
+            <div class="gc-num" style="color:var(--green)">0.3</div>
+            <div class="gc-num">0.0</div>
+            <div class="gc-prog" style="font-size:10.5px;color:var(--text-secondary)">Digital Project Delivery</div>
+            <div style="text-align:center"><span class="gc-status gc-closed">Closed</span></div>
+          </div>
+          <div style="padding:0 14px 10px">
+            <div class="gap-bar-wrap">
+              <div class="gap-bar-track">
+                <div class="gap-bar-original" style="width:25%;background:var(--red)"></div>
+                <div class="gap-bar-current" style="width:7.5%;background:var(--green)"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2 -->
+          <div class="gc-row">
+            <div class="gc-skill">AI &amp; ML Literacy</div>
+            <div class="gc-num" style="color:var(--amber)">1.2</div>
+            <div class="gc-num" style="color:var(--teal)">0.7</div>
+            <div class="gc-num">0.0</div>
+            <div class="gc-prog" style="font-size:10.5px;color:var(--text-secondary)">AI &amp; Data Literacy</div>
+            <div style="text-align:center"><span class="gc-status gc-inprog">In Progress</span></div>
+          </div>
+          <div style="padding:0 14px 10px">
+            <div class="gap-bar-wrap">
+              <div class="gap-bar-track">
+                <div class="gap-bar-original" style="width:30%;background:var(--red)"></div>
+                <div class="gap-bar-current" style="width:17.5%;background:var(--teal)"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 3 -->
+          <div class="gc-row">
+            <div class="gc-skill">Risk Management</div>
+            <div class="gc-num" style="color:var(--amber)">0.8</div>
+            <div class="gc-num" style="color:var(--amber)">0.8</div>
+            <div class="gc-num">0.0</div>
+            <div class="gc-prog" style="font-size:10.5px;color:var(--text-secondary)">Adv Risk &amp; Contract</div>
+            <div style="text-align:center"><span class="gc-status gc-notstart">Not Started</span></div>
+          </div>
+          <div style="padding:0 14px 10px">
+            <div class="gap-bar-wrap">
+              <div class="gap-bar-track">
+                <div class="gap-bar-original" style="width:20%;background:var(--red)"></div>
+                <div class="gap-bar-current" style="width:20%;background:var(--amber)"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 4 -->
+          <div class="gc-row">
+            <div class="gc-skill">BIM</div>
+            <div class="gc-num" style="color:var(--text-muted)">0.6</div>
+            <div class="gc-num" style="color:var(--text-muted)">0.6</div>
+            <div class="gc-num">0.0</div>
+            <div class="gc-prog" style="font-size:10.5px;color:var(--text-muted)">&mdash;</div>
+            <div style="text-align:center"><span class="gc-status gc-none">No programme</span></div>
+          </div>
+          <div style="padding:0 14px 10px">
+            <div class="gap-bar-wrap">
+              <div class="gap-bar-track">
+                <div class="gap-bar-original" style="width:15%;background:var(--red)"></div>
+                <div class="gap-bar-current" style="width:15%;background:rgba(0,0,0,.10)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. PACE SELECTOR -->
+        <div class="panel-card" style="animation-delay:.3s">
+          <div class="panel-head">
+            <div class="panel-title">Learning Pace</div>
+          </div>
+          <div style="padding:14px 16px">
+            <div class="pace-btns">
+              <button class="pace-btn" onclick="selectPace(this)">Fast</button>
+              <button class="pace-btn active" onclick="selectPace(this)">Standard</button>
+              <button class="pace-btn" onclick="selectPace(this)">Intensive</button>
+            </div>
+            <div class="pace-desc">Standard pace: ~6 hours/week learning commitment. Your manager and AI recommend this pace based on your current project workload.</div>
+          </div>
+        </div>
+
+        <!-- 6. IDP LINK -->
+        <div class="panel-card" style="animation-delay:.35s">
+          <div class="panel-head">
+            <div class="panel-title">IDP Goals</div>
+            <div class="panel-count">3 goals</div>
+          </div>
+          <div class="idp-goal-row">
+            <div class="idp-icon" style="background:var(--green-bg);color:var(--green)">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            </div>
+            <div class="idp-goal-text">Achieve BIM Coordinator proficiency by Q3 2026</div>
+            <div class="idp-goal-status s-on-track">On Track</div>
+          </div>
+          <div class="idp-goal-row">
+            <div class="idp-icon" style="background:var(--green-bg);color:var(--green)">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+            </div>
+            <div class="idp-goal-text">Complete PMP recertification by Q2 2026</div>
+            <div class="idp-goal-status s-on-track">On Track</div>
+          </div>
+          <div class="idp-goal-row">
+            <div class="idp-icon" style="background:var(--amber-bg);color:var(--amber)">
+              <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+            <div class="idp-goal-text">Lead one digital delivery project end-to-end</div>
+            <div class="idp-goal-status s-in-prog">In Progress</div>
+          </div>
+          <div class="idp-link">
+            <a href="#">View full IDP &rarr;</a>
+          </div>
+        </div>
+
+      </div><!-- /col-side -->
+    </div><!-- /two-col -->
+
+  </div><!-- /content -->
+
+  <!-- Confidence statement -->
+  <div class="confidence-footer">
+    <svg viewBox="0 0 24 24"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+    <span class="cf-text">Learning Path &middot; AI-personalised &middot; 4 gaps targeted &middot; Manager approved &middot; Next review: June 2026</span>
+    <span class="cf-trail">Employee ownership</span>
+  </div>
+
+</main>
+
+<!-- Shell Component -->
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'employee',
+    activeNav: 'Learning Path',
+    breadcrumbs: ['Development', 'Learning Path'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+// Pace selector
+function selectPace(btn) {
+  document.querySelectorAll('.pace-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+// Toast handler for # links
+(function(){
+  var toast = document.createElement("div");
+  toast.id = "sip-toast";
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(0,0,0,0.08);color:var(--text-secondary);font-size:12px;font-family:'DM Sans',sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08);";
+  document.body.appendChild(toast);
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){
+      toast.style.opacity="0";
+      toast.style.transform="translateX(-50%) translateY(8px)";
+    }, 2400);
+  }
+  document.addEventListener("click", function(e){
+    var a = e.target.closest("a");
+    if(a && a.getAttribute("href") === "#"){
+      e.preventDefault();
+      var label = (a.textContent || "").trim().replace(/\s+/g," ").substring(0,36);
+      showToast(label + " \u2014 available in full platform");
+    }
+  });
+})();
+</script>
+</body>
+</html>
