@@ -573,8 +573,12 @@
         <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
         Reset All Blocks
       </button>
+      <button class="btn" onclick="clearAllStorage()" style="padding:12px 20px;font-size:13px;color:#EF4444;border-color:rgba(239,68,68,0.3)">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Clear All Storage
+      </button>
     </div>
-    <p style="font-size:12px;color:var(--text-t);text-align:center;margin-top:-12px">Complete all 12 blocks to enable locking &nbsp;|&nbsp; Reset clears all data across every block</p>
+    <p style="font-size:12px;color:var(--text-t);text-align:center;margin-top:-12px">Complete all 12 blocks to enable locking &nbsp;|&nbsp; Reset clears block data &nbsp;|&nbsp; Clear Storage removes all saved data across pages</p>
   </div>
 </div>
 </main>
@@ -7221,6 +7225,19 @@ function resetAll(){
   renderDashboard();
   document.getElementById('aiChat').innerHTML = '';
   showToast('All data reset');
+}
+
+function clearAllStorage(){
+  if(!confirm('This will clear ALL stored data across all pages — Organisation Setup, DataPort imports, Employee Directory, and Reports. You will need to re-run all autofills. Continue?')) return;
+  try{sessionStorage.clear()}catch(e){}
+  try{localStorage.removeItem('sip_orgsetup_v4')}catch(e){}
+  try{localStorage.removeItem('sip_dataport_import')}catch(e){}
+  try{localStorage.removeItem('sip_employee_directory')}catch(e){}
+  state = defaultState();
+  saveState();
+  renderDashboard();
+  document.getElementById('aiChat').innerHTML = '';
+  showToast('All storage cleared — ready for fresh autofill');
 }
 
 // ═══════════════════════════════════════════════════════

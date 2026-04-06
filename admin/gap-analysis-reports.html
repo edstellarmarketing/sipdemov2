@@ -212,6 +212,7 @@
         <button onclick="loadDemoData()" style="padding:8px 20px;font-size:13px;font-weight:500;background:var(--accent,#C9A84C);color:#fff;border:none;border-radius:6px;cursor:pointer">Load Demo Data</button>
         <a href="org-setup-v4.html" style="padding:8px 20px;font-size:13px;font-weight:500;border:1px solid var(--border,#E5E7EB);border-radius:6px;color:var(--text-s,#6B7280);text-decoration:none">Go to Setup</a>
       </div>
+      <div style="margin-top:24px"><button onclick="clearAllData()" style="padding:6px 16px;font-size:11px;font-weight:500;background:none;border:1px solid rgba(239,68,68,0.3);border-radius:6px;color:#EF4444;cursor:pointer">Clear All Stored Data</button></div>
     </div>
   </div>
 
@@ -1211,7 +1212,18 @@ EdstellarShell.init({
     showReports();
   }
 
-  // Expose for demo button
+  // Expose for buttons
+  window.clearAllData=function(){
+    if(!confirm('Clear all stored data? You will need to re-run autofills.')) return;
+    try{sessionStorage.removeItem('sip_orgsetup_v4')}catch(e){}
+    try{localStorage.removeItem('sip_orgsetup_v4')}catch(e){}
+    try{sessionStorage.removeItem('sip_dataport_import')}catch(e){}
+    try{localStorage.removeItem('sip_dataport_import')}catch(e){}
+    try{sessionStorage.removeItem('sip_employee_directory')}catch(e){}
+    try{localStorage.removeItem('sip_employee_directory')}catch(e){}
+    location.reload();
+  };
+
   window.loadDemoData=function(){
     // Demo org setup data
     var demoOrg={version:'5.0',blocks:[

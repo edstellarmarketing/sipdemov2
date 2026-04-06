@@ -225,9 +225,15 @@
 <div class="report-scroll">
 <div class="report-container">
 
-  <div class="page-header">
-    <h1>Organization Setup Report</h1>
-    <p>Organisation data reports and analytics dashboard</p>
+  <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+    <div>
+      <h1>Organization Setup Report</h1>
+      <p>Organisation data reports and analytics dashboard</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-shrink:0;padding-top:4px">
+      <button onclick="loadDemoData()" style="padding:6px 14px;font-size:11px;font-weight:500;background:var(--accent,#C9A84C);color:#fff;border:none;border-radius:6px;cursor:pointer">Reload Demo Data</button>
+      <button onclick="clearAllData()" style="padding:6px 14px;font-size:11px;font-weight:500;background:none;border:1px solid rgba(239,68,68,0.3);border-radius:6px;color:#EF4444;cursor:pointer">Clear Data</button>
+    </div>
   </div>
 
   <!-- TAB BAR -->
@@ -254,6 +260,7 @@
         <button onclick="loadDemoData()" style="padding:8px 20px;font-size:13px;font-weight:500;background:var(--accent,#C9A84C);color:#fff;border:none;border-radius:6px;cursor:pointer">Load Demo Data</button>
         <a href="org-setup-v4.html" style="padding:8px 20px;font-size:13px;font-weight:500;border:1px solid var(--border,#E5E7EB);border-radius:6px;color:var(--text-s,#6B7280);text-decoration:none">Go to Setup</a>
       </div>
+      <div style="margin-top:24px"><button onclick="clearAllData()" style="padding:6px 16px;font-size:11px;font-weight:500;background:none;border:1px solid rgba(239,68,68,0.3);border-radius:6px;color:#EF4444;cursor:pointer">Clear All Stored Data</button></div>
     </div>
   </div>
 
@@ -1333,6 +1340,21 @@ EdstellarShell.init({
     try{localStorage.setItem('sip_orgsetup_v4',demoJson)}catch(e){}
     state=demo;
     showReports();
+  };
+
+  window.clearAllData=function(){
+    if(!confirm('This will clear all stored data (Organisation Setup, DataPort imports, Employee Directory). You will need to re-run autofill. Continue?')) return;
+    try{sessionStorage.removeItem('sip_orgsetup_v4')}catch(e){}
+    try{localStorage.removeItem('sip_orgsetup_v4')}catch(e){}
+    try{sessionStorage.removeItem('sip_dataport_import')}catch(e){}
+    try{localStorage.removeItem('sip_dataport_import')}catch(e){}
+    try{sessionStorage.removeItem('sip_employee_directory')}catch(e){}
+    try{localStorage.removeItem('sip_employee_directory')}catch(e){}
+    state=null;
+    window.rendered={};
+    document.getElementById('noDataState').style.display='block';
+    document.getElementById('tabPanels').style.display='none';
+    document.querySelector('.report-tabs').style.display='none';
   };
 
   init();
