@@ -363,6 +363,9 @@ const EdstellarShell = (() => {
       </div>
     </header>`;
 
+    // ── Collapse toggle button ──
+    const collapseHTML = `<button class="nav-collapse-btn" onclick="EdstellarShell.toggleNav()" title="Toggle sidebar"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>`;
+
     // ── Inject into DOM ──
     // Grab existing main content
     const mainEl = document.querySelector('.main') || document.querySelector('#page-content') || document.querySelector('main');
@@ -373,9 +376,19 @@ const EdstellarShell = (() => {
       mainEl.style.gridArea = 'main';
 
       // Insert nav and topbar before main
-      mainEl.insertAdjacentHTML('beforebegin', navHTML + topbarHTML);
+      mainEl.insertAdjacentHTML('beforebegin', navHTML + topbarHTML + collapseHTML);
     }
+
+    // Restore collapsed state
+    try { if (localStorage.getItem('sip_nav_collapsed') === '1') document.body.classList.add('nav-collapsed'); } catch(e) {}
   }
 
-  return { init, navStructure, icons };
+  function toggleNav() {
+    document.body.classList.toggle('nav-collapsed');
+    try {
+      localStorage.setItem('sip_nav_collapsed', document.body.classList.contains('nav-collapsed') ? '1' : '0');
+    } catch(e) {}
+  }
+
+  return { init, toggleNav, navStructure, icons };
 })();

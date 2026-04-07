@@ -53,6 +53,7 @@ html,body{height:100%;overflow:hidden;}
 
   /* Nav dimensions */
   --nav-w:       240px;
+  --nav-w-collapsed: 0px;
   --topbar-h:    56px;
 
   /* Type */
@@ -74,6 +75,21 @@ body{
     "nav main";
   height: 100vh;
 }
+
+/* ── NAV COLLAPSE ── */
+body.nav-collapsed{grid-template-columns:0px 1fr}
+body.nav-collapsed .nav{transform:translateX(-100%);pointer-events:none;opacity:0}
+body.nav-collapsed .topbar{border-left:none}
+body.nav-collapsed .main{font-size:13.5px}
+body.nav-collapsed .main h1,.body.nav-collapsed .main h2{font-size:1.15em}
+.nav-collapse-btn{position:fixed;top:12px;left:var(--nav-w);z-index:200;width:24px;height:24px;border-radius:50%;border:1px solid rgba(0,0,0,0.1);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.08);transition:left .25s ease,transform .25s ease}
+.nav-collapse-btn svg{width:14px;height:14px;stroke:var(--text-muted);fill:none;stroke-width:2;transition:transform .25s}
+.nav-collapse-btn:hover{border-color:var(--accent)}
+.nav-collapse-btn:hover svg{stroke:var(--accent)}
+body.nav-collapsed .nav-collapse-btn{left:8px}
+body.nav-collapsed .nav-collapse-btn svg{transform:rotate(180deg)}
+body .nav{transition:transform .25s ease,opacity .25s ease}
+body{transition:grid-template-columns .25s ease}
 
 /* ══════════════════════════════════════════════════════════════
    LEFT NAV
