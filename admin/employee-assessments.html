@@ -158,11 +158,23 @@ var ROLE_SKILL_OVERRIDES={
   'Cloud Architect':[{name:'Digital Twin',required:3},{name:'Data Analysis',required:3},{name:'Risk Assessment',required:2},{name:'Revit',required:1}]
 };
 
+// Competency pools per department — synced with Block K
+var DEPT_COMPETENCIES={
+  'Engineering':['Safety-First Mindset','Problem Solving','Innovation & Continuous Improvement','Digital Fluency','Sustainability Thinking','Regulatory Awareness','Adaptability'],
+  'Project Delivery':['Client Partnership','Strategic Leadership','People Development','Decision Making Under Uncertainty','Integrity & Accountability','Cross-Cultural Collaboration','Result Orientation'],
+  'Digital Delivery':['Digital Fluency','Data-Driven Decision Making','Innovation & Continuous Improvement','Problem Solving','Adaptability','Cross-Cultural Collaboration'],
+  'Corporate Services':['Integrity & Accountability','Data-Driven Decision Making','Regulatory Awareness','Stakeholder Influence','Analytical Thinking','Communication Effectiveness'],
+  'EHS & Risk':['Safety-First Mindset','Integrity & Accountability','Regulatory Awareness','People Development','Risk Awareness','Problem Solving'],
+  'HR & Talent':['People Development','Cross-Cultural Collaboration','Innovation & Continuous Improvement','Client Partnership','Communication Effectiveness','Learning Agility']
+};
+
 var STORAGE_KEY='sip_employee_assessments';
+var COMP_STORAGE_KEY='sip_competency_assessments';
 var currentPage=0;var PAGE_SIZE=15;
-var filterSearch='';var filterDept='';
+var filterSearch='';var filterDept='';var filterType='all';
 var assessmentData=null;
-var skillAggData=null; // aggregated skill-centric data
+var compAssessmentData=null;
+var skillAggData=null;
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
@@ -221,7 +233,208 @@ function clearAssessments(){
   if(!confirm('Clear all assessment data?'))return;
   try{sessionStorage.removeItem(STORAGE_KEY)}catch(e){}
   try{localStorage.removeItem(STORAGE_KEY)}catch(e){}
-  assessmentData=null;skillAggData=null;render();
+  try{sessionStorage.removeItem(COMP_STORAGE_KEY)}catch(e){}
+  try{localStorage.removeItem(COMP_STORAGE_KEY)}catch(e){}
+  assessmentData=null;compAssessmentData=null;skillAggData=null;render();
+}
+
+// ═══════════════════════════════════════════════════════
+// COMPETENCY ASSESSMENT DEMO FILL
+// ═══════════════════════════════════════════════════════
+function loadCompAssessments(){
+  var r=null;try{r=sessionStorage.getItem(COMP_STORAGE_KEY)}catch(e){}
+  if(!r){try{r=localStorage.getItem(COMP_STORAGE_KEY)}catch(e){}}
+  if(r){try{return JSON.parse(r)}catch(e){}}return null;
+}
+function saveCompAssessments(data){
+  var j=JSON.stringify(data);
+  try{sessionStorage.setItem(COMP_STORAGE_KEY,j)}catch(e){}
+  try{localStorage.setItem(COMP_STORAGE_KEY,j)}catch(e){}
+}
+
+function demoFillCompetencies(){
+  var employees=loadEmployees();
+  if(!employees.length){alert('No employee data. Run Demo Fill in Data Import first.');return}
+  var all=[];var seed=77;var recId=0;
+  function sr(){seed=(seed*16807+0)%2147483647;return(seed-1)/2147483646}
+  var sources=['Self + Manager','Self + Manager + Peer','Self + Manager + Peer + Skip-Level','Self + Manager + 360°'];
+  employees.forEach(function(emp){
+    var dept=emp.department,level=emp.jobLevel||'L3';
+    var comps=DEPT_COMPETENCIES[dept]||DEPT_COMPETENCIES['Corporate Services'];
+    var boost=LEVEL_REQ_BOOST[level]||0;
+    var numComps=Math.min(comps.length,Math.max(3,Math.floor(sr()*3)+3));
+    var empComps=comps.slice(0,numComps);
+    empComps.forEach(function(compName){
+      recId++;
+      var reqProf=Math.max(1,Math.min(4,2+boost));
+      var selfScore=Math.round((Math.max(0.5,reqProf-1+sr()*2.5))*10)/10;
+      var mgrScore=Math.round((Math.max(0.5,reqProf-0.8+sr()*2))*10)/10;
+      var peerScore=sr()>0.3?Math.round((Math.max(0.5,reqProf-1+sr()*2.2))*10)/10:null;
+      var skipScore=sr()>0.6?Math.round((Math.max(0.5,reqProf-0.5+sr()*2))*10)/10:null;
+      var scores=[selfScore*0.25,mgrScore*0.35];
+      if(peerScore)scores.push(peerScore*0.2);
+      if(skipScore)scores.push(skipScore*0.2);
+      var wTotal=0.25+0.35+(peerScore?0.2:0)+(skipScore?0.2:0);
+      var weighted=Math.round(scores.reduce(function(a,b){return a+b},0)/wTotal*100)/100;
+      var gap=Math.round((weighted-reqProf)*100)/100;
+      all.push({
+        recordId:'ECA-'+String(recId).padStart(5,'0'),
+        employeeId:emp.id,employeeName:emp.fullName,department:dept,role:emp.role,jobLevel:level,
+        year:2024,compName:compName,compType:sr()>0.5?'Behavioural':'Core',
+        selfScore:selfScore,mgrScore:mgrScore,peerScore:peerScore,skipScore:skipScore,
+        weightedScore:weighted,requiredProf:reqProf,gap:gap,
+        gapDirection:gap>=0?'Met':'Below',
+        assessmentDate:'2024-'+('0'+Math.floor(sr()*12+1)).slice(-2)+'-'+('0'+Math.floor(sr()*28+1)).slice(-2),
+        source:sources[Math.floor(sr()*sources.length)]
+      });
+    });
+  });
+  var data={generatedAt:new Date().toISOString(),totalRecords:all.length,records:all};
+  saveCompAssessments(data);compAssessmentData=data;render();
+  showToast(all.length+' competency assessments generated');
+}
+
+// ═══════════════════════════════════════════════════════
+// TEMPLATE DOWNLOADS
+// ═══════════════════════════════════════════════════════
+function downloadSkillsTemplate(){
+  var emps=loadEmployees().slice(0,10);
+  var lines=['Assessment_Record_ID,Employee_ID,Employee_Name,Department,Role,Job_Level,Assessment_Year,Skill_ID,Skill_Name,Skill_Domain,Skill_Type,Assessment_Source,Self_Score,Manager_Score,Observation_Score,Test_Score,Certification_Score,Weighted_Score,Required_Proficiency,Gap_vs_Required,Gap_Direction,Assessment_Date,Assessor_Role,Verified_Flag,Remarks'];
+  var n=0;
+  emps.forEach(function(emp){
+    var skills=ROLE_SKILL_OVERRIDES[emp.role];
+    if(!skills){var ds=DEPT_SKILLS[emp.department]||DEPT_SKILLS['Corporate Services'];var boost=LEVEL_REQ_BOOST[emp.jobLevel]||0;skills=ds.map(function(s){return{name:s.name,required:Math.max(1,Math.min(4,s.required+boost))}}).slice(0,5)}
+    skills.slice(0,4).forEach(function(sk){
+      n++;
+      lines.push('ESA-'+String(n).padStart(5,'0')+','+emp.id+',"'+emp.fullName+'","'+emp.department+'","'+emp.role+'",'+emp.jobLevel+',2024,SKL-'+String(n).padStart(3,'0')+',"'+sk.name+'",Technical,Technical,Multi-Source,,,,,,,'+ sk.required+',,,,,,');
+    });
+  });
+  downloadCSV(lines.join('\n'),'skills_assessment_template.csv');
+  showToast('Skills assessment template downloaded');
+}
+
+function downloadCompTemplate(){
+  var emps=loadEmployees().slice(0,10);
+  var lines=['Assessment_Record_ID,Employee_ID,Employee_Name,Department,Role,Job_Level,Assessment_Year,Competency_ID,Competency_Name,Competency_Type,Competency_Category,Self_Score,Manager_Score,Peer_Score,Skip_Level_Score,Weighted_Score,Required_Proficiency,Gap_vs_Required,Gap_Direction,Observed_Behaviours,Development_Recommendation,Assessment_Date,Verified_Flag'];
+  var n=0;
+  emps.forEach(function(emp){
+    var comps=(DEPT_COMPETENCIES[emp.department]||DEPT_COMPETENCIES['Corporate Services']).slice(0,3);
+    comps.forEach(function(comp){
+      n++;
+      var boost=LEVEL_REQ_BOOST[emp.jobLevel]||0;
+      var req=Math.max(1,Math.min(4,2+boost));
+      lines.push('ECA-'+String(n).padStart(5,'0')+','+emp.id+',"'+emp.fullName+'","'+emp.department+'","'+emp.role+'",'+emp.jobLevel+',2024,COMP-'+String(n).padStart(3,'0')+',"'+comp+'",Behavioural,Core,,,,,,'+req+',,,,,,');
+    });
+  });
+  downloadCSV(lines.join('\n'),'competency_assessment_template.csv');
+  showToast('Competency assessment template downloaded');
+}
+
+function downloadCSV(content,filename){
+  var blob=new Blob([content],{type:'text/csv'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════
+// CSV UPLOAD HANDLERS
+// ═══════════════════════════════════════════════════════
+function parseCSVLine(line){
+  var result=[];var current='';var inQ=false;
+  for(var i=0;i<line.length;i++){var c=line[i];if(c==='"'){inQ=!inQ}else if(c===','&&!inQ){result.push(current);current=''}else{current+=c}}
+  result.push(current);return result;
+}
+
+function handleSkillsUpload(input){
+  if(!input.files||!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var lines=e.target.result.split(/\r?\n/).filter(function(l){return l.trim()});
+    if(lines.length<2){showToast('File is empty');return}
+    var header=parseCSVLine(lines[0]);
+    var col={};header.forEach(function(h,i){col[h.trim()]=i});
+    var records=[];
+    for(var i=1;i<lines.length;i++){
+      var c=parseCSVLine(lines[i]);
+      var empId=(c[col['Employee_ID']]||'').trim();
+      var skillName=(c[col['Skill_Name']]||'').trim();
+      var year=parseInt(c[col['Assessment_Year']])||2024;
+      var weighted=parseFloat(c[col['Weighted_Score']])||0;
+      var reqProf=parseFloat(c[col['Required_Proficiency']])||2;
+      if(!empId||!skillName)continue;
+      var managedScore=weighted?Math.round(weighted):Math.round(reqProf);
+      records.push({empId:empId,empName:(c[col['Employee_Name']]||'').trim(),dept:(c[col['Department']]||'').trim(),role:(c[col['Role']]||'').trim(),level:(c[col['Job_Level']]||'L3').trim(),year:year,skillName:skillName,requiredScore:Math.round(reqProf),managedScore:Math.max(1,Math.min(4,managedScore))});
+    }
+    if(!records.length){showToast('No valid records found');return}
+    // Merge into assessment data
+    if(!assessmentData)assessmentData={generatedAt:new Date().toISOString(),totalEmployees:0,records:[]};
+    var grouped={};
+    records.forEach(function(r){
+      var key=r.empId;
+      if(!grouped[key])grouped[key]={empId:r.empId,empName:r.empName,role:r.role,dept:r.dept,level:r.level,years:{}};
+      if(!grouped[key].years[r.year])grouped[key].years[r.year]=[];
+      grouped[key].years[r.year].push({skillName:r.skillName,requiredScore:r.requiredScore,managedScore:r.managedScore});
+    });
+    var merged=0;
+    Object.keys(grouped).forEach(function(empId){
+      var g=grouped[empId];
+      var existing=null;
+      for(var i=0;i<assessmentData.records.length;i++){if(assessmentData.records[i].employeeId===empId){existing=assessmentData.records[i];break}}
+      if(!existing){existing={employeeId:empId,employeeName:g.empName,role:g.role,department:g.dept,jobLevel:g.level,joinYear:2020,assessments:[]};assessmentData.records.push(existing)}
+      Object.keys(g.years).forEach(function(yr){
+        var yrN=parseInt(yr);
+        var idx=-1;for(var j=0;j<existing.assessments.length;j++){if(existing.assessments[j].year===yrN){idx=j;break}}
+        if(idx>=0){existing.assessments[idx].skills=existing.assessments[idx].skills.concat(g.years[yr])}
+        else{existing.assessments.push({year:yrN,skills:g.years[yr]});existing.assessments.sort(function(a,b){return a.year-b.year})}
+      });
+      merged++;
+    });
+    assessmentData.totalEmployees=assessmentData.records.length;
+    saveAssessments(assessmentData);render();
+    showToast('Imported '+records.length+' skill assessments for '+merged+' employees');
+  };
+  reader.readAsText(input.files[0]);input.value='';
+}
+
+function handleCompUpload(input){
+  if(!input.files||!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var lines=e.target.result.split(/\r?\n/).filter(function(l){return l.trim()});
+    if(lines.length<2){showToast('File is empty');return}
+    var header=parseCSVLine(lines[0]);
+    var col={};header.forEach(function(h,i){col[h.trim()]=i});
+    var records=[];
+    for(var i=1;i<lines.length;i++){
+      var c=parseCSVLine(lines[i]);
+      var empId=(c[col['Employee_ID']]||'').trim();
+      var compName=(c[col['Competency_Name']]||'').trim();
+      if(!empId||!compName)continue;
+      records.push({
+        recordId:(c[col['Assessment_Record_ID']]||'').trim(),
+        employeeId:empId,employeeName:(c[col['Employee_Name']]||'').trim(),
+        department:(c[col['Department']]||'').trim(),role:(c[col['Role']]||'').trim(),
+        jobLevel:(c[col['Job_Level']]||'L3').trim(),year:parseInt(c[col['Assessment_Year']])||2024,
+        compName:compName,compType:(c[col['Competency_Type']]||'').trim(),
+        selfScore:parseFloat(c[col['Self_Score']])||0,mgrScore:parseFloat(c[col['Manager_Score']])||0,
+        peerScore:c[col['Peer_Score']]?parseFloat(c[col['Peer_Score']]):null,
+        skipScore:c[col['Skip_Level_Score']]?parseFloat(c[col['Skip_Level_Score']]):null,
+        weightedScore:parseFloat(c[col['Weighted_Score']])||0,
+        requiredProf:parseFloat(c[col['Required_Proficiency']])||2,
+        gap:parseFloat(c[col['Gap_vs_Required']])||0,
+        gapDirection:(c[col['Gap_Direction']]||'').trim(),
+        assessmentDate:(c[col['Assessment_Date']]||'').trim(),
+        source:'Uploaded'
+      });
+    }
+    if(!records.length){showToast('No valid records found');return}
+    if(!compAssessmentData)compAssessmentData={generatedAt:new Date().toISOString(),totalRecords:0,records:[]};
+    compAssessmentData.records=compAssessmentData.records.concat(records);
+    compAssessmentData.totalRecords=compAssessmentData.records.length;
+    saveCompAssessments(compAssessmentData);render();
+    showToast('Imported '+records.length+' competency assessments');
+  };
+  reader.readAsText(input.files[0]);input.value='';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -297,40 +510,87 @@ function render(){
     body.innerHTML=renderEmptyState();return;
   }
 
-  skillAggData=aggregateBySkill(assessmentData.records);
+  compAssessmentData=loadCompAssessments();
+
+  // Merge competency data into the aggregation — convert competencies to skill-like records
+  var mergedRecords=assessmentData.records.slice();
+  if(compAssessmentData&&compAssessmentData.records.length){
+    var compByEmp={};
+    compAssessmentData.records.forEach(function(cr){
+      var key=cr.employeeId;
+      if(!compByEmp[key])compByEmp[key]={employeeId:cr.employeeId,employeeName:cr.employeeName,role:cr.role,department:cr.department,jobLevel:cr.jobLevel,joinYear:2020,assessments:[],isComp:true};
+      var entry=compByEmp[key];
+      var yrIdx=-1;for(var i=0;i<entry.assessments.length;i++){if(entry.assessments[i].year===cr.year){yrIdx=i;break}}
+      if(yrIdx<0){entry.assessments.push({year:cr.year,skills:[]});yrIdx=entry.assessments.length-1}
+      entry.assessments[yrIdx].skills.push({skillName:cr.compName+' [C]',requiredScore:Math.round(cr.requiredProf),managedScore:Math.max(1,Math.min(4,Math.round(cr.weightedScore||cr.selfScore)))});
+    });
+    Object.keys(compByEmp).forEach(function(k){
+      // Merge with existing or add new
+      var existing=null;for(var i=0;i<mergedRecords.length;i++){if(mergedRecords[i].employeeId===k){existing=mergedRecords[i];break}}
+      if(existing){
+        compByEmp[k].assessments.forEach(function(ca){
+          var eIdx=-1;for(var j=0;j<existing.assessments.length;j++){if(existing.assessments[j].year===ca.year){eIdx=j;break}}
+          if(eIdx>=0){existing.assessments[eIdx].skills=existing.assessments[eIdx].skills.concat(ca.skills)}
+          else{existing.assessments.push(ca);existing.assessments.sort(function(a,b){return a.year-b.year})}
+        });
+      } else {mergedRecords.push(compByEmp[k])}
+    });
+  }
+
+  skillAggData=aggregateBySkill(mergedRecords);
   var html='';
 
+  // Count competency items
+  var compCount=compAssessmentData?compAssessmentData.records.length:0;
+
   // Header
-  html+='<div class="page-head"><div><h1>Employee Assessments — Skill View</h1><p>Skill-wise assessment analysis across '+assessmentData.totalEmployees+' employees</p></div>';
+  html+='<div class="page-head"><div><h1>Employee Assessments — Skill &amp; Competency View</h1><p>Organisation-wide assessment analysis across '+assessmentData.totalEmployees+' employees</p></div>';
   html+='<div style="display:flex;gap:8px;flex-wrap:wrap">';
-  html+='<button class="btn btn-primary btn-sm" onclick="demoFillAssessments()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Regenerate Demo</button>';
+  html+='<button class="btn btn-primary btn-sm" onclick="demoFillAssessments();demoFillCompetencies()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Demo Fill All</button>';
   html+='<button class="btn btn-danger btn-sm" onclick="clearAssessments()">Clear Data</button>';
   html+='</div></div>';
 
+  // Upload & Download action bar
+  html+='<div class="action-bar">';
+  html+='<span class="ab-title">Upload Assessments:</span>';
+  html+='<label class="btn btn-sm" style="cursor:pointer"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Skills Assessments (.csv)<input type="file" accept=".csv,.xlsx" style="display:none" onchange="handleSkillsUpload(this)"></label>';
+  html+='<label class="btn btn-sm" style="cursor:pointer"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Competency Assessments (.csv)<input type="file" accept=".csv,.xlsx" style="display:none" onchange="handleCompUpload(this)"></label>';
+  html+='<div style="flex:1"></div>';
+  html+='<span class="ab-title">Templates:</span>';
+  html+='<button class="btn btn-sm" onclick="downloadSkillsTemplate()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Skills Template</button>';
+  html+='<button class="btn btn-sm" onclick="downloadCompTemplate()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Competency Template</button>';
+  html+='</div>';
+
   // Company-wide stats
   var totalSkills=skillAggData.length;
+  var skillsOnly=skillAggData.filter(function(s){return s.name.indexOf(' [C]')<0}).length;
+  var compsOnly=totalSkills-skillsOnly;
   var skillsAboveTarget=skillAggData.filter(function(s){return s.latestGap>=0}).length;
   var skillsBelowTarget=totalSkills-skillsAboveTarget;
   var overallAvg=0;if(totalSkills){var sum=0;skillAggData.forEach(function(s){sum+=s.companyAvg});overallAvg=Math.round(sum/totalSkills*10)/10}
 
   html+='<div class="stats-strip">';
-  html+='<div class="stat-card"><div class="stat-val">'+totalSkills+'</div><div class="stat-label">Skills Tracked</div></div>';
+  html+='<div class="stat-card"><div class="stat-val">'+skillsOnly+'</div><div class="stat-label">Skills Tracked</div></div>';
+  html+='<div class="stat-card"><div class="stat-val accent">'+compsOnly+'</div><div class="stat-label">Competencies Tracked</div></div>';
   html+='<div class="stat-card"><div class="stat-val">'+assessmentData.totalEmployees+'</div><div class="stat-label">Employees Assessed</div></div>';
   html+='<div class="stat-card"><div class="stat-val accent">'+overallAvg+'</div><div class="stat-label">Company Avg Proficiency</div></div>';
-  html+='<div class="stat-card"><div class="stat-val green">'+skillsAboveTarget+'</div><div class="stat-label">Skills at/above Target</div></div>';
-  html+='<div class="stat-card"><div class="stat-val red">'+skillsBelowTarget+'</div><div class="stat-label">Skills Below Target</div></div>';
+  html+='<div class="stat-card"><div class="stat-val green">'+skillsAboveTarget+'</div><div class="stat-label">At/Above Target</div></div>';
+  html+='<div class="stat-card"><div class="stat-val red">'+skillsBelowTarget+'</div><div class="stat-label">Below Target</div></div>';
   html+='</div>';
 
   // Filters
   var allDepts={};skillAggData.forEach(function(s){s.departments.forEach(function(d){allDepts[d]=1})});
   html+='<div class="filter-bar">';
-  html+='<input type="text" placeholder="Search skills..." id="fSearch" value="'+esc(filterSearch)+'" oninput="filterSearch=this.value;currentPage=0;render()">';
+  html+='<input type="text" placeholder="Search skills or competencies..." id="fSearch" value="'+esc(filterSearch)+'" oninput="filterSearch=this.value;currentPage=0;render()">';
+  html+='<select onchange="filterType=this.value;currentPage=0;render()"><option value="all"'+(filterType==='all'?' selected':'')+'>All (Skills + Competencies)</option><option value="skills"'+(filterType==='skills'?' selected':'')+'>Skills Only</option><option value="comps"'+(filterType==='comps'?' selected':'')+'>Competencies Only</option></select>';
   html+='<select onchange="filterDept=this.value;currentPage=0;render()"><option value="">All Departments</option>';
   Object.keys(allDepts).sort().forEach(function(d){html+='<option value="'+esc(d)+'"'+(filterDept===d?' selected':'')+'>'+esc(d)+'</option>'});
   html+='</select></div>';
 
-  // Filter skills
+  // Filter skills and competencies
   var filtered=skillAggData;
+  if(filterType==='skills')filtered=filtered.filter(function(s){return s.name.indexOf(' [C]')<0});
+  if(filterType==='comps')filtered=filtered.filter(function(s){return s.name.indexOf(' [C]')>=0});
   if(filterSearch){var q=filterSearch.toLowerCase();filtered=filtered.filter(function(s){return s.name.toLowerCase().indexOf(q)>=0})}
   if(filterDept){filtered=filtered.filter(function(s){return s.departments.indexOf(filterDept)>=0})}
 
@@ -351,7 +611,9 @@ function render(){
     html+='<div class="skill-row-card">';
     html+='<div class="skill-header" onclick="toggleSkill('+gi+')">';
     html+='<svg class="sk-chevron" id="skChev_'+gi+'" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>';
-    html+='<span class="sk-name">'+esc(sk.name)+'</span>';
+    var isComp=sk.name.indexOf(' [C]')>=0;
+    var displayName=sk.name.replace(' [C]','');
+    html+='<span class="sk-name">'+esc(displayName)+(isComp?' <span style="font-size:9px;padding:1px 6px;border-radius:100px;background:rgba(139,92,246,0.08);color:#8B5CF6;font-weight:500;vertical-align:1px">Competency</span>':' <span style="font-size:9px;padding:1px 6px;border-radius:100px;background:rgba(59,130,246,0.06);color:#3B82F6;font-weight:500;vertical-align:1px">Skill</span>')+'</span>';
     html+='<span class="sk-pill" style="background:rgba(0,0,0,0.04);color:var(--text-secondary)">'+sk.departments.join(', ')+'</span>';
     html+='<span class="sk-emp-count">'+sk.empCount+' employees</span>';
     html+='<span class="sk-req" title="Avg Required">Req '+sk.latestAvgReq+'</span>';
@@ -444,15 +706,28 @@ function render(){
 
 function renderEmptyState(){
   var emps=loadEmployees();var hasEmps=emps.length>0;
-  var h='<div class="page-head"><div><h1>Employee Assessments — Skill View</h1><p>Skill-wise assessment analysis across the organisation</p></div></div>';
+  var h='<div class="page-head"><div><h1>Employee Assessments — Skill &amp; Competency View</h1><p>Organisation-wide assessment analysis</p></div></div>';
+
+  // Upload bar even in empty state
+  h+='<div class="action-bar">';
+  h+='<span class="ab-title">Upload Existing Data:</span>';
+  h+='<label class="btn btn-sm" style="cursor:pointer"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Skills Assessments (.csv)<input type="file" accept=".csv,.xlsx" style="display:none" onchange="handleSkillsUpload(this)"></label>';
+  h+='<label class="btn btn-sm" style="cursor:pointer"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Competency Assessments (.csv)<input type="file" accept=".csv,.xlsx" style="display:none" onchange="handleCompUpload(this)"></label>';
+  h+='<div style="flex:1"></div>';
+  h+='<button class="btn btn-sm" onclick="downloadSkillsTemplate()">Skills Template</button>';
+  h+='<button class="btn btn-sm" onclick="downloadCompTemplate()">Competency Template</button>';
+  h+='</div>';
+
   h+='<div class="empty-state">';
   h+='<div class="empty-icon">📊</div>';
   h+='<div class="empty-title">No Assessment Data Yet</div>';
   if(hasEmps){
-    h+='<div class="empty-desc">'+emps.length+' employees loaded from Data Import. Click below to generate yearly skill assessments, then view the skill-wise analysis.</div>';
-    h+='<button class="btn btn-primary" onclick="demoFillAssessments()"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate Assessment Demo Data</button>';
+    h+='<div class="empty-desc">'+emps.length+' employees loaded from Data Import. Upload your existing skills and competency assessment data using the buttons above, or auto-generate demo data.</div>';
+    h+='<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">';
+    h+='<button class="btn btn-primary" onclick="demoFillAssessments();demoFillCompetencies()"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Demo Fill All (Skills + Competencies)</button>';
+    h+='</div>';
   } else {
-    h+='<div class="empty-desc">No employee data found. Please run <strong>Demo Fill</strong> in <a href="dataport.html" style="color:var(--accent);font-weight:600">Data Import</a> first.</div>';
+    h+='<div class="empty-desc">No employee data found. Please run <strong>Demo Fill</strong> in <a href="dataport.html" style="color:var(--accent);font-weight:600">Data Import</a> first, then upload assessments or generate demo data.</div>';
     h+='<a href="dataport.html" class="btn btn-primary">Go to Data Import</a>';
   }
   h+='</div>';
