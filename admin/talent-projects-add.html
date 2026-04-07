@@ -343,7 +343,7 @@ function renderSuggestions(suggestions){
   var el=document.getElementById('suggestionsPanel');
   if(!suggestions.length){
     var h='<div class="no-data" style="padding:40px">';
-    h+='<div style="font-size:24px;margin-bottom:12px">🧠</div>';
+    h+='<div style="font-size:24px;margin-bottom:12px"></div>';
     h+='<div style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:6px">No Organisation Context Found</div>';
     h+='<div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;max-width:400px;margin-left:auto;margin-right:auto;line-height:1.6">AI suggestions are generated from your Organisation Setup data (strategies, tools, BCDR gaps, market demand, compliance). Load demo data to see it in action.</div>';
     h+='<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">';
@@ -367,7 +367,7 @@ function renderSuggestions(suggestions){
   h+='</div>';
   // AI reasoning explanation
   h+='<div style="padding:14px 16px;background:rgba(139,92,246,0.04);border:1px solid rgba(139,92,246,0.12);border-radius:10px;margin-bottom:16px">';
-  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:16px">🧠</span><span style="font-family:var(--font-display);font-size:13px;font-weight:600;color:#7C3AED">Why is AI recommending these projects?</span></div>';
+  h+='<div style="margin-bottom:6px"><span style="font-family:var(--font-display);font-size:13px;font-weight:600;color:#7C3AED">Why is AI recommending these projects?</span></div>';
   h+='<div style="font-size:12px;color:var(--text-secondary);line-height:1.6">The SIP AI engine analysed your organisation context across <strong>5 data sources</strong> to identify immediate capability gaps and risks:</div>';
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:10px">';
   h+='<div style="padding:8px 12px;background:var(--card);border-radius:6px;border:1px solid var(--border)"><div style="font-size:10px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.04em">Block E — Market Demand</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Skills with Critical Shortage or High Demand where internal supply is low</div></div>';
@@ -381,7 +381,6 @@ function renderSuggestions(suggestions){
   suggestions.forEach(function(s,i){
     h+='<div class="sug-card">';
     h+='<div class="sug-head">';
-    h+='<div class="sug-icon" style="background:'+s.iconBg+'">'+s.icon+'</div>';
     h+='<div class="sug-title">'+esc(s.title)+'</div>';
     h+='<div class="sug-priority '+s.priority+'">'+s.priority.charAt(0).toUpperCase()+s.priority.slice(1)+'</div>';
     h+='</div>';
