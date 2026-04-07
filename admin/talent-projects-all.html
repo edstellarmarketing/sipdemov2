@@ -81,6 +81,15 @@
 .dp-input,.dp-select,.dp-textarea{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:12px;color:var(--text-primary);background:var(--card);box-sizing:border-box}
 .dp-input:focus,.dp-select:focus,.dp-textarea:focus{outline:none;border-color:var(--accent)}
 .dp-textarea{min-height:60px;resize:vertical}
+/* Sub-project items */
+.sub-item{padding:12px 14px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;transition:all .15s}
+.sub-item:hover{border-color:var(--text-muted)}
+.sub-head{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.sub-type-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.sub-name{font-size:12px;font-weight:600;color:var(--text-primary);flex:1}
+.sub-meta{font-size:10.5px;color:var(--text-muted);display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+.sub-assign{font-size:10px;padding:2px 8px;border-radius:100px;background:rgba(139,92,246,0.06);color:#8B5CF6;border:1px solid rgba(139,92,246,0.15)}
+
 .dp-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--card)}
 
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a1a;color:#fff;padding:10px 22px;border-radius:10px;font-size:12.5px;font-family:var(--font-body);z-index:9999;transition:transform .3s ease;pointer-events:none}
@@ -218,6 +227,15 @@ function render(){
     (p.Target_Departments||[]).forEach(function(d){html+='<span class="proj-tag dept">'+esc(d)+'</span>'});
     html+='</div>';
 
+    var subCount=(p.subProjects||[]).length;
+    if(subCount){
+      html+='<div style="margin-top:6px;font-size:10.5px;color:var(--text-muted);display:flex;align-items:center;gap:6px">';
+      html+='<svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
+      html+=subCount+' activit'+(subCount>1?'ies':'y');
+      var subDone=(p.subProjects||[]).filter(function(s){return s.status==='Completed'}).length;
+      if(subDone) html+=' <span style="color:var(--green)">('+subDone+' done)</span>';
+      html+='</div>';
+    }
     html+='<div class="proj-actions">';
     html+='<button class="btn btn-sm" onclick="event.stopPropagation();deleteProject('+realIdx+')">Delete</button>';
     html+='</div>';
@@ -253,6 +271,9 @@ var PROJECT_TYPES=['Training Programme','Capability Building','Certification Dri
 var PROJECT_CATEGORIES=['Client Servicing','Employee Development'];
 var PROJECT_STATUSES=['Planned','Active','On Hold','Completed','Cancelled'];
 var PRIORITIES=['Critical','High','Medium','Low'];
+var SUB_TYPES=['Survey','Skill Assessment','Competency Assessment','Training Session','Workshop','Certification Exam','Coaching Session','Review Meeting','Feedback Collection','Knowledge Test','Discovery Session','OD Intervention'];
+var SUB_STATUSES=['Not Started','In Progress','Completed','Cancelled'];
+var ASSIGN_OPTIONS=['All Employees','Engineering','Project Delivery','Digital Delivery','Corporate Services','EHS & Risk','HR & Talent','Managers Only','Senior Leaders','Custom List'];
 
 function openDetail(idx){
   detailIdx=idx;editMode=false;
@@ -325,7 +346,42 @@ function renderReadonly(p){
   else h+='<div class="dp-val">—</div>';
   h+='</div></div>';
 
+  // Sub-Projects / Activities
+  var subs=p.subProjects||[];
+  h+='<div class="dp-section"><div class="dp-section-title">Activities &amp; Delegated Tasks ('+subs.length+')</div>';
+  if(subs.length){
+    subs.forEach(function(s,si){
+      var typeColors={'Survey':'#8B5CF6','Skill Assessment':'#3B82F6','Competency Assessment':'#0891B2','Training Session':'#16A34A','Workshop':'#D97706','Certification Exam':'#DC2626','Coaching Session':'#C9A84C','Review Meeting':'#6B7280','Feedback Collection':'#8B5CF6','Knowledge Test':'#3B82F6','Discovery Session':'#0891B2','OD Intervention':'#D97706'};
+      var col=typeColors[s.type]||'#6B7280';
+      var stCls=s.status==='Completed'?'completed':s.status==='In Progress'?'active':s.status==='Cancelled'?'hold':'planned';
+      h+='<div class="sub-item">';
+      h+='<div class="sub-head">';
+      h+='<div class="sub-type-icon" style="background:'+col+'15;color:'+col+'">'+getSubIcon(s.type)+'</div>';
+      h+='<div class="sub-name">'+esc(s.name)+'</div>';
+      h+='<span class="proj-pill '+stCls+'" style="font-size:9px">'+esc(s.status)+'</span>';
+      h+='<button class="btn btn-sm" style="padding:2px 6px;font-size:9px;color:var(--red);border-color:var(--red)" onclick="removeSubProject('+si+')">x</button>';
+      h+='</div>';
+      h+='<div class="sub-meta">';
+      h+='<span>'+esc(s.type)+'</span>';
+      if(s.dueDate) h+='<span>Due: '+esc(s.dueDate)+'</span>';
+      if(s.assignedTo) h+='<span class="sub-assign">'+esc(s.assignedTo)+'</span>';
+      h+='</div>';
+      if(s.notes) h+='<div style="font-size:10.5px;color:var(--text-secondary);margin-top:4px;line-height:1.4">'+esc(s.notes)+'</div>';
+      h+='</div>';
+    });
+  } else {
+    h+='<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:11.5px;border:1px dashed var(--border);border-radius:8px">No activities yet. Add surveys, assessments, training sessions, or other tasks to delegate to teams.</div>';
+  }
+  h+='<button class="btn btn-sm" onclick="showAddSubForm()" style="margin-top:6px"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Activity</button>';
+  h+='<div id="addSubForm" style="display:none;margin-top:10px;padding:14px;border:1px solid var(--accent);border-radius:8px;background:rgba(201,168,76,0.02)"></div>';
+  h+='</div>';
+
   return h;
+}
+
+function getSubIcon(type){
+  var map={'Survey':'📊','Skill Assessment':'📋','Competency Assessment':'🧠','Training Session':'🎓','Workshop':'🛠','Certification Exam':'📜','Coaching Session':'💬','Review Meeting':'📅','Feedback Collection':'💭','Knowledge Test':'✏️','Discovery Session':'🔍','OD Intervention':'🔄'};
+  return map[type]||'📌';
 }
 
 function roField(label,val){
@@ -386,6 +442,59 @@ function saveEdit(){
   renderDetail();
   render();
   showToast('Project updated');
+}
+
+// ── Sub-Project / Activity Management ──
+function showAddSubForm(){
+  var el=document.getElementById('addSubForm');
+  if(el.style.display==='block'){el.style.display='none';return}
+  function selOpts(arr){return arr.map(function(v){return'<option>'+esc(v)+'</option>'}).join('')}
+  var h='<div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:8px">New Activity</div>';
+  h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Activity Name *</div><input class="dp-input" id="subName" placeholder="e.g. Pre-training Skills Assessment"></div></div>';
+  h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Type</div><select class="dp-select" id="subType">'+selOpts(SUB_TYPES)+'</select></div>';
+  h+='<div class="form-group"><div class="dp-label">Assign To</div><select class="dp-select" id="subAssign">'+selOpts(ASSIGN_OPTIONS)+'</select></div></div>';
+  h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Status</div><select class="dp-select" id="subStatus">'+selOpts(SUB_STATUSES)+'</select></div>';
+  h+='<div class="form-group"><div class="dp-label">Due Date</div><input class="dp-input" type="date" id="subDue"></div></div>';
+  h+='<div class="form-group"><div class="dp-label">Notes</div><input class="dp-input" id="subNotes" placeholder="Instructions, scope, or context..."></div>';
+  h+='<div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-primary btn-sm" onclick="saveSubProject()">Add Activity</button><button class="btn btn-sm" onclick="document.getElementById(\'addSubForm\').style.display=\'none\'">Cancel</button></div>';
+  el.innerHTML=h;
+  el.style.display='block';
+}
+
+function saveSubProject(){
+  var name=document.getElementById('subName').value.trim();
+  if(!name){showToast('Enter activity name');return}
+  var projects=loadProjects();
+  var p=projects[detailIdx];
+  if(!p)return;
+  if(!p.subProjects)p.subProjects=[];
+  p.subProjects.push({
+    id:'ACT-'+String(Date.now()).slice(-6),
+    name:name,
+    type:document.getElementById('subType').value,
+    assignedTo:document.getElementById('subAssign').value,
+    status:document.getElementById('subStatus').value,
+    dueDate:document.getElementById('subDue').value,
+    notes:document.getElementById('subNotes').value.trim(),
+    createdAt:new Date().toISOString()
+  });
+  saveProjects(projects);
+  renderDetail();
+  render();
+  showToast('Activity "'+name+'" added');
+}
+
+function removeSubProject(subIdx){
+  var projects=loadProjects();
+  var p=projects[detailIdx];
+  if(!p||!p.subProjects)return;
+  var name=p.subProjects[subIdx]?p.subProjects[subIdx].name:'';
+  if(!confirm('Remove activity "'+name+'"?'))return;
+  p.subProjects.splice(subIdx,1);
+  saveProjects(projects);
+  renderDetail();
+  render();
+  showToast('Activity removed');
 }
 
 function deleteFromDetail(){
