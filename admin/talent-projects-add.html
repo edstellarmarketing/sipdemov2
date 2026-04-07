@@ -446,22 +446,18 @@ function renderCreateForm(prefill){
   h+='</div>'; // close grid
   h+='</div>'; // close create-panel
 
-  // Sub-projects section — always visible between form and save
+  // Sub-projects section — inline activity form (before save)
   h+='<div id="subProjectSection">';
   if(window._lastSavedIdx>=0){
     h+='</div>';
   } else {
-    h+='<div class="create-panel" style="max-width:100%;margin-top:16px">';
-    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
-    h+='<div style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-primary)">Activities &amp; Sub-Projects</div>';
+    h+=renderPendingActivities();
     h+='</div>';
-    h+='<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;border:2px dashed var(--border);border-radius:8px">Add surveys, assessments, training sessions, and other delegated tasks. These will be saved with the project.</div>';
-    h+='</div></div>';
   }
 
-  // Save button at the bottom after sub-projects
+  // Save button at the bottom
   h+='<div style="display:flex;gap:8px;margin-top:16px;padding:16px 24px;background:var(--card);border:1px solid var(--border);border-radius:12px">';
-  h+='<button class="btn btn-primary" onclick="saveProject()"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><polyline points="20 6 9 17 4 12"/></svg> Save Project</button>';
+  h+='<button class="btn btn-primary" onclick="saveProject()"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><polyline points="20 6 9 17 4 12"/></svg> Save Project'+(window._pendingActivities&&window._pendingActivities.length?' &amp; '+window._pendingActivities.length+' Activities':'')+'</button>';
   if(prefill) h+='<button class="btn" onclick="activeTab=\'create\';render()">Clear &amp; Start Fresh</button>';
   h+='<a href="talent-projects-all.html" class="btn" style="margin-left:auto">View All Projects</a>';
   h+='</div>';
@@ -504,7 +500,7 @@ function saveProject(){
     Employees_Targeted:parseInt(document.getElementById('fpEmps').value)||0,
     Required_Skills:getMultiSelected('fpSkills'),
     Target_Departments:getMultiSelected('fpDepts'),
-    subProjects:[],
+    subProjects:(window._pendingActivities||[]).slice(),
     Description:document.getElementById('fpDesc').value.trim(),
     Created_At:new Date().toISOString()
   };
@@ -520,7 +516,8 @@ function saveProject(){
   try{localStorage.setItem('sip_talent_projects',json)}catch(e){}
 
   window._lastSavedIdx=projects.length-1;
-  showToast('Project "'+name+'" saved — add activities below');
+  window._pendingActivities=[];
+  showToast('Project "'+name+'" saved with '+(project.subProjects.length||0)+' activities');
   renderSubProjects(projects.length-1);
 }
 
@@ -532,6 +529,81 @@ var SUB_TYPES=['Survey','Skill Assessment','Competency Assessment','Training Ses
 var SUB_STATUSES=['Not Started','In Progress','Completed','Cancelled'];
 var SUB_ASSIGN=['All Employees','Engineering','Project Delivery','Digital Delivery','Corporate Services','EHS & Risk','HR & Talent','Managers Only','Senior Leaders','Custom List'];
 window._lastSavedIdx=-1;
+window._pendingActivities=[];
+
+var typeIcons={'Survey':'\uD83D\uDCCA','Skill Assessment':'\uD83D\uDCCB','Competency Assessment':'\uD83E\uDDE0','Training Session':'\uD83C\uDF93','Workshop':'\uD83D\uDEE0','Certification Exam':'\uD83D\uDCDC','Coaching Session':'\uD83D\uDCAC','Review Meeting':'\uD83D\uDCC5','Feedback Collection':'\uD83D\uDCAD','Knowledge Test':'\u270F\uFE0F','Discovery Session':'\uD83D\uDD0D','OD Intervention':'\uD83D\uDD04'};
+var typeColors={'Survey':'#8B5CF6','Skill Assessment':'#3B82F6','Competency Assessment':'#0891B2','Training Session':'#16A34A','Workshop':'#D97706','Certification Exam':'#DC2626','Coaching Session':'#C9A84C','Review Meeting':'#6B7280','Feedback Collection':'#8B5CF6','Knowledge Test':'#3B82F6','Discovery Session':'#0891B2','OD Intervention':'#D97706'};
+
+function renderPendingActivities(){
+  function selOpts(arr){return arr.map(function(v){return'<option>'+esc(v)+'</option>'}).join('')}
+  var h='<div class="create-panel" style="max-width:100%;margin-top:16px">';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+  h+='<div><div style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-primary)">Activities &amp; Sub-Projects</div>';
+  h+='<div style="font-size:11px;color:var(--text-muted)">Add surveys, assessments, training sessions, or other tasks to delegate to teams</div></div>';
+  if(window._pendingActivities.length) h+='<span style="font-size:11px;padding:3px 10px;border-radius:100px;background:var(--accent-lt);color:var(--accent);font-weight:600">'+window._pendingActivities.length+' added</span>';
+  h+='</div>';
+
+  // Existing pending activities
+  if(window._pendingActivities.length){
+    window._pendingActivities.forEach(function(s,si){
+      var col=typeColors[s.type]||'#6B7280';
+      var stCls=s.status==='Completed'?'background:var(--green-bg);color:var(--green)':s.status==='In Progress'?'background:rgba(8,145,178,0.08);color:#0891B2':'background:rgba(0,0,0,0.04);color:var(--text-muted)';
+      h+='<div style="padding:10px 14px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;display:flex;align-items:center;gap:10px">';
+      h+='<span style="font-size:14px">'+(typeIcons[s.type]||'\uD83D\uDCCC')+'</span>';
+      h+='<span style="font-size:12px;font-weight:600;color:var(--text-primary);flex:1">'+esc(s.name)+'</span>';
+      h+='<span style="font-size:10px;color:var(--text-muted)">'+esc(s.type)+'</span>';
+      if(s.assignedTo) h+='<span style="font-size:9px;padding:2px 8px;border-radius:100px;background:rgba(139,92,246,0.06);color:#8B5CF6;border:1px solid rgba(139,92,246,0.15)">'+esc(s.assignedTo)+'</span>';
+      if(s.dueDate) h+='<span style="font-size:10px;color:var(--text-muted)">Due: '+esc(s.dueDate)+'</span>';
+      h+='<span style="font-size:9px;padding:2px 8px;border-radius:100px;'+stCls+'">'+esc(s.status)+'</span>';
+      h+='<button class="btn btn-sm" style="padding:2px 6px;font-size:9px;color:var(--red);border-color:var(--red)" onclick="removePendingActivity('+si+')">x</button>';
+      h+='</div>';
+    });
+  }
+
+  // Add activity form
+  h+='<div style="padding:14px;border:1px dashed var(--accent);border-radius:8px;background:rgba(201,168,76,0.02);margin-top:8px">';
+  h+='<div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:8px">Add New Activity</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">';
+  h+='<div class="form-group"><label class="form-label">Activity Name *</label><input class="form-input" id="pendSubName" placeholder="e.g. Pre-training Skill Assessment"></div>';
+  h+='<div class="form-group"><label class="form-label">Type</label><select class="form-select" id="pendSubType">'+selOpts(SUB_TYPES)+'</select></div>';
+  h+='<div class="form-group"><label class="form-label">Assign To</label><select class="form-select" id="pendSubAssign">'+selOpts(SUB_ASSIGN)+'</select></div>';
+  h+='</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:6px">';
+  h+='<div class="form-group"><label class="form-label">Status</label><select class="form-select" id="pendSubStatus">'+selOpts(SUB_STATUSES)+'</select></div>';
+  h+='<div class="form-group"><label class="form-label">Due Date</label><input class="form-input" type="date" id="pendSubDue"></div>';
+  h+='<div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="pendSubNotes" placeholder="Instructions or scope..."></div>';
+  h+='</div>';
+  h+='<button class="btn btn-primary btn-sm" onclick="addPendingActivity()" style="margin-top:8px">+ Add Activity</button>';
+  h+='</div>';
+  h+='</div>';
+  return h;
+}
+
+function addPendingActivity(){
+  var name=document.getElementById('pendSubName').value.trim();
+  if(!name){showToast('Enter activity name');return}
+  window._pendingActivities.push({
+    id:'ACT-'+String(Date.now()).slice(-6),
+    name:name,
+    type:document.getElementById('pendSubType').value,
+    assignedTo:document.getElementById('pendSubAssign').value,
+    status:document.getElementById('pendSubStatus').value,
+    dueDate:document.getElementById('pendSubDue').value,
+    notes:document.getElementById('pendSubNotes').value.trim(),
+    createdAt:new Date().toISOString()
+  });
+  // Re-render just the sub-project section
+  var el=document.getElementById('subProjectSection');
+  if(el) el.innerHTML=renderPendingActivities();
+  showToast('Activity "'+name+'" added');
+}
+
+function removePendingActivity(idx){
+  window._pendingActivities.splice(idx,1);
+  var el=document.getElementById('subProjectSection');
+  if(el) el.innerHTML=renderPendingActivities();
+  showToast('Activity removed');
+}
 
 function loadProjects(){
   var raw=null;try{raw=sessionStorage.getItem('sip_talent_projects')||localStorage.getItem('sip_talent_projects')}catch(e){}
