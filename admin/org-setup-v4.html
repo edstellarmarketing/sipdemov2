@@ -3515,6 +3515,7 @@ BLOCK_RENDERERS['C'] = {edit:renderBlockC_Edit, ro:renderBlockC_ReadOnly};
 // BLOCK D: PRODUCTS & SERVICES
 // ═══════════════════════════════════════════════════════
 var dActiveTab='products';
+var dProjSubTab='client';
 var D_LIFECYCLES=['Concept','Development','Growth','Mature','Declining','Sunset'];
 var D_COMPLEXITY=['Simple','Moderate','Complex','Highly Complex'];
 var D_REGCLASS=['None','Light — Internal Policy','Moderate — Industry Standard','Heavy — Government Regulated','Critical — Safety/Life'];
@@ -3524,7 +3525,8 @@ var D_ENGAGEMENT=['Individual','Small Team (2-5)','Medium (6-20)','Large (20+)',
 var D_SKILL_LEVELS = ['Basic','Intermediate','Advanced','Expert'];
 var D_SKILL_CRITICALITY = ['Essential','High','Medium','Low'];
 var D_SKILL_CATEGORIES = ['Technical','Domain Knowledge','Tool / Platform','Process','Behavioural','Certification'];
-var D_PROJECT_TYPES = ['Internal','Client-facing','R&D','Infrastructure','Compliance','Digital Transformation'];
+var D_PROJECT_CATEGORIES = ['Client Servicing','Employee Development'];
+var D_PROJECT_TYPES = ['Internal','Client-facing','R&D','Infrastructure','Compliance','Digital Transformation','Training Programme','Leadership Development','OD Initiative','Capability Building','Certification Drive'];
 var D_PROJECT_STATUS = ['Planned','Active','On Hold','Completed','Cancelled'];
 
 function getBlockDData(){
@@ -3549,7 +3551,9 @@ function renderBlockD_Edit(){
   h+='<div class="hier-tab'+(dActiveTab==='services'?' active':'')+'" onclick="switchDTab(\'services\')">2. Services ('+d.services.length+')</div>';
   h+='<div class="hier-tab'+(dActiveTab==='productskill'?' active':'')+'" onclick="switchDTab(\'productskill\')">3. Product Skill Map ('+d.productSkillMap.length+')</div>';
   h+='<div class="hier-tab'+(dActiveTab==='serviceskill'?' active':'')+'" onclick="switchDTab(\'serviceskill\')">4. Service Skill Map ('+d.serviceSkillMap.length+')</div>';
-  h+='<div class="hier-tab'+(dActiveTab==='projects'?' active':'')+'" onclick="switchDTab(\'projects\')">5. Projects ('+d.projects.length+')</div>';
+  var _clientProjCount=d.projects.filter(function(p){return p.Project_Category!=='Employee Development'}).length;
+  var _devProjCount=d.projects.filter(function(p){return p.Project_Category==='Employee Development'}).length;
+  h+='<div class="hier-tab'+(dActiveTab==='projects'?' active':'')+'" onclick="switchDTab(\'projects\')">5. Projects ('+_clientProjCount+'C / '+_devProjCount+'D)</div>';
   h+='</div>';
   h+='<div class="hier-tab-content'+(dActiveTab==='products'?' active':'')+'">'+renderDTab_Products(d)+'</div>';
   h+='<div class="hier-tab-content'+(dActiveTab==='services'?' active':'')+'">'+renderDTab_Services(d)+'</div>';
@@ -3696,10 +3700,30 @@ function updateDSkillMapRow(listName,i,field,val){var d=getBlockDData();d[listNa
 
 function renderDTab_Projects(d){
   var h='';
-  h+='<div class="form-section">';
-  h+='<div class="form-section-title">Projects</div>';
-  h+='<div class="form-section-desc">Key projects that require specific skill sets. Drives demand-side skill planning and workforce deployment.</div>';
-  d.projects.forEach(function(proj,i){
+  var clientProjs=[];var devProjs=[];
+  d.projects.forEach(function(p,i){p._idx=i;if(p.Project_Category==='Employee Development')devProjs.push(p);else clientProjs.push(p)});
+
+  // Sub-tabs
+  h+='<div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">';
+  h+='<div style="padding:10px 18px;cursor:pointer;font-size:12px;font-weight:600;border-bottom:2px solid '+(dProjSubTab==='client'?'var(--accent)':'transparent')+';color:'+(dProjSubTab==='client'?'var(--accent)':'var(--text-t)')+';margin-bottom:-2px" onclick="dProjSubTab=\'client\';renderBlockContent(\'D\')">Client Servicing Projects ('+clientProjs.length+')</div>';
+  h+='<div style="padding:10px 18px;cursor:pointer;font-size:12px;font-weight:600;border-bottom:2px solid '+(dProjSubTab==='dev'?'var(--accent)':'transparent')+';color:'+(dProjSubTab==='dev'?'var(--accent)':'var(--text-t)')+';margin-bottom:-2px" onclick="dProjSubTab=\'dev\';renderBlockContent(\'D\')">Employee Development Projects ('+devProjs.length+')</div>';
+  h+='</div>';
+
+  var showList=dProjSubTab==='dev'?devProjs:clientProjs;
+  var catLabel=dProjSubTab==='dev'?'Employee Development':'Client Servicing';
+
+  if(dProjSubTab==='client'){
+    h+='<div class="form-section">';
+    h+='<div class="form-section-title">Client Servicing Projects</div>';
+    h+='<div class="form-section-desc">External client-facing projects performed by employees. Drives demand-side skill planning, workforce deployment, and project-based capability gaps.</div>';
+  } else {
+    h+='<div class="form-section">';
+    h+='<div class="form-section-title">Employee Development Projects</div>';
+    h+='<div class="form-section-desc">Internal OD &amp; L&amp;D projects for employee growth. Includes training programmes, leadership development, capability building, certification drives, and organisational development initiatives.</div>';
+  }
+
+  showList.forEach(function(proj){
+    var i=proj._idx;
     var stCls=proj.Project_Status==='Active'?'green':proj.Project_Status==='Completed'?'gray':proj.Project_Status==='On Hold'?'amber':proj.Project_Status==='Cancelled'?'red':'blue';
     h+='<div class="ro-card" style="margin-bottom:10px">';
     h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
@@ -3720,8 +3744,15 @@ function renderDTab_Projects(d){
     h+='<div class="form-group"><label class="form-label">Budget ($M)</label><input class="form-input" type="number" step="0.1" value="'+escH(String(proj.Budget_M||''))+'" onblur="updateDProject('+i+',\'Budget_M\',parseFloat(this.value)||0)"></div>';
     h+='<div class="form-group"><label class="form-label">Team Size</label><input class="form-input" type="number" min="1" value="'+escH(String(proj.Team_Size||''))+'" onblur="updateDProject('+i+',\'Team_Size\',parseInt(this.value)||0)"></div>';
     h+='</div><div class="form-grid">';
-    h+='<div class="form-group"><label class="form-label">Linked Product / Service</label><input class="form-input" value="'+escH(proj.Linked_Product_Service||'')+'" onblur="updateDProject('+i+',\'Linked_Product_Service\',this.value)"></div>';
-    h+='<div class="form-group"><label class="form-label">Client Name (if external)</label><input class="form-input" value="'+escH(proj.Client_Name||'')+'" onblur="updateDProject('+i+',\'Client_Name\',this.value)"></div>';
+    if(dProjSubTab==='client'){
+      h+='<div class="form-group"><label class="form-label">Linked Product / Service</label><input class="form-input" value="'+escH(proj.Linked_Product_Service||'')+'" onblur="updateDProject('+i+',\'Linked_Product_Service\',this.value)"></div>';
+      h+='<div class="form-group"><label class="form-label">Client Name</label><input class="form-input" value="'+escH(proj.Client_Name||'')+'" onblur="updateDProject('+i+',\'Client_Name\',this.value)"></div>';
+    } else {
+      h+='<div class="form-group"><label class="form-label">Target Departments</label>';
+      h+=renderTagInput('projDepts_'+i,proj.Target_Departments||[],'D');
+      h+='</div>';
+      h+='<div class="form-group"><label class="form-label">Employees Targeted</label><input class="form-input" type="number" min="0" value="'+escH(String(proj.Employees_Targeted||''))+'" onblur="updateDProject('+i+',\'Employees_Targeted\',parseInt(this.value)||0)"></div>';
+    }
     h+='</div><div class="form-grid single">';
     h+='<div class="form-group"><label class="form-label">Key Skills Required</label>';
     h+=renderTagInput('projSkills_'+i,proj.Required_Skills||[],'D');
@@ -3729,7 +3760,7 @@ function renderDTab_Projects(d){
     h+='<div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" style="min-height:40px" onblur="updateDProject('+i+',\'Description\',this.value)">'+escH(proj.Description||'')+'</textarea></div>';
     h+='</div></div>';
   });
-  h+='<button class="btn btn-sm" onclick="addDProject()" style="margin-top:8px"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Project</button>';
+  h+='<button class="btn btn-sm" onclick="addDProject(\''+catLabel+'\')" style="margin-top:8px"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add '+(dProjSubTab==='dev'?'Development':'Client')+' Project</button>';
   h+='</div>';
   return h;
 }
@@ -3739,9 +3770,10 @@ function genProjID(existing){
   var n=(ids.length?Math.max.apply(null,ids):0)+1;
   return 'PROJ-'+String(n).padStart(4,'0');
 }
-function addDProject(){
+function addDProject(category){
   var d=getBlockDData();
-  d.projects.push({Project_ID:genProjID(d.projects),Project_Name:'',Project_Type:'',Project_Status:'Planned',Project_Owner:'',Start_Date:'',Target_End_Date:'',Budget_M:0,Team_Size:0,Linked_Product_Service:'',Client_Name:'',Required_Skills:[],Description:''});
+  var cat=category||'Client Servicing';
+  d.projects.push({Project_ID:genProjID(d.projects),Project_Category:cat,Project_Name:'',Project_Type:'',Project_Status:'Planned',Project_Owner:'',Start_Date:'',Target_End_Date:'',Budget_M:0,Team_Size:0,Linked_Product_Service:'',Client_Name:'',Target_Departments:[],Employees_Targeted:0,Required_Skills:[],Description:''});
   setBlockData('D',d);renderBlockContent('D');
 }
 function removeDProject(i){var d=getBlockDData();d.projects.splice(i,1);setBlockData('D',d);renderBlockContent('D');}
@@ -3856,25 +3888,36 @@ function renderBlockD_ReadOnly(){
     });
     h+='</div>';
   }
-  // Projects summary
+  // Projects summary — split by category
   if(d.projects&&d.projects.length){
-    h+='<div class="ro-card">';
-    h+='<div class="ro-card-header"><div class="ro-card-title">Projects ('+d.projects.length+')</div>';
-    h+='<button class="ro-edit-btn" onclick="enterEditMode()"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button></div>';
-    d.projects.forEach(function(proj){
-      var stCls=proj.Project_Status==='Active'?'green':proj.Project_Status==='Completed'?'gray':proj.Project_Status==='On Hold'?'amber':proj.Project_Status==='Cancelled'?'red':'blue';
-      h+='<div style="padding:8px 0;border-bottom:1px solid var(--border)">';
-      h+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
-      h+='<span style="font-size:11px;color:var(--text-t);font-family:var(--font-mono,monospace)">'+escH(proj.Project_ID||'')+'</span>';
-      h+='<span style="font-size:13px;font-weight:600;color:var(--text);flex:1">'+escH(proj.Project_Name||'—')+'</span>';
-      if(proj.Project_Type) h+='<span class="ro-tag" style="font-size:9px">'+escH(proj.Project_Type)+'</span>';
-      if(proj.Project_Status) h+='<span class="life-badge '+stCls+'">'+escH(proj.Project_Status)+'</span>';
-      h+='</div>';
-      var meta=[];if(proj.Project_Owner)meta.push(proj.Project_Owner);if(proj.Team_Size)meta.push(proj.Team_Size+' members');if(proj.Budget_M)meta.push('$'+proj.Budget_M+'M');
-      if(meta.length) h+='<div style="font-size:11px;color:var(--text-t);margin-top:2px">'+meta.join(' \u00B7 ')+'</div>';
-      h+='</div>';
-    });
-    h+='</div>';
+    var clientProjs=d.projects.filter(function(p){return p.Project_Category!=='Employee Development'});
+    var devProjs=d.projects.filter(function(p){return p.Project_Category==='Employee Development'});
+    function renderProjROList(title,list,editTab){
+      if(!list.length)return'';
+      var out='<div class="ro-card">';
+      out+='<div class="ro-card-header"><div class="ro-card-title">'+escH(title)+' ('+list.length+')</div>';
+      out+='<button class="ro-edit-btn" onclick="dProjSubTab=\''+editTab+'\';dActiveTab=\'projects\';enterEditMode()"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button></div>';
+      list.forEach(function(proj){
+        var stCls=proj.Project_Status==='Active'?'green':proj.Project_Status==='Completed'?'gray':proj.Project_Status==='On Hold'?'amber':proj.Project_Status==='Cancelled'?'red':'blue';
+        out+='<div style="padding:8px 0;border-bottom:1px solid var(--border)">';
+        out+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+        out+='<span style="font-size:11px;color:var(--text-t);font-family:var(--font-mono,monospace)">'+escH(proj.Project_ID||'')+'</span>';
+        out+='<span style="font-size:13px;font-weight:600;color:var(--text);flex:1">'+escH(proj.Project_Name||'\u2014')+'</span>';
+        if(proj.Project_Type) out+='<span class="ro-tag" style="font-size:9px">'+escH(proj.Project_Type)+'</span>';
+        if(proj.Project_Status) out+='<span class="life-badge '+stCls+'">'+escH(proj.Project_Status)+'</span>';
+        out+='</div>';
+        var meta=[];if(proj.Project_Owner)meta.push(proj.Project_Owner);if(proj.Team_Size)meta.push(proj.Team_Size+' members');if(proj.Budget_M)meta.push('$'+proj.Budget_M+'M');
+        if(proj.Client_Name)meta.push('Client: '+proj.Client_Name);
+        if(proj.Employees_Targeted)meta.push(proj.Employees_Targeted+' employees targeted');
+        if(meta.length) out+='<div style="font-size:11px;color:var(--text-t);margin-top:2px">'+meta.join(' \u00B7 ')+'</div>';
+        if(proj.Target_Departments&&proj.Target_Departments.length){out+='<div class="ro-tags" style="margin-top:3px">';proj.Target_Departments.forEach(function(dep){out+='<span class="ro-tag" style="font-size:9px">'+escH(dep)+'</span>'});out+='</div>'}
+        out+='</div>';
+      });
+      out+='</div>';
+      return out;
+    }
+    h+=renderProjROList('Client Servicing Projects',clientProjs,'client');
+    h+=renderProjROList('Employee Development Projects',devProjs,'dev');
   }
   // Completion
   if(!d.products.length&&!d.services.length){
@@ -3951,14 +3994,22 @@ function aiExtractBlockD(){
       {Service_Name:'Digital Transformation Advisory',Required_Skill:'Digital Strategy',Skill_Level:'Expert',Criticality:'Essential',Skill_Category:'Behavioural',Notes:'Client-facing; must be able to build technology roadmaps'}
     ];
     d.projects=[
-      {Project_ID:'PROJ-0001',Project_Name:'KL-MRT Phase 3 — BIM Integration',Project_Type:'Client-facing',Project_Status:'Active',Project_Owner:'Priya Nair',Start_Date:'2024-01-15',Target_End_Date:'2025-06-30',Budget_M:4.2,Team_Size:22,Linked_Product_Service:'BIM Consulting & Implementation',Client_Name:'Gamuda Berhad',Required_Skills:['BIM Coordination','Revit','Navisworks','LOD Standards','Client Management'],Description:'Full BIM delivery for KL-MRT Phase 3 civil and MEP packages. Includes clash detection, 4D scheduling, and handover data pack.'},
-      {Project_ID:'PROJ-0002',Project_Name:'Singapore CBD Smart Building Retrofit',Project_Type:'Client-facing',Project_Status:'Active',Project_Owner:'Wei Liang Tan',Start_Date:'2024-03-01',Target_End_Date:'2025-03-31',Budget_M:2.8,Team_Size:14,Linked_Product_Service:'Smart Building Platform',Client_Name:'Land Transport Authority (LTA)',Required_Skills:['IoT Architecture','Azure IoT Hub','Digital Twin','Power BI','Sensor Integration'],Description:'Digital twin deployment for 3 Grade A office buildings in CBD. Includes energy monitoring, occupancy analytics, and predictive maintenance integration.'},
-      {Project_ID:'PROJ-0003',Project_Name:'AI-Powered Asset Inspection Platform — R&D',Project_Type:'R&D',Project_Status:'Active',Project_Owner:'Rajan Patel',Start_Date:'2024-06-01',Target_End_Date:'2025-12-31',Budget_M:1.5,Team_Size:8,Linked_Product_Service:'Infrastructure Asset Management',Client_Name:'',Required_Skills:['Machine Learning','Computer Vision','Drone Analytics','Python','TensorFlow'],Description:'Internal R&D programme to build AI-driven defect detection using drone imagery for bridges and tunnels. Target: 80% automation of routine visual inspections.'}
+      // Client Servicing Projects
+      {Project_ID:'PROJ-0001',Project_Category:'Client Servicing',Project_Name:'KL-MRT Phase 3 — BIM Integration',Project_Type:'Client-facing',Project_Status:'Active',Project_Owner:'Priya Nair',Start_Date:'2024-01-15',Target_End_Date:'2025-06-30',Budget_M:4.2,Team_Size:22,Linked_Product_Service:'BIM Consulting & Implementation',Client_Name:'Gamuda Berhad',Target_Departments:[],Employees_Targeted:0,Required_Skills:['BIM Coordination','Revit','Navisworks','LOD Standards','Client Management'],Description:'Full BIM delivery for KL-MRT Phase 3 civil and MEP packages. Includes clash detection, 4D scheduling, and handover data pack.'},
+      {Project_ID:'PROJ-0002',Project_Category:'Client Servicing',Project_Name:'Singapore CBD Smart Building Retrofit',Project_Type:'Client-facing',Project_Status:'Active',Project_Owner:'Wei Liang Tan',Start_Date:'2024-03-01',Target_End_Date:'2025-03-31',Budget_M:2.8,Team_Size:14,Linked_Product_Service:'Smart Building Platform',Client_Name:'Land Transport Authority (LTA)',Target_Departments:[],Employees_Targeted:0,Required_Skills:['IoT Architecture','Azure IoT Hub','Digital Twin','Power BI','Sensor Integration'],Description:'Digital twin deployment for 3 Grade A office buildings in CBD. Includes energy monitoring, occupancy analytics, and predictive maintenance integration.'},
+      {Project_ID:'PROJ-0003',Project_Category:'Client Servicing',Project_Name:'AI-Powered Asset Inspection Platform — R&D',Project_Type:'R&D',Project_Status:'Active',Project_Owner:'Rajan Patel',Start_Date:'2024-06-01',Target_End_Date:'2025-12-31',Budget_M:1.5,Team_Size:8,Linked_Product_Service:'Infrastructure Asset Management',Client_Name:'',Target_Departments:[],Employees_Targeted:0,Required_Skills:['Machine Learning','Computer Vision','Drone Analytics','Python','TensorFlow'],Description:'Internal R&D programme to build AI-driven defect detection using drone imagery for bridges and tunnels. Target: 80% automation of routine visual inspections.'},
+      {Project_ID:'PROJ-0004',Project_Category:'Client Servicing',Project_Name:'Abu Dhabi Waterfront — Structural Assessment',Project_Type:'Client-facing',Project_Status:'Active',Project_Owner:'Omar Al-Rashid',Start_Date:'2024-09-01',Target_End_Date:'2025-09-30',Budget_M:3.6,Team_Size:18,Linked_Product_Service:'Structural Assessment & Retrofit',Client_Name:'Aldar Properties',Target_Departments:[],Employees_Targeted:0,Required_Skills:['Structural Analysis','NDT Inspection','Retrofit Design','Concrete Design','Risk Assessment'],Description:'Condition assessment and retrofit design for 2 waterfront commercial towers. Includes seismic retrofit and façade remediation scope.'},
+      // Employee Development Projects
+      {Project_ID:'PROJ-0005',Project_Category:'Employee Development',Project_Name:'Digital Twin Academy — 10-Week Certification',Project_Type:'Training Programme',Project_Status:'Active',Project_Owner:'L&D Manager — Sarah Lim',Start_Date:'2025-01-06',Target_End_Date:'2025-03-14',Budget_M:0.18,Team_Size:3,Linked_Product_Service:'',Client_Name:'',Target_Departments:['Engineering','Digital Delivery'],Employees_Targeted:20,Required_Skills:['Digital Twin','IoT Architecture','Azure IoT Hub','Data Analysis'],Description:'Internal capability build programme to certify 20 engineers in Digital Twin development. Addresses critical shortage identified in Block E market skill demand. Curriculum: 10 modules, hands-on labs, final capstone project.'},
+      {Project_ID:'PROJ-0006',Project_Category:'Employee Development',Project_Name:'Leadership Pipeline — Senior Manager Accelerator',Project_Type:'Leadership Development',Project_Status:'Active',Project_Owner:'CHRO — Sarah Lim',Start_Date:'2024-07-01',Target_End_Date:'2025-06-30',Budget_M:0.32,Team_Size:2,Linked_Product_Service:'',Client_Name:'',Target_Departments:['Engineering','Project Delivery','Digital Delivery','Corporate Services','EHS & Risk','HR & Talent'],Employees_Targeted:15,Required_Skills:['Strategic Leadership','People Development','Decision Making Under Uncertainty','Stakeholder Management'],Description:'12-month accelerator for 15 high-potential L4-L5 employees identified for senior management succession. Includes executive coaching, cross-functional rotations, and board shadowing.'},
+      {Project_ID:'PROJ-0007',Project_Category:'Employee Development',Project_Name:'Safety Excellence — ISO 45001 Lead Auditor Certification',Project_Type:'Certification Drive',Project_Status:'Active',Project_Owner:'Head of EHS — Priya Shankar',Start_Date:'2025-02-01',Target_End_Date:'2025-05-31',Budget_M:0.08,Team_Size:1,Linked_Product_Service:'',Client_Name:'',Target_Departments:['EHS & Risk','Engineering','Project Delivery'],Employees_Targeted:25,Required_Skills:['ISO 45001','Risk Assessment','Safety Leadership','Incident Investigation','Safety Auditing'],Description:'Drive to certify 25 employees as ISO 45001 Lead Auditors. Addresses compliance gap for Singapore MOM requirements and upcoming BCA audit. External trainer: Bureau Veritas.'},
+      {Project_ID:'PROJ-0008',Project_Category:'Employee Development',Project_Name:'Cloud-Native DevOps Bootcamp',Project_Type:'Capability Building',Project_Status:'Planned',Project_Owner:'Head of Digital — Marcus Tan',Start_Date:'2025-04-01',Target_End_Date:'2025-06-30',Budget_M:0.12,Team_Size:2,Linked_Product_Service:'',Client_Name:'',Target_Departments:['Digital Delivery'],Employees_Targeted:12,Required_Skills:['Kubernetes','Terraform','AWS','Docker','CI/CD'],Description:'12-week intensive bootcamp for backend engineers transitioning to cloud-native DevOps. Aligned with Kubernetes planned adoption (Block G). Target: 12 engineers certified in CKA (Certified Kubernetes Administrator).'},
+      {Project_ID:'PROJ-0009',Project_Category:'Employee Development',Project_Name:'OD Initiative — Cross-Cultural Collaboration Programme',Project_Type:'OD Initiative',Project_Status:'Active',Project_Owner:'CHRO — Sarah Lim',Start_Date:'2024-10-01',Target_End_Date:'2025-09-30',Budget_M:0.15,Team_Size:2,Linked_Product_Service:'',Client_Name:'',Target_Departments:['Engineering','Project Delivery','Digital Delivery','Corporate Services','EHS & Risk','HR & Talent'],Employees_Targeted:120,Required_Skills:['Cross-Cultural Collaboration','Stakeholder Management','Team Leadership','Adaptability'],Description:'Organisation-wide OD programme addressing cross-border collaboration challenges identified in BCDR crisis comms cascade test (MY 34% non-response rate). Includes cultural intelligence workshops, bilingual communication training, and cross-office team projects.'}
     ];
     setBlockData('D',d);checkBlockDCompletion();renderBlockContent('D');editMode=true;
     document.getElementById('bpEditAllBtn').style.display='none';
-    addAiMsg("Generated <strong>3 products</strong>, <strong>4 services</strong>, <strong>7 product skill mappings</strong>, <strong>6 service skill mappings</strong>, and <strong>3 projects</strong>. Review and adjust as needed.");
-    showToast('Products & services generated');
+    addAiMsg("Generated <strong>3 products</strong>, <strong>4 services</strong>, <strong>7 product skill mappings</strong>, <strong>6 service skill mappings</strong>, and <strong>9 projects</strong> (4 Client Servicing + 5 Employee Development). Employee Development projects include Digital Twin Academy, Leadership Pipeline, ISO 45001 certification drive, DevOps Bootcamp, and Cross-Cultural OD initiative. Review and adjust as needed.");
+    showToast('Products, services & projects generated');
   },1300);
 }
 
