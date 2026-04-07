@@ -397,7 +397,7 @@
       <table class="emp-table">
         <thead>
           <tr>
-            <th>Emp ID</th><th>Name</th><th>Email</th><th>Department</th><th>Role / Title</th><th>Seniority</th><th>Location</th><th>Type</th><th>Status</th><th>Join Date</th><th>Manager</th>
+            <th>Emp ID</th><th>Name</th><th>Email</th><th>Department</th><th>Role / Title</th><th>Seniority</th><th>Location</th><th>Type</th><th>Status</th><th>Join Date</th><th>Manager</th><th>Resume</th>
           </tr>
         </thead>
         <tbody id="empTableBody"></tbody>
@@ -692,7 +692,8 @@ function loadEmployees(){
             department:e.department, role:e.role, seniority:e.jobLevel||guessSeniority(e.role),
             location:e.location||'',
             type:e.employmentType||'Full-Time', status:e.status||'Active',
-            joinDate:e.joinDate, manager:e.reportsTo||'\u2014'
+            joinDate:e.joinDate, manager:e.reportsTo||'\u2014',
+            resumeFile:e.resumeFile||'', resumeUploadedAt:e.resumeUploadedAt||''
           };
         });
         return mapped;
@@ -850,6 +851,7 @@ function renderTable(){
       '<td><span class="status-dot '+statusClass(e.status)+'">'+e.status+'</span></td>'+
       '<td>'+e.joinDate+'</td>'+
       '<td>'+(e.manager||'—')+'</td>'+
+      '<td>'+(e.resumeFile?'<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:100px;background:rgba(59,130,246,0.08);color:#3B82F6;cursor:pointer" title="'+e.resumeFile+'"><svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Resume</span>':'<span style="font-size:10px;color:var(--text-muted)">—</span>')+'</td>'+
     '</tr>';
   }).join('');
 

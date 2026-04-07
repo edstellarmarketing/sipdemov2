@@ -369,6 +369,20 @@
         <button class="tc-btn">Download template</button>
       </div>
 
+      <!-- Resume Upload Section -->
+      <div class="template-card" style="margin-top:8px;border:1px dashed rgba(201,168,76,0.3);background:rgba(201,168,76,0.02)">
+        <div class="tc-icon" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2)"><svg viewBox="0 0 24 24" style="stroke:#3B82F6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+        <div class="tc-text">
+          <div class="tc-title">Employee Resume Upload</div>
+          <div class="tc-sub">Bulk upload employee resumes (.pdf, .docx). Files are linked to employee profiles and used by AI for skill extraction and gap analysis.</div>
+        </div>
+        <label style="padding:8px 16px;border-radius:6px;border:1px solid rgba(59,130,246,0.3);color:#3B82F6;background:transparent;font-size:12px;cursor:pointer;font-family:var(--font-body);white-space:nowrap;transition:background .15s;display:inline-flex;align-items:center;gap:6px" onmouseover="this.style.background='rgba(59,130,246,0.06)'" onmouseout="this.style.background=''">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Resumes
+          <input type="file" accept=".pdf,.docx,.doc" multiple style="display:none" onchange="handleResumeUpload(this)">
+        </label>
+      </div>
+
       <div style="text-align:center;padding:16px 0 8px;border-top:1px dashed rgba(0,0,0,0.08);margin-top:8px">
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">Or try with sample data</div>
         <button onclick="demoFillDataport()" style="padding:10px 24px;font-size:13px;font-weight:600;background:linear-gradient(135deg,#C9A84C,#D4B65A);color:#fff;border:none;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .15s,box-shadow .15s;box-shadow:0 2px 8px rgba(201,168,76,0.3)" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
@@ -907,7 +921,9 @@ function generateArcovaDemoEmployees(){
         totalExp:Math.round(totalExp),workMode:pick(workModes),
         highPotential:hiPo,
         skillProfileStatus:pick(skillStatuses),
-        careerPath:pick(careerPaths)
+        careerPath:pick(careerPaths),
+        resumeFile:Math.random()>0.35?fn.toLowerCase()+'_'+ln.toLowerCase().replace(/\s+/g,'')+'_resume.pdf':'',
+        resumeUploadedAt:Math.random()>0.35?joinYear+'-'+('0'+randInt(1,12)).slice(-2)+'-'+('0'+randInt(1,28)).slice(-2):''
       });
     }
   });
@@ -994,6 +1010,44 @@ function demoFillDataport() {
     }
   });
 })();
+
+// ═══════════════════════════════════════════════════════
+// RESUME UPLOAD
+// ═══════════════════════════════════════════════════════
+function handleResumeUpload(input){
+  if(!input.files||!input.files.length)return;
+  var count=input.files.length;
+  var names=[];
+  for(var i=0;i<count;i++)names.push(input.files[i].name);
+  // Store resume filenames — try to match to employees by name pattern
+  var raw=null;
+  try{raw=sessionStorage.getItem('sip_dataport_import')}catch(e){}
+  if(!raw){try{raw=localStorage.getItem('sip_dataport_import')}catch(e){}}
+  if(raw){
+    try{
+      var data=JSON.parse(raw);
+      var matched=0;
+      names.forEach(function(fname){
+        // Try to match filename to employee (e.g. "priya_shankar_resume.pdf")
+        var clean=fname.toLowerCase().replace(/[_\-\.]/g,' ').replace(/resume|cv|pdf|docx|doc/gi,'').trim();
+        var parts=clean.split(/\s+/);
+        if(parts.length>=2){
+          var emp=data.employees.find(function(e){
+            return e.firstName.toLowerCase()===parts[0]&&e.lastName.toLowerCase().indexOf(parts[1])===0;
+          });
+          if(emp){emp.resumeFile=fname;emp.resumeUploadedAt=new Date().toISOString().substring(0,10);matched++}
+        }
+      });
+      var json=JSON.stringify(data);
+      try{sessionStorage.setItem('sip_dataport_import',json)}catch(e){}
+      try{localStorage.setItem('sip_dataport_import',json)}catch(e){}
+      showToast(count+' resume'+(count>1?'s':'')+' uploaded — '+matched+' matched to employees');
+    }catch(e){showToast(count+' resume'+(count>1?'s':'')+' uploaded')}
+  } else {
+    showToast(count+' resume'+(count>1?'s':'')+' uploaded — import employees first to auto-link');
+  }
+  input.value='';
+}
 
 // ═══════════════════════════════════════════════════════
 // INTEGRATIONS POPUP

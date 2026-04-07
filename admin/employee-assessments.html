@@ -323,7 +323,7 @@ function demoFillAssessments(){
       });
       yearly.push({year:y,skills:ss});
     }
-    all.push({employeeId:emp.id,employeeName:emp.fullName,role:role,department:dept,location:emp.location,jobLevel:level,joinYear:joinYear,assessments:yearly});
+    all.push({employeeId:emp.id,employeeName:emp.fullName,role:role,department:dept,location:emp.location,jobLevel:level,joinYear:joinYear,resumeFile:emp.resumeFile||'',assessments:yearly});
   });
   var data={generatedAt:new Date().toISOString(),totalEmployees:all.length,records:all};
   saveAssessments(data);assessmentData=data;currentPage=0;render();

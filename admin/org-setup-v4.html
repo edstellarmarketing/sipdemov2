@@ -62,6 +62,40 @@
 .progress-stats{display:flex;gap:20px;margin-top:8px;font-size:12px;color:var(--text-t)}
 .progress-stats strong{color:var(--text-s);font-weight:600}
 
+/* ── CONTEXT SCORE PANEL ── */
+.ctx-panel{margin-bottom:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.ctx-header{padding:18px 22px;display:flex;align-items:center;gap:18px;cursor:pointer}
+.ctx-header:hover{background:rgba(0,0,0,0.01)}
+.ctx-ring{position:relative;width:72px;height:72px;flex-shrink:0}
+.ctx-ring svg{width:72px;height:72px;transform:rotate(-90deg)}
+.ctx-ring-bg{fill:none;stroke:var(--surface-alt);stroke-width:5}
+.ctx-ring-fill{fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .8s ease,stroke .4s}
+.ctx-ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ctx-ring-pct{font-family:var(--font-display);font-size:18px;font-weight:700;line-height:1}
+.ctx-ring-tier{font-size:9px;font-weight:600;letter-spacing:.04em;margin-top:1px}
+.ctx-info{flex:1}
+.ctx-info h3{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text);margin:0 0 3px}
+.ctx-info p{font-size:12px;color:var(--text-t);margin:0;line-height:1.5}
+.ctx-toggle{font-size:11px;padding:5px 14px;border:1px solid var(--border);border-radius:6px;background:none;color:var(--text-s);cursor:pointer;font-family:var(--font-body);white-space:nowrap}
+.ctx-toggle:hover{border-color:var(--accent);color:var(--accent)}
+.ctx-body{display:none;padding:0 22px 18px;border-top:1px solid var(--border)}
+.ctx-body.open{display:block}
+.ctx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:14px}
+.ctx-block{padding:10px 14px;border:1px solid var(--border);border-radius:8px;transition:all .15s}
+.ctx-block:hover{border-color:var(--text-t)}
+.ctx-block-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.ctx-block-icon{font-size:14px}
+.ctx-block-name{font-size:11.5px;font-weight:600;color:var(--text);flex:1}
+.ctx-block-score{font-family:var(--font-display);font-size:12px;font-weight:700}
+.ctx-block-bar{height:4px;background:var(--surface-alt);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.ctx-block-fill{height:100%;border-radius:2px;transition:width .4s ease}
+.ctx-block-unlock{font-size:10px;color:var(--text-t);line-height:1.4}
+.ctx-block-unlock strong{color:var(--green);font-weight:600}
+.ctx-block-unlock em{color:var(--red);font-style:normal;font-weight:500}
+.ctx-critical{margin-top:14px;padding:12px 16px;background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.15);border-radius:8px}
+.ctx-critical-title{font-size:11px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.ctx-critical-list{font-size:11.5px;color:var(--text-s);line-height:1.6}
+
 /* ── GLOBAL UPLOAD ── */
 .global-upload{border:2px dashed var(--border-ai);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:28px;background:var(--ai-soft);display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .2s;position:relative}
 .global-upload:hover{border-color:var(--accent);background:rgba(201,168,76,0.06)}
@@ -519,6 +553,28 @@
       </div>
     </div>
 
+    <!-- Context Capture Score -->
+    <div class="ctx-panel" id="ctxPanel">
+      <div class="ctx-header" onclick="toggleCtxPanel()">
+        <div class="ctx-ring">
+          <svg viewBox="0 0 80 80"><circle class="ctx-ring-bg" cx="40" cy="40" r="34"/><circle class="ctx-ring-fill" id="ctxRingFill" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6"/></svg>
+          <div class="ctx-ring-text"><div class="ctx-ring-pct" id="ctxPct">0%</div><div class="ctx-ring-tier" id="ctxTier" style="color:var(--text-t)">—</div></div>
+        </div>
+        <div class="ctx-info">
+          <h3>Context Capture Score</h3>
+          <p id="ctxMotivation">Complete your organisation profile to unlock AI-powered skill framework generation, gap analysis, and workforce intelligence.</p>
+        </div>
+        <button class="ctx-toggle" id="ctxToggleBtn">Show Details</button>
+      </div>
+      <div class="ctx-body" id="ctxBody">
+        <div class="ctx-grid" id="ctxGrid"></div>
+        <div class="ctx-critical" id="ctxCritical" style="display:none">
+          <div class="ctx-critical-title">Critical Fields Missing — AI Accuracy at Risk</div>
+          <div class="ctx-critical-list" id="ctxCriticalList"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Global Upload -->
     <div class="global-upload" onclick="">
       <input type="file" accept=".pdf,.docx,.doc,.xlsx,.csv,.pptx,.txt" onchange="handleGlobalUpload(this)">
@@ -924,6 +980,136 @@ function updateProgress(){
   document.getElementById('lockBtn').disabled = done < TOTAL_BLOCKS;
   var banner = document.getElementById('congratsBanner');
   if(banner) banner.style.display = (done >= TOTAL_BLOCKS) ? 'block' : 'none';
+  updateContextScore();
+}
+
+// ═══════════════════════════════════════════════════════
+// CONTEXT CAPTURE SCORE
+// ═══════════════════════════════════════════════════════
+var ctxPanelOpen=false;
+function toggleCtxPanel(){
+  ctxPanelOpen=!ctxPanelOpen;
+  document.getElementById('ctxBody').classList.toggle('open',ctxPanelOpen);
+  document.getElementById('ctxToggleBtn').textContent=ctxPanelOpen?'Hide Details':'Show Details';
+}
+
+// Weighted field-level scoring per block
+var BLOCK_FIELD_CHECKS={
+  A:[{f:function(d){return!!d.legalName},w:8,label:'Legal Name',critical:true},
+     {f:function(d){return!!d.primaryIndustry},w:10,label:'Primary Industry',critical:true},
+     {f:function(d){return!!d.currentHeadcount},w:8,label:'Headcount',critical:true},
+     {f:function(d){return!!d.operatingModel},w:6,label:'Operating Model'},
+     {f:function(d){return!!d.hqCountry},w:5,label:'HQ Country'},
+     {f:function(d){return!!d.coreValues},w:7,label:'Core Values',critical:true},
+     {f:function(d){return!!d.cultureDefinition},w:6,label:'Culture Definition'},
+     {f:function(d){return!!d.vision},w:5,label:'Vision'},
+     {f:function(d){return(d.performanceYearly||[]).length>=2},w:5,label:'2+ Years Performance Data'}],
+  B:[{f:function(d){return(d.levels||[]).length>=2},w:12,label:'2+ Hierarchy Levels',critical:true},
+     {f:function(d){return(d.nodes||[]).length>=3},w:10,label:'3+ Org Nodes',critical:true},
+     {f:function(d){return(d.secondaryHierarchies||[]).length>=1},w:5,label:'Secondary Hierarchy'},
+     {f:function(d){return(d.locationMaster||[]).length>=2},w:5,label:'2+ Locations'}],
+  C:[{f:function(d){return!!d.mission||!!d.vision},w:8,label:'Mission or Vision',critical:true},
+     {f:function(d){return(d.strategicPriorities||[]).length>=2},w:8,label:'2+ Strategic Priorities'},
+     {f:function(d){return(d.strategicRisks||[]).length>=1},w:5,label:'Strategic Risks'},
+     {f:function(d){return(d.goals||[]).length>=3},w:7,label:'3+ Goals',critical:true}],
+  D:[{f:function(d){return(d.products||[]).length>=1},w:6,label:'1+ Products'},
+     {f:function(d){return(d.services||[]).length>=1},w:6,label:'1+ Services'},
+     {f:function(d){return(d.projects||[]).filter(function(p){return p.Project_Category!=='Employee Development'}).length>=1},w:5,label:'1+ Client Project'},
+     {f:function(d){return(d.projects||[]).filter(function(p){return p.Project_Category==='Employee Development'}).length>=1},w:5,label:'1+ Dev Project'},
+     {f:function(d){return(d.trainers||[]).length>=2},w:4,label:'2+ Trainers'}],
+  E:[{f:function(d){return(d.clients||[]).length>=2},w:7,label:'2+ Clients'},
+     {f:function(d){return(d.locations||[]).length>=2},w:7,label:'2+ Locations',critical:true},
+     {f:function(d){return(d.marketSkillDemand||[]).length>=1},w:4,label:'Market Skill Demand'}],
+  F:[{f:function(d){return(d.standards||[]).length>=2},w:7,label:'2+ Standards',critical:true},
+     {f:function(d){return(d.certifications||[]).length>=1},w:5,label:'Certifications'}],
+  G:[{f:function(d){return(d.tools||[]).length>=5},w:7,label:'5+ Tools'},
+     {f:function(d){return(d.tools||[]).some(function(t){return t.lifecycle==='Sunsetting (within 12m)'})},w:3,label:'Sunsetting Tools Tagged'},
+     {f:function(d){return(d.techStackHistory||[]).length>=1},w:3,label:'Tech Stack History'}],
+  M:[{f:function(d){return(d.plans||[]).length>=2},w:5,label:'2+ BC/DR Plans'},
+     {f:function(d){return(d.riskScenarios||[]).length>=3},w:5,label:'3+ Risk Scenarios'},
+     {f:function(d){return(d.exercises||[]).length>=1},w:3,label:'1+ DR Exercise'}],
+  H:[{f:function(d){var sc=d.scale||[];return sc.filter(function(s){return!!s.definition}).length>=4},w:8,label:'All 4 Criticality Levels',critical:true}],
+  I:[{f:function(d){return!!d.constructionMethod},w:3,label:'Construction Method'},
+     {f:function(d){var lv=d.levels||[];return lv.filter(function(l){return!!l.definition}).length>=4},w:8,label:'All 4 Proficiency Levels',critical:true}],
+  J:[{f:function(d){return(d.skills||[]).length>=15},w:12,label:'15+ Skills',critical:true},
+     {f:function(d){return(d.skills||[]).length>=20},w:5,label:'20+ Skills (rich taxonomy)'}],
+  K:[{f:function(d){var c=d.competencies||[];return c.filter(function(x){return x.type==='Core'}).length>=3},w:7,label:'3+ Core Competencies',critical:true},
+     {f:function(d){var c=d.competencies||[];return c.filter(function(x){return x.type!=='Core'}).length>=2},w:5,label:'2+ Non-Core Competencies'}],
+  L:[{f:function(d){return(d.roles||[]).length>=3},w:10,label:'3+ Role Profiles',critical:true},
+     {f:function(d){return(d.roles||[]).length>=5},w:5,label:'5+ Role Profiles (deep coverage)'},
+     {f:function(d){var r=d.roles||[];return r.every(function(x){return(x.requiredSkills||[]).length>=3})&&r.length>0},w:5,label:'All Roles Have 3+ Skills'}]
+};
+
+var TIER_DEFS=[
+  {min:0,name:'Bronze',color:'#CD7F32',msg:'Minimal context — AI outputs will be generic. Fill critical fields to unlock precision.'},
+  {min:40,name:'Silver',color:'#9CA3AF',msg:'Moderate context — some AI features available. Complete more blocks for full intelligence.'},
+  {min:70,name:'Gold',color:'var(--accent)',msg:'Strong context — most AI features active. Fill remaining gaps to reach Platinum.'},
+  {min:90,name:'Platinum',color:'#3B82F6',msg:'Full context captured — all AI features at maximum precision. Ready for Level 2.'}
+];
+
+function computeContextScore(){
+  var totalWeight=0,earnedWeight=0;
+  var criticalMissing=[];
+  var blockScores={};
+  BLOCKS.forEach(function(b){
+    var checks=BLOCK_FIELD_CHECKS[b.id]||[];
+    var d=getBlockState(b.id).data;
+    var bTotal=0,bEarned=0;
+    checks.forEach(function(c){
+      bTotal+=c.w;totalWeight+=c.w;
+      if(c.f(d)){bEarned+=c.w;earnedWeight+=c.w}
+      else if(c.critical) criticalMissing.push({block:b.title,field:c.label});
+    });
+    blockScores[b.id]={score:bTotal?Math.round(bEarned/bTotal*100):0,earned:bEarned,total:bTotal};
+  });
+  var overall=totalWeight?Math.round(earnedWeight/totalWeight*100):0;
+  var tier=TIER_DEFS[0];
+  for(var i=TIER_DEFS.length-1;i>=0;i--){if(overall>=TIER_DEFS[i].min){tier=TIER_DEFS[i];break}}
+  return{overall:overall,tier:tier,blockScores:blockScores,criticalMissing:criticalMissing};
+}
+
+function updateContextScore(){
+  var cs=computeContextScore();
+  // Ring
+  var circumference=213.6; // 2 * PI * 34
+  var offset=circumference-(cs.overall/100*circumference);
+  var ring=document.getElementById('ctxRingFill');
+  ring.style.strokeDashoffset=offset;
+  ring.style.stroke=cs.tier.color;
+  document.getElementById('ctxPct').textContent=cs.overall+'%';
+  var tierEl=document.getElementById('ctxTier');
+  tierEl.textContent=cs.tier.name;tierEl.style.color=cs.tier.color;
+  document.getElementById('ctxMotivation').textContent=cs.tier.msg;
+
+  // Block grid
+  var gh='';
+  BLOCKS.forEach(function(b){
+    var bs=cs.blockScores[b.id];
+    var barColor=bs.score>=90?'var(--green)':bs.score>=50?'var(--accent)':bs.score>0?'var(--amber)':'var(--border)';
+    var unlockText=BLOCK_UNLOCKS[b.id]||'';
+    var missing=getBlockMissing(b.id);
+    gh+='<div class="ctx-block" onclick="openBlock(\''+b.id+'\')" style="cursor:pointer">';
+    gh+='<div class="ctx-block-head"><span class="ctx-block-icon">'+b.icon+'</span><span class="ctx-block-name">'+escH(b.title)+'</span><span class="ctx-block-score" style="color:'+barColor+'">'+bs.score+'%</span></div>';
+    gh+='<div class="ctx-block-bar"><div class="ctx-block-fill" style="width:'+bs.score+'%;background:'+barColor+'"></div></div>';
+    if(bs.score>=90){
+      gh+='<div class="ctx-block-unlock"><strong>Unlocked:</strong> '+escH(unlockText.substring(0,80))+(unlockText.length>80?'...':'')+'</div>';
+    } else if(missing.length){
+      gh+='<div class="ctx-block-unlock"><em>Missing:</em> '+escH(missing.slice(0,2).join(', '))+(missing.length>2?' +'+( missing.length-2)+' more':'')+'</div>';
+    }
+    gh+='</div>';
+  });
+  document.getElementById('ctxGrid').innerHTML=gh;
+
+  // Critical missing
+  var critEl=document.getElementById('ctxCritical');
+  if(cs.criticalMissing.length){
+    critEl.style.display='';
+    var ch='';
+    cs.criticalMissing.forEach(function(cm){ch+='<div>\u26A0 <strong>'+escH(cm.block)+'</strong> \u2014 '+escH(cm.field)+'</div>'});
+    document.getElementById('ctxCriticalList').innerHTML=ch;
+  } else {
+    critEl.style.display='none';
+  }
 }
 
 // ═══════════════════════════════════════════════════════
