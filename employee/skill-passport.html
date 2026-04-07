@@ -420,7 +420,7 @@
           </div>
         </div>
 
-        <div class="skills-grid">
+        <div class="skills-grid" id="skillsGridDynamic">
           <!-- Project Management Domain -->
           <div class="domain-card">
             <div class="domain-head">
@@ -932,6 +932,115 @@ function switchTab(id, btn) {
       showToast(label + " — available in full platform");
     }
   });
+})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DYNAMIC ASSESSMENT DATA OVERLAY
+// Enriches the Skill Passport with imported assessment data
+// ═══════════════════════════════════════════════════════
+(function(){
+  var PASSPORT_EMP_ID='EMP-0001'; // Priya Menon — hardcoded passport
+
+  // Load assessment data
+  var skillData=null,compData=null;
+  try{var sr=sessionStorage.getItem('sip_employee_assessments')||localStorage.getItem('sip_employee_assessments');if(sr)skillData=JSON.parse(sr)}catch(e){}
+  try{var cr=sessionStorage.getItem('sip_competency_assessments')||localStorage.getItem('sip_competency_assessments');if(cr)compData=JSON.parse(cr)}catch(e){}
+
+  // Find this employee's records
+  var empSkills=null;
+  if(skillData&&skillData.records){
+    for(var i=0;i<skillData.records.length;i++){
+      if(skillData.records[i].employeeId===PASSPORT_EMP_ID){empSkills=skillData.records[i];break}
+    }
+  }
+  var empComps=[];
+  if(compData&&compData.records){
+    empComps=compData.records.filter(function(r){return r.employeeId===PASSPORT_EMP_ID});
+  }
+
+  if(!empSkills&&!empComps.length) return; // No assessment data — keep hardcoded view
+
+  var grid=document.getElementById('skillsGridDynamic');
+  if(!grid) return;
+
+  // Build dynamic content that APPENDS to existing hardcoded skills
+  var h='';
+
+  // ── Imported Skills Assessment Section ──
+  if(empSkills&&empSkills.assessments.length){
+    var latest=empSkills.assessments[empSkills.assessments.length-1];
+    h+='<div class="domain-card" style="border:1px solid rgba(59,130,246,0.2)">';
+    h+='<div class="domain-head"><div class="domain-pip" style="background:#3B82F6"></div>';
+    h+='<div class="domain-title">Imported Skills Assessment ('+latest.year+')</div>';
+    var avg=0;if(latest.skills.length){var s=0;latest.skills.forEach(function(sk){s+=sk.managedScore});avg=Math.round(s/latest.skills.length*10)/10}
+    var avgColor=avg>=3?'var(--green)':avg>=2?'var(--amber)':'var(--red)';
+    h+='<div class="domain-avg" style="color:'+avgColor+'">avg '+avg+'</div></div>';
+    h+='<div class="skill-list">';
+    latest.skills.forEach(function(sk){
+      h+='<div class="skill-row">';
+      h+='<div class="skill-name">'+sk.skillName+'</div>';
+      h+='<div class="skill-source">Assessed</div>';
+      h+='<div class="prof-track">';
+      for(var l=1;l<=4;l++){
+        var cls='prof-pip';
+        if(l<=sk.managedScore&&l<=sk.requiredScore) cls+=' match';
+        else if(l<=sk.managedScore) cls+=' filled-current';
+        else if(l<=sk.requiredScore) cls+=' gap';
+        var label=String(l);
+        if(l===sk.managedScore&&l===sk.requiredScore) label+='✓';
+        else if(l===sk.requiredScore&&sk.managedScore<sk.requiredScore) label+='△';
+        h+='<div class="'+cls+'" title="L'+l+'">'+label+'</div>';
+      }
+      h+='</div></div>';
+    });
+    h+='</div></div>';
+  }
+
+  // ── Imported Competency Assessment Section ──
+  if(empComps.length){
+    h+='<div class="domain-card" style="border:1px solid rgba(139,92,246,0.2)">';
+    h+='<div class="domain-head"><div class="domain-pip" style="background:#8B5CF6"></div>';
+    h+='<div class="domain-title">Imported Competency Assessment (2024)</div>';
+    var cavg=0;var cs=0;empComps.forEach(function(c){cs+=(c.weightedScore||c.selfScore||0)});
+    cavg=Math.round(cs/empComps.length*10)/10;
+    var cavgColor=cavg>=2?'var(--green)':cavg>=1.5?'var(--amber)':'var(--red)';
+    h+='<div class="domain-avg" style="color:'+cavgColor+'">avg '+cavg+'</div></div>';
+    h+='<div class="skill-list">';
+    empComps.forEach(function(c){
+      var achieved=Math.round(c.weightedScore||c.selfScore||0);
+      var required=Math.round(c.requiredProf||2);
+      h+='<div class="skill-row">';
+      h+='<div class="skill-name">'+c.compName+' <span style="font-size:9px;padding:1px 5px;border-radius:100px;background:rgba(139,92,246,0.08);color:#8B5CF6">Competency</span></div>';
+      h+='<div class="skill-source">'+c.source+'</div>';
+      h+='<div class="prof-track">';
+      for(var l=1;l<=4;l++){
+        var cls='prof-pip';
+        if(l<=achieved&&l<=required) cls+=' match';
+        else if(l<=achieved) cls+=' filled-current';
+        else if(l<=required) cls+=' gap';
+        var label=String(l);
+        if(l===achieved&&l===required) label+='✓';
+        else if(l===required&&achieved<required) label+='△';
+        h+='<div class="'+cls+'" title="L'+l+'">'+label+'</div>';
+      }
+      h+='</div></div>';
+    });
+    h+='</div></div>';
+  }
+
+  if(h){
+    // Append the imported data cards to the existing skills grid
+    grid.insertAdjacentHTML('beforeend',h);
+
+    // Update the resume skills card count
+    var countEl=document.getElementById('resumeSkillsCount');
+    if(countEl){
+      var total=(empSkills&&empSkills.assessments.length?empSkills.assessments[empSkills.assessments.length-1].skills.length:0)+empComps.length;
+      countEl.textContent='AI-Extracted + '+total+' Assessed';
+    }
+  }
 })();
 </script>
 </body>

@@ -397,7 +397,7 @@
       <table class="emp-table">
         <thead>
           <tr>
-            <th>Emp ID</th><th>Name</th><th>Email</th><th>Department</th><th>Role / Title</th><th>Seniority</th><th>Location</th><th>Type</th><th>Status</th><th>Join Date</th><th>Manager</th><th>Resume</th><th>Resume Skills</th>
+            <th>Emp ID</th><th>Name</th><th>Email</th><th>Department</th><th>Role / Title</th><th>Seniority</th><th>Location</th><th>Type</th><th>Status</th><th>Join Date</th><th>Manager</th><th>Resume</th><th>Resume Skills</th><th>Skills Assessed</th><th>Skill Avg</th><th>Skill Gaps</th><th>Competencies</th><th>Comp Avg</th>
           </tr>
         </thead>
         <tbody id="empTableBody"></tbody>
@@ -713,7 +713,27 @@ function loadEmployees(){
       var imp=JSON.parse(raw);
       if(imp.employees&&imp.employees.length){
         // Map dataport employees to directory format
+        // Load assessment data to enrich employees
+        var skillAssess=null,compAssess=null;
+        try{var sr=sessionStorage.getItem('sip_employee_assessments')||localStorage.getItem('sip_employee_assessments');if(sr)skillAssess=JSON.parse(sr)}catch(ex){}
+        try{var cr=sessionStorage.getItem('sip_competency_assessments')||localStorage.getItem('sip_competency_assessments');if(cr)compAssess=JSON.parse(cr)}catch(ex){}
+        // Build lookup maps
+        var skillMap={};if(skillAssess&&skillAssess.records){skillAssess.records.forEach(function(r){skillMap[r.employeeId]=r})}
+        var compMap={};if(compAssess&&compAssess.records){compAssess.records.forEach(function(r){if(!compMap[r.employeeId])compMap[r.employeeId]=[];compMap[r.employeeId].push(r)})}
+
         var mapped=imp.employees.map(function(e){
+          var sa=skillMap[e.id];var ca=compMap[e.id]||[];
+          // Latest year skill stats
+          var skillCount=0,skillAvg=0,skillGaps=0,skillNames=[];
+          if(sa&&sa.assessments.length){
+            var latest=sa.assessments[sa.assessments.length-1];
+            skillCount=latest.skills.length;var sum=0;
+            latest.skills.forEach(function(sk){sum+=sk.managedScore;if(sk.managedScore<sk.requiredScore)skillGaps++;skillNames.push(sk.skillName)});
+            skillAvg=skillCount?Math.round(sum/skillCount*10)/10:0;
+          }
+          // Competency stats
+          var compCount=ca.length;var compAvg=0,compGaps=0,compNames=[];
+          if(compCount){var cSum=0;ca.forEach(function(c){var ws=c.weightedScore||c.selfScore||0;cSum+=ws;if(ws<c.requiredProf)compGaps++;compNames.push(c.compName)});compAvg=Math.round(cSum/compCount*10)/10}
           return {
             id:e.id, firstName:e.firstName, lastName:e.lastName, email:e.email,
             department:e.department, role:e.role, seniority:e.jobLevel||guessSeniority(e.role),
@@ -721,7 +741,9 @@ function loadEmployees(){
             type:e.employmentType||'Full-Time', status:e.status||'Active',
             joinDate:e.joinDate, manager:e.reportsTo||'\u2014',
             resumeFile:e.resumeFile||'', resumeUploadedAt:e.resumeUploadedAt||'',
-            resumeSkills:e.resumeSkills||''
+            resumeSkills:e.resumeSkills||'',
+            skillCount:skillCount, skillAvg:skillAvg, skillGaps:skillGaps, assessedSkills:skillNames.join(', '),
+            compCount:compCount, compAvg:compAvg, compGaps:compGaps, assessedComps:compNames.join(', ')
           };
         });
         return mapped;
@@ -881,6 +903,11 @@ function renderTable(){
       '<td>'+(e.manager||'—')+'</td>'+
       '<td>'+(e.resumeFile?'<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:100px;background:rgba(59,130,246,0.08);color:#3B82F6;cursor:pointer" title="'+e.resumeFile+'"><svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Resume</span>':'<span style="font-size:10px;color:var(--text-muted)">—</span>')+'</td>'+
       '<td>'+(e.resumeSkills?'<span style="font-size:10px;color:var(--text-secondary);line-height:1.5;display:inline-block;max-width:260px">'+e.resumeSkills+'</span>':'<span style="font-size:10px;color:var(--text-muted)">—</span>')+'</td>'+
+      '<td>'+(e.skillCount?'<span style="font-size:11px;font-weight:600" title="'+e.assessedSkills+'">'+e.skillCount+'</span>':'<span style="font-size:10px;color:var(--text-muted)">—</span>')+'</td>'+
+      '<td>'+(e.skillAvg?'<span style="font-size:11px;font-weight:600;color:'+(e.skillAvg>=3?'var(--green)':e.skillAvg>=2?'var(--amber)':'var(--red)')+'">'+e.skillAvg+'</span>':'<span style="font-size:10px;color:var(--text-muted)">—</span>')+'</td>'+
+      '<td>'+(e.skillGaps?'<span style="font-size:10px;padding:2px 7px;border-radius:100px;background:var(--red-bg);color:var(--red);font-weight:600">'+e.skillGaps+'</span>':'<span style="font-size:10px;color:var(--green)">0</span>')+'</td>'+
+      '<td>'+(e.compCount?'<span style="font-size:11px;font-weight:600" title="'+e.assessedComps+'">'+e.compCount+'</span>':'<span style="font-size:10px;color:var(--text-muted)">—</span>')+'</td>'+
+      '<td>'+(e.compAvg?'<span style="font-size:11px;font-weight:600;color:'+(e.compAvg>=2?'var(--green)':e.compAvg>=1.5?'var(--amber)':'var(--red)')+'">'+e.compAvg+'</span>':'<span style="font-size:10px;color:var(--text-muted)">—</span>')+'</td>'+
     '</tr>';
   }).join('');
 
