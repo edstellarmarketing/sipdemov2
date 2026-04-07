@@ -365,6 +365,18 @@ function renderSuggestions(suggestions){
   h+='<button class="btn btn-sm" onclick="loadDemoContext()" style="font-size:10px">Reload</button>';
   h+='<button class="btn btn-sm" onclick="clearDemoContext()" style="font-size:10px;color:var(--red);border-color:var(--red)">Clear</button>';
   h+='</div>';
+  // AI reasoning explanation
+  h+='<div style="padding:14px 16px;background:rgba(139,92,246,0.04);border:1px solid rgba(139,92,246,0.12);border-radius:10px;margin-bottom:16px">';
+  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:16px">🧠</span><span style="font-family:var(--font-display);font-size:13px;font-weight:600;color:#7C3AED">Why is AI recommending these projects?</span></div>';
+  h+='<div style="font-size:12px;color:var(--text-secondary);line-height:1.6">The SIP AI engine analysed your organisation context across <strong>5 data sources</strong> to identify immediate capability gaps and risks:</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:10px">';
+  h+='<div style="padding:8px 12px;background:var(--card);border-radius:6px;border:1px solid var(--border)"><div style="font-size:10px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.04em">Block E — Market Demand</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Skills with Critical Shortage or High Demand where internal supply is low</div></div>';
+  h+='<div style="padding:8px 12px;background:var(--card);border-radius:6px;border:1px solid var(--border)"><div style="font-size:10px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.04em">Block G — Sunsetting Tools</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Tools being retired need migration reskilling before deadline</div></div>';
+  h+='<div style="padding:8px 12px;background:var(--card);border-radius:6px;border:1px solid var(--border)"><div style="font-size:10px;font-weight:600;color:#0891B2;text-transform:uppercase;letter-spacing:.04em">Block M — BCDR Gaps</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">DR exercises that found skill gaps need remediation training</div></div>';
+  h+='<div style="padding:8px 12px;background:var(--card);border-radius:6px;border:1px solid var(--border)"><div style="font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.04em">Block C — Strategic Risks</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">High-severity risks that need skill-based mitigation</div></div>';
+  h+='<div style="padding:8px 12px;background:var(--card);border-radius:6px;border:1px solid var(--border)"><div style="font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.04em">Block E — Compliance</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Regulatory requirements with non-compliant employee gaps</div></div>';
+  h+='</div></div>';
+
   h+='<div class="section-label">AI-Suggested Projects ('+suggestions.length+')</div>';
   suggestions.forEach(function(s,i){
     h+='<div class="sug-card">';
@@ -419,8 +431,8 @@ function renderCreateForm(prefill){
   h+='</select></div>';
   h+='<div class="form-group"><label class="form-label">Start Date</label><input class="form-input" type="date" id="fpStart"></div></div>';
   h+='<div class="form-row"><div class="form-group"><label class="form-label">Target End Date</label><input class="form-input" type="date" id="fpEnd"></div>';
-  h+='<div class="form-row"><div class="form-group"><label class="form-label">Budget ($M)</label><input class="form-input" type="number" step="0.01" id="fpBudget" placeholder="0.15"></div>';
-  h+='<div class="form-group"><label class="form-label">Employees Targeted</label><input class="form-input" type="number" id="fpEmps" value="'+(p.emps||'')+'" placeholder="20"></div></div>';
+  h+='<div class="form-group"><label class="form-label">Budget ($M)</label><input class="form-input" type="number" step="0.01" id="fpBudget" placeholder="0.15"></div></div>';
+  h+='<div class="form-group"><label class="form-label">Employees Targeted</label><input class="form-input" type="number" id="fpEmps" value="'+(p.emps||'')+'" placeholder="20"></div>';
   h+='</div>';
 
   // Right column
