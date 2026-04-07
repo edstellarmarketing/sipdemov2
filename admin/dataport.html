@@ -88,6 +88,32 @@
 .hris-btn.connected .hris-dot { background: var(--green); }
 .hris-btn.connected { border-color: rgba(22,163,74,0.3); color: var(--green); background: var(--green-bg); }
 
+/* ── INTEGRATIONS MODAL ── */
+.intg-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:900;display:none;align-items:center;justify-content:center;animation:fadeIn .2s ease}
+.intg-overlay.open{display:flex}
+.intg-modal{background:var(--card);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,0.18);width:90%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden}
+.intg-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(0,0,0,0.08);flex-shrink:0}
+.intg-title{font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--text-primary)}
+.intg-close{width:28px;height:28px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--text-muted);font-size:18px}
+.intg-close:hover{background:rgba(0,0,0,0.05);color:var(--text-primary)}
+.intg-body{padding:20px 22px;overflow-y:auto;flex:1}
+.intg-search{width:100%;padding:9px 14px;border:1px solid rgba(0,0,0,0.1);border-radius:8px;font-size:12px;font-family:var(--font-body);color:var(--text-primary);margin-bottom:18px}
+.intg-search:focus{outline:none;border-color:var(--accent)}
+.intg-category{margin-bottom:20px}
+.intg-cat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.intg-cat-label::after{content:'';flex:1;height:1px;background:rgba(0,0,0,0.06)}
+.intg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.intg-card{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid rgba(0,0,0,0.08);border-radius:8px;cursor:pointer;transition:all .15s;background:var(--card)}
+.intg-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,0.06);transform:translateY(-1px)}
+.intg-card.active{border-color:var(--green);background:var(--green-bg)}
+.intg-card .intg-logo{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.intg-card .intg-info{flex:1;min-width:0}
+.intg-card .intg-name{font-size:12px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.intg-card .intg-desc{font-size:10px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.intg-card .intg-status{font-size:9px;padding:2px 7px;border-radius:100px;font-weight:500;flex-shrink:0;white-space:nowrap}
+.intg-card .intg-status.connected{background:var(--green-bg);color:var(--green)}
+.intg-card .intg-status.available{background:rgba(0,0,0,0.04);color:var(--text-muted)}
+
 .template-card { background: var(--card); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; }
 .tc-icon { width: 40px; height: 40px; border-radius: 9px; background: var(--accent-lt); border: 1px solid var(--accent-bd); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .tc-icon svg { width: 19px; height: 19px; stroke: var(--accent); fill: none; stroke-width: 1.6; stroke-linecap: round; }
@@ -327,10 +353,10 @@
       <div class="hris-strip">
         <div class="hris-label">Or sync from HRIS</div>
         <div class="hris-options">
-          <button class="hris-btn connected"><div class="hris-dot"></div>Workday · Connected</button>
-          <button class="hris-btn"><div class="hris-dot"></div>BambooHR</button>
-          <button class="hris-btn"><div class="hris-dot"></div>SAP SuccessFactors</button>
-          <button class="hris-btn"><div class="hris-dot"></div>+ Add integration</button>
+          <button class="hris-btn connected" onclick="openIntegrations()"><div class="hris-dot"></div>Workday · Connected</button>
+          <button class="hris-btn" onclick="openIntegrations()"><div class="hris-dot"></div>BambooHR</button>
+          <button class="hris-btn" onclick="openIntegrations()"><div class="hris-dot"></div>SAP SuccessFactors</button>
+          <button class="hris-btn" onclick="openIntegrations()"><div class="hris-dot"></div>+ Add integration</button>
         </div>
       </div>
 
@@ -968,6 +994,131 @@ function demoFillDataport() {
     }
   });
 })();
+
+// ═══════════════════════════════════════════════════════
+// INTEGRATIONS POPUP
+// ═══════════════════════════════════════════════════════
+var INTEGRATIONS = [
+  // HRMS / HRIS
+  {cat:'HRMS / HRIS',name:'Workday',desc:'Cloud HCM & payroll',status:'connected',logo:'🔵'},
+  {cat:'HRMS / HRIS',name:'SAP SuccessFactors',desc:'Enterprise HR suite',status:'available',logo:'🟢'},
+  {cat:'HRMS / HRIS',name:'BambooHR',desc:'SMB-friendly HRIS',status:'available',logo:'🟩'},
+  {cat:'HRMS / HRIS',name:'Oracle HCM Cloud',desc:'Enterprise HR & talent',status:'available',logo:'🔴'},
+  {cat:'HRMS / HRIS',name:'ADP Workforce Now',desc:'Payroll & HR management',status:'available',logo:'🔲'},
+  {cat:'HRMS / HRIS',name:'Darwinbox',desc:'APAC-focused HR platform',status:'available',logo:'🟣'},
+  {cat:'HRMS / HRIS',name:'Zoho People',desc:'HR management suite',status:'available',logo:'🟡'},
+  {cat:'HRMS / HRIS',name:'Keka HR',desc:'India-focused payroll & HR',status:'available',logo:'🟠'},
+  {cat:'HRMS / HRIS',name:'Personio',desc:'EU HR & recruiting',status:'available',logo:'🔷'},
+  {cat:'HRMS / HRIS',name:'HiBob',desc:'Modern people platform',status:'available',logo:'🟪'},
+
+  // LMS / LXP
+  {cat:'LMS / LXP',name:'Cornerstone OnDemand',desc:'Enterprise LMS & talent',status:'connected',logo:'🔶'},
+  {cat:'LMS / LXP',name:'SAP Litmos',desc:'Cloud learning platform',status:'available',logo:'🟢'},
+  {cat:'LMS / LXP',name:'Docebo',desc:'AI-powered LMS',status:'available',logo:'🔵'},
+  {cat:'LMS / LXP',name:'Absorb LMS',desc:'Flexible learning platform',status:'available',logo:'⬛'},
+  {cat:'LMS / LXP',name:'360Learning',desc:'Collaborative learning',status:'available',logo:'🟣'},
+  {cat:'LMS / LXP',name:'Degreed',desc:'Upskilling & LXP',status:'available',logo:'🔷'},
+  {cat:'LMS / LXP',name:'EdCast (Cornerstone)',desc:'Learning experience platform',status:'available',logo:'🟡'},
+  {cat:'LMS / LXP',name:'TalentLMS',desc:'Easy-to-use LMS',status:'available',logo:'🟩'},
+  {cat:'LMS / LXP',name:'Moodle',desc:'Open-source LMS',status:'available',logo:'🟠'},
+  {cat:'LMS / LXP',name:'Udemy Business',desc:'Marketplace-based learning',status:'available',logo:'🟪'},
+  {cat:'LMS / LXP',name:'LinkedIn Learning',desc:'Professional skill courses',status:'available',logo:'🔵'},
+  {cat:'LMS / LXP',name:'Coursera for Business',desc:'University-grade learning',status:'available',logo:'🔷'},
+
+  // CRM
+  {cat:'CRM',name:'Salesforce',desc:'Enterprise CRM platform',status:'available',logo:'🔵'},
+  {cat:'CRM',name:'HubSpot CRM',desc:'Inbound marketing & sales',status:'available',logo:'🟠'},
+  {cat:'CRM',name:'Microsoft Dynamics 365',desc:'CRM & ERP suite',status:'available',logo:'🔷'},
+  {cat:'CRM',name:'Zoho CRM',desc:'Affordable CRM',status:'available',logo:'🟡'},
+  {cat:'CRM',name:'Pipedrive',desc:'Sales pipeline CRM',status:'available',logo:'🟢'},
+  {cat:'CRM',name:'Freshsales (Freshworks)',desc:'AI-powered CRM',status:'available',logo:'🟩'},
+  {cat:'CRM',name:'monday CRM',desc:'Work OS with CRM',status:'available',logo:'🟣'},
+
+  // Knowledge Management Systems
+  {cat:'Knowledge Management',name:'Confluence',desc:'Team wiki & knowledge base',status:'available',logo:'🔵'},
+  {cat:'Knowledge Management',name:'Notion',desc:'All-in-one workspace',status:'available',logo:'⬛'},
+  {cat:'Knowledge Management',name:'SharePoint',desc:'Microsoft document management',status:'connected',logo:'🔷'},
+  {cat:'Knowledge Management',name:'Guru',desc:'AI-powered knowledge base',status:'available',logo:'🟢'},
+  {cat:'Knowledge Management',name:'Bloomfire',desc:'Knowledge engagement',status:'available',logo:'🟠'},
+  {cat:'Knowledge Management',name:'Tettra',desc:'Company knowledge base',status:'available',logo:'🟣'},
+  {cat:'Knowledge Management',name:'Slite',desc:'Team knowledge hub',status:'available',logo:'🟡'},
+  {cat:'Knowledge Management',name:'Document360',desc:'SaaS knowledge base',status:'available',logo:'🔵'},
+  {cat:'Knowledge Management',name:'Nuclino',desc:'Lightweight wiki',status:'available',logo:'🟪'}
+];
+
+function openIntegrations(){
+  document.getElementById('intgOverlay').classList.add('open');
+  renderIntegrations('');
+}
+function closeIntegrations(){
+  document.getElementById('intgOverlay').classList.remove('open');
+}
+function renderIntegrations(query){
+  var q = query.toLowerCase();
+  var filtered = INTEGRATIONS;
+  if(q) filtered = INTEGRATIONS.filter(function(i){return i.name.toLowerCase().indexOf(q)>=0 || i.cat.toLowerCase().indexOf(q)>=0 || i.desc.toLowerCase().indexOf(q)>=0});
+
+  var cats = {};
+  filtered.forEach(function(i){if(!cats[i.cat])cats[i.cat]=[];cats[i.cat].push(i)});
+  var catOrder = ['HRMS / HRIS','LMS / LXP','CRM','Knowledge Management'];
+
+  var h = '';
+  catOrder.forEach(function(cat){
+    if(!cats[cat]) return;
+    var items = cats[cat];
+    h += '<div class="intg-category">';
+    h += '<div class="intg-cat-label">' + cat + ' (' + items.length + ')</div>';
+    h += '<div class="intg-grid">';
+    items.forEach(function(i){
+      var cls = i.status === 'connected' ? 'active' : '';
+      var stCls = i.status === 'connected' ? 'connected' : 'available';
+      var stText = i.status === 'connected' ? 'Connected' : 'Available';
+      h += '<div class="intg-card ' + cls + '" onclick="toggleIntegration(this,\'' + i.name.replace(/'/g,"\\'") + '\')">';
+      h += '<div class="intg-logo">' + i.logo + '</div>';
+      h += '<div class="intg-info"><div class="intg-name">' + i.name + '</div><div class="intg-desc">' + i.desc + '</div></div>';
+      h += '<div class="intg-status ' + stCls + '">' + stText + '</div>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+  });
+
+  if(!filtered.length) h = '<div style="padding:32px;text-align:center;color:var(--text-muted);font-size:13px">No integrations match your search.</div>';
+
+  document.getElementById('intgGrid').innerHTML = h;
+}
+function filterIntegrations(val){
+  renderIntegrations(val);
+}
+function toggleIntegration(el, name){
+  var card = el;
+  var statusEl = card.querySelector('.intg-status');
+  if(card.classList.contains('active')){
+    card.classList.remove('active');
+    statusEl.className = 'intg-status available';
+    statusEl.textContent = 'Available';
+    showToast(name + ' disconnected');
+  } else {
+    card.classList.add('active');
+    statusEl.className = 'intg-status connected';
+    statusEl.textContent = 'Connected';
+    showToast(name + ' connected successfully');
+  }
+}
 </script>
+
+<!-- Integrations Modal -->
+<div class="intg-overlay" id="intgOverlay" onclick="if(event.target===this)closeIntegrations()">
+<div class="intg-modal">
+  <div class="intg-head">
+    <div class="intg-title">Platform Integrations</div>
+    <button class="intg-close" onclick="closeIntegrations()">&times;</button>
+  </div>
+  <div class="intg-body">
+    <input class="intg-search" type="text" placeholder="Search integrations by name or category..." oninput="filterIntegrations(this.value)">
+    <div id="intgGrid"></div>
+  </div>
+</div>
+</div>
+
 </body>
 </html>
