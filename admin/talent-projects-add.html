@@ -444,26 +444,27 @@ function renderCreateForm(prefill){
   h+='</div>';
 
   h+='</div>'; // close grid
+  h+='</div>'; // close create-panel
 
-  h+='<div style="display:flex;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">';
-  h+='<button class="btn btn-primary" onclick="saveProject()"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><polyline points="20 6 9 17 4 12"/></svg> Save Project</button>';
-  if(prefill) h+='<button class="btn" onclick="activeTab=\'create\';render()">Clear &amp; Start Fresh</button>';
-  h+='<a href="talent-projects-all.html" class="btn" style="margin-left:auto">View All Projects</a>';
-  h+='</div>';
-  h+='</div>';
-
-  // Sub-projects section — always visible
+  // Sub-projects section — always visible between form and save
   h+='<div id="subProjectSection">';
   if(window._lastSavedIdx>=0){
     h+='</div>';
   } else {
-    h+='<div class="create-panel" style="max-width:100%;margin-top:16px;opacity:0.6">';
+    h+='<div class="create-panel" style="max-width:100%;margin-top:16px">';
     h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
     h+='<div style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-primary)">Activities &amp; Sub-Projects</div>';
     h+='</div>';
-    h+='<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;border:2px dashed var(--border);border-radius:8px">Save the project above first, then add surveys, assessments, training sessions, and other delegated tasks here.</div>';
+    h+='<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;border:2px dashed var(--border);border-radius:8px">Add surveys, assessments, training sessions, and other delegated tasks. These will be saved with the project.</div>';
     h+='</div></div>';
   }
+
+  // Save button at the bottom after sub-projects
+  h+='<div style="display:flex;gap:8px;margin-top:16px;padding:16px 24px;background:var(--card);border:1px solid var(--border);border-radius:12px">';
+  h+='<button class="btn btn-primary" onclick="saveProject()"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><polyline points="20 6 9 17 4 12"/></svg> Save Project</button>';
+  if(prefill) h+='<button class="btn" onclick="activeTab=\'create\';render()">Clear &amp; Start Fresh</button>';
+  h+='<a href="talent-projects-all.html" class="btn" style="margin-left:auto">View All Projects</a>';
+  h+='</div>';
 
   el.innerHTML=h;
 
