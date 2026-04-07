@@ -424,39 +424,19 @@
     <!-- Stage 1: Brief -->
     <div class="stage-panel active" id="stage1">
 
-      <!-- Section A: Assessment Library -->
-      <div class="kpi-strip">
-        <div class="kpi-card"><div class="kpi-label">Assessment Cycles</div><div class="kpi-value teal">9</div></div>
-        <div class="kpi-card"><div class="kpi-label">Employees Assessed</div><div class="kpi-value green">681</div></div>
-        <div class="kpi-card"><div class="kpi-label">Avg Completion</div><div class="kpi-value gold">87%</div></div>
-        <div class="kpi-card"><div class="kpi-label">AI Confidence</div><div class="kpi-value purple">88%</div></div>
+      <!-- Inner tabs: Create | Recent | Summary -->
+      <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid rgba(0,0,0,0.06)">
+        <div class="s1-tab active" onclick="switchS1Tab('create',this)" style="padding:10px 20px;cursor:pointer;font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--teal);border-bottom:2px solid var(--teal);margin-bottom:-2px;transition:all .15s">Create Assessment</div>
+        <div class="s1-tab" onclick="switchS1Tab('recent',this)" style="padding:10px 20px;cursor:pointer;font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s">Recent Assessments</div>
+        <div class="s1-tab" onclick="switchS1Tab('summary',this)" style="padding:10px 20px;cursor:pointer;font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s">Summary</div>
       </div>
 
-      <div class="panel">
-        <div class="panel-head">
-          <div><div class="panel-title">Recent Assessments</div></div>
+      <!-- Tab: Create Assessment (default, prominent) -->
+      <div class="s1-content" id="s1Create">
+        <div style="margin-bottom:8px">
+          <span style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text-primary)">Create New Assessment</span>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Select an assessment type to get started. AI will generate the framework, questions, and scoring criteria.</div>
         </div>
-        <div class="panel-body no-pad">
-          <div class="tbl-wrap">
-          <table class="tbl">
-            <thead><tr><th>Assessment</th><th>Category</th><th>Population</th><th>Status</th><th>Completion</th><th>Closes</th></tr></thead>
-            <tbody>
-              <tr style="cursor:pointer" onclick="openAssessReport(0)"><td style="font-weight:500;color:var(--text-primary)">L2 Skills — Engineering Track</td><td>Cat A</td><td>324</td><td><span class="chip chip-green">Complete</span></td><td>94%</td><td>28 Feb</td></tr>
-              <tr style="cursor:pointer" onclick="openAssessReport(1)"><td style="font-weight:500;color:var(--text-primary)">L2 Skills — Digital & Tech</td><td>Cat A</td><td>118</td><td><span class="chip chip-green">Complete</span></td><td>89%</td><td>28 Feb</td></tr>
-              <tr style="cursor:pointer" onclick="openAssessReport(2)"><td style="font-weight:500;color:var(--text-primary)">AI & Data Literacy Post-Training</td><td>Cat C</td><td>72</td><td><span class="chip chip-teal"><span class="blink-dot"></span> Active</span></td><td>57%</td><td>15 Apr</td></tr>
-              <tr style="cursor:pointer" onclick="openAssessReport(3)"><td style="font-weight:500;color:var(--text-primary)">Leadership 360&deg;</td><td>Cat D</td><td>28</td><td><span class="chip chip-teal"><span class="blink-dot"></span> Active</span></td><td>42%</td><td>30 Apr</td></tr>
-              <tr style="cursor:pointer" onclick="openAssessReport(4)"><td style="font-weight:500;color:var(--text-primary)">ISO 45001 Certification</td><td>Cat A</td><td>96</td><td><span class="chip chip-amber">Upcoming</span></td><td>0%</td><td>15 May</td></tr>
-              <tr style="cursor:pointer" onclick="openAssessReport(5)"><td style="font-weight:500;color:var(--text-primary)">Wellbeing Pulse Q1</td><td>Cat E</td><td>812</td><td><span class="chip chip-green">Complete</span></td><td>89%</td><td>31 Mar</td></tr>
-            </tbody>
-          </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section B: Create New Assessment -->
-      <div style="margin-top:6px">
-        <div style="margin-bottom:4px"><span style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-primary)">Create New Assessment</span></div>
-        <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:6px">What do you want to find out?</div>
 
         <div class="qs-grid">
           <!-- Card 1: Skill Gap Check -->
@@ -540,6 +520,77 @@
           </div>
         </div>
       </div>
+      </div><!-- /s1Create -->
+
+      <!-- Tab: Recent Assessments -->
+      <div class="s1-content" id="s1Recent" style="display:none">
+        <div class="panel">
+          <div class="panel-head">
+            <div><div class="panel-title">Recent Assessments</div></div>
+          </div>
+          <div class="panel-body no-pad">
+            <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>Assessment</th><th>Category</th><th>Population</th><th>Status</th><th>Completion</th><th>Closes</th></tr></thead>
+              <tbody>
+                <tr style="cursor:pointer" onclick="openAssessReport(0)"><td style="font-weight:500;color:var(--text-primary)">L2 Skills — Engineering Track</td><td>Cat A</td><td>324</td><td><span class="chip chip-green">Complete</span></td><td>94%</td><td>28 Feb</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(1)"><td style="font-weight:500;color:var(--text-primary)">L2 Skills — Digital & Tech</td><td>Cat A</td><td>118</td><td><span class="chip chip-green">Complete</span></td><td>89%</td><td>28 Feb</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(2)"><td style="font-weight:500;color:var(--text-primary)">AI & Data Literacy Post-Training</td><td>Cat C</td><td>72</td><td><span class="chip chip-teal"><span class="blink-dot"></span> Active</span></td><td>57%</td><td>15 Apr</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(3)"><td style="font-weight:500;color:var(--text-primary)">Leadership 360&deg;</td><td>Cat D</td><td>28</td><td><span class="chip chip-teal"><span class="blink-dot"></span> Active</span></td><td>42%</td><td>30 Apr</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(4)"><td style="font-weight:500;color:var(--text-primary)">ISO 45001 Certification</td><td>Cat A</td><td>96</td><td><span class="chip chip-amber">Upcoming</span></td><td>0%</td><td>15 May</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(5)"><td style="font-weight:500;color:var(--text-primary)">Wellbeing Pulse Q1</td><td>Cat E</td><td>812</td><td><span class="chip chip-green">Complete</span></td><td>89%</td><td>31 Mar</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(6)"><td style="font-weight:500;color:var(--text-primary)">BIM Competency Assessment</td><td>Cat A</td><td>48</td><td><span class="chip chip-green">Complete</span></td><td>92%</td><td>15 Jan</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(7)"><td style="font-weight:500;color:var(--text-primary)">New Hire Onboarding — Q1 Batch</td><td>Cat A</td><td>34</td><td><span class="chip chip-green">Complete</span></td><td>100%</td><td>31 Jan</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(8)"><td style="font-weight:500;color:var(--text-primary)">Safety Culture Baseline</td><td>Cat E</td><td>812</td><td><span class="chip chip-green">Complete</span></td><td>86%</td><td>15 Dec</td></tr>
+              </tbody>
+            </table>
+            </div>
+          </div>
+        </div>
+      </div><!-- /s1Recent -->
+
+      <!-- Tab: Summary -->
+      <div class="s1-content" id="s1Summary" style="display:none">
+        <div class="kpi-strip">
+          <div class="kpi-card"><div class="kpi-label">Assessment Cycles</div><div class="kpi-value teal">9</div></div>
+          <div class="kpi-card"><div class="kpi-label">Employees Assessed</div><div class="kpi-value green">681</div></div>
+          <div class="kpi-card"><div class="kpi-label">Avg Completion</div><div class="kpi-value gold">87%</div></div>
+          <div class="kpi-card"><div class="kpi-label">AI Confidence</div><div class="kpi-value purple">88%</div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+          <div class="panel"><div class="panel-head"><div class="panel-title">By Category</div></div><div class="panel-body">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--text-secondary);flex:1">Skill Gap Checks (Cat A)</span><span style="font-family:var(--font-display);font-weight:600;color:var(--teal)">4</span><div style="width:80px;height:6px;background:rgba(0,0,0,0.04);border-radius:3px;overflow:hidden"><div style="height:100%;width:44%;background:var(--teal);border-radius:3px"></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--text-secondary);flex:1">Training Effectiveness (Cat C)</span><span style="font-family:var(--font-display);font-weight:600;color:var(--teal)">1</span><div style="width:80px;height:6px;background:rgba(0,0,0,0.04);border-radius:3px;overflow:hidden"><div style="height:100%;width:11%;background:var(--teal);border-radius:3px"></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--text-secondary);flex:1">360° Feedback (Cat D)</span><span style="font-family:var(--font-display);font-weight:600;color:var(--amber)">1</span><div style="width:80px;height:6px;background:rgba(0,0,0,0.04);border-radius:3px;overflow:hidden"><div style="height:100%;width:11%;background:var(--amber);border-radius:3px"></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--text-secondary);flex:1">Organisation Surveys (Cat E)</span><span style="font-family:var(--font-display);font-weight:600;color:var(--green)">2</span><div style="width:80px;height:6px;background:rgba(0,0,0,0.04);border-radius:3px;overflow:hidden"><div style="height:100%;width:22%;background:var(--green);border-radius:3px"></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--text-secondary);flex:1">Psychometric (Cat B)</span><span style="font-family:var(--font-display);font-weight:600;color:var(--text-muted)">1</span><div style="width:80px;height:6px;background:rgba(0,0,0,0.04);border-radius:3px;overflow:hidden"><div style="height:100%;width:11%;background:var(--purple);border-radius:3px"></div></div></div>
+            </div>
+          </div></div>
+
+          <div class="panel"><div class="panel-head"><div class="panel-title">By Status</div></div><div class="panel-body">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:10px"><span class="chip chip-green">Complete</span><span style="font-family:var(--font-display);font-weight:600;flex:1;text-align:right">5</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span class="chip chip-teal"><span class="blink-dot"></span> Active</span><span style="font-family:var(--font-display);font-weight:600;flex:1;text-align:right">2</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span class="chip chip-amber">Upcoming</span><span style="font-family:var(--font-display);font-weight:600;flex:1;text-align:right">1</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span class="chip chip-purple">Draft</span><span style="font-family:var(--font-display);font-weight:600;flex:1;text-align:right">1</span></div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="panel" style="margin-top:14px"><div class="panel-head"><div class="panel-title">Coverage by Department</div></div><div class="panel-body">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <div style="padding:10px;border:1px solid var(--border);border-radius:8px"><div style="font-size:12px;font-weight:600;color:var(--text-primary)">Engineering</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">243 / 250 employees assessed (97%)</div><div style="height:4px;background:rgba(0,0,0,0.04);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;width:97%;background:var(--green);border-radius:2px"></div></div></div>
+            <div style="padding:10px;border:1px solid var(--border);border-radius:8px"><div style="font-size:12px;font-weight:600;color:var(--text-primary)">Project Delivery</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">188 / 200 employees assessed (94%)</div><div style="height:4px;background:rgba(0,0,0,0.04);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;width:94%;background:var(--green);border-radius:2px"></div></div></div>
+            <div style="padding:10px;border:1px solid var(--border);border-radius:8px"><div style="font-size:12px;font-weight:600;color:var(--text-primary)">Digital Delivery</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">102 / 120 employees assessed (85%)</div><div style="height:4px;background:rgba(0,0,0,0.04);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;width:85%;background:var(--amber);border-radius:2px"></div></div></div>
+            <div style="padding:10px;border:1px solid var(--border);border-radius:8px"><div style="font-size:12px;font-weight:600;color:var(--text-primary)">Corporate Services</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">72 / 100 employees assessed (72%)</div><div style="height:4px;background:rgba(0,0,0,0.04);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;width:72%;background:var(--amber);border-radius:2px"></div></div></div>
+            <div style="padding:10px;border:1px solid var(--border);border-radius:8px"><div style="font-size:12px;font-weight:600;color:var(--text-primary)">EHS & Risk</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">56 / 80 employees assessed (70%)</div><div style="height:4px;background:rgba(0,0,0,0.04);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;width:70%;background:var(--amber);border-radius:2px"></div></div></div>
+            <div style="padding:10px;border:1px solid var(--border);border-radius:8px"><div style="font-size:12px;font-weight:600;color:var(--text-primary)">HR & Talent</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">20 / 62 employees assessed (32%)</div><div style="height:4px;background:rgba(0,0,0,0.04);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;width:32%;background:var(--red);border-radius:2px"></div></div></div>
+          </div>
+        </div></div>
+      </div><!-- /s1Summary -->
+
     </div>
 
     <!-- Stage 2: Review & Refine -->
@@ -1396,6 +1447,15 @@ function showToast(msg){
   var t = document.getElementById('toast');
   t.textContent = msg; t.style.display = 'block'; t.classList.remove('hide');
   setTimeout(function(){ t.classList.add('hide'); setTimeout(function(){ t.style.display='none'; },300); },2500);
+}
+
+// ── STAGE 1 INNER TABS ──
+function switchS1Tab(tab,btn){
+  document.querySelectorAll('.s1-tab').forEach(function(t){t.style.color='var(--text-muted)';t.style.borderBottomColor='transparent'});
+  btn.style.color='var(--teal)';btn.style.borderBottomColor='var(--teal)';
+  document.querySelectorAll('.s1-content').forEach(function(c){c.style.display='none'});
+  var map={create:'s1Create',recent:'s1Recent',summary:'s1Summary'};
+  if(map[tab])document.getElementById(map[tab]).style.display='block';
 }
 
 // ── STAGE NAVIGATION ──
