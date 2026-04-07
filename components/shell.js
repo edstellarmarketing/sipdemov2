@@ -78,6 +78,7 @@ const EdstellarShell = (() => {
       { group: 'Setup', items: [
         { label: 'Organisation Setup', icon: 'grid', href: 'org-setup-v4.html' },
         { label: 'Data Import', icon: 'import', href: 'dataport.html', badge: '3' },
+        { label: 'Employee Assessments', icon: 'scope', href: 'employee-assessments.html' },
       ]},
       { group: 'Reports', items: [
         { label: 'Organization Setup Report', icon: 'report', href: 'report.html' },

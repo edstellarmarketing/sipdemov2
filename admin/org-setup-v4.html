@@ -513,7 +513,7 @@
       <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
       <div class="progress-stats">
         <span>Phase 1: <strong id="p1count">0/2</strong></span>
-        <span>Phase 2: <strong id="p2count">0/5</strong></span>
+        <span>Phase 2: <strong id="p2count">0/6</strong></span>
         <span>Phase 3: <strong id="p3count">0/5</strong></span>
         <span id="lastActivityLabel"></span>
       </div>
@@ -529,7 +529,15 @@
       </div>
     </div>
 
-
+    <!-- Demo Fill All -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;padding:14px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md)">
+      <div style="flex:1">
+        <div style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px">Quick Start Demo</div>
+        <div style="font-size:11.5px;color:var(--text-t)">Populate all 13 blocks with Arcova Infrastructure demo data, or reset everything.</div>
+      </div>
+      <button class="btn btn-sm btn-primary" onclick="autoFillAllBlocks()" style="white-space:nowrap"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;margin-right:4px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Demo Fill All Blocks</button>
+      <button class="btn btn-sm" onclick="resetAll()" style="white-space:nowrap;color:var(--red);border-color:var(--red)">Reset All</button>
+    </div>
 
     <!-- Phase 1: Who You Are -->
     <div class="phase-section">
@@ -909,7 +917,7 @@ function updateProgress(){
   document.getElementById('progressFill').style.width = pct+'%';
   document.getElementById('progressLabel').textContent = done+' of '+TOTAL_BLOCKS+' blocks \u00B7 '+pct+'%';
   document.getElementById('p1count').textContent = p1+'/2';
-  document.getElementById('p2count').textContent = p2+'/5';
+  document.getElementById('p2count').textContent = p2+'/6';
   document.getElementById('p3count').textContent = p3+'/5';
   var lastAct = state.lastGlobalSave ? 'Last activity: '+formatTimeAgo(state.lastGlobalSave) : '';
   document.getElementById('lastActivityLabel').textContent = lastAct;
@@ -7610,12 +7618,12 @@ function aiExtractBlockB(){
 }
 
 function autoFillAllBlocks(){
-  if(!confirm('This will populate all 13 blocks with Edstellar Infrastructure demo data. Existing data will be overwritten. Continue?')) return;
+  if(!confirm('This will populate all 13 blocks with Arcova Infrastructure demo data. Existing data will be overwritten. Continue?')) return;
   showToast('Auto-filling all blocks...');
   var delay = 0;
   var blocks = ['A','B','H','I','C','D','E','F','G','M','J','K','L'];
   var funcs = {
-    A: function(){ aiExtractBlockA_silent ? aiExtractBlockA_silent() : aiExtractBlockA(); },
+    A: autoFillBlockA,
     B: aiExtractBlockB,
     C: aiExtractBlockC,
     D: aiExtractBlockD,

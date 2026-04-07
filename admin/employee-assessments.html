@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Assessments · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<style>
+.content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+.page-body{max-width:1200px;margin:0 auto;padding:28px 32px 60px;width:100%}
+
+/* Header */
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.page-head h1{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text-primary);margin:0 0 4px}
+.page-head p{font-size:13px;color:var(--text-secondary);margin:0}
+
+/* Stats strip */
+.stats-strip{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.stat-card{flex:1;min-width:130px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stat-val{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text-primary)}
+.stat-label{font-size:11px;color:var(--text-muted);margin-top:2px}
+.stat-val.green{color:var(--green)}.stat-val.red{color:var(--red)}.stat-val.amber{color:var(--amber)}.stat-val.accent{color:var(--accent)}
+
+/* Action bar */
+.action-bar{display:flex;gap:8px;margin-bottom:18px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:10px;align-items:center;flex-wrap:wrap}
+.action-bar .ab-title{font-size:12px;font-weight:600;color:var(--text-secondary);margin-right:8px;white-space:nowrap}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+.filter-bar select,.filter-bar input{padding:7px 12px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:12px;color:var(--text-primary);background:var(--card)}
+.filter-bar input{flex:1;min-width:180px}
+.filter-bar select{min-width:140px}
+
+/* Employee row */
+.emp-row{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;transition:box-shadow .15s}
+.emp-row:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.emp-header{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none}
+.emp-header:hover{background:rgba(0,0,0,0.015)}
+.emp-chevron{width:16px;height:16px;stroke:var(--text-muted);fill:none;stroke-width:2;transition:transform .2s;flex-shrink:0}
+.emp-chevron.open{transform:rotate(90deg)}
+.emp-id{font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-muted);min-width:72px}
+.emp-name{font-size:13px;font-weight:600;color:var(--text-primary);min-width:160px}
+.emp-role{font-size:12px;color:var(--text-secondary);flex:1;min-width:120px}
+.emp-dept{font-size:11px;padding:3px 10px;border-radius:100px;border:1px solid var(--border);color:var(--text-secondary);white-space:nowrap}
+.emp-loc{font-size:11px;color:var(--text-muted);white-space:nowrap}
+.emp-avg{font-family:var(--font-display);font-size:13px;font-weight:600;min-width:48px;text-align:right}
+.emp-gap-count{font-size:10px;padding:2px 8px;border-radius:100px;white-space:nowrap;font-weight:500}
+.emp-gap-count.has-gaps{background:var(--red-bg);color:var(--red)}
+.emp-gap-count.no-gaps{background:var(--green-bg);color:var(--green)}
+
+/* Year section inside expanded row */
+.emp-body{display:none;padding:0 16px 16px;border-top:1px solid var(--border)}
+.year-section{margin-top:14px}
+.year-head{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.year-badge{font-size:10px;padding:2px 8px;border-radius:100px;font-weight:500}
+
+/* Skill assessment table */
+.skill-table{width:100%;border-collapse:collapse;font-size:12px}
+.skill-table th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);padding:6px 10px;border-bottom:1px solid var(--border)}
+.skill-table td{padding:7px 10px;border-bottom:1px solid rgba(0,0,0,0.04);color:var(--text-primary)}
+.skill-table tr:last-child td{border-bottom:none}
+.skill-name{font-weight:500}
+.score-cell{text-align:center;font-family:var(--font-display);font-weight:600;min-width:50px}
+.score-pill{display:inline-block;padding:2px 10px;border-radius:100px;font-size:11px;font-weight:600}
+.score-pill.met{background:var(--green-bg);color:var(--green)}
+.score-pill.close{background:var(--amber-bg);color:var(--amber)}
+.score-pill.gap{background:var(--red-bg);color:var(--red)}
+.score-pill.exceeded{background:rgba(59,130,246,0.08);color:#3B82F6}
+.gap-indicator{font-size:10px;color:var(--text-muted);text-align:center}
+.gap-indicator.positive{color:var(--green)}
+.gap-indicator.negative{color:var(--red)}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:20px}
+.pagination button{padding:6px 12px;border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text-secondary);background:var(--card);cursor:pointer;font-family:var(--font-body)}
+.pagination button:hover{border-color:var(--accent);color:var(--accent)}
+.pagination button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pagination button:disabled{opacity:0.4;cursor:default}
+.page-info{font-size:11px;color:var(--text-muted);padding:0 8px}
+
+/* Empty state */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px;text-align:center}
+.empty-icon{width:64px;height:64px;border-radius:16px;background:var(--accent-lt);display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:28px}
+.empty-title{font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--text-primary);margin-bottom:8px}
+.empty-desc{font-size:13px;color:var(--text-secondary);max-width:460px;line-height:1.6;margin-bottom:20px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);background:var(--card);color:var(--text-primary);transition:all .15s}
+.btn:hover{border-color:var(--text-muted)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#B8983F}
+.btn-sm{padding:6px 12px;font-size:11px}
+.btn-danger{color:var(--red);border-color:var(--red)}
+.btn-danger:hover{background:var(--red-bg)}
+
+/* ── MODAL OVERLAY ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:900;display:none;align-items:center;justify-content:center;animation:fadeIn .2s ease}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,0.18);width:90%;max-height:85vh;display:flex;flex-direction:column;overflow:hidden}
+.modal.sm{max-width:580px}
+.modal.lg{max-width:900px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-title{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-primary)}
+.modal-close{width:28px;height:28px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--text-muted)}
+.modal-close:hover{background:rgba(0,0,0,0.05);color:var(--text-primary)}
+.modal-body{padding:20px 22px;overflow-y:auto;flex:1}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+
+/* ── FORM ELEMENTS ── */
+.form-row{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.form-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px}
+.form-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
+.form-select,.form-input{padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:12px;color:var(--text-primary);background:var(--card)}
+.form-select:focus,.form-input:focus{outline:none;border-color:var(--accent)}
+
+/* Score input */
+.score-input{width:56px;text-align:center;font-family:var(--font-display);font-weight:600;font-size:13px;padding:6px 4px;border:1px solid var(--border);border-radius:6px}
+.score-input:focus{outline:none;border-color:var(--accent)}
+
+/* Dept entry table */
+.dept-table{width:100%;border-collapse:collapse;font-size:12px}
+.dept-table th{position:sticky;top:0;background:var(--card);text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);padding:8px 8px;border-bottom:2px solid var(--border);white-space:nowrap}
+.dept-table th.skill-col{text-align:center;min-width:60px;max-width:80px;font-size:9px;letter-spacing:0;writing-mode:horizontal-tb}
+.dept-table td{padding:6px 8px;border-bottom:1px solid rgba(0,0,0,0.04)}
+.dept-table td.emp-cell{white-space:nowrap;font-weight:500}
+.dept-table td.role-cell{font-size:11px;color:var(--text-secondary);white-space:nowrap}
+
+/* Upload zone */
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;position:relative;margin-bottom:16px}
+.upload-zone:hover{border-color:var(--accent);background:rgba(201,168,76,0.03)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-zone .uz-icon{font-size:28px;margin-bottom:8px}
+.upload-zone .uz-title{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.upload-zone .uz-desc{font-size:12px;color:var(--text-muted)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a1a;color:#fff;padding:10px 22px;border-radius:10px;font-size:12.5px;font-family:var(--font-body);z-index:9999;transition:transform .3s ease;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+<div class="content">
+<div class="page-body" id="mainBody"></div>
+</div>
+</main>
+
+<!-- Individual Entry Modal -->
+<div class="modal-overlay" id="modalIndividual">
+<div class="modal sm">
+  <div class="modal-head">
+    <div class="modal-title" id="indModalTitle">Input Assessment — Individual</div>
+    <button class="modal-close" onclick="closeModal('modalIndividual')">&times;</button>
+  </div>
+  <div class="modal-body" id="indModalBody"></div>
+  <div class="modal-footer" id="indModalFooter"></div>
+</div>
+</div>
+
+<!-- Department Entry Modal -->
+<div class="modal-overlay" id="modalDept">
+<div class="modal lg">
+  <div class="modal-head">
+    <div class="modal-title" id="deptModalTitle">Input Assessment — By Department</div>
+    <button class="modal-close" onclick="closeModal('modalDept')">&times;</button>
+  </div>
+  <div class="modal-body" id="deptModalBody" style="padding:0;overflow:auto"></div>
+  <div class="modal-footer" id="deptModalFooter"></div>
+</div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal-overlay" id="modalUpload">
+<div class="modal sm">
+  <div class="modal-head">
+    <div class="modal-title">Upload Assessments — Excel / CSV</div>
+    <button class="modal-close" onclick="closeModal('modalUpload')">&times;</button>
+  </div>
+  <div class="modal-body" id="uploadModalBody"></div>
+  <div class="modal-footer" id="uploadModalFooter"></div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal:'admin',activeNav:'Employee Assessments',
+  breadcrumbs:['Setup','Employee Assessments'],topbarActions:[]
+});
+
+// ═══════════════════════════════════════════════════════
+// CONSTANTS — synced with org-setup-v4.html Blocks J, L
+// ═══════════════════════════════════════════════════════
+var PROFICIENCY_LABELS={1:'L1 — Awareness',2:'L2 — Working',3:'L3 — Practitioner',4:'L4 — Expert'};
+
+var DEPT_SKILLS={
+  'Engineering':[
+    {name:'Structural Analysis',required:3},{name:'Concrete Design',required:3},
+    {name:'Foundation Design',required:2},{name:'Load Calculation',required:3},
+    {name:'Revit',required:2},{name:'Risk Assessment',required:2},
+    {name:'Geotechnical Assessment',required:2},{name:'Lean Construction',required:2},
+    {name:'Sustainability Assessment',required:2}
+  ],
+  'Project Delivery':[
+    {name:'Project Governance',required:3},{name:'Stakeholder Management',required:3},
+    {name:'Contract Management',required:3},{name:'Risk Assessment',required:3},
+    {name:'Team Leadership',required:2},{name:'Client Management',required:2},
+    {name:'Procurement',required:2}
+  ],
+  'Digital Delivery':[
+    {name:'Revit',required:3},{name:'Navisworks',required:3},
+    {name:'Digital Twin',required:2},{name:'Data Analysis',required:3},
+    {name:'Drone Surveying',required:1}
+  ],
+  'Corporate Services':[
+    {name:'Data Analysis',required:2},{name:'Contract Management',required:2},
+    {name:'Procurement',required:3},{name:'Stakeholder Management',required:2},
+    {name:'Risk Assessment',required:1}
+  ],
+  'EHS & Risk':[
+    {name:'ISO 45001',required:3},{name:'Risk Assessment',required:4},
+    {name:'Incident Investigation',required:3},{name:'Safety Leadership',required:3},
+    {name:'Stakeholder Management',required:2}
+  ],
+  'HR & Talent':[
+    {name:'Team Leadership',required:3},{name:'Stakeholder Management',required:3},
+    {name:'Data Analysis',required:2},{name:'Client Management',required:2}
+  ]
+};
+var LEVEL_REQ_BOOST={'L2':-1,'L3':0,'L4':1,'L5':1,'L6':2};
+var ROLE_SKILL_OVERRIDES={
+  'Senior Structural Engineer':[{name:'Structural Analysis',required:4},{name:'Concrete Design',required:3},{name:'Foundation Design',required:3},{name:'Load Calculation',required:4},{name:'Revit',required:2},{name:'Risk Assessment',required:2}],
+  'BIM Coordinator':[{name:'Revit',required:4},{name:'Navisworks',required:3},{name:'Digital Twin',required:2},{name:'Data Analysis',required:2}],
+  'Senior BIM Coordinator':[{name:'Revit',required:4},{name:'Navisworks',required:4},{name:'Digital Twin',required:3},{name:'Data Analysis',required:3}],
+  'Project Manager':[{name:'Project Governance',required:3},{name:'Stakeholder Management',required:3},{name:'Contract Management',required:3},{name:'Risk Assessment',required:3},{name:'Team Leadership',required:3}],
+  'Safety Manager':[{name:'ISO 45001',required:4},{name:'Risk Assessment',required:4},{name:'Incident Investigation',required:4},{name:'Safety Leadership',required:4},{name:'Stakeholder Management',required:3}],
+  'L&D Manager':[{name:'Team Leadership',required:3},{name:'Stakeholder Management',required:3},{name:'Data Analysis',required:2},{name:'Client Management',required:2}],
+  'Cloud Architect':[{name:'Digital Twin',required:3},{name:'Data Analysis',required:3},{name:'Risk Assessment',required:2},{name:'Revit',required:1}]
+};
+
+var STORAGE_KEY='sip_employee_assessments';
+var PAGE_SIZE=20;var currentPage=0;
+var filterDept='';var filterLoc='';var filterSearch='';
+var assessmentData=null;
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function openModal(id){document.getElementById(id).classList.add('open')}
+
+function loadAssessments(){
+  var r=null;try{r=sessionStorage.getItem(STORAGE_KEY)}catch(e){}
+  if(!r){try{r=localStorage.getItem(STORAGE_KEY)}catch(e){}}
+  if(r){try{return JSON.parse(r)}catch(e){}}return null;
+}
+function saveAssessments(data){
+  var j=JSON.stringify(data);
+  try{sessionStorage.setItem(STORAGE_KEY,j)}catch(e){}
+  try{localStorage.setItem(STORAGE_KEY,j)}catch(e){}
+}
+function loadEmployees(){
+  var r=null;try{r=sessionStorage.getItem('sip_dataport_import')}catch(e){}
+  if(!r){try{r=localStorage.getItem('sip_dataport_import')}catch(e){}}
+  if(r){try{var d=JSON.parse(r);return d.employees||[]}catch(e){}}return[];
+}
+function getSkillsForEmployee(emp){
+  var role=emp.role,dept=emp.department,level=emp.jobLevel||'L3';
+  var skills=ROLE_SKILL_OVERRIDES[role];
+  if(!skills){
+    var ds=DEPT_SKILLS[dept]||DEPT_SKILLS['Corporate Services'];
+    var boost=LEVEL_REQ_BOOST[level]||0;
+    skills=ds.map(function(s){return{name:s.name,required:Math.max(1,Math.min(4,s.required+boost))}});
+  }
+  return skills;
+}
+function findAssessmentRecord(empId){
+  if(!assessmentData||!assessmentData.records)return null;
+  for(var i=0;i<assessmentData.records.length;i++){
+    if(assessmentData.records[i].employeeId===empId)return assessmentData.records[i];
+  }
+  return null;
+}
+function ensureAssessmentData(){
+  if(!assessmentData){assessmentData={generatedAt:new Date().toISOString(),totalEmployees:0,records:[]};}
+}
+
+// ═══════════════════════════════════════════════════════
+// DEMO FILL
+// ═══════════════════════════════════════════════════════
+function demoFillAssessments(){
+  var employees=loadEmployees();
+  if(!employees.length){alert('No employee data found. Please run Demo Fill in Data Import first.');return}
+  var all=[];var seed=42;
+  function sr(){seed=(seed*16807+0)%2147483647;return(seed-1)/2147483646}
+  employees.forEach(function(emp){
+    var dept=emp.department,role=emp.role,level=emp.jobLevel||'L3';
+    var joinYear=parseInt((emp.joinDate||'2020').substring(0,4));
+    var skills=ROLE_SKILL_OVERRIDES[role];
+    if(!skills){var ds=DEPT_SKILLS[dept]||DEPT_SKILLS['Corporate Services'];var boost=LEVEL_REQ_BOOST[level]||0;skills=ds.map(function(s){return{name:s.name,required:Math.max(1,Math.min(4,s.required+boost))}});}
+    var numSkills=Math.min(skills.length,Math.max(4,Math.floor(sr()*3)+4));
+    var empSkills=skills.slice(0,numSkills);
+    var yearly=[];
+    for(var y=joinYear;y<=2024;y++){
+      var yearsIn=y-joinYear;
+      var ss=empSkills.map(function(sk){
+        var base=Math.max(1,sk.required-2);
+        var growth=Math.min(sk.required+1,base+Math.floor(yearsIn*0.4+sr()*1.2));
+        var managed=Math.max(1,Math.min(4,growth+(sr()>0.7?1:0)-(sr()>0.85?1:0)));
+        if(level==='L5'||level==='L6')managed=Math.min(4,managed+1);
+        if(level==='L2')managed=Math.max(1,managed-(sr()>0.5?1:0));
+        return{skillName:sk.name,requiredScore:sk.required,managedScore:managed};
+      });
+      yearly.push({year:y,skills:ss});
+    }
+    all.push({employeeId:emp.id,employeeName:emp.fullName,role:role,department:dept,location:emp.location,jobLevel:level,joinYear:joinYear,assessments:yearly});
+  });
+  var data={generatedAt:new Date().toISOString(),totalEmployees:all.length,records:all};
+  saveAssessments(data);assessmentData=data;currentPage=0;render();
+  showToast(all.length+' employee assessments generated');
+}
+function clearAssessments(){
+  if(!confirm('Clear all assessment data?'))return;
+  try{sessionStorage.removeItem(STORAGE_KEY)}catch(e){}
+  try{localStorage.removeItem(STORAGE_KEY)}catch(e){}
+  assessmentData=null;render();
+}
+
+// ═══════════════════════════════════════════════════════
+// 1. INDIVIDUAL EMPLOYEE ENTRY
+// ═══════════════════════════════════════════════════════
+var indSelectedEmp=null;var indSelectedYear=2024;
+
+function openIndividualEntry(){
+  var emps=loadEmployees();
+  if(!emps.length){alert('No employee data. Run Demo Fill in Data Import first.');return}
+  indSelectedEmp=null;indSelectedYear=2024;
+  renderIndStep1(emps);
+  openModal('modalIndividual');
+}
+
+function renderIndStep1(emps){
+  document.getElementById('indModalTitle').textContent='Input Assessment — Select Employee';
+  var h='<div class="form-row"><div class="form-group"><label class="form-label">Search Employee</label>';
+  h+='<input class="form-input" id="indEmpSearch" placeholder="Type name or ID..." oninput="filterIndEmps()"></div>';
+  h+='<div class="form-group" style="max-width:120px"><label class="form-label">Year</label>';
+  h+='<select class="form-select" id="indYearSel" onchange="indSelectedYear=parseInt(this.value)">';
+  for(var y=2024;y>=2010;y--)h+='<option value="'+y+'"'+(y===indSelectedYear?' selected':'')+'>'+y+'</option>';
+  h+='</select></div></div>';
+  h+='<div id="indEmpList" style="max-height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:8px"></div>';
+  document.getElementById('indModalBody').innerHTML=h;
+  document.getElementById('indModalFooter').innerHTML='<button class="btn btn-sm" onclick="closeModal(\'modalIndividual\')">Cancel</button>';
+  setTimeout(function(){filterIndEmps()},50);
+}
+
+function filterIndEmps(){
+  var q=(document.getElementById('indEmpSearch').value||'').toLowerCase();
+  var emps=loadEmployees();
+  var filtered=emps;
+  if(q)filtered=emps.filter(function(e){return e.fullName.toLowerCase().indexOf(q)>=0||e.id.toLowerCase().indexOf(q)>=0||e.role.toLowerCase().indexOf(q)>=0});
+  var shown=filtered.slice(0,50);
+  var h='';
+  if(!shown.length){h='<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px">No employees match</div>';}
+  shown.forEach(function(e){
+    h+='<div style="padding:8px 14px;border-bottom:1px solid rgba(0,0,0,0.04);cursor:pointer;display:flex;align-items:center;gap:10px;font-size:12px" onclick="selectIndEmp(\''+esc(e.id)+'\')" onmouseover="this.style.background=\'rgba(0,0,0,0.02)\'" onmouseout="this.style.background=\'\'">';
+    h+='<span style="font-family:var(--font-mono,monospace);font-size:10px;color:var(--text-muted);min-width:68px">'+esc(e.id)+'</span>';
+    h+='<span style="font-weight:600;color:var(--text-primary);min-width:140px">'+esc(e.fullName)+'</span>';
+    h+='<span style="color:var(--text-secondary);flex:1">'+esc(e.role)+'</span>';
+    h+='<span style="color:var(--text-muted);font-size:11px">'+esc(e.department)+'</span>';
+    h+='</div>';
+  });
+  if(filtered.length>50)h+='<div style="padding:8px 14px;text-align:center;color:var(--text-muted);font-size:11px">Showing 50 of '+filtered.length+' — refine your search</div>';
+  document.getElementById('indEmpList').innerHTML=h;
+}
+
+function selectIndEmp(empId){
+  var emps=loadEmployees();
+  indSelectedEmp=emps.find(function(e){return e.id===empId});
+  if(!indSelectedEmp)return;
+  indSelectedYear=parseInt(document.getElementById('indYearSel').value);
+  renderIndStep2();
+}
+
+function renderIndStep2(){
+  var emp=indSelectedEmp;
+  var skills=getSkillsForEmployee(emp);
+  document.getElementById('indModalTitle').textContent='Assessment — '+emp.fullName+' ('+indSelectedYear+')';
+
+  // Load existing scores if any
+  var existing=findAssessmentRecord(emp.id);
+  var existingYear=null;
+  if(existing){
+    existingYear=existing.assessments.find(function(a){return a.year===indSelectedYear});
+  }
+
+  var h='<div style="display:flex;gap:16px;margin-bottom:16px;font-size:12px;color:var(--text-secondary)">';
+  h+='<span><strong>ID:</strong> '+esc(emp.id)+'</span>';
+  h+='<span><strong>Role:</strong> '+esc(emp.role)+'</span>';
+  h+='<span><strong>Dept:</strong> '+esc(emp.department)+'</span>';
+  h+='<span><strong>Level:</strong> '+esc(emp.jobLevel)+'</span></div>';
+
+  h+='<table class="skill-table"><thead><tr><th>Skill</th><th style="text-align:center">Required (L1-L4)</th><th style="text-align:center">Achieved Score</th></tr></thead><tbody>';
+  skills.forEach(function(sk,i){
+    var existVal='';
+    if(existingYear){
+      var es=existingYear.skills.find(function(s){return s.skillName===sk.name});
+      if(es)existVal=es.managedScore;
+    }
+    h+='<tr>';
+    h+='<td class="skill-name">'+esc(sk.name)+'</td>';
+    h+='<td class="score-cell">'+sk.required+'</td>';
+    h+='<td class="score-cell"><input class="score-input" type="number" min="1" max="4" id="indScore_'+i+'" value="'+existVal+'" placeholder="-" data-skill="'+esc(sk.name)+'" data-req="'+sk.required+'"></td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table>';
+  h+='<div style="margin-top:10px;font-size:11px;color:var(--text-muted)">Score scale: 1 = Awareness, 2 = Working, 3 = Practitioner, 4 = Expert</div>';
+
+  document.getElementById('indModalBody').innerHTML=h;
+  document.getElementById('indModalFooter').innerHTML='<button class="btn btn-sm" onclick="renderIndStep1(loadEmployees())">Back</button><button class="btn btn-primary btn-sm" onclick="saveIndividualEntry()">Save Assessment</button>';
+}
+
+function saveIndividualEntry(){
+  var emp=indSelectedEmp;
+  var skills=getSkillsForEmployee(emp);
+  var yearSkills=[];
+  var valid=true;
+  skills.forEach(function(sk,i){
+    var el=document.getElementById('indScore_'+i);
+    if(!el)return;
+    var val=parseInt(el.value);
+    if(!val||val<1||val>4){valid=false;el.style.borderColor='var(--red)';return}
+    el.style.borderColor='';
+    yearSkills.push({skillName:sk.name,requiredScore:sk.required,managedScore:val});
+  });
+  if(!valid||!yearSkills.length){showToast('Please enter valid scores (1-4) for all skills');return}
+
+  ensureAssessmentData();
+  var rec=findAssessmentRecord(emp.id);
+  if(!rec){
+    rec={employeeId:emp.id,employeeName:emp.fullName,role:emp.role,department:emp.department,location:emp.location,jobLevel:emp.jobLevel,joinYear:parseInt((emp.joinDate||'2020').substring(0,4)),assessments:[]};
+    assessmentData.records.push(rec);
+  }
+  // Replace or add year
+  var idx=-1;
+  for(var i=0;i<rec.assessments.length;i++){if(rec.assessments[i].year===indSelectedYear){idx=i;break}}
+  if(idx>=0)rec.assessments[idx]={year:indSelectedYear,skills:yearSkills};
+  else{rec.assessments.push({year:indSelectedYear,skills:yearSkills});rec.assessments.sort(function(a,b){return a.year-b.year})}
+  assessmentData.totalEmployees=assessmentData.records.length;
+  saveAssessments(assessmentData);
+  closeModal('modalIndividual');render();
+  showToast('Assessment saved for '+emp.fullName+' ('+indSelectedYear+')');
+}
+
+// ═══════════════════════════════════════════════════════
+// 2. DEPARTMENT BULK ENTRY
+// ═══════════════════════════════════════════════════════
+var deptEntryDept='';var deptEntryYear=2024;var deptEntryEmps=[];var deptEntrySkills=[];
+
+function openDeptEntry(){
+  var emps=loadEmployees();
+  if(!emps.length){alert('No employee data. Run Demo Fill in Data Import first.');return}
+  var depts={};emps.forEach(function(e){depts[e.department]=1});
+  deptEntryDept=Object.keys(depts).sort()[0]||'';deptEntryYear=2024;
+
+  var h='<div style="padding:20px 22px"><div class="form-row">';
+  h+='<div class="form-group"><label class="form-label">Department</label><select class="form-select" id="deptSelDept" onchange="deptEntryDept=this.value">';
+  Object.keys(depts).sort().forEach(function(d){h+='<option value="'+esc(d)+'"'+(d===deptEntryDept?' selected':'')+'>'+esc(d)+'</option>'});
+  h+='</select></div>';
+  h+='<div class="form-group" style="max-width:120px"><label class="form-label">Year</label><select class="form-select" id="deptSelYear" onchange="deptEntryYear=parseInt(this.value)">';
+  for(var y=2024;y>=2010;y--)h+='<option value="'+y+'"'+(y===deptEntryYear?' selected':'')+'>'+y+'</option>';
+  h+='</select></div>';
+  h+='<div class="form-group" style="max-width:140px;justify-content:flex-end"><button class="btn btn-primary btn-sm" onclick="loadDeptEntryGrid()" style="margin-top:auto">Load Employees</button></div>';
+  h+='</div></div>';
+  h+='<div id="deptGrid"></div>';
+
+  document.getElementById('deptModalBody').innerHTML=h;
+  document.getElementById('deptModalFooter').innerHTML='<button class="btn btn-sm" onclick="closeModal(\'modalDept\')">Cancel</button><button class="btn btn-primary btn-sm" onclick="saveDeptEntry()">Save All</button>';
+  openModal('modalDept');
+}
+
+function loadDeptEntryGrid(){
+  deptEntryDept=document.getElementById('deptSelDept').value;
+  deptEntryYear=parseInt(document.getElementById('deptSelYear').value);
+  var emps=loadEmployees().filter(function(e){return e.department===deptEntryDept});
+  deptEntryEmps=emps;
+
+  // Get skills for this department
+  var ds=DEPT_SKILLS[deptEntryDept]||DEPT_SKILLS['Corporate Services'];
+  deptEntrySkills=ds;
+
+  var h='<div style="overflow:auto;max-height:400px"><table class="dept-table"><thead><tr>';
+  h+='<th style="min-width:70px">ID</th><th style="min-width:140px">Name</th><th style="min-width:120px">Role</th>';
+  ds.forEach(function(sk){h+='<th class="skill-col" title="'+esc(sk.name)+' (Required: '+sk.required+')">'+esc(sk.name)+'<br><span style="color:var(--accent);font-weight:700">Req: '+sk.required+'</span></th>'});
+  h+='</tr></thead><tbody>';
+
+  emps.forEach(function(emp,ei){
+    var boost=LEVEL_REQ_BOOST[emp.jobLevel]||0;
+    var override=ROLE_SKILL_OVERRIDES[emp.role];
+    // Load existing
+    var existing=findAssessmentRecord(emp.id);
+    var existYear=existing?existing.assessments.find(function(a){return a.year===deptEntryYear}):null;
+
+    h+='<tr>';
+    h+='<td class="emp-cell" style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono,monospace)">'+esc(emp.id)+'</td>';
+    h+='<td class="emp-cell">'+esc(emp.fullName)+'</td>';
+    h+='<td class="role-cell">'+esc(emp.role)+' <span style="color:var(--text-muted)">('+esc(emp.jobLevel)+')</span></td>';
+    ds.forEach(function(sk,si){
+      var req=override?null:Math.max(1,Math.min(4,sk.required+boost));
+      if(override){var ov=override.find(function(o){return o.name===sk.name});req=ov?ov.required:Math.max(1,Math.min(4,sk.required+boost))}
+      var existVal='';
+      if(existYear){var es=existYear.skills.find(function(s){return s.skillName===sk.name});if(es)existVal=es.managedScore}
+      h+='<td style="text-align:center"><input class="score-input" type="number" min="1" max="4" id="dg_'+ei+'_'+si+'" value="'+existVal+'" placeholder="-" data-req="'+req+'"></td>';
+    });
+    h+='</tr>';
+  });
+  h+='</tbody></table></div>';
+  if(emps.length>20)h+='<div style="padding:8px 22px;font-size:11px;color:var(--text-muted)">'+emps.length+' employees in '+esc(deptEntryDept)+'</div>';
+
+  document.getElementById('deptGrid').innerHTML=h;
+}
+
+function saveDeptEntry(){
+  if(!deptEntryEmps.length){showToast('Load employees first');return}
+  ensureAssessmentData();
+  var saved=0;
+  deptEntryEmps.forEach(function(emp,ei){
+    var boost=LEVEL_REQ_BOOST[emp.jobLevel]||0;
+    var override=ROLE_SKILL_OVERRIDES[emp.role];
+    var yearSkills=[];
+    deptEntrySkills.forEach(function(sk,si){
+      var el=document.getElementById('dg_'+ei+'_'+si);
+      if(!el||!el.value)return;
+      var val=parseInt(el.value);if(val<1||val>4)return;
+      var req=override?null:Math.max(1,Math.min(4,sk.required+boost));
+      if(override){var ov=override.find(function(o){return o.name===sk.name});req=ov?ov.required:Math.max(1,Math.min(4,sk.required+boost))}
+      yearSkills.push({skillName:sk.name,requiredScore:req,managedScore:val});
+    });
+    if(!yearSkills.length)return;
+
+    var rec=findAssessmentRecord(emp.id);
+    if(!rec){rec={employeeId:emp.id,employeeName:emp.fullName,role:emp.role,department:emp.department,location:emp.location,jobLevel:emp.jobLevel,joinYear:parseInt((emp.joinDate||'2020').substring(0,4)),assessments:[]};assessmentData.records.push(rec)}
+    var idx=-1;for(var i=0;i<rec.assessments.length;i++){if(rec.assessments[i].year===deptEntryYear){idx=i;break}}
+    if(idx>=0)rec.assessments[idx]={year:deptEntryYear,skills:yearSkills};
+    else{rec.assessments.push({year:deptEntryYear,skills:yearSkills});rec.assessments.sort(function(a,b){return a.year-b.year})}
+    saved++;
+  });
+  assessmentData.totalEmployees=assessmentData.records.length;
+  saveAssessments(assessmentData);
+  closeModal('modalDept');render();
+  showToast(saved+' employees saved for '+deptEntryDept+' ('+deptEntryYear+')');
+}
+
+// ═══════════════════════════════════════════════════════
+// 3. EXCEL / CSV UPLOAD
+// ═══════════════════════════════════════════════════════
+function openUploadModal(){
+  var h='<div class="upload-zone" id="uploadZone">';
+  h+='<input type="file" accept=".csv,.xlsx,.xls" onchange="handleFileUpload(this)">';
+  h+='<div class="uz-icon">📄</div>';
+  h+='<div class="uz-title">Drop your assessment file here or click to browse</div>';
+  h+='<div class="uz-desc">Accepts .csv files matching the template format</div>';
+  h+='</div>';
+  h+='<div style="margin-bottom:16px;padding:14px 16px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:8px">';
+  h+='<div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:6px">Template Format</div>';
+  h+='<div style="font-size:11px;color:var(--text-secondary);line-height:1.6">The CSV must have these columns:<br>';
+  h+='<code style="font-size:10px;background:rgba(0,0,0,0.04);padding:1px 4px;border-radius:3px">Employee_ID, Employee_Name, Role, Department, Location, Year, Skill_Name, Required_Score, Achieved_Score</code></div>';
+  h+='<div style="font-size:11px;color:var(--text-muted);margin-top:6px">Scores must be 1-4 (L1 Awareness to L4 Expert). One row per employee per skill per year.</div>';
+  h+='</div>';
+  h+='<div id="uploadPreview"></div>';
+
+  document.getElementById('uploadModalBody').innerHTML=h;
+  document.getElementById('uploadModalFooter').innerHTML='<button class="btn btn-sm" onclick="downloadTemplate()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Template</button><button class="btn btn-sm" onclick="closeModal(\'modalUpload\')">Cancel</button>';
+  openModal('modalUpload');
+}
+
+function downloadTemplate(){
+  var emps=loadEmployees().slice(0,20); // Sample 20 employees
+  var lines=['Employee_ID,Employee_Name,Role,Department,Location,Year,Skill_Name,Required_Score,Achieved_Score'];
+  emps.forEach(function(emp){
+    var skills=getSkillsForEmployee(emp);
+    var numSkills=Math.min(skills.length,5);
+    for(var i=0;i<numSkills;i++){
+      lines.push([emp.id,'"'+emp.fullName+'"','"'+emp.role+'"','"'+emp.department+'"',emp.location,2024,'"'+skills[i].name+'"',skills[i].required,''].join(','));
+    }
+  });
+  var blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='assessment_template.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('Template downloaded — fill the Achieved_Score column');
+}
+
+function handleFileUpload(input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var text=e.target.result;
+    parseAndPreviewCSV(text);
+  };
+  reader.readAsText(file);
+}
+
+function parseAndPreviewCSV(text){
+  var lines=text.split(/\r?\n/).filter(function(l){return l.trim()});
+  if(lines.length<2){showToast('File is empty or has no data rows');return}
+
+  // Parse header
+  var header=parseCSVLine(lines[0]);
+  var colMap={};
+  header.forEach(function(h,i){colMap[h.trim()]=i});
+
+  var required=['Employee_ID','Year','Skill_Name','Required_Score','Achieved_Score'];
+  var missing=required.filter(function(r){return colMap[r]===undefined});
+  if(missing.length){
+    document.getElementById('uploadPreview').innerHTML='<div style="padding:12px;background:var(--red-bg);border:1px solid rgba(239,68,68,0.3);border-radius:6px;font-size:12px;color:var(--red)">Missing columns: '+missing.join(', ')+'</div>';
+    return;
+  }
+
+  // Parse rows
+  var parsed=[];var errors=0;
+  for(var i=1;i<lines.length;i++){
+    var cols=parseCSVLine(lines[i]);
+    var empId=(cols[colMap['Employee_ID']]||'').trim();
+    var year=parseInt(cols[colMap['Year']]);
+    var skillName=(cols[colMap['Skill_Name']]||'').trim();
+    var reqScore=parseInt(cols[colMap['Required_Score']]);
+    var achScore=parseInt(cols[colMap['Achieved_Score']]);
+    if(!empId||!year||!skillName||!reqScore||!achScore){errors++;continue}
+    if(achScore<1||achScore>4||reqScore<1||reqScore>4){errors++;continue}
+    parsed.push({
+      empId:empId,
+      empName:(cols[colMap['Employee_Name']]||'').trim(),
+      role:(cols[colMap['Role']]||'').trim(),
+      department:(cols[colMap['Department']]||'').trim(),
+      location:(cols[colMap['Location']]||'').trim(),
+      year:year,skillName:skillName,requiredScore:reqScore,achievedScore:achScore
+    });
+  }
+
+  var empCount={};parsed.forEach(function(p){empCount[p.empId]=1});
+  var h='<div style="padding:12px;background:var(--green-bg);border:1px solid rgba(22,163,74,0.2);border-radius:6px;font-size:12px;color:var(--green);margin-bottom:10px">';
+  h+='Parsed <strong>'+parsed.length+'</strong> assessment entries for <strong>'+Object.keys(empCount).length+'</strong> employees';
+  if(errors)h+=' <span style="color:var(--amber)">('+errors+' rows skipped due to errors)</span>';
+  h+='</div>';
+  document.getElementById('uploadPreview').innerHTML=h;
+
+  // Update footer with import button
+  document.getElementById('uploadModalFooter').innerHTML='<button class="btn btn-sm" onclick="downloadTemplate()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Template</button><button class="btn btn-sm" onclick="closeModal(\'modalUpload\')">Cancel</button><button class="btn btn-primary btn-sm" onclick="importCSVData()">Import '+parsed.length+' Entries</button>';
+
+  // Store parsed data for import
+  window._parsedCSV=parsed;
+}
+
+function parseCSVLine(line){
+  var result=[];var current='';var inQuotes=false;
+  for(var i=0;i<line.length;i++){
+    var c=line[i];
+    if(c==='"'){inQuotes=!inQuotes}
+    else if(c===','&&!inQuotes){result.push(current);current=''}
+    else{current+=c}
+  }
+  result.push(current);
+  return result;
+}
+
+function importCSVData(){
+  var parsed=window._parsedCSV;
+  if(!parsed||!parsed.length){showToast('No data to import');return}
+
+  ensureAssessmentData();
+  var emps=loadEmployees();
+  // Group by employee + year
+  var grouped={};
+  parsed.forEach(function(p){
+    var key=p.empId+'_'+p.year;
+    if(!grouped[key])grouped[key]={empId:p.empId,empName:p.empName,role:p.role,department:p.department,location:p.location,year:p.year,skills:[]};
+    grouped[key].skills.push({skillName:p.skillName,requiredScore:p.requiredScore,managedScore:p.achievedScore});
+  });
+
+  var savedCount=0;
+  Object.keys(grouped).forEach(function(key){
+    var g=grouped[key];
+    var emp=emps.find(function(e){return e.id===g.empId});
+
+    var rec=findAssessmentRecord(g.empId);
+    if(!rec){
+      rec={employeeId:g.empId,employeeName:g.empName||(emp?emp.fullName:''),role:g.role||(emp?emp.role:''),department:g.department||(emp?emp.department:''),location:g.location||(emp?emp.location:''),jobLevel:emp?emp.jobLevel:'L3',joinYear:emp?parseInt((emp.joinDate||'2020').substring(0,4)):2020,assessments:[]};
+      assessmentData.records.push(rec);
+    }
+    var idx=-1;for(var i=0;i<rec.assessments.length;i++){if(rec.assessments[i].year===g.year){idx=i;break}}
+    if(idx>=0)rec.assessments[idx]={year:g.year,skills:g.skills};
+    else{rec.assessments.push({year:g.year,skills:g.skills});rec.assessments.sort(function(a,b){return a.year-b.year})}
+    savedCount++;
+  });
+
+  assessmentData.totalEmployees=assessmentData.records.length;
+  saveAssessments(assessmentData);
+  closeModal('modalUpload');render();
+  showToast('Imported '+savedCount+' assessment records from CSV');
+  window._parsedCSV=null;
+}
+
+// ═══════════════════════════════════════════════════════
+// FILTERING
+// ═══════════════════════════════════════════════════════
+function getFilteredRecords(){
+  if(!assessmentData)return[];
+  var recs=assessmentData.records;
+  if(filterDept)recs=recs.filter(function(r){return r.department===filterDept});
+  if(filterLoc)recs=recs.filter(function(r){return r.location===filterLoc});
+  if(filterSearch){var q=filterSearch.toLowerCase();recs=recs.filter(function(r){return r.employeeName.toLowerCase().indexOf(q)>=0||r.employeeId.toLowerCase().indexOf(q)>=0||r.role.toLowerCase().indexOf(q)>=0})}
+  return recs;
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function render(){
+  var body=document.getElementById('mainBody');
+  assessmentData=loadAssessments();
+
+  if(!assessmentData||!assessmentData.records||!assessmentData.records.length){
+    body.innerHTML=renderEmptyState();return;
+  }
+
+  var html='';
+
+  // Header
+  html+='<div class="page-head"><div><h1>Employee Assessments</h1><p>Yearly skill assessment scores — synced from Organisation Setup &amp; Data Import</p></div>';
+  html+='<div style="display:flex;gap:8px;flex-wrap:wrap">';
+  html+='<button class="btn btn-primary btn-sm" onclick="demoFillAssessments()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Regenerate Demo</button>';
+  html+='<button class="btn btn-danger btn-sm" onclick="clearAssessments()">Clear Data</button>';
+  html+='</div></div>';
+
+  // Stats
+  var recs=assessmentData.records;
+  var totalGaps=0,totalScores=0,totalSkillChecks=0,gapEmployees=0;
+  recs.forEach(function(r){var hasGap=false;if(r.assessments.length){var latest=r.assessments[r.assessments.length-1];latest.skills.forEach(function(sk){totalSkillChecks++;totalScores+=sk.managedScore;if(sk.managedScore<sk.requiredScore){totalGaps++;hasGap=true}})}if(hasGap)gapEmployees++});
+  var avgScore=totalSkillChecks?(totalScores/totalSkillChecks).toFixed(1):'0';
+  var gapPct=recs.length?Math.round(gapEmployees/recs.length*100):0;
+
+  html+='<div class="stats-strip">';
+  html+='<div class="stat-card"><div class="stat-val">'+recs.length+'</div><div class="stat-label">Employees Assessed</div></div>';
+  html+='<div class="stat-card"><div class="stat-val accent">'+avgScore+'</div><div class="stat-label">Avg Proficiency (Latest)</div></div>';
+  html+='<div class="stat-card"><div class="stat-val red">'+totalGaps+'</div><div class="stat-label">Skill Gaps (Latest)</div></div>';
+  html+='<div class="stat-card"><div class="stat-val amber">'+gapPct+'%</div><div class="stat-label">Employees with Gaps</div></div>';
+  html+='</div>';
+
+  // Action bar — Input Modes
+  html+='<div class="action-bar">';
+  html+='<span class="ab-title">Input Assessments:</span>';
+  html+='<button class="btn btn-sm" onclick="openIndividualEntry()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Individual Employee</button>';
+  html+='<button class="btn btn-sm" onclick="openDeptEntry()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> By Department</button>';
+  html+='<button class="btn btn-sm" onclick="openUploadModal()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Upload Excel / CSV</button>';
+  html+='</div>';
+
+  // Filters
+  var depts={},locs={};recs.forEach(function(r){depts[r.department]=1;locs[r.location]=1});
+  html+='<div class="filter-bar">';
+  html+='<input type="text" placeholder="Search by name, ID, or role..." id="fSearch" value="'+esc(filterSearch)+'" oninput="filterSearch=this.value;currentPage=0;render()">';
+  html+='<select id="fDept" onchange="filterDept=this.value;currentPage=0;render()"><option value="">All Departments</option>';
+  Object.keys(depts).sort().forEach(function(d){html+='<option value="'+esc(d)+'"'+(filterDept===d?' selected':'')+'>'+esc(d)+'</option>'});
+  html+='</select>';
+  html+='<select id="fLoc" onchange="filterLoc=this.value;currentPage=0;render()"><option value="">All Locations</option>';
+  Object.keys(locs).sort().forEach(function(l){html+='<option value="'+esc(l)+'"'+(filterLoc===l?' selected':'')+'>'+esc(l)+'</option>'});
+  html+='</select></div>';
+
+  // Employee list
+  var filtered=getFilteredRecords();
+  var totalPages=Math.ceil(filtered.length/PAGE_SIZE);
+  if(currentPage>=totalPages)currentPage=Math.max(0,totalPages-1);
+  var start=currentPage*PAGE_SIZE;
+  var pageRecs=filtered.slice(start,start+PAGE_SIZE);
+
+  if(!pageRecs.length)html+='<div style="padding:40px;text-align:center;color:var(--text-muted);font-size:13px">No employees match your filters.</div>';
+
+  pageRecs.forEach(function(r,idx){
+    var globalIdx=start+idx;
+    var latestGaps=0,latestAvg=0;
+    if(r.assessments.length){var latest=r.assessments[r.assessments.length-1];var sum=0;latest.skills.forEach(function(sk){sum+=sk.managedScore;if(sk.managedScore<sk.requiredScore)latestGaps++});latestAvg=latest.skills.length?(sum/latest.skills.length).toFixed(1):'0'}
+    var avgColor=latestAvg>=3?'green':latestAvg>=2?'amber':'red';
+
+    html+='<div class="emp-row" id="empRow_'+globalIdx+'">';
+    html+='<div class="emp-header" onclick="toggleEmp('+globalIdx+')">';
+    html+='<svg class="emp-chevron" id="empChev_'+globalIdx+'" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>';
+    html+='<span class="emp-id">'+esc(r.employeeId)+'</span>';
+    html+='<span class="emp-name">'+esc(r.employeeName)+'</span>';
+    html+='<span class="emp-role">'+esc(r.role)+'</span>';
+    html+='<span class="emp-dept">'+esc(r.department)+'</span>';
+    html+='<span class="emp-loc">'+esc(r.location)+'</span>';
+    html+='<span class="emp-avg '+avgColor+'">'+latestAvg+'</span>';
+    html+=latestGaps>0?'<span class="emp-gap-count has-gaps">'+latestGaps+' gap'+(latestGaps>1?'s':'')+'</span>':'<span class="emp-gap-count no-gaps">On track</span>';
+    html+='</div>';
+
+    html+='<div class="emp-body" id="empBody_'+globalIdx+'">';
+    for(var ai=r.assessments.length-1;ai>=0;ai--){
+      var a=r.assessments[ai];var yrGaps=0,yrExceeded=0;
+      a.skills.forEach(function(sk){if(sk.managedScore>sk.requiredScore)yrExceeded++;else if(sk.managedScore<sk.requiredScore)yrGaps++});
+      var yrLabel=yrGaps===0?'All met':yrGaps+' gap'+(yrGaps>1?'s':'');
+      var yrCls=yrGaps===0?'background:var(--green-bg);color:var(--green)':'background:var(--red-bg);color:var(--red)';
+
+      html+='<div class="year-section"><div class="year-head">'+a.year+' Assessment <span class="year-badge" style="'+yrCls+'">'+yrLabel+'</span>';
+      if(yrExceeded)html+=' <span class="year-badge" style="background:rgba(59,130,246,0.08);color:#3B82F6">'+yrExceeded+' exceeded</span>';
+      html+='</div>';
+      html+='<table class="skill-table"><thead><tr><th>Skill</th><th style="text-align:center">Required</th><th style="text-align:center">Achieved</th><th style="text-align:center">Gap</th></tr></thead><tbody>';
+      a.skills.forEach(function(sk){
+        var diff=sk.managedScore-sk.requiredScore;
+        var pillCls=diff>0?'exceeded':diff===0?'met':diff===-1?'close':'gap';
+        var gapCls=diff>0?'positive':diff<0?'negative':'';
+        var gapText=diff>0?'+'+diff:diff===0?'-':String(diff);
+        html+='<tr><td class="skill-name">'+esc(sk.skillName)+'</td><td class="score-cell">'+sk.requiredScore+'</td><td class="score-cell"><span class="score-pill '+pillCls+'">'+sk.managedScore+'</span></td><td class="gap-indicator '+gapCls+'">'+gapText+'</td></tr>';
+      });
+      html+='</tbody></table></div>';
+    }
+    html+='</div></div>';
+  });
+
+  // Pagination
+  if(totalPages>1){
+    html+='<div class="pagination">';
+    html+='<button onclick="currentPage=0;render()" '+(currentPage===0?'disabled':'')+'>First</button>';
+    html+='<button onclick="currentPage=Math.max(0,currentPage-1);render()" '+(currentPage===0?'disabled':'')+'>Prev</button>';
+    var startP=Math.max(0,currentPage-3);var endP=Math.min(totalPages,startP+7);
+    for(var p=startP;p<endP;p++){html+='<button onclick="currentPage='+p+';render()" class="'+(p===currentPage?'active':'')+'">'+(p+1)+'</button>'}
+    html+='<button onclick="currentPage=Math.min('+(totalPages-1)+',currentPage+1);render()" '+(currentPage>=totalPages-1?'disabled':'')+'>Next</button>';
+    html+='<button onclick="currentPage='+(totalPages-1)+';render()" '+(currentPage>=totalPages-1?'disabled':'')+'>Last</button>';
+    html+='<span class="page-info">'+filtered.length+' employees</span></div>';
+  }
+  body.innerHTML=html;
+}
+
+function renderEmptyState(){
+  var emps=loadEmployees();var hasEmps=emps.length>0;
+  var h='<div class="page-head"><div><h1>Employee Assessments</h1><p>Yearly skill assessment scores — synced from Organisation Setup &amp; Data Import</p></div></div>';
+
+  // Action bar even in empty state
+  h+='<div class="action-bar">';
+  h+='<span class="ab-title">Input Assessments:</span>';
+  h+='<button class="btn btn-sm" onclick="openIndividualEntry()"'+(hasEmps?'':' disabled')+'>Individual Employee</button>';
+  h+='<button class="btn btn-sm" onclick="openDeptEntry()"'+(hasEmps?'':' disabled')+'>By Department</button>';
+  h+='<button class="btn btn-sm" onclick="openUploadModal()">Upload Excel / CSV</button>';
+  h+='<div style="flex:1"></div>';
+  if(hasEmps)h+='<button class="btn btn-primary btn-sm" onclick="demoFillAssessments()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Demo Fill All ('+emps.length+' employees)</button>';
+  h+='</div>';
+
+  h+='<div class="empty-state">';
+  h+='<div class="empty-icon">📋</div>';
+  h+='<div class="empty-title">No Assessment Data Yet</div>';
+  if(hasEmps){
+    h+='<div class="empty-desc">'+emps.length+' employees loaded from Data Import. Use the input options above to enter assessments individually, by department, upload a CSV, or auto-generate demo data.</div>';
+  } else {
+    h+='<div class="empty-desc">No employee data found. Please run <strong>Demo Fill</strong> in <a href="dataport.html" style="color:var(--accent);font-weight:600">Data Import</a> first, then return here.</div>';
+    h+='<a href="dataport.html" class="btn btn-primary">Go to Data Import</a>';
+  }
+  h+='</div>';
+  return h;
+}
+
+function toggleEmp(idx){
+  var body=document.getElementById('empBody_'+idx);var chev=document.getElementById('empChev_'+idx);
+  if(!body)return;var open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  if(chev)chev.classList.toggle('open',!open);
+}
+
+render();
+</script>
+</body>
+</html>

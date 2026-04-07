@@ -753,9 +753,144 @@ function resetWizard() {
   goStep('1a');
 }
 
+function generateArcovaDemoEmployees(){
+  // ── Synced with org-setup-v4.html Arcova Infrastructure demo data ──
+  // Locations from Block E: Singapore 320, Mumbai 280, Dubai 120, Sydney 92 = 812
+  var locations=[
+    {id:'LOC-0001',name:'Singapore',count:320,phones:['+65-8','+65-9'],zone:'SG'},
+    {id:'LOC-0006',name:'Mumbai',count:280,phones:['+91-7','+91-8','+91-9'],zone:'IN'},
+    {id:'LOC-0004',name:'Dubai',count:120,phones:['+971-5'],zone:'AE'},
+    {id:'LOC-0005',name:'Sydney',count:92,phones:['+61-4'],zone:'AU'}
+  ];
+  // Departments from Blocks B/G — distribution per location proportional
+  var departments=[
+    {name:'Engineering',pct:0.30,manager:'Head of Engineering',roles:[
+      {title:'Structural Engineer',level:'L2',sal:[55000,72000]},
+      {title:'Senior Structural Engineer',level:'L4',sal:[88000,115000]},
+      {title:'Civil Engineer',level:'L2',sal:[52000,68000]},
+      {title:'Senior Civil Engineer',level:'L4',sal:[85000,110000]},
+      {title:'Geotechnical Engineer',level:'L3',sal:[68000,88000]},
+      {title:'Design Engineer',level:'L3',sal:[65000,82000]},
+      {title:'BIM Modeller',level:'L3',sal:[60000,78000]},
+      {title:'Principal Engineer',level:'L5',sal:[120000,155000]},
+      {title:'Engineering Manager',level:'L5',sal:[125000,160000]},
+      {title:'Director of Engineering',level:'L6',sal:[165000,210000]}
+    ]},
+    {name:'Project Delivery',pct:0.25,manager:'Head of Project Delivery',roles:[
+      {title:'Project Coordinator',level:'L2',sal:[48000,62000]},
+      {title:'Project Engineer',level:'L3',sal:[65000,82000]},
+      {title:'Project Manager',level:'L4',sal:[90000,120000]},
+      {title:'Senior Project Manager',level:'L5',sal:[125000,160000]},
+      {title:'Quantity Surveyor',level:'L3',sal:[62000,80000]},
+      {title:'Site Supervisor',level:'L3',sal:[55000,72000]},
+      {title:'Construction Manager',level:'L5',sal:[115000,150000]},
+      {title:'Contracts Manager',level:'L4',sal:[92000,118000]},
+      {title:'Director of Projects',level:'L6',sal:[170000,220000]}
+    ]},
+    {name:'Digital Delivery',pct:0.15,manager:'Head of Digital Delivery',roles:[
+      {title:'BIM Coordinator',level:'L3',sal:[62000,80000]},
+      {title:'Senior BIM Coordinator',level:'L4',sal:[85000,108000]},
+      {title:'Cloud Architect',level:'L5',sal:[130000,170000]},
+      {title:'Data Analyst',level:'L3',sal:[60000,78000]},
+      {title:'Software Developer',level:'L3',sal:[65000,85000]},
+      {title:'DevOps Engineer',level:'L3',sal:[68000,88000]},
+      {title:'Digital Twin Specialist',level:'L4',sal:[95000,125000]},
+      {title:'IT Systems Administrator',level:'L3',sal:[58000,75000]},
+      {title:'Director of Digital',level:'L6',sal:[160000,205000]}
+    ]},
+    {name:'Corporate Services',pct:0.12,manager:'Chief Financial Officer',roles:[
+      {title:'Finance Analyst',level:'L3',sal:[58000,75000]},
+      {title:'Senior Finance Analyst',level:'L4',sal:[80000,105000]},
+      {title:'Procurement Officer',level:'L3',sal:[55000,72000]},
+      {title:'Procurement Manager',level:'L4',sal:[85000,110000]},
+      {title:'Legal Counsel',level:'L4',sal:[90000,120000]},
+      {title:'Facilities Manager',level:'L4',sal:[78000,100000]},
+      {title:'Administrative Coordinator',level:'L2',sal:[42000,55000]},
+      {title:'CFO',level:'L6',sal:[180000,230000]}
+    ]},
+    {name:'EHS & Risk',pct:0.10,manager:'Head of EHS & Risk',roles:[
+      {title:'Safety Officer',level:'L2',sal:[48000,62000]},
+      {title:'Safety Manager',level:'L4',sal:[85000,112000]},
+      {title:'Senior Safety Manager',level:'L5',sal:[115000,148000]},
+      {title:'Environmental Specialist',level:'L3',sal:[62000,80000]},
+      {title:'Risk Analyst',level:'L3',sal:[60000,78000]},
+      {title:'EHS Inspector',level:'L3',sal:[55000,72000]},
+      {title:'Director of EHS',level:'L6',sal:[155000,200000]}
+    ]},
+    {name:'HR & Talent',pct:0.08,manager:'CHRO',roles:[
+      {title:'HR Executive',level:'L2',sal:[45000,58000]},
+      {title:'HR Business Partner',level:'L4',sal:[82000,108000]},
+      {title:'L&D Manager',level:'L4',sal:[80000,105000]},
+      {title:'Talent Acquisition Specialist',level:'L3',sal:[58000,75000]},
+      {title:'Compensation & Benefits Analyst',level:'L3',sal:[60000,78000]},
+      {title:'L&D Coordinator',level:'L2',sal:[44000,56000]},
+      {title:'Senior HRBP',level:'L5',sal:[110000,142000]},
+      {title:'CHRO',level:'L6',sal:[175000,225000]}
+    ]}
+  ];
+  var firstNamesM=['Arun','Rajan','Vikram','Suresh','Pradeep','Rajesh','Karthik','Anand','Deepak','Sanjay','Vivek','Rohit','Amit','Omar','Wei','Liang','James','Chen','Marcus','Daniel','Raj','Nikhil','Harish','Vinod','Manoj','Ashok','Naveen','Prasad','Girish','Mohan','Arjun','Dinesh','Ganesh','Hari','Ramesh','Santosh','Anil','Balaji','Venkat','Kishore','Ajay','Pranav','Ishaan','Ravi','Sameer','Aakash','Sahil','Kunal','Tarun','Abhishek'];
+  var firstNamesF=['Priya','Ananya','Sneha','Pooja','Divya','Lakshmi','Sara','Nisha','Sunita','Meera','Kavitha','Bhavna','Chitra','Tanya','Uma','Swathi','Aisha','Leila','Fatima','Sophie','Amirah','Rachel','Emma','Rina','Deepa','Geeta','Jaya','Kala','Mala','Neha','Padma','Radha','Sita','Usha','Vani','Yamini','Zara','Indira','Hema','Gita','Kamala','Lata','Nalini','Parvati','Rekha','Shanti','Veena','Aruna','Bhanu','Charulata'];
+  var lastNames=['Shankar','Tan','Kumar','Patel','Singh','Verma','Gupta','Sharma','Khan','Malik','Reddy','Menon','Krishnan','Iyer','Nair','Bose','Joshi','Shetty','Pillai','Das','Rao','Lim','Wong','Lee','Chen','Whitfield','Al-Hassan','Johnson','Davis','Liu','Wang','Brown','Binti Yusof','Ali','Kapoor','Saxena','Thakur','Mishra','Chauhan','Pandey','Tiwari','Dubey','Yadav','Bhatt','Jain','Agarwal','Banerjee','Mukherjee','Sen','Dutta'];
+  var educations=["Bachelor's","Bachelor's","Bachelor's","Master's","Master's","PhD"];
+  var empTypes=['Full-Time','Full-Time','Full-Time','Full-Time','Full-Time','Full-Time','Full-Time','Full-Time','Contract','Part-Time'];
+  var workModes=['Hybrid','Hybrid','Hybrid','Hybrid','On-site','On-site','Remote'];
+  var skillStatuses=['Complete','Complete','Complete','Partial','Partial','Draft'];
+  var careerPaths=['IC Track','IC Track','Management Track','Management Track','Specialist Track'];
+  var genders=['Male','Female'];
+
+  function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+  function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+  function pad4(n){return ('0000'+n).slice(-4)}
+
+  var employees=[];
+  var empIdx=0;
+  locations.forEach(function(loc){
+    for(var i=0;i<loc.count;i++){
+      empIdx++;
+      var dept=function(){var r=Math.random(),cum=0;for(var d=0;d<departments.length;d++){cum+=departments[d].pct;if(r<cum)return departments[d]}return departments[0]}();
+      var role=pick(dept.roles);
+      var gender=pick(genders);
+      var fn=gender==='Male'?pick(firstNamesM):pick(firstNamesF);
+      var ln=pick(lastNames);
+      var fullName=fn+' '+ln;
+      var emailName=(fn+'.'+ln).toLowerCase().replace(/\s+/g,'').replace(/[^a-z.]/g,'');
+      var phonePrefix=pick(loc.phones);
+      var phone=phonePrefix+randInt(1000000,9999999);
+      var joinYear=randInt(2010,2024);
+      var joinMonth=randInt(1,12);
+      var joinDay=randInt(1,28);
+      var joinDate=joinYear+'-'+('0'+joinMonth).slice(-2)+'-'+('0'+joinDay).slice(-2);
+      var tenure=Math.round((2025-joinYear-(joinMonth>6?0:0.5))*10)/10;
+      if(tenure<0.5)tenure=0.5;
+      var totalExp=Math.max(tenure,randInt(Math.ceil(tenure),tenure+10));
+      var salary=randInt(role.sal[0],role.sal[1]);
+      var isCritical=role.level==='L5'||role.level==='L6'||Math.random()<0.12?'Yes':'No';
+      var hiPo=(role.level==='L3'||role.level==='L4')&&Math.random()<0.18?'Yes':'No';
+
+      employees.push({
+        id:'EMP-'+pad4(empIdx),
+        firstName:fn,lastName:ln,fullName:fullName,
+        email:emailName+'@arcova-infra.com',
+        phone:phone,gender:gender,
+        locationId:loc.id,location:loc.name,
+        department:dept.name,role:role.title,jobLevel:role.level,
+        education:pick(educations),reportsTo:dept.manager,
+        joinDate:joinDate,tenureYears:tenure,
+        salary:salary,employmentType:pick(empTypes),
+        criticalRole:isCritical,status:'Active',
+        totalExp:Math.round(totalExp),workMode:pick(workModes),
+        highPotential:hiPo,
+        skillProfileStatus:pick(skillStatuses),
+        careerPath:pick(careerPaths)
+      });
+    }
+  });
+  return employees;
+}
+
 function demoFillDataport() {
   var steps = ['1a','1b','1c','1d'];
-  var stepLabels = ['Uploading NovaTech employee file...','Parsing Employee_Master sheet...','Validating 50 employee records...','Importing employees...'];
+  var stepLabels = ['Uploading Arcova Infrastructure employee file...','Parsing Employee_Master sheet...','Validating 812 employee records...','Importing employees...'];
   var i = 0;
   function nextStep() {
     if (i < steps.length) {
@@ -764,58 +899,7 @@ function demoFillDataport() {
       i++;
       setTimeout(nextStep, 600);
     } else {
-      var demoEmployees = [
-      {id:"EMP-0001",firstName:"Priya",lastName:"Menon",fullName:"Priya Menon",email:"priya.menon@novatechsolutions.com",phone:"+91-9906402157",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"DevOps Engineer",jobLevel:"L3",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2017-03-03",tenureYears:7.8,salary:63286,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:10,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
-      {id:"EMP-0002",firstName:"Rohan",lastName:"Krishnan",fullName:"Rohan Krishnan",email:"rohan.krishnan@novatechsolutions.com",phone:"+91-7027911967",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Software Engineer I",jobLevel:"L2",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2023-03-23",tenureYears:1.8,salary:48359,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:3,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Partial",careerPath:"IC Track"},
-      {id:"EMP-0003",firstName:"Anil",lastName:"Wang",fullName:"Anil Wang",email:"anil.wang@novatechsolutions.com",phone:"+91-9303082117",gender:"Male",locationId:"LOC-002",location:"Mumbai",department:"Product Engineering",role:"Software Engineer I",jobLevel:"L2",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2018-09-18",tenureYears:6.3,salary:41711,employmentType:"Contract",criticalRole:"Yes",status:"Active",totalExp:7,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Management Track"},
-      {id:"EMP-0004",firstName:"Harish",lastName:"Patel",fullName:"Harish Patel",email:"harish.patel@novatechsolutions.com",phone:"+91-7999829240",gender:"Male",locationId:"LOC-002",location:"Mumbai",department:"Product Engineering",role:"Senior QA Engineer",jobLevel:"L4",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2012-01-11",tenureYears:13,salary:90741,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:17,workMode:"On-site",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
-      {id:"EMP-0005",firstName:"Swathi",lastName:"Brown",fullName:"Swathi Brown",email:"swathi.brown@novatechsolutions.com",phone:"+91-8051454923",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Product Engineering",role:"Senior Software Engineer",jobLevel:"L4",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2012-08-07",tenureYears:12.4,salary:88803,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:16,workMode:"Remote",highPotential:"No",skillProfileStatus:"Partial",careerPath:"IC Track"},
-      {id:"EMP-0006",firstName:"Rahul",lastName:"Shetty",fullName:"Rahul Shetty",email:"rahul.shetty@novatechsolutions.com",phone:"+91-9436019774",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Senior Software Engineer",jobLevel:"L4",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2018-01-28",tenureYears:6.9,salary:87084,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:11,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
-      {id:"EMP-0007",firstName:"Vivek",lastName:"Malik",fullName:"Vivek Malik",email:"vivek.malik@novatechsolutions.com",phone:"+91-9506254832",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Software Engineer II",jobLevel:"L3",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2023-02-02",tenureYears:1.9,salary:70577,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:4,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"IC Track"},
-      {id:"EMP-0008",firstName:"Suresh",lastName:"Shetty",fullName:"Suresh Shetty",email:"suresh.shetty@novatechsolutions.com",phone:"+91-9010258946",gender:"Male",locationId:"LOC-002",location:"Mumbai",department:"Product Engineering",role:"Software Engineer II",jobLevel:"L3",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2020-06-20",tenureYears:4.5,salary:67304,employmentType:"Part-Time",criticalRole:"No",status:"Active",totalExp:6,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Specialist Track"},
-      {id:"EMP-0009",firstName:"Rohit",lastName:"Brown",fullName:"Rohit Brown",email:"rohit.brown@novatechsolutions.com",phone:"+91-7013938521",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Data Engineer",jobLevel:"L3",education:"PhD",reportsTo:"Engineering Manager",joinDate:"2018-08-18",tenureYears:6.4,salary:68123,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:8,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Draft",careerPath:"Specialist Track"},
-      {id:"EMP-0010",firstName:"Nikhil",lastName:"Khan",fullName:"Nikhil Khan",email:"nikhil.khan@novatechsolutions.com",phone:"+91-9277851678",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Senior Software Engineer",jobLevel:"L4",education:"PhD",reportsTo:"Engineering Manager",joinDate:"2015-06-18",tenureYears:9.5,salary:88646,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:14,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Draft",careerPath:"Management Track"},
-      {id:"EMP-0011",firstName:"Pooja",lastName:"Verma",fullName:"Pooja Verma",email:"pooja.verma@novatechsolutions.com",phone:"+91-7297265480",gender:"Female",locationId:"LOC-004",location:"Dubai",department:"Product Engineering",role:"Senior Software Engineer",jobLevel:"L4",education:"PhD",reportsTo:"Engineering Manager",joinDate:"2023-09-22",tenureYears:1.3,salary:87403,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:5,workMode:"Remote",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
-      {id:"EMP-0012",firstName:"Sara",lastName:"Kumar",fullName:"Sara Kumar",email:"sara.kumar@novatechsolutions.com",phone:"+91-8338811290",gender:"Female",locationId:"LOC-003",location:"Singapore",department:"Product Engineering",role:"ML Engineer",jobLevel:"L4",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2023-02-04",tenureYears:1.9,salary:97302,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:6,workMode:"On-site",highPotential:"No",skillProfileStatus:"Complete",careerPath:"IC Track"},
-      {id:"EMP-0013",firstName:"Uma",lastName:"Malik",fullName:"Uma Malik",email:"uma.malik@novatechsolutions.com",phone:"+91-9710566582",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Product Engineering",role:"Staff Engineer",jobLevel:"L5",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2016-02-29",tenureYears:8.8,salary:126117,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:16,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
-      {id:"EMP-0014",firstName:"Ananya",lastName:"Malik",fullName:"Ananya Malik",email:"ananya.malik@novatechsolutions.com",phone:"+91-8043665192",gender:"Female",locationId:"LOC-003",location:"Singapore",department:"Product Engineering",role:"DevOps Engineer",jobLevel:"L3",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2013-12-19",tenureYears:11,salary:70355,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:13,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
-      {id:"EMP-0015",firstName:"Sneha",lastName:"Davis",fullName:"Sneha Davis",email:"sneha.davis@novatechsolutions.com",phone:"+91-7469306919",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"ML Engineer",jobLevel:"L4",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2013-03-17",tenureYears:11.8,salary:97931,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:16,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"IC Track"},
-      {id:"EMP-0016",firstName:"Lakshmi",lastName:"Reddy",fullName:"Lakshmi Reddy",email:"lakshmi.reddy@novatechsolutions.com",phone:"+91-7400560567",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Product Engineering",role:"Director of Engineering",jobLevel:"L6",education:"PhD",reportsTo:"Engineering Manager",joinDate:"2012-02-19",tenureYears:12.9,salary:179856,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:23,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
-      {id:"EMP-0017",firstName:"Suresh",lastName:"Liu",fullName:"Suresh Liu",email:"suresh.liu@novatechsolutions.com",phone:"+91-8954246074",gender:"Male",locationId:"LOC-004",location:"Dubai",department:"Product Engineering",role:"UX Designer",jobLevel:"L3",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2011-01-18",tenureYears:14,salary:65345,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:16,workMode:"Remote",highPotential:"No",skillProfileStatus:"Complete",careerPath:"IC Track"},
-      {id:"EMP-0018",firstName:"Sneha",lastName:"Johnson",fullName:"Sneha Johnson",email:"sneha.johnson@novatechsolutions.com",phone:"+91-9509023674",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Senior Software Engineer",jobLevel:"L4",education:"Master's",reportsTo:"Engineering Manager",joinDate:"2023-02-28",tenureYears:1.8,salary:91138,employmentType:"Contract",criticalRole:"No",status:"Active",totalExp:6,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Partial",careerPath:"IC Track"},
-      {id:"EMP-0019",firstName:"Swathi",lastName:"Kapoor",fullName:"Swathi Kapoor",email:"swathi.kapoor@novatechsolutions.com",phone:"+91-9553440342",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"Senior QA Engineer",jobLevel:"L4",education:"Bachelor's",reportsTo:"Engineering Manager",joinDate:"2016-04-10",tenureYears:8.7,salary:95333,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:13,workMode:"Remote",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
-      {id:"EMP-0020",firstName:"Pooja",lastName:"Joshi",fullName:"Pooja Joshi",email:"pooja.joshi@novatechsolutions.com",phone:"+91-8357970698",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Product Engineering",role:"DevOps Engineer",jobLevel:"L3",education:"PhD",reportsTo:"Engineering Manager",joinDate:"2019-11-17",tenureYears:5.1,salary:71575,employmentType:"Contract",criticalRole:"Yes",status:"Active",totalExp:7,workMode:"Remote",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
-      {id:"EMP-0021",firstName:"Amit",lastName:"Iyer",fullName:"Amit Iyer",email:"amit.iyer@novatechsolutions.com",phone:"+91-7677517496",gender:"Male",locationId:"LOC-004",location:"Dubai",department:"Customer Success",role:"Customer Success Manager",jobLevel:"L3",education:"Bachelor's",reportsTo:"Head of Customer Success",joinDate:"2018-10-30",tenureYears:6.2,salary:65002,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:8,workMode:"On-site",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
-      {id:"EMP-0022",firstName:"Sunita",lastName:"Shah",fullName:"Sunita Shah",email:"sunita.shah@novatechsolutions.com",phone:"+91-7459716009",gender:"Female",locationId:"LOC-004",location:"Dubai",department:"Customer Success",role:"Technical Support Specialist",jobLevel:"L2",education:"Master's",reportsTo:"Head of Customer Success",joinDate:"2013-04-28",tenureYears:11.7,salary:43200,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:13,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Management Track"},
-      {id:"EMP-0023",firstName:"Amit",lastName:"Verma",fullName:"Amit Verma",email:"amit.verma@novatechsolutions.com",phone:"+91-7189351213",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Customer Success",role:"Head of Customer Success",jobLevel:"L6",education:"Bachelor's",reportsTo:"Head of Customer Success",joinDate:"2012-02-21",tenureYears:12.9,salary:177939,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:23,workMode:"Remote",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Specialist Track"},
-      {id:"EMP-0024",firstName:"Lakshmi",lastName:"Sharma",fullName:"Lakshmi Sharma",email:"lakshmi.sharma@novatechsolutions.com",phone:"+91-9343292475",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Customer Success",role:"Technical Support Specialist",jobLevel:"L2",education:"Bachelor's",reportsTo:"Head of Customer Success",joinDate:"2013-07-05",tenureYears:11.5,salary:52321,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:12,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"IC Track"},
-      {id:"EMP-0025",firstName:"Ananya",lastName:"Davis",fullName:"Ananya Davis",email:"ananya.davis@novatechsolutions.com",phone:"+91-8745377599",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Customer Success",role:"Support Lead",jobLevel:"L4",education:"PhD",reportsTo:"Head of Customer Success",joinDate:"2016-08-06",tenureYears:8.4,salary:91794,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:12,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Partial",careerPath:"IC Track"},
-      {id:"EMP-0026",firstName:"Priya",lastName:"Gupta",fullName:"Priya Gupta",email:"priya.gupta@novatechsolutions.com",phone:"+91-8065870178",gender:"Female",locationId:"LOC-003",location:"Singapore",department:"Customer Success",role:"Support Lead",jobLevel:"L4",education:"Bachelor's",reportsTo:"Head of Customer Success",joinDate:"2018-06-14",tenureYears:6.6,salary:92745,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:11,workMode:"On-site",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
-      {id:"EMP-0027",firstName:"Sanjay",lastName:"Singh",fullName:"Sanjay Singh",email:"sanjay.singh@novatechsolutions.com",phone:"+91-7298159856",gender:"Male",locationId:"LOC-002",location:"Mumbai",department:"Customer Success",role:"Senior CSM",jobLevel:"L4",education:"PhD",reportsTo:"Head of Customer Success",joinDate:"2011-07-13",tenureYears:13.5,salary:92528,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:18,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"IC Track"},
-      {id:"EMP-0028",firstName:"Amit",lastName:"Gupta",fullName:"Amit Gupta",email:"amit.gupta@novatechsolutions.com",phone:"+91-8347233823",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Customer Success",role:"Customer Success Manager",jobLevel:"L3",education:"Bachelor's",reportsTo:"Head of Customer Success",joinDate:"2016-12-14",tenureYears:8.1,salary:70774,employmentType:"Part-Time",criticalRole:"Yes",status:"Active",totalExp:10,workMode:"On-site",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Management Track"},
-      {id:"EMP-0029",firstName:"Ravi",lastName:"Davis",fullName:"Ravi Davis",email:"ravi.davis@novatechsolutions.com",phone:"+91-8418198351",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Customer Success",role:"Customer Success Manager",jobLevel:"L3",education:"Master's",reportsTo:"Head of Customer Success",joinDate:"2015-06-03",tenureYears:9.6,salary:62146,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:12,workMode:"On-site",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Management Track"},
-      {id:"EMP-0030",firstName:"Rajesh",lastName:"Malik",fullName:"Rajesh Malik",email:"rajesh.malik@novatechsolutions.com",phone:"+91-9909058412",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Customer Success",role:"Customer Success Lead",jobLevel:"L5",education:"Master's",reportsTo:"Head of Customer Success",joinDate:"2013-11-08",tenureYears:11.2,salary:136894,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:18,workMode:"Remote",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Management Track"},
-      {id:"EMP-0031",firstName:"Sara",lastName:"Shetty",fullName:"Sara Shetty",email:"sara.shetty@novatechsolutions.com",phone:"+91-9195475598",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Customer Success",role:"Senior CSM",jobLevel:"L4",education:"Master's",reportsTo:"Head of Customer Success",joinDate:"2018-03-24",tenureYears:6.8,salary:93244,employmentType:"Contract",criticalRole:"No",status:"Active",totalExp:11,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
-      {id:"EMP-0032",firstName:"Divya",lastName:"Bose",fullName:"Divya Bose",email:"divya.bose@novatechsolutions.com",phone:"+91-7632880459",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Customer Success",role:"Technical Support Specialist",jobLevel:"L2",education:"Bachelor's",reportsTo:"Head of Customer Success",joinDate:"2016-04-08",tenureYears:8.7,salary:44680,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:10,workMode:"On-site",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
-      {id:"EMP-0033",firstName:"Harish",lastName:"Krishnan",fullName:"Harish Krishnan",email:"harish.krishnan@novatechsolutions.com",phone:"+91-9953315788",gender:"Male",locationId:"LOC-002",location:"Mumbai",department:"Sales & Marketing",role:"VP of Sales",jobLevel:"L6",education:"Bachelor's",reportsTo:"VP of Sales",joinDate:"2019-08-12",tenureYears:5.4,salary:174997,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:15,workMode:"Remote",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"IC Track"},
-      {id:"EMP-0034",firstName:"Karthik",lastName:"Khan",fullName:"Karthik Khan",email:"karthik.khan@novatechsolutions.com",phone:"+91-7521231222",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Sales & Marketing",role:"Senior Marketing Manager",jobLevel:"L5",education:"Master's",reportsTo:"VP of Sales",joinDate:"2021-06-02",tenureYears:3.6,salary:130082,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:11,workMode:"Remote",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Management Track"},
-      {id:"EMP-0035",firstName:"Bhavna",lastName:"Verma",fullName:"Bhavna Verma",email:"bhavna.verma@novatechsolutions.com",phone:"+91-7683577992",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Sales & Marketing",role:"Marketing Executive",jobLevel:"L3",education:"Master's",reportsTo:"VP of Sales",joinDate:"2022-04-28",tenureYears:2.7,salary:69976,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:5,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Specialist Track"},
-      {id:"EMP-0036",firstName:"Leila",lastName:"Patel",fullName:"Leila Patel",email:"leila.patel@novatechsolutions.com",phone:"+91-9319936135",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Sales & Marketing",role:"Sales Manager",jobLevel:"L5",education:"Bachelor's",reportsTo:"VP of Sales",joinDate:"2017-05-29",tenureYears:7.6,salary:131502,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:15,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Management Track"},
-      {id:"EMP-0037",firstName:"Ravi",lastName:"Lee",fullName:"Ravi Lee",email:"ravi.lee@novatechsolutions.com",phone:"+91-9508601974",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Sales & Marketing",role:"Senior Account Executive",jobLevel:"L4",education:"PhD",reportsTo:"VP of Sales",joinDate:"2020-04-29",tenureYears:4.7,salary:92883,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:9,workMode:"Remote",highPotential:"No",skillProfileStatus:"Draft",careerPath:"Management Track"},
-      {id:"EMP-0038",firstName:"Omar",lastName:"Malik",fullName:"Omar Malik",email:"omar.malik@novatechsolutions.com",phone:"+91-8172248246",gender:"Male",locationId:"LOC-003",location:"Singapore",department:"Sales & Marketing",role:"Marketing Executive",jobLevel:"L3",education:"Bachelor's",reportsTo:"VP of Sales",joinDate:"2023-04-01",tenureYears:1.8,salary:64613,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:4,workMode:"Remote",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
-      {id:"EMP-0039",firstName:"Chitra",lastName:"Malik",fullName:"Chitra Malik",email:"chitra.malik@novatechsolutions.com",phone:"+91-7116402431",gender:"Female",locationId:"LOC-004",location:"Dubai",department:"Sales & Marketing",role:"Content Strategist",jobLevel:"L3",education:"Bachelor's",reportsTo:"VP of Sales",joinDate:"2011-08-09",tenureYears:13.4,salary:70697,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:15,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Management Track"},
-      {id:"EMP-0040",firstName:"Tanya",lastName:"Verma",fullName:"Tanya Verma",email:"tanya.verma@novatechsolutions.com",phone:"+91-7351784589",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Sales & Marketing",role:"Account Executive",jobLevel:"L3",education:"Master's",reportsTo:"VP of Sales",joinDate:"2019-07-03",tenureYears:5.5,salary:67906,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:8,workMode:"On-site",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
-      {id:"EMP-0041",firstName:"Priya",lastName:"Singh",fullName:"Priya Singh",email:"priya.singh@novatechsolutions.com",phone:"+91-7542114964",gender:"Female",locationId:"LOC-003",location:"Singapore",department:"Sales & Marketing",role:"Business Development Rep",jobLevel:"L2",education:"Master's",reportsTo:"VP of Sales",joinDate:"2015-06-22",tenureYears:9.5,salary:51179,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:10,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
-      {id:"EMP-0042",firstName:"Vivek",lastName:"Krishnan",fullName:"Vivek Krishnan",email:"vivek.krishnan@novatechsolutions.com",phone:"+91-7464280597",gender:"Male",locationId:"LOC-003",location:"Singapore",department:"Sales & Marketing",role:"Marketing Executive",jobLevel:"L3",education:"Master's",reportsTo:"VP of Sales",joinDate:"2013-07-27",tenureYears:11.4,salary:63683,employmentType:"Contract",criticalRole:"No",status:"Active",totalExp:13,workMode:"On-site",highPotential:"No",skillProfileStatus:"Draft",careerPath:"IC Track"},
-      {id:"EMP-0043",firstName:"Karthik",lastName:"Bose",fullName:"Karthik Bose",email:"karthik.bose@novatechsolutions.com",phone:"+91-9578748240",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Sales & Marketing",role:"Business Development Rep",jobLevel:"L2",education:"Master's",reportsTo:"VP of Sales",joinDate:"2016-06-12",tenureYears:8.6,salary:45941,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:10,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Partial",careerPath:"IC Track"},
-      {id:"EMP-0044",firstName:"Li",lastName:"Sharma",fullName:"Li Sharma",email:"li.sharma@novatechsolutions.com",phone:"+91-8555585773",gender:"Female",locationId:"LOC-003",location:"Singapore",department:"Sales & Marketing",role:"Sales Manager",jobLevel:"L5",education:"Master's",reportsTo:"VP of Sales",joinDate:"2020-06-03",tenureYears:4.6,salary:127729,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:12,workMode:"Remote",highPotential:"No",skillProfileStatus:"Partial",careerPath:"Specialist Track"},
-      {id:"EMP-0045",firstName:"Ravi",lastName:"Pillai",fullName:"Ravi Pillai",email:"ravi.pillai@novatechsolutions.com",phone:"+91-8384287616",gender:"Male",locationId:"LOC-002",location:"Mumbai",department:"Corporate Functions",role:"Talent Acquisition Specialist",jobLevel:"L3",education:"Master's",reportsTo:"Chief People Officer",joinDate:"2021-11-04",tenureYears:3.2,salary:72977,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:5,workMode:"On-site",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
-      {id:"EMP-0046",firstName:"James",lastName:"Kapoor",fullName:"James Kapoor",email:"james.kapoor@novatechsolutions.com",phone:"+91-8109615163",gender:"Male",locationId:"LOC-001",location:"Bengaluru",department:"Corporate Functions",role:"Senior Finance Analyst",jobLevel:"L4",education:"Bachelor's",reportsTo:"Chief People Officer",joinDate:"2018-04-16",tenureYears:6.7,salary:89475,employmentType:"Contract",criticalRole:"No",status:"Active",totalExp:11,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Draft",careerPath:"IC Track"},
-      {id:"EMP-0047",firstName:"Omar",lastName:"Al-Hassan",fullName:"Omar Al-Hassan",email:"omar.al-hassan@novatechsolutions.com",phone:"+91-9108061573",gender:"Male",locationId:"LOC-003",location:"Singapore",department:"Corporate Functions",role:"Talent Acquisition Specialist",jobLevel:"L3",education:"Bachelor's",reportsTo:"Chief People Officer",joinDate:"2023-06-15",tenureYears:1.5,salary:72314,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:4,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Partial",careerPath:"Management Track"},
-      {id:"EMP-0048",firstName:"Daniel",lastName:"Wang",fullName:"Daniel Wang",email:"daniel.wang@novatechsolutions.com",phone:"+91-8948821078",gender:"Male",locationId:"LOC-004",location:"Dubai",department:"Corporate Functions",role:"Finance Analyst",jobLevel:"L3",education:"Bachelor's",reportsTo:"Chief People Officer",joinDate:"2020-07-17",tenureYears:4.5,salary:70017,employmentType:"Full-Time",criticalRole:"Yes",status:"Active",totalExp:6,workMode:"Hybrid",highPotential:"Yes",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
-      {id:"EMP-0049",firstName:"Ananya",lastName:"Menon",fullName:"Ananya Menon",email:"ananya.menon@novatechsolutions.com",phone:"+91-9253298195",gender:"Female",locationId:"LOC-001",location:"Bengaluru",department:"Corporate Functions",role:"Talent Acquisition Specialist",jobLevel:"L3",education:"Master's",reportsTo:"Chief People Officer",joinDate:"2021-11-10",tenureYears:3.1,salary:70659,employmentType:"Part-Time",criticalRole:"No",status:"Active",totalExp:5,workMode:"Hybrid",highPotential:"No",skillProfileStatus:"Complete",careerPath:"Specialist Track"},
-      {id:"EMP-0050",firstName:"Nisha",lastName:"Nair",fullName:"Nisha Nair",email:"nisha.nair@novatechsolutions.com",phone:"+91-9739629302",gender:"Female",locationId:"LOC-002",location:"Mumbai",department:"Corporate Functions",role:"Finance Analyst",jobLevel:"L3",education:"Master's",reportsTo:"Chief People Officer",joinDate:"2012-03-22",tenureYears:12.8,salary:72426,employmentType:"Full-Time",criticalRole:"No",status:"Active",totalExp:15,workMode:"Remote",highPotential:"No",skillProfileStatus:"Complete",careerPath:"IC Track"}
-      ];
+      var demoEmployees = generateArcovaDemoEmployees();
 
       var totalCerts = 0;
       var totalTrainingEntries = 0;
