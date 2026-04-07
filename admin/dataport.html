@@ -878,7 +878,18 @@ function generateArcovaDemoEmployees(){
   var careerPaths=['IC Track','IC Track','Management Track','Management Track','Specialist Track'];
   var genders=['Male','Female'];
 
+  // Resume Skills pools — synced with org-setup Block J skills + realistic resume keywords per role
+  var RESUME_SKILL_POOLS={
+    'Engineering':['Structural Analysis','Concrete Design','Foundation Design','Load Calculation','AutoCAD','Revit','SAP2000','ETABS','Tekla Structures','Geotechnical Assessment','Soil Mechanics','Steel Design','Seismic Analysis','Finite Element Analysis','Construction Drawings','Building Codes','Sustainability Assessment','Lean Construction','Quality Assurance','Technical Report Writing'],
+    'Project Delivery':['Project Management','Stakeholder Management','Contract Management','Risk Assessment','Primavera P6','MS Project','Cost Estimation','Quantity Surveying','Site Management','Health & Safety','Client Management','Procurement','Budget Management','Scheduling','Earned Value Management','Claims Management','Tender Preparation','Construction Law'],
+    'Digital Delivery':['Revit','Navisworks','BIM Coordination','Digital Twin','Data Analysis','Python','Power BI','SQL','Cloud Architecture','AWS','Azure','Kubernetes','Docker','DevOps','CI/CD','JavaScript','GIS','Drone Surveying','IoT','Machine Learning'],
+    'Corporate Services':['Financial Analysis','SAP S/4HANA','Procurement','Contract Negotiation','Budgeting','Forecasting','Compliance','Audit','Risk Management','Vendor Management','Legal Research','Corporate Governance','Excel Advanced','Power BI','Stakeholder Management','Policy Development','Accounts Payable','Tax Planning'],
+    'EHS & Risk':['ISO 45001','Risk Assessment','Incident Investigation','Safety Leadership','Safety Auditing','Environmental Compliance','NEBOSH','Hazard Identification','Emergency Response','Fire Safety','Confined Space','Working at Heights','Permit to Work','Workplace Inspections','OSHA Standards','HSE Management Systems','Environmental Impact Assessment','Waste Management'],
+    'HR & Talent':['Talent Acquisition','Employee Relations','Performance Management','Learning & Development','HRIS (Workday)','Compensation & Benefits','Succession Planning','Organisational Development','Change Management','Employee Engagement','Training Needs Analysis','Competency Mapping','HR Analytics','Labour Law','Onboarding','Employer Branding','Coaching','Diversity & Inclusion']
+  };
+
   function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+  function pickN(arr,min,max){var n=Math.floor(Math.random()*(max-min+1))+min;var copy=arr.slice();var result=[];for(var i=0;i<n&&copy.length;i++){var idx=Math.floor(Math.random()*copy.length);result.push(copy.splice(idx,1)[0])}return result}
   function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}
   function pad4(n){return ('0000'+n).slice(-4)}
 
@@ -923,7 +934,8 @@ function generateArcovaDemoEmployees(){
         skillProfileStatus:pick(skillStatuses),
         careerPath:pick(careerPaths),
         resumeFile:Math.random()>0.35?fn.toLowerCase()+'_'+ln.toLowerCase().replace(/\s+/g,'')+'_resume.pdf':'',
-        resumeUploadedAt:Math.random()>0.35?joinYear+'-'+('0'+randInt(1,12)).slice(-2)+'-'+('0'+randInt(1,28)).slice(-2):''
+        resumeUploadedAt:Math.random()>0.35?joinYear+'-'+('0'+randInt(1,12)).slice(-2)+'-'+('0'+randInt(1,28)).slice(-2):'',
+        resumeSkills:pickN(RESUME_SKILL_POOLS[dept.name]||RESUME_SKILL_POOLS['Corporate Services'],4,8).join(', ')
       });
     }
   });
