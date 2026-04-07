@@ -237,11 +237,30 @@ function render(){
 function renderSuggestions(suggestions){
   var el=document.getElementById('suggestionsPanel');
   if(!suggestions.length){
-    el.innerHTML='<div class="no-data">No organisation context found. Complete <a href="org-setup-v4.html" style="color:var(--accent);font-weight:600">Organisation Setup</a> and run <strong>Demo Fill All Blocks</strong> to see AI-suggested projects.</div>';
+    var h='<div class="no-data" style="padding:40px">';
+    h+='<div style="font-size:24px;margin-bottom:12px">🧠</div>';
+    h+='<div style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:6px">No Organisation Context Found</div>';
+    h+='<div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;max-width:400px;margin-left:auto;margin-right:auto;line-height:1.6">AI suggestions are generated from your Organisation Setup data (strategies, tools, BCDR gaps, market demand, compliance). Load demo data to see it in action.</div>';
+    h+='<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">';
+    h+='<button class="btn btn-primary" onclick="loadDemoContext()"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Load Demo Context (Arcova Infrastructure)</button>';
+    h+='<button class="btn btn-sm" onclick="clearDemoContext()" style="color:var(--red);border-color:var(--red)">Clear All Data</button>';
+    h+='</div>';
+    h+='<div style="font-size:10px;color:var(--text-muted);margin-top:12px">Or go to <a href="org-setup-v4.html" style="color:var(--accent)">Organisation Setup</a> → Demo Fill All Blocks</div>';
+    h+='</div>';
+    el.innerHTML=h;
     return;
   }
 
-  var h='<div class="section-label">AI-Suggested Projects ('+suggestions.length+')</div>';
+  // Context status bar
+  var org=loadOrgData();
+  var companyName=(org&&org.blocks&&org.blocks['A']&&org.blocks['A'].data)?org.blocks['A'].data.legalName||org.blocks['A'].data.tradingName||'Unknown':'Unknown';
+  var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 16px;background:rgba(22,163,74,0.04);border:1px solid rgba(22,163,74,0.15);border-radius:8px">';
+  h+='<div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></div>';
+  h+='<div style="font-size:12px;color:var(--green);font-weight:500;flex:1">Context loaded: <strong>'+esc(companyName)+'</strong> — '+suggestions.length+' project suggestions generated</div>';
+  h+='<button class="btn btn-sm" onclick="loadDemoContext()" style="font-size:10px">Reload</button>';
+  h+='<button class="btn btn-sm" onclick="clearDemoContext()" style="font-size:10px;color:var(--red);border-color:var(--red)">Clear</button>';
+  h+='</div>';
+  h+='<div class="section-label">AI-Suggested Projects ('+suggestions.length+')</div>';
   suggestions.forEach(function(s,i){
     h+='<div class="sug-card">';
     h+='<div class="sug-head">';
@@ -345,6 +364,112 @@ function saveProject(){
 
   showToast('Project "'+name+'" created successfully');
   renderCreateForm(); // reset form
+}
+
+// ═══════════════════════════════════════════════════════
+// DEMO CONTEXT LOADER — seeds org-setup & dataport data
+// ═══════════════════════════════════════════════════════
+function loadDemoContext(){
+  showToast('Loading Arcova Infrastructure demo context...');
+
+  // Build a minimal but complete org-setup state with all blocks that feed suggestions
+  var state={version:'4.0',locked:false,lockedAt:null,lastGlobalSave:new Date().toISOString(),blocks:{}};
+  var blockIds=['A','B','C','D','E','F','G','H','I','J','K','L','M'];
+  blockIds.forEach(function(id){state.blocks[id]={status:'complete',lastSaved:new Date().toISOString(),completedAt:new Date().toISOString(),savedBy:'demo',data:{}}});
+
+  // Block A — Company identity
+  state.blocks['A'].data={legalName:'Arcova Infrastructure Pte. Ltd.',tradingName:'Arcova',primaryIndustry:'Infrastructure',currentHeadcount:'812',operatingModel:'Services Company',hqCountry:'Singapore',coreValues:'Safety, Innovation, Excellence, Integrity, Sustainability',vision:'To be APAC\'s most trusted infrastructure partner by 2035'};
+
+  // Block C — Strategy & Goals (feeds risk-based suggestions)
+  state.blocks['C'].data={
+    mission:'To deliver world-class infrastructure that shapes sustainable cities.',
+    vision:'APAC\'s most trusted infrastructure partner by 2035.',
+    strategicPriorities:[
+      {name:'Digital Twin & IoT Integration',timeHorizon:'Medium-term (1-3yr)',sponsoringBU:'Digital Delivery',description:'Embed digital twin capabilities across all major projects'},
+      {name:'Regional Expansion — Australia & India',timeHorizon:'Short-term (0-1yr)',sponsoringBU:'Corporate Services',description:'Grow headcount in Sydney and Mumbai offices'},
+      {name:'Sustainability Leadership',timeHorizon:'Long-term (3-5yr)',sponsoringBU:'Engineering',description:'Achieve net-zero construction by 2035'}
+    ],
+    strategicRisks:[
+      {name:'AI Talent Shortage',severity:'High',likelihood:'Likely',owner:'Head of Digital Delivery',mitigationPlan:'Launch internal AI/ML Academy; partner with NUS for sponsored MSc programme; activate external hiring pipeline for 5 senior ML engineers.'},
+      {name:'Safety Incident Escalation',severity:'High',likelihood:'Possible',owner:'Director of EHS',mitigationPlan:'Accelerate ISO 45001 Lead Auditor certification across all site staff; implement predictive safety analytics.'},
+      {name:'Supply Chain Disruption',severity:'Medium',likelihood:'Likely',owner:'Head of Procurement',mitigationPlan:'Dual-source policy for critical materials; 30-day buffer stock; quarterly supplier health monitoring.'}
+    ],
+    goals:[
+      {name:'Achieve SGD 800M revenue',type:'Revenue',timeframe:'Annual',status:'On Track'},
+      {name:'Zero serious harm target',type:'Quality',timeframe:'Annual',status:'At Risk'},
+      {name:'Reduce carbon intensity by 20%',type:'Compliance',timeframe:'Long-term',status:'On Track'}
+    ]
+  };
+
+  // Block E — Market demand & regulatory gaps (feeds critical suggestions)
+  state.blocks['E'].data={
+    clients:[
+      {id:1,name:'Land Transport Authority (LTA)',industry:'Government & Public Sector',sizeBand:'Enterprise (1000-10000)',geography:'Singapore',isStrategic:true,npsScore:85},
+      {id:2,name:'Tata Projects Ltd',industry:'Construction & Engineering',sizeBand:'Enterprise (1000-10000)',geography:'India',isStrategic:true,npsScore:78},
+      {id:3,name:'Aldar Properties',industry:'Real Estate',sizeBand:'Enterprise (1000-10000)',geography:'United Arab Emirates',isStrategic:true,npsScore:82},
+      {id:4,name:'Gamuda Berhad',industry:'Construction & Engineering',sizeBand:'Enterprise (1000-10000)',geography:'Malaysia',isStrategic:false,npsScore:75},
+      {id:5,name:'CIMIC Group',industry:'Construction & Engineering',sizeBand:'Global Enterprise (10000+)',geography:'Australia',isStrategic:true,npsScore:80}
+    ],
+    locations:[
+      {id:6,country:'Singapore',city:'Singapore',officeType:'Headquarters',employeeCount:320},
+      {id:7,country:'India',city:'Mumbai',officeType:'Delivery Centre',employeeCount:280},
+      {id:8,country:'United Arab Emirates',city:'Dubai',officeType:'Regional Office',employeeCount:120},
+      {id:9,country:'Australia',city:'Sydney',officeType:'Branch Office',employeeCount:92}
+    ],
+    marketSkillDemand:[
+      {MSD_ID:'MSD-0001',Skill_Name:'Digital Twin Development',Demand_Level:'Critical Shortage',Skill_Category:'Technical',Primary_Market:'Singapore',Client_Industry:'Construction & Engineering',Source:'LinkedIn Workforce Insights',Market_Salary:145000,Scarcity_Score:9,Year:2024,Internal_Supply:4,Strategic_Response:'Launch internal Digital Twin Academy with 10-week curriculum. Target: certify 20 engineers by Q3 2025.'},
+      {MSD_ID:'MSD-0002',Skill_Name:'ESG Reporting & Sustainability Auditing',Demand_Level:'High Demand',Skill_Category:'Domain Knowledge',Primary_Market:'Singapore',Client_Industry:'Real Estate',Source:'Industry Report',Market_Salary:110000,Scarcity_Score:7,Year:2024,Internal_Supply:2,Strategic_Response:'Partner with Singapore Institute of Sustainability for certified ESG auditor programme.'},
+      {MSD_ID:'MSD-0003',Skill_Name:'Cloud-Native DevOps (Kubernetes / Terraform)',Demand_Level:'High Demand',Skill_Category:'Tool / Platform',Primary_Market:'India',Client_Industry:'Technology',Source:'Recruiter Intelligence',Market_Salary:95000,Scarcity_Score:8,Year:2024,Internal_Supply:6,Strategic_Response:'Internal DevOps bootcamp running Q1-Q2 2025. 12 backend engineers enrolled.'},
+      {MSD_ID:'MSD-0004',Skill_Name:'ISO 45001 — Occupational Health & Safety',Demand_Level:'Moderate Demand',Skill_Category:'Certification',Primary_Market:'United Arab Emirates',Client_Industry:'Construction & Engineering',Source:'Client Requirement',Market_Salary:88000,Scarcity_Score:5,Year:2024,Internal_Supply:18,Strategic_Response:'Supply currently adequate. Monitor as UAE construction pipeline grows.'},
+      {MSD_ID:'MSD-0005',Skill_Name:'AI / Machine Learning for Engineering',Demand_Level:'Emerging',Skill_Category:'Technical',Primary_Market:'Australia',Client_Industry:'Government & Public Sector',Source:'Analyst Firm',Market_Salary:155000,Scarcity_Score:8,Year:2024,Internal_Supply:3,Strategic_Response:'3-year capability build programme. Year 1: foundational AI literacy for 50 engineers.'}
+    ],
+    regulatorySkillDemand:[
+      {Year:2024,Skill_Name:'BIM Level 2 Compliance',Regulatory_Framework:'Government Mandate',Geography:'Singapore',Regulation_Name:'BCA BIM Mandate for GFA > 5,000 sqm',Compliance_Deadline:'2025-01-01',Employees_Required:85,Employees_Compliant:62,Training_Cost_Per_Person:1200,Penalty_M:0.5,Notes:'23 engineers still require BIM Level 2 certification.'},
+      {Year:2024,Skill_Name:'Environmental Compliance (EIA)',Regulatory_Framework:'Government Mandate',Geography:'India',Regulation_Name:'MoEFCC Environmental Impact Assessment Notification',Compliance_Deadline:'2024-12-31',Employees_Required:28,Employees_Compliant:20,Training_Cost_Per_Person:800,Penalty_M:1.0,Notes:'8 project managers require certified EIA training.'}
+    ]
+  };
+
+  // Block G — Tools (feeds sunsetting/adoption suggestions)
+  state.blocks['G'].data={
+    tools:[
+      {id:1,name:'Workday',category:'Business Applications',vendor:'Workday Inc.',version:'2024.1',lifecycle:'Active',departmentScope:['Corporate Services','HR & Talent']},
+      {id:2,name:'Autodesk Revit',category:'Development & Engineering',vendor:'Autodesk',version:'2025',lifecycle:'Active',departmentScope:['Engineering','Digital Delivery']},
+      {id:3,name:'Power BI',category:'Data & Analytics',vendor:'Microsoft',version:'Desktop + Service',lifecycle:'Active',departmentScope:['Engineering','Corporate Services','Digital Delivery']},
+      {id:8,name:'AutoCAD',category:'Development & Engineering',vendor:'Autodesk',version:'2025',lifecycle:'Sunsetting (within 12m)',departmentScope:['Engineering']},
+      {id:9,name:'Kubernetes',category:'Infrastructure & DevOps',vendor:'CNCF',version:'1.29',lifecycle:'Planned Adoption',departmentScope:['Digital Delivery']},
+      {id:10,name:'Bentley MicroStation',category:'Development & Engineering',vendor:'Bentley Systems',version:'CONNECT',lifecycle:'Evaluating',departmentScope:['Engineering']}
+    ]
+  };
+
+  // Block M — BCDR exercises (feeds gap remediation suggestions)
+  state.blocks['M'].data={
+    plans:[{id:1,name:'Enterprise BCP',planType:'Business Continuity Plan (BCP)',status:'Active'}],
+    riskScenarios:[{id:1,name:'Ransomware Attack',category:'Cyber Attack',probability:'High',impact:'Catastrophic'}],
+    exercises:[
+      {id:1,name:'Annual BCP Tabletop — Leadership Team',exerciseType:'Tabletop Exercise',dateConducted:'2025-09-20',linkedPlan:'Enterprise BCP',participants:18,outcome:'Passed — All objectives met',lessons:'Communication chain worked well. Gap in MY cross-border coordination.',skillGaps:['Cross-border Crisis Coordination','Bilingual Crisis Communication'],followUpActions:['Appoint MY Crisis Liaison']},
+      {id:2,name:'IT Failover Test — AWS DR Region',exerciseType:'IT Failover Test',dateConducted:'2025-08-15',linkedPlan:'IT Disaster Recovery Plan',participants:8,outcome:'Partial — Some gaps identified',lessons:'SAP failover OK. Power BI dashboards took 3h to restore — exceeded 2h RTO.',skillGaps:['Power BI DR Configuration','Cross-Region Data Replication'],followUpActions:['Configure Power BI replication','Re-test in isolation']},
+      {id:3,name:'Crisis Comms Cascade Test',exerciseType:'Communication Cascade Test',dateConducted:'2025-11-15',linkedPlan:'Crisis Communication Plan',participants:42,outcome:'Partial — Some gaps identified',lessons:'98% SG reached in 15min. MY had 34% non-response — outdated contacts.',skillGaps:['MY Emergency Contact Management','After-Hours Reach Rate'],followUpActions:['Quarterly contact verification for MY']}
+    ]
+  };
+
+  // Save to both storage types
+  var json=JSON.stringify(state);
+  try{sessionStorage.setItem('sip_orgsetup_v4',json)}catch(e){}
+  try{localStorage.setItem('sip_orgsetup_v4',json)}catch(e){}
+
+  showToast('Demo context loaded — Arcova Infrastructure');
+  setTimeout(function(){render()},300);
+}
+
+function clearDemoContext(){
+  if(!confirm('Clear all demo data? This will remove org-setup, dataport, assessments, and project data from browser storage.'))return;
+  var keys=['sip_orgsetup_v4','sip_dataport_import','sip_employee_assessments','sip_competency_assessments','sip_talent_projects'];
+  keys.forEach(function(k){
+    try{sessionStorage.removeItem(k)}catch(e){}
+    try{localStorage.removeItem(k)}catch(e){}
+  });
+  showToast('All demo data cleared');
+  render();
 }
 
 render();
