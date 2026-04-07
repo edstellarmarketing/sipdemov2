@@ -15,10 +15,9 @@
 .page-head h1{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text-primary);margin:0 0 4px}
 .page-head p{font-size:13px;color:var(--text-secondary);margin:0}
 
-/* Split layout */
-.split{display:flex;gap:24px;align-items:flex-start}
-.col-left{flex:1;min-width:0}
-.col-right{width:420px;flex-shrink:0;position:sticky;top:20px}
+/* Layout */
+.create-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px 24px}
+@media(max-width:800px){.create-panel>div:first-child{grid-template-columns:1fr!important}}
 
 /* Suggestion card */
 .sug-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:10px;transition:all .15s;cursor:default}
@@ -39,9 +38,7 @@
 .sug-actions{display:flex;gap:8px}
 
 /* Create form panel */
-.create-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px}
-.cp-title{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
-.cp-sub{font-size:11.5px;color:var(--text-muted);margin-bottom:16px}
+/* (create-panel defined above) */
 .form-group{margin-bottom:12px}
 .form-label{font-size:10.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block}
 .form-input,.form-select,.form-textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:12px;color:var(--text-primary);background:var(--card);box-sizing:border-box}
@@ -64,23 +61,14 @@
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a1a;color:#fff;padding:10px 22px;border-radius:10px;font-size:12.5px;font-family:var(--font-body);z-index:9999;transition:transform .3s ease;pointer-events:none}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
-@media(max-width:900px){.split{flex-direction:column}.col-right{width:100%;position:static}}
+/* responsive handled inline */
 </style>
 </head>
 <body>
 
 <main class="main" id="page-content">
 <div class="content">
-<div class="page-body">
-  <div class="page-head">
-    <h1>Add Talent Project</h1>
-    <p>AI-suggested projects based on your organisation context, or create a custom project</p>
-  </div>
-  <div class="split">
-    <div class="col-left" id="suggestionsPanel"></div>
-    <div class="col-right" id="createPanel"></div>
-  </div>
-</div>
+<div class="page-body" id="mainBody"></div>
 </div>
 </main>
 
@@ -227,11 +215,35 @@ function generateSuggestions(){
 var PROJECT_TYPES=['Training Programme','Capability Building','Certification Drive','Leadership Development','OD Initiative','Client-facing','R&D','Infrastructure','Compliance','Digital Transformation'];
 var PROJECT_CATEGORIES=['Client Servicing','Employee Development'];
 var PROJECT_STATUSES=['Planned','Active','On Hold'];
+var activeTab='create';
 
 function render(){
+  var body=document.getElementById('mainBody');
   var suggestions=generateSuggestions();
-  renderSuggestions(suggestions);
-  renderCreateForm();
+  var sugCount=suggestions.length;
+
+  var h='';
+  h+='<div class="page-head"><h1>Add Talent Project</h1><p>Create a new project or explore AI-suggested projects from your organisation context</p></div>';
+
+  // Tabs
+  h+='<div style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid rgba(0,0,0,0.06)">';
+  h+='<div style="padding:10px 22px;cursor:pointer;font-family:var(--font-display);font-size:13px;font-weight:600;color:'+(activeTab==='create'?'var(--accent)':'var(--text-muted)')+';border-bottom:2px solid '+(activeTab==='create'?'var(--accent)':'transparent')+';margin-bottom:-2px;transition:all .15s" onclick="activeTab=\'create\';render()">Create Project</div>';
+  h+='<div style="padding:10px 22px;cursor:pointer;font-family:var(--font-display);font-size:13px;font-weight:600;color:'+(activeTab==='suggest'?'var(--accent)':'var(--text-muted)')+';border-bottom:2px solid '+(activeTab==='suggest'?'var(--accent)':'transparent')+';margin-bottom:-2px;transition:all .15s" onclick="activeTab=\'suggest\';render()">AI Suggestions'+(sugCount?' <span style="font-size:10px;padding:1px 7px;border-radius:100px;background:'+(activeTab==='suggest'?'var(--accent)':'rgba(0,0,0,0.08)')+';color:'+(activeTab==='suggest'?'#fff':'var(--text-muted)')+'">'+sugCount+'</span>':'')+'</div>';
+  h+='</div>';
+
+  if(activeTab==='create'){
+    h+='<div id="createPanel"></div>';
+  } else {
+    h+='<div id="suggestionsPanel"></div>';
+  }
+
+  body.innerHTML=h;
+
+  if(activeTab==='create'){
+    renderCreateForm();
+  } else {
+    renderSuggestions(suggestions);
+  }
 }
 
 function renderSuggestions(suggestions){
@@ -289,10 +301,15 @@ function renderSuggestions(suggestions){
 function renderCreateForm(prefill){
   var p=prefill||{};
   var el=document.getElementById('createPanel');
-  var h='<div class="create-panel">';
-  h+='<div class="cp-title">'+(prefill?'Create Project':'New Custom Project')+'</div>';
-  h+='<div class="cp-sub">'+(prefill?'Pre-filled from AI suggestion. Review and save.':'Define a new talent project from scratch.')+'</div>';
-  h+='<div class="form-group"><label class="form-label">Project Name *</label><input class="form-input" id="fpName" value="'+esc(p.title||'')+'" placeholder="e.g. Digital Twin Academy"></div>';
+  var h='';
+  if(prefill&&p.source){h+='<div style="font-size:11px;color:var(--accent);margin-bottom:14px;padding:10px 14px;background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:8px;display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Pre-filled from AI suggestion: '+esc(p.source)+'</div>'}
+
+  h+='<div class="create-panel" style="max-width:100%">';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">';
+
+  // Left column
+  h+='<div>';
+  h+='<div class="form-group"><label class="form-label">Project Name *</label><input class="form-input" id="fpName" value="'+esc(p.title||'')+'" placeholder="e.g. Digital Twin Academy — 10-Week Certification"></div>';
   h+='<div class="form-row"><div class="form-group"><label class="form-label">Category</label><select class="form-select" id="fpCategory">';
   PROJECT_CATEGORIES.forEach(function(c){h+='<option value="'+c+'"'+(p.category===c?' selected':'')+'>'+c+'</option>'});
   h+='</select></div>';
@@ -308,13 +325,21 @@ function renderCreateForm(prefill){
   h+='<div class="form-group"><label class="form-label">Target End Date</label><input class="form-input" type="date" id="fpEnd"></div></div>';
   h+='<div class="form-row"><div class="form-group"><label class="form-label">Budget ($M)</label><input class="form-input" type="number" step="0.01" id="fpBudget" placeholder="0.15"></div>';
   h+='<div class="form-group"><label class="form-label">Employees Targeted</label><input class="form-input" type="number" id="fpEmps" value="'+(p.emps||'')+'" placeholder="20"></div></div>';
-  h+='<div class="form-group"><label class="form-label">Key Skills</label><input class="form-input" id="fpSkills" value="'+esc((p.skills||[]).join(', '))+'" placeholder="Comma-separated skills"></div>';
-  h+='<div class="form-group"><label class="form-label">Target Departments</label><input class="form-input" id="fpDepts" value="'+esc((p.depts||[]).join(', '))+'" placeholder="Comma-separated departments"></div>';
-  h+='<div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="fpDesc" placeholder="Project description and objectives...">'+esc(p.desc||'')+'</textarea></div>';
-  if(p.source){h+='<div style="font-size:10px;color:var(--text-muted);margin-bottom:12px;padding:8px 10px;background:rgba(201,168,76,0.04);border-radius:6px;border:1px solid rgba(201,168,76,0.15)">Source: '+esc(p.source)+'</div>'}
-  h+='<div style="display:flex;gap:8px;margin-top:4px">';
-  h+='<button class="btn btn-primary" onclick="saveProject()">Save Project</button>';
-  if(prefill) h+='<button class="btn btn-sm" onclick="renderCreateForm()">Clear Form</button>';
+  h+='</div>';
+
+  // Right column
+  h+='<div>';
+  h+='<div class="form-group"><label class="form-label">Key Skills (comma-separated)</label><input class="form-input" id="fpSkills" value="'+esc((p.skills||[]).join(', '))+'" placeholder="e.g. Kubernetes, Terraform, AWS, Docker"></div>';
+  h+='<div class="form-group"><label class="form-label">Target Departments (comma-separated)</label><input class="form-input" id="fpDepts" value="'+esc((p.depts||[]).join(', '))+'" placeholder="e.g. Digital Delivery, Engineering"></div>';
+  h+='<div class="form-group"><label class="form-label">Description &amp; Objectives</label><textarea class="form-textarea" id="fpDesc" style="min-height:160px" placeholder="Describe the project goals, scope, expected outcomes, success metrics, and any dependencies...">'+esc(p.desc||'')+'</textarea></div>';
+  h+='</div>';
+
+  h+='</div>'; // close grid
+
+  h+='<div style="display:flex;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">';
+  h+='<button class="btn btn-primary" onclick="saveProject()"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><polyline points="20 6 9 17 4 12"/></svg> Save Project</button>';
+  if(prefill) h+='<button class="btn" onclick="activeTab=\'create\';render()">Clear &amp; Start Fresh</button>';
+  h+='<a href="talent-projects-all.html" class="btn" style="margin-left:auto">View All Projects</a>';
   h+='</div>';
   h+='</div>';
   el.innerHTML=h;
@@ -323,9 +348,12 @@ function renderCreateForm(prefill){
 function createFromSuggestion(idx){
   var s=window._suggestions[idx];
   if(!s)return;
-  // Strip HTML from reason for description
   var desc=s.reason.replace(/<[^>]+>/g,'');
-  renderCreateForm({title:s.title,category:s.category,type:s.type,priority:s.priority,skills:s.skills,depts:s.depts,desc:desc,source:s.source});
+  activeTab='create';
+  render();
+  setTimeout(function(){
+    renderCreateForm({title:s.title,category:s.category,type:s.type,priority:s.priority,skills:s.skills,depts:s.depts,desc:desc,source:s.source});
+  },50);
   // Scroll to create panel on mobile
   document.getElementById('createPanel').scrollIntoView({behavior:'smooth',block:'start'});
 }
