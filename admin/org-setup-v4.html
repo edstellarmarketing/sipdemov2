@@ -695,7 +695,7 @@ var BLOCKS = [
   {id:'A',title:'Organisation Identity',icon:'\uD83C\uDFE2',phase:1,desc:'Legal name, industry, size, maturity, values'},
   {id:'B',title:'Hierarchy Architecture',icon:'\uD83C\uDFD7',phase:1,desc:'Levels, nodes, secondary hierarchies, org chart'},
   {id:'C',title:'Strategy & Goals',icon:'\uD83C\uDFAF',phase:2,desc:'Mission, priorities, risks, cascaded goals'},
-  {id:'D',title:'Products & Services',icon:'\uD83D\uDCE6',phase:2,desc:'Product catalogue, services, performance data'},
+  {id:'D',title:'Products, Services & Projects',icon:'\uD83D\uDCE6',phase:2,desc:'Product catalogue, services, client & development projects, trainers'},
   {id:'E',title:'Client & Market',icon:'\uD83D\uDC65',phase:2,desc:'Client registry, geographic presence'},
   {id:'F',title:'Standards & Compliance',icon:'\uD83D\uDEE1',phase:2,desc:'Certifications, regulations, compliance scope'},
   {id:'G',title:'Tools & Technologies',icon:'\uD83D\uDD27',phase:2,desc:'Tech stack, lifecycle flags, skill implications'},
@@ -3555,7 +3555,7 @@ function renderBlockD_Edit(){
   h+='<div class="ai-suggest-zone" style="margin-bottom:20px">';
   h+='<div class="ai-suggest-label"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> AI-Powered Input</div>';
   h+='<p style="font-size:12.5px;color:var(--text-s);margin-bottom:10px">Let AI generate a product &amp; services catalogue based on your organisation context.</p>';
-  h+='<button class="btn btn-ai btn-sm" onclick="aiExtractBlockD()"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate Products &amp; Services</button>';
+  h+='<button class="btn btn-ai btn-sm" onclick="aiExtractBlockD()"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate Products, Services &amp; Projects</button>';
   h+='</div>';
   h+='<div class="hier-tabs">';
   h+='<div class="hier-tab'+(dActiveTab==='products'?' active':'')+'" onclick="switchDTab(\'products\')">1. Products ('+d.products.length+')</div>';
@@ -7462,7 +7462,7 @@ var BLOCK_GUIDES = {
     {t:'Goals', d:'Define goals by type (Revenue, Efficiency, Quality, People, Innovation, Compliance, Customer). Link to owner nodes and set review cadence.'},
     {t:'Completion', d:'Fill mission or vision, add 1 priority, and 1 goal to complete.'}
   ]},
-  D: { title:'Products & Services — Setup Guide', steps:[
+  D: { title:'Products, Services & Projects — Setup Guide', steps:[
     {t:'Products Tab', d:'Add each product with its lifecycle stage, complexity rating, owning BU, technology stack, and regulatory classification.'},
     {t:'Services Tab', d:'Add services with delivery model, engagement size, client industry, required skills, and performance metrics (satisfaction, on-time %, escalation rate).'},
     {t:'Why This Matters', d:'Products and services determine which skills the AI prioritises. A regulated product auto-generates compliance skill requirements.'},
