@@ -10,33 +10,344 @@
 <link rel="stylesheet" href="../styles/design-system.css">
 <style>
 .content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
-.page-body{max-width:1200px;margin:0 auto;padding:28px 32px 60px;width:100%}
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 32px;text-align:center}
-.empty-icon{width:64px;height:64px;border-radius:16px;background:var(--accent-lt);display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:28px}
-.empty-title{font-family:var(--font-display);font-size:20px;font-weight:600;color:var(--text-primary);margin-bottom:8px}
-.empty-desc{font-size:13px;color:var(--text-secondary);max-width:420px;line-height:1.6}
+.page-body{max-width:1400px;margin:0 auto;padding:28px 32px 60px;width:100%}
+.page-head{margin-bottom:20px}
+.page-head h1{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text-primary);margin:0 0 4px}
+.page-head p{font-size:13px;color:var(--text-secondary);margin:0}
+
+/* Split layout */
+.split{display:flex;gap:24px;align-items:flex-start}
+.col-left{flex:1;min-width:0}
+.col-right{width:420px;flex-shrink:0;position:sticky;top:20px}
+
+/* Suggestion card */
+.sug-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:10px;transition:all .15s;cursor:default}
+.sug-card:hover{box-shadow:0 3px 12px rgba(0,0,0,0.06);border-color:var(--text-muted)}
+.sug-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.sug-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sug-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1}
+.sug-priority{font-size:9px;padding:3px 8px;border-radius:100px;font-weight:600;white-space:nowrap}
+.sug-priority.critical{background:var(--red-bg);color:var(--red)}
+.sug-priority.high{background:var(--amber-bg);color:var(--amber)}
+.sug-priority.medium{background:rgba(59,130,246,0.08);color:#3B82F6}
+.sug-reason{font-size:11.5px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px}
+.sug-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.sug-tag{font-size:9.5px;padding:2px 8px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted)}
+.sug-tag.skill{background:rgba(59,130,246,0.05);border-color:rgba(59,130,246,0.15);color:#3B82F6}
+.sug-tag.dept{background:rgba(201,168,76,0.05);border-color:rgba(201,168,76,0.2);color:var(--accent)}
+.sug-source{font-size:10px;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;gap:4px}
+.sug-actions{display:flex;gap:8px}
+
+/* Create form panel */
+.create-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px}
+.cp-title{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.cp-sub{font-size:11.5px;color:var(--text-muted);margin-bottom:16px}
+.form-group{margin-bottom:12px}
+.form-label{font-size:10.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block}
+.form-input,.form-select,.form-textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:12px;color:var(--text-primary);background:var(--card);box-sizing:border-box}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--accent)}
+.form-textarea{min-height:60px;resize:vertical}
+.form-row{display:flex;gap:12px}
+.form-row .form-group{flex:1}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);background:var(--card);color:var(--text-primary);transition:all .15s}
+.btn:hover{border-color:var(--text-muted)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#B8983F}
+.btn-sm{padding:6px 12px;font-size:11px}
+
+.section-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.no-data{padding:40px;text-align:center;color:var(--text-muted);font-size:13px;background:var(--card);border:1px solid var(--border);border-radius:10px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a1a;color:#fff;padding:10px 22px;border-radius:10px;font-size:12.5px;font-family:var(--font-body);z-index:9999;transition:transform .3s ease;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:900px){.split{flex-direction:column}.col-right{width:100%;position:static}}
 </style>
 </head>
 <body>
+
 <main class="main" id="page-content">
 <div class="content">
 <div class="page-body">
-  <div class="empty-state">
-    <div class="empty-icon">➕</div>
-    <div class="empty-title">Add Project</div>
-    <div class="empty-desc">Create a new talent project — client servicing, employee development, training programme, or capability building initiative.</div>
+  <div class="page-head">
+    <h1>Add Talent Project</h1>
+    <p>AI-suggested projects based on your organisation context, or create a custom project</p>
+  </div>
+  <div class="split">
+    <div class="col-left" id="suggestionsPanel"></div>
+    <div class="col-right" id="createPanel"></div>
   </div>
 </div>
 </div>
 </main>
+
+<div class="toast" id="toast"></div>
+
 <script src="../components/shell.js"></script>
 <script>
-  EdstellarShell.init({
-    portal: 'admin',
-    activeNav: '+ Add Project',
-    breadcrumbs: ['Talent Projects', 'Add Project'],
-    topbarActions: []
+EdstellarShell.init({portal:'admin',activeNav:'+ Add Project',breadcrumbs:['Talent Projects','Add Project'],topbarActions:[]});
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
+
+// ═══════════════════════════════════════════════════════
+// LOAD ORG CONTEXT
+// ═══════════════════════════════════════════════════════
+function loadOrgData(){
+  var raw=null;
+  try{raw=sessionStorage.getItem('sip_orgsetup_v4')}catch(e){}
+  if(!raw){try{raw=localStorage.getItem('sip_orgsetup_v4')}catch(e){}}
+  if(!raw)return null;
+  try{return JSON.parse(raw)}catch(e){return null}
+}
+function getBlock(state,id){
+  if(!state||!state.blocks||!state.blocks[id])return{};
+  return state.blocks[id].data||{};
+}
+
+// ═══════════════════════════════════════════════════════
+// GENERATE AI SUGGESTIONS FROM ORG CONTEXT
+// ═══════════════════════════════════════════════════════
+function generateSuggestions(){
+  var org=loadOrgData();
+  if(!org) return[];
+  var suggestions=[];
+
+  // 1. Market Skill Demand gaps (Block E)
+  var eData=getBlock(org,'E');
+  (eData.marketSkillDemand||[]).forEach(function(msd){
+    if(msd.Demand_Level==='Critical Shortage'||msd.Demand_Level==='High Demand'){
+      suggestions.push({
+        title:msd.Skill_Name+' — Capability Building Programme',
+        reason:'Market demand is <strong>'+msd.Demand_Level+'</strong> in '+msd.Primary_Market+' with a scarcity score of '+msd.Scarcity_Score+'/10. Your internal supply is only <strong>'+msd.Internal_Supply+' employees</strong> vs market salary of $'+Number(msd.Market_Salary).toLocaleString()+'. '+msd.Strategic_Response,
+        priority:msd.Demand_Level==='Critical Shortage'?'critical':'high',
+        icon:'🎯',iconBg:'var(--red-bg)',
+        skills:[msd.Skill_Name],depts:[],type:'Capability Building',
+        source:'Block E — Market Skill Demand ('+msd.Source+')',
+        category:'Employee Development'
+      });
+    }
   });
+
+  // 2. Sunsetting & Planned Adoption tools (Block G)
+  var gData=getBlock(org,'G');
+  (gData.tools||[]).forEach(function(tool){
+    if(tool.lifecycle==='Sunsetting (within 12m)'){
+      suggestions.push({
+        title:tool.name+' Migration — Reskilling Programme',
+        reason:'<strong>'+tool.name+'</strong> is sunsetting within 12 months. '+((tool.departmentScope||[]).join(', ')||'Multiple')+' department'+(tool.departmentScope&&tool.departmentScope.length>1?'s':'')+' need migration training. Delayed reskilling risks project delivery and client commitments.',
+        priority:'critical',icon:'⚠️',iconBg:'var(--amber-bg)',
+        skills:[tool.name+' Migration','Change Management'],depts:tool.departmentScope||[],type:'Training Programme',
+        source:'Block G — Tools & Technologies (Sunsetting)',
+        category:'Employee Development'
+      });
+    }
+    if(tool.lifecycle==='Planned Adoption'){
+      suggestions.push({
+        title:tool.name+' Adoption — Upskilling Initiative',
+        reason:'<strong>'+tool.name+'</strong> ('+tool.vendor+') is planned for adoption in '+((tool.departmentScope||[]).join(', ')||'Digital Delivery')+'. Proactive upskilling ensures smooth rollout and reduces adoption friction.',
+        priority:'high',icon:'🚀',iconBg:'rgba(59,130,246,0.08)',
+        skills:[tool.name],depts:tool.departmentScope||[],type:'Capability Building',
+        source:'Block G — Tools & Technologies (Planned Adoption)',
+        category:'Employee Development'
+      });
+    }
+  });
+
+  // 3. BCDR Exercise Skill Gaps (Block M)
+  var mData=getBlock(org,'M');
+  (mData.exercises||[]).forEach(function(ex){
+    if(ex.skillGaps&&ex.skillGaps.length&&(ex.outcome||'').indexOf('Partial')>=0){
+      suggestions.push({
+        title:'BCDR Gap Remediation — '+ex.name,
+        reason:'DR exercise "<strong>'+ex.name+'</strong>" ('+ex.dateConducted+') identified <strong>'+ex.skillGaps.length+' skill gaps</strong>: '+ex.skillGaps.join(', ')+'. Outcome was "'+ex.outcome+'". Lessons: '+ex.lessons,
+        priority:'high',icon:'🛡️',iconBg:'var(--amber-bg)',
+        skills:ex.skillGaps,depts:[],type:'Training Programme',
+        source:'Block M — DR Testing & Exercises',
+        category:'Employee Development'
+      });
+    }
+  });
+
+  // 4. Strategic Risks requiring skill mitigation (Block C)
+  var cData=getBlock(org,'C');
+  (cData.strategicRisks||[]).forEach(function(risk){
+    if(risk.severity==='High'||risk.likelihood==='Likely'){
+      suggestions.push({
+        title:'Risk Mitigation — '+risk.name,
+        reason:'Strategic risk "<strong>'+risk.name+'</strong>" rated <strong>'+risk.severity+' severity / '+risk.likelihood+'</strong>. Owner: '+risk.owner+'. Mitigation: '+risk.mitigationPlan,
+        priority:risk.severity==='High'?'high':'medium',
+        icon:'⚡',iconBg:'var(--red-bg)',
+        skills:[],depts:[],type:'Capability Building',
+        source:'Block C — Strategic Risks',
+        category:'Employee Development'
+      });
+    }
+  });
+
+  // 5. Regulatory Skill Demand (Block E)
+  (eData.regulatorySkillDemand||[]).forEach(function(rsd){
+    if(rsd.Employees_Required>rsd.Employees_Compliant){
+      var gap=rsd.Employees_Required-rsd.Employees_Compliant;
+      suggestions.push({
+        title:rsd.Skill_Name+' Compliance — '+rsd.Geography,
+        reason:'<strong>'+rsd.Regulation_Name+'</strong> requires '+rsd.Employees_Required+' compliant employees. Currently <strong>'+rsd.Employees_Compliant+' compliant</strong> ('+gap+' gap). Deadline: '+rsd.Compliance_Deadline+'. Penalty risk: $'+rsd.Penalty_M+'M. '+rsd.Notes,
+        priority:'critical',icon:'📋',iconBg:'var(--red-bg)',
+        skills:[rsd.Skill_Name],depts:[],type:'Certification Drive',
+        source:'Block E — Regulatory Skill Demand',
+        category:'Employee Development'
+      });
+    }
+  });
+
+  // 6. Client projects from strategic clients (Block E clients + Block D)
+  (eData.clients||[]).filter(function(c){return c.isStrategic}).forEach(function(client){
+    suggestions.push({
+      title:'Capability Alignment — '+client.name+' Account',
+      reason:'<strong>'+client.name+'</strong> ('+client.industry+', '+client.geography+') is a strategic account with NPS '+client.npsScore+'. Proactive capability building aligned to client industry ensures contract renewal and upsell readiness.',
+      priority:'medium',icon:'🤝',iconBg:'rgba(201,168,76,0.08)',
+      skills:[],depts:[],type:'Client-facing',
+      source:'Block E — Strategic Client Portfolio',
+      category:'Client Servicing'
+    });
+  });
+
+  // Sort: critical first, then high, then medium
+  var pOrder={critical:0,high:1,medium:2};
+  suggestions.sort(function(a,b){return(pOrder[a.priority]||9)-(pOrder[b.priority]||9)});
+  return suggestions;
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+var PROJECT_TYPES=['Training Programme','Capability Building','Certification Drive','Leadership Development','OD Initiative','Client-facing','R&D','Infrastructure','Compliance','Digital Transformation'];
+var PROJECT_CATEGORIES=['Client Servicing','Employee Development'];
+var PROJECT_STATUSES=['Planned','Active','On Hold'];
+
+function render(){
+  var suggestions=generateSuggestions();
+  renderSuggestions(suggestions);
+  renderCreateForm();
+}
+
+function renderSuggestions(suggestions){
+  var el=document.getElementById('suggestionsPanel');
+  if(!suggestions.length){
+    el.innerHTML='<div class="no-data">No organisation context found. Complete <a href="org-setup-v4.html" style="color:var(--accent);font-weight:600">Organisation Setup</a> and run <strong>Demo Fill All Blocks</strong> to see AI-suggested projects.</div>';
+    return;
+  }
+
+  var h='<div class="section-label">AI-Suggested Projects ('+suggestions.length+')</div>';
+  suggestions.forEach(function(s,i){
+    h+='<div class="sug-card">';
+    h+='<div class="sug-head">';
+    h+='<div class="sug-icon" style="background:'+s.iconBg+'">'+s.icon+'</div>';
+    h+='<div class="sug-title">'+esc(s.title)+'</div>';
+    h+='<div class="sug-priority '+s.priority+'">'+s.priority.charAt(0).toUpperCase()+s.priority.slice(1)+'</div>';
+    h+='</div>';
+    h+='<div class="sug-reason">'+s.reason+'</div>';
+    h+='<div class="sug-tags">';
+    s.skills.forEach(function(sk){h+='<span class="sug-tag skill">'+esc(sk)+'</span>'});
+    s.depts.forEach(function(d){h+='<span class="sug-tag dept">'+esc(d)+'</span>'});
+    h+='<span class="sug-tag">'+esc(s.type)+'</span>';
+    h+='<span class="sug-tag">'+esc(s.category)+'</span>';
+    h+='</div>';
+    h+='<div class="sug-source"><svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> '+esc(s.source)+'</div>';
+    h+='<div class="sug-actions">';
+    h+='<button class="btn btn-primary btn-sm" onclick="createFromSuggestion('+i+')">Create This Project</button>';
+    h+='</div>';
+    h+='</div>';
+  });
+  el.innerHTML=h;
+  // Store suggestions for click handler
+  window._suggestions=suggestions;
+}
+
+function renderCreateForm(prefill){
+  var p=prefill||{};
+  var el=document.getElementById('createPanel');
+  var h='<div class="create-panel">';
+  h+='<div class="cp-title">'+(prefill?'Create Project':'New Custom Project')+'</div>';
+  h+='<div class="cp-sub">'+(prefill?'Pre-filled from AI suggestion. Review and save.':'Define a new talent project from scratch.')+'</div>';
+  h+='<div class="form-group"><label class="form-label">Project Name *</label><input class="form-input" id="fpName" value="'+esc(p.title||'')+'" placeholder="e.g. Digital Twin Academy"></div>';
+  h+='<div class="form-row"><div class="form-group"><label class="form-label">Category</label><select class="form-select" id="fpCategory">';
+  PROJECT_CATEGORIES.forEach(function(c){h+='<option value="'+c+'"'+(p.category===c?' selected':'')+'>'+c+'</option>'});
+  h+='</select></div>';
+  h+='<div class="form-group"><label class="form-label">Type</label><select class="form-select" id="fpType">';
+  PROJECT_TYPES.forEach(function(t){h+='<option value="'+t+'"'+(p.type===t?' selected':'')+'>'+t+'</option>'});
+  h+='</select></div></div>';
+  h+='<div class="form-row"><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="fpStatus"><option>Planned</option><option>Active</option></select></div>';
+  h+='<div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="fpPriority">';
+  ['Critical','High','Medium','Low'].forEach(function(pr){h+='<option'+(p.priority&&p.priority.toLowerCase()===pr.toLowerCase()?' selected':'')+'>'+pr+'</option>'});
+  h+='</select></div></div>';
+  h+='<div class="form-group"><label class="form-label">Project Owner</label><input class="form-input" id="fpOwner" value="" placeholder="e.g. CHRO — Sarah Lim"></div>';
+  h+='<div class="form-row"><div class="form-group"><label class="form-label">Start Date</label><input class="form-input" type="date" id="fpStart"></div>';
+  h+='<div class="form-group"><label class="form-label">Target End Date</label><input class="form-input" type="date" id="fpEnd"></div></div>';
+  h+='<div class="form-row"><div class="form-group"><label class="form-label">Budget ($M)</label><input class="form-input" type="number" step="0.01" id="fpBudget" placeholder="0.15"></div>';
+  h+='<div class="form-group"><label class="form-label">Employees Targeted</label><input class="form-input" type="number" id="fpEmps" value="'+(p.emps||'')+'" placeholder="20"></div></div>';
+  h+='<div class="form-group"><label class="form-label">Key Skills</label><input class="form-input" id="fpSkills" value="'+esc((p.skills||[]).join(', '))+'" placeholder="Comma-separated skills"></div>';
+  h+='<div class="form-group"><label class="form-label">Target Departments</label><input class="form-input" id="fpDepts" value="'+esc((p.depts||[]).join(', '))+'" placeholder="Comma-separated departments"></div>';
+  h+='<div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="fpDesc" placeholder="Project description and objectives...">'+esc(p.desc||'')+'</textarea></div>';
+  if(p.source){h+='<div style="font-size:10px;color:var(--text-muted);margin-bottom:12px;padding:8px 10px;background:rgba(201,168,76,0.04);border-radius:6px;border:1px solid rgba(201,168,76,0.15)">Source: '+esc(p.source)+'</div>'}
+  h+='<div style="display:flex;gap:8px;margin-top:4px">';
+  h+='<button class="btn btn-primary" onclick="saveProject()">Save Project</button>';
+  if(prefill) h+='<button class="btn btn-sm" onclick="renderCreateForm()">Clear Form</button>';
+  h+='</div>';
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+function createFromSuggestion(idx){
+  var s=window._suggestions[idx];
+  if(!s)return;
+  // Strip HTML from reason for description
+  var desc=s.reason.replace(/<[^>]+>/g,'');
+  renderCreateForm({title:s.title,category:s.category,type:s.type,priority:s.priority,skills:s.skills,depts:s.depts,desc:desc,source:s.source});
+  // Scroll to create panel on mobile
+  document.getElementById('createPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function saveProject(){
+  var name=document.getElementById('fpName').value.trim();
+  if(!name){showToast('Enter a project name');return}
+
+  var project={
+    Project_ID:'PROJ-'+String(Date.now()).slice(-6),
+    Project_Category:document.getElementById('fpCategory').value,
+    Project_Name:name,
+    Project_Type:document.getElementById('fpType').value,
+    Project_Status:document.getElementById('fpStatus').value,
+    Priority:document.getElementById('fpPriority').value,
+    Project_Owner:document.getElementById('fpOwner').value.trim(),
+    Start_Date:document.getElementById('fpStart').value,
+    Target_End_Date:document.getElementById('fpEnd').value,
+    Budget_M:parseFloat(document.getElementById('fpBudget').value)||0,
+    Employees_Targeted:parseInt(document.getElementById('fpEmps').value)||0,
+    Required_Skills:document.getElementById('fpSkills').value.split(',').map(function(s){return s.trim()}).filter(Boolean),
+    Target_Departments:document.getElementById('fpDepts').value.split(',').map(function(s){return s.trim()}).filter(Boolean),
+    Description:document.getElementById('fpDesc').value.trim(),
+    Created_At:new Date().toISOString()
+  };
+
+  // Save to a talent projects storage
+  var raw=null;
+  try{raw=sessionStorage.getItem('sip_talent_projects')||localStorage.getItem('sip_talent_projects')}catch(e){}
+  var projects=[];
+  if(raw){try{projects=JSON.parse(raw)}catch(e){}}
+  projects.push(project);
+  var json=JSON.stringify(projects);
+  try{sessionStorage.setItem('sip_talent_projects',json)}catch(e){}
+  try{localStorage.setItem('sip_talent_projects',json)}catch(e){}
+
+  showToast('Project "'+name+'" created successfully');
+  renderCreateForm(); // reset form
+}
+
+render();
 </script>
 </body>
 </html>
