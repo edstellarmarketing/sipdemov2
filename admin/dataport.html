@@ -353,9 +353,9 @@
       <div class="hris-strip">
         <div class="hris-label">Or sync from HRIS</div>
         <div class="hris-options">
-          <button class="hris-btn connected" onclick="openIntegrations()"><div class="hris-dot"></div>Workday · Connected</button>
-          <button class="hris-btn" onclick="openIntegrations()"><div class="hris-dot"></div>BambooHR</button>
-          <button class="hris-btn" onclick="openIntegrations()"><div class="hris-dot"></div>SAP SuccessFactors</button>
+          <button class="hris-btn connected" onclick="openIntegrations()"><img src="https://www.google.com/s2/favicons?sz=64&domain=workday.com" style="width:16px;height:16px;border-radius:2px"> Workday · Connected</button>
+          <button class="hris-btn" onclick="openIntegrations()"><img src="https://www.google.com/s2/favicons?sz=64&domain=bamboohr.com" style="width:16px;height:16px;border-radius:2px"> BambooHR</button>
+          <button class="hris-btn" onclick="openIntegrations()"><img src="https://www.google.com/s2/favicons?sz=64&domain=sap.com" style="width:16px;height:16px;border-radius:2px"> SAP SuccessFactors</button>
           <button class="hris-btn" onclick="openIntegrations()" style="background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.03));border:1px solid rgba(201,168,76,0.35);color:var(--accent);font-weight:600"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:2;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Explore 100+ Integrations</button>
         </div>
       </div>
@@ -1129,7 +1129,7 @@ function renderIntegrations(query){
       var stCls = i.status === 'connected' ? 'connected' : 'available';
       var stText = i.status === 'connected' ? 'Connected' : 'Available';
       h += '<div class="intg-card ' + cls + '" onclick="toggleIntegration(this,\'' + i.name.replace(/'/g,"\\'") + '\')">';
-      h += '<div class="intg-logo"><img src="https://logo.clearbit.com/' + i.domain + '" alt="" style="width:28px;height:28px;border-radius:4px;object-fit:contain" onerror="this.style.display=\'none\';this.parentElement.textContent=\'' + i.name.charAt(0) + '\'"></div>';
+      h += '<div class="intg-logo"><img src="https://www.google.com/s2/favicons?sz=128&domain=' + i.domain + '" alt="" style="width:28px;height:28px;border-radius:4px;object-fit:contain" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<span style=font-size:15px;font-weight:700;color:var(--text-muted)>' + i.name.charAt(0) + '</span>\'"></div>';
       h += '<div class="intg-info"><div class="intg-name">' + i.name + '</div><div class="intg-desc">' + i.desc + '</div></div>';
       h += '<div class="intg-status ' + stCls + '">' + stText + '</div>';
       h += '</div>';
