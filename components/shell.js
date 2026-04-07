@@ -81,6 +81,7 @@ const EdstellarShell = (() => {
         { label: 'Employee Assessments', icon: 'scope', href: 'employee-assessments.html' },
       ]},
       { group: 'Talent Projects', items: [
+        { label: 'All Projects', icon: 'report', href: 'talent-projects-all.html' },
         { label: '+ Add Project', icon: 'grid', href: 'talent-projects-add.html' },
       ]},
       { group: 'Reports', items: [
