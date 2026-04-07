@@ -604,6 +604,33 @@
       </div>
     </div>
 
+    <!-- Documents & Resume -->
+    <div class="form-card">
+      <h3>Documents & Resume</h3>
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:span 2">
+          <label class="form-label">Resume / CV Upload</label>
+          <div id="resumeUploadZone" style="border:2px dashed rgba(59,130,246,0.25);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:rgba(59,130,246,0.02)" onmouseover="this.style.borderColor='rgba(59,130,246,0.5)';this.style.background='rgba(59,130,246,0.04)'" onmouseout="this.style.borderColor='rgba(59,130,246,0.25)';this.style.background='rgba(59,130,246,0.02)'">
+            <input type="file" id="fResume" accept=".pdf,.docx,.doc" style="position:absolute;inset:0;opacity:0;cursor:pointer" onchange="handleAddEmpResume(this)">
+            <div style="font-size:24px;margin-bottom:6px">📄</div>
+            <div style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:3px">Drop resume here or click to browse</div>
+            <div style="font-size:11px;color:var(--text-muted)">Accepts .pdf, .docx — used by AI for skill extraction and gap analysis</div>
+            <div id="resumeFileName" style="display:none;margin-top:10px;padding:8px 14px;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:6px;font-size:12px;color:#3B82F6;font-weight:500"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Other Documents (optional)</label>
+          <div style="position:relative">
+            <input type="file" id="fOtherDocs" accept=".pdf,.docx,.doc,.jpg,.png" multiple style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" onchange="handleOtherDocs(this)">
+            <div style="padding:10px 14px;border:1px solid rgba(0,0,0,0.08);border-radius:8px;font-size:12px;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;gap:8px">
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span id="otherDocsLabel">Certificates, ID proof, offer letter...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Actions -->
     <div class="form-actions">
       <button type="submit" class="btn btn-primary" id="btnSave">Save Employee</button>
@@ -878,6 +905,33 @@ function getNextEmpId(){
 function resetForm(){
   document.getElementById('addEmployeeForm').reset();
   document.getElementById('fEmpId').value = getNextEmpId();
+  clearResume();
+  _pendingOtherDocs = [];
+  document.getElementById('otherDocsLabel').textContent = 'Certificates, ID proof, offer letter...';
+}
+
+var _pendingResumeFile = '';
+var _pendingOtherDocs = [];
+
+function handleAddEmpResume(input){
+  if(!input.files||!input.files[0])return;
+  _pendingResumeFile = input.files[0].name;
+  var el = document.getElementById('resumeFileName');
+  el.style.display = 'block';
+  el.innerHTML = '<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:-2px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> ' + _pendingResumeFile + ' <span style="margin-left:8px;cursor:pointer;color:var(--red)" onclick="event.stopPropagation();clearResume()">&times; Remove</span>';
+}
+
+function clearResume(){
+  _pendingResumeFile = '';
+  document.getElementById('fResume').value = '';
+  document.getElementById('resumeFileName').style.display = 'none';
+}
+
+function handleOtherDocs(input){
+  if(!input.files||!input.files.length)return;
+  _pendingOtherDocs = [];
+  for(var i=0;i<input.files.length;i++) _pendingOtherDocs.push(input.files[i].name);
+  document.getElementById('otherDocsLabel').textContent = _pendingOtherDocs.length + ' file' + (_pendingOtherDocs.length>1?'s':'') + ' selected: ' + _pendingOtherDocs.join(', ');
 }
 
 function collectFormData(){
@@ -906,7 +960,10 @@ function collectFormData(){
     certs: document.getElementById('fCerts').value.trim(),
     ctc: document.getElementById('fCtc').value,
     currency: document.getElementById('fCurrency').value,
-    payBand: document.getElementById('fPayBand').value.trim()
+    payBand: document.getElementById('fPayBand').value.trim(),
+    resumeFile: _pendingResumeFile,
+    resumeUploadedAt: _pendingResumeFile ? new Date().toISOString().substring(0,10) : '',
+    otherDocs: _pendingOtherDocs.slice()
   };
 }
 
