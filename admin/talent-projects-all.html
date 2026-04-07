@@ -347,28 +347,48 @@ function renderDetail(){
   body.innerHTML=h;
 }
 
+var editingSubIdx=-1;
+
 function renderActivitiesSection(p){
   var subs=p.subProjects||[];
+  var typeColors={'Survey':'#8B5CF6','Skill Assessment':'#3B82F6','Competency Assessment':'#0891B2','Training Session':'#16A34A','Workshop':'#D97706','Certification Exam':'#DC2626','Coaching Session':'#C9A84C','Review Meeting':'#6B7280','Feedback Collection':'#8B5CF6','Knowledge Test':'#3B82F6','Discovery Session':'#0891B2','OD Intervention':'#D97706'};
+  function selOpts(arr,cur){return arr.map(function(v){return'<option'+(v===cur?' selected':'')+'>'+esc(v)+'</option>'}).join('')}
+
   var h='<div class="dp-card"><div class="dp-section-title">Activities &amp; Delegated Tasks ('+subs.length+')</div>';
   if(subs.length){
     subs.forEach(function(s,si){
-      var typeColors={'Survey':'#8B5CF6','Skill Assessment':'#3B82F6','Competency Assessment':'#0891B2','Training Session':'#16A34A','Workshop':'#D97706','Certification Exam':'#DC2626','Coaching Session':'#C9A84C','Review Meeting':'#6B7280','Feedback Collection':'#8B5CF6','Knowledge Test':'#3B82F6','Discovery Session':'#0891B2','OD Intervention':'#D97706'};
       var col=typeColors[s.type]||'#6B7280';
       var stCls=s.status==='Completed'?'completed':s.status==='In Progress'?'active':s.status==='Cancelled'?'hold':'planned';
-      h+='<div class="sub-item">';
-      h+='<div class="sub-head">';
-      h+='<div class="sub-type-icon" style="background:'+col+'15;color:'+col+'">'+getSubIcon(s.type)+'</div>';
-      h+='<div class="sub-name">'+esc(s.name)+'</div>';
-      h+='<span class="proj-pill '+stCls+'" style="font-size:9px">'+esc(s.status)+'</span>';
-      h+='<button class="btn btn-sm" style="padding:2px 6px;font-size:9px;color:var(--red);border-color:var(--red)" onclick="removeSubProject('+si+')">x</button>';
-      h+='</div>';
-      h+='<div class="sub-meta">';
-      h+='<span>'+esc(s.type)+'</span>';
-      if(s.dueDate) h+='<span>Due: '+esc(s.dueDate)+'</span>';
-      if(s.assignedTo) h+='<span class="sub-assign">'+esc(s.assignedTo)+'</span>';
-      h+='</div>';
-      if(s.notes) h+='<div style="font-size:10.5px;color:var(--text-secondary);margin-top:4px;line-height:1.4">'+esc(s.notes)+'</div>';
-      h+='</div>';
+
+      if(editingSubIdx===si){
+        // Inline edit form
+        h+='<div class="sub-item" style="border-color:var(--accent);background:rgba(201,168,76,0.02)">';
+        h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Activity Name *</div><input class="dp-input" id="edSubName" value="'+esc(s.name)+'"></div></div>';
+        h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Type</div><select class="dp-select" id="edSubType">'+selOpts(SUB_TYPES,s.type)+'</select></div>';
+        h+='<div class="form-group"><div class="dp-label">Assign To</div><select class="dp-select" id="edSubAssign">'+selOpts(ASSIGN_OPTIONS,s.assignedTo)+'</select></div></div>';
+        h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Status</div><select class="dp-select" id="edSubStatus">'+selOpts(SUB_STATUSES,s.status)+'</select></div>';
+        h+='<div class="form-group"><div class="dp-label">Due Date</div><input class="dp-input" type="date" id="edSubDue" value="'+esc(s.dueDate||'')+'"></div></div>';
+        h+='<div class="form-group"><div class="dp-label">Notes</div><input class="dp-input" id="edSubNotes" value="'+esc(s.notes||'')+'"></div>';
+        h+='<div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-primary btn-sm" onclick="saveSubEdit('+si+')">Save</button><button class="btn btn-sm" onclick="editingSubIdx=-1;renderDetail()">Cancel</button></div>';
+        h+='</div>';
+      } else {
+        // Readonly view
+        h+='<div class="sub-item">';
+        h+='<div class="sub-head">';
+        h+='<div class="sub-type-icon" style="background:'+col+'15;color:'+col+'">'+getSubIcon(s.type)+'</div>';
+        h+='<div class="sub-name">'+esc(s.name)+'</div>';
+        h+='<span class="proj-pill '+stCls+'" style="font-size:9px">'+esc(s.status)+'</span>';
+        h+='<button class="btn btn-sm" style="padding:2px 6px;font-size:9px" onclick="editingSubIdx='+si+';renderDetail()">Edit</button>';
+        h+='<button class="btn btn-sm" style="padding:2px 6px;font-size:9px;color:var(--red);border-color:var(--red)" onclick="removeSubProject('+si+')">x</button>';
+        h+='</div>';
+        h+='<div class="sub-meta">';
+        h+='<span>'+esc(s.type)+'</span>';
+        if(s.dueDate) h+='<span>Due: '+esc(s.dueDate)+'</span>';
+        if(s.assignedTo) h+='<span class="sub-assign">'+esc(s.assignedTo)+'</span>';
+        h+='</div>';
+        if(s.notes) h+='<div style="font-size:10.5px;color:var(--text-secondary);margin-top:4px;line-height:1.4">'+esc(s.notes)+'</div>';
+        h+='</div>';
+      }
     });
   } else {
     h+='<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;border:2px dashed var(--border);border-radius:8px">No activities yet. Add surveys, assessments, training sessions, or other delegated tasks.</div>';
@@ -482,6 +502,24 @@ function saveSubProject(){
   renderDetail();
   render();
   showToast('Activity "'+name+'" added');
+}
+
+function saveSubEdit(subIdx){
+  var projects=loadProjects();
+  var p=projects[detailIdx];
+  if(!p||!p.subProjects||!p.subProjects[subIdx])return;
+  var name=document.getElementById('edSubName').value.trim();
+  if(!name){showToast('Enter activity name');return}
+  p.subProjects[subIdx].name=name;
+  p.subProjects[subIdx].type=document.getElementById('edSubType').value;
+  p.subProjects[subIdx].assignedTo=document.getElementById('edSubAssign').value;
+  p.subProjects[subIdx].status=document.getElementById('edSubStatus').value;
+  p.subProjects[subIdx].dueDate=document.getElementById('edSubDue').value;
+  p.subProjects[subIdx].notes=document.getElementById('edSubNotes').value.trim();
+  saveProjects(projects);
+  editingSubIdx=-1;
+  renderDetail();
+  showToast('Activity updated');
 }
 
 function removeSubProject(subIdx){
