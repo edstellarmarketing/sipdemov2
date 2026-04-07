@@ -452,12 +452,22 @@ function renderCreateForm(prefill){
   h+='</div>';
   h+='</div>';
 
-  // Sub-projects section (shown after first save)
-  h+='<div id="subProjectSection"></div>';
+  // Sub-projects section — always visible
+  h+='<div id="subProjectSection">';
+  if(window._lastSavedIdx>=0){
+    h+='</div>';
+  } else {
+    h+='<div class="create-panel" style="max-width:100%;margin-top:16px;opacity:0.6">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+    h+='<div style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-primary)">Activities &amp; Sub-Projects</div>';
+    h+='</div>';
+    h+='<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;border:2px dashed var(--border);border-radius:8px">Save the project above first, then add surveys, assessments, training sessions, and other delegated tasks here.</div>';
+    h+='</div></div>';
+  }
 
   el.innerHTML=h;
 
-  // If editing a saved project, show sub-projects
+  // Render sub-projects if project was already saved
   if(window._lastSavedIdx>=0) renderSubProjects(window._lastSavedIdx);
 }
 
