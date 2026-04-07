@@ -362,8 +362,8 @@ function saveProject(){
   try{sessionStorage.setItem('sip_talent_projects',json)}catch(e){}
   try{localStorage.setItem('sip_talent_projects',json)}catch(e){}
 
-  showToast('Project "'+name+'" created successfully');
-  renderCreateForm(); // reset form
+  showToast('Project "'+name+'" created — redirecting...');
+  setTimeout(function(){window.location.href='talent-projects-all.html'},600);
 }
 
 // ═══════════════════════════════════════════════════════

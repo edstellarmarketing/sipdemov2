@@ -10,33 +10,207 @@
 <link rel="stylesheet" href="../styles/design-system.css">
 <style>
 .content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
 .page-body{max-width:1200px;margin:0 auto;padding:28px 32px 60px;width:100%}
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 32px;text-align:center}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.page-head h1{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text-primary);margin:0 0 4px}
+.page-head p{font-size:13px;color:var(--text-secondary);margin:0}
+
+.stats-strip{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.stat-card{flex:1;min-width:110px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stat-val{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text-primary)}
+.stat-label{font-size:11px;color:var(--text-muted);margin-top:2px}
+.stat-val.green{color:var(--green)}.stat-val.amber{color:var(--amber)}.stat-val.red{color:var(--red)}.stat-val.accent{color:var(--accent)}
+
+.filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filter-bar select,.filter-bar input{padding:7px 12px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:12px;color:var(--text-primary);background:var(--card)}
+.filter-bar input{flex:1;min-width:160px}
+
+.proj-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:8px;transition:all .15s}
+.proj-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06);border-color:var(--text-muted)}
+.proj-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.proj-id{font-family:var(--font-mono,monospace);font-size:10px;color:var(--text-muted)}
+.proj-name{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text-primary);flex:1}
+.proj-pill{font-size:9.5px;padding:3px 10px;border-radius:100px;font-weight:500;white-space:nowrap}
+.proj-pill.planned{background:rgba(59,130,246,0.08);color:#3B82F6}
+.proj-pill.active{background:var(--green-bg);color:var(--green)}
+.proj-pill.hold{background:var(--amber-bg);color:var(--amber)}
+.proj-pill.completed{background:rgba(0,0,0,0.04);color:var(--text-muted)}
+.proj-pill.critical{background:var(--red-bg);color:var(--red)}
+.proj-pill.high{background:var(--amber-bg);color:var(--amber)}
+.proj-pill.medium{background:rgba(59,130,246,0.08);color:#3B82F6}
+.proj-pill.low{background:rgba(0,0,0,0.04);color:var(--text-muted)}
+.proj-meta{font-size:11px;color:var(--text-muted);margin-bottom:6px}
+.proj-desc{font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px}
+.proj-tags{display:flex;flex-wrap:wrap;gap:4px}
+.proj-tag{font-size:9.5px;padding:2px 8px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted)}
+.proj-tag.skill{background:rgba(59,130,246,0.05);border-color:rgba(59,130,246,0.15);color:#3B82F6}
+.proj-tag.dept{background:rgba(201,168,76,0.05);border-color:rgba(201,168,76,0.2);color:var(--accent)}
+.proj-actions{display:flex;gap:6px;margin-top:10px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);background:var(--card);color:var(--text-primary);transition:all .15s}
+.btn:hover{border-color:var(--text-muted)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#B8983F}
+.btn-sm{padding:6px 12px;font-size:11px}
+.btn-danger{color:var(--red);border-color:var(--red)}
+.btn-danger:hover{background:var(--red-bg)}
+
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px;text-align:center}
 .empty-icon{width:64px;height:64px;border-radius:16px;background:var(--accent-lt);display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:28px}
-.empty-title{font-family:var(--font-display);font-size:20px;font-weight:600;color:var(--text-primary);margin-bottom:8px}
-.empty-desc{font-size:13px;color:var(--text-secondary);max-width:420px;line-height:1.6}
+.empty-title{font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--text-primary);margin-bottom:8px}
+.empty-desc{font-size:13px;color:var(--text-secondary);max-width:420px;line-height:1.6;margin-bottom:16px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a1a;color:#fff;padding:10px 22px;border-radius:10px;font-size:12.5px;font-family:var(--font-body);z-index:9999;transition:transform .3s ease;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
+
 <main class="main" id="page-content">
 <div class="content">
-<div class="page-body">
-  <div class="empty-state">
-    <div class="empty-icon">📂</div>
-    <div class="empty-title">All Projects</div>
-    <div class="empty-desc">View and manage all talent projects — client servicing, employee development, training programmes, and capability building initiatives.</div>
-  </div>
-</div>
+<div class="page-body" id="mainBody"></div>
 </div>
 </main>
+
+<div class="toast" id="toast"></div>
+
 <script src="../components/shell.js"></script>
 <script>
-  EdstellarShell.init({
-    portal: 'admin',
-    activeNav: 'All Projects',
-    breadcrumbs: ['Talent Projects', 'All Projects'],
-    topbarActions: []
+EdstellarShell.init({portal:'admin',activeNav:'All Projects',breadcrumbs:['Talent Projects','All Projects'],topbarActions:[]});
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
+
+function loadProjects(){
+  var raw=null;
+  try{raw=sessionStorage.getItem('sip_talent_projects')||localStorage.getItem('sip_talent_projects')}catch(e){}
+  if(raw){try{return JSON.parse(raw)}catch(e){}}
+  return[];
+}
+function saveProjects(projects){
+  var json=JSON.stringify(projects);
+  try{sessionStorage.setItem('sip_talent_projects',json)}catch(e){}
+  try{localStorage.setItem('sip_talent_projects',json)}catch(e){}
+}
+
+var filterSearch='';var filterCat='';var filterStatus='';
+
+function render(){
+  var projects=loadProjects();
+  var body=document.getElementById('mainBody');
+
+  if(!projects.length){
+    body.innerHTML='<div class="page-head"><div><h1>All Projects</h1><p>Manage all talent projects</p></div><a href="talent-projects-add.html" class="btn btn-primary btn-sm">+ Add Project</a></div>'+
+      '<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">No Projects Yet</div>'+
+      '<div class="empty-desc">Create your first talent project from AI suggestions or from scratch.</div>'+
+      '<a href="talent-projects-add.html" class="btn btn-primary">+ Add Project</a></div>';
+    return;
+  }
+
+  var html='';
+
+  // Header
+  html+='<div class="page-head"><div><h1>All Projects</h1><p>'+projects.length+' talent project'+(projects.length>1?'s':'')+' created</p></div>';
+  html+='<div style="display:flex;gap:8px"><a href="talent-projects-add.html" class="btn btn-primary btn-sm">+ Add Project</a>';
+  html+='<button class="btn btn-danger btn-sm" onclick="clearProjects()">Clear All</button></div></div>';
+
+  // Stats
+  var planned=0,active=0,hold=0,completed=0;
+  projects.forEach(function(p){
+    var s=(p.Project_Status||'').toLowerCase();
+    if(s==='planned')planned++;else if(s==='active')active++;else if(s==='on hold')hold++;else if(s==='completed')completed++;else planned++;
   });
+  html+='<div class="stats-strip">';
+  html+='<div class="stat-card"><div class="stat-val">'+projects.length+'</div><div class="stat-label">Total Projects</div></div>';
+  html+='<div class="stat-card"><div class="stat-val accent">'+active+'</div><div class="stat-label">Active</div></div>';
+  html+='<div class="stat-card"><div class="stat-val green">'+planned+'</div><div class="stat-label">Planned</div></div>';
+  html+='<div class="stat-card"><div class="stat-val amber">'+hold+'</div><div class="stat-label">On Hold</div></div>';
+  html+='<div class="stat-card"><div class="stat-val">'+completed+'</div><div class="stat-label">Completed</div></div>';
+  html+='</div>';
+
+  // Filters
+  var cats={},statuses={};
+  projects.forEach(function(p){if(p.Project_Category)cats[p.Project_Category]=1;if(p.Project_Status)statuses[p.Project_Status]=1});
+  html+='<div class="filter-bar">';
+  html+='<input type="text" placeholder="Search projects..." value="'+esc(filterSearch)+'" oninput="filterSearch=this.value;render()">';
+  html+='<select onchange="filterCat=this.value;render()"><option value="">All Categories</option>';
+  Object.keys(cats).sort().forEach(function(c){html+='<option'+(filterCat===c?' selected':'')+'>'+esc(c)+'</option>'});
+  html+='</select>';
+  html+='<select onchange="filterStatus=this.value;render()"><option value="">All Statuses</option>';
+  Object.keys(statuses).sort().forEach(function(s){html+='<option'+(filterStatus===s?' selected':'')+'>'+esc(s)+'</option>'});
+  html+='</select></div>';
+
+  // Filter
+  var filtered=projects;
+  if(filterSearch){var q=filterSearch.toLowerCase();filtered=filtered.filter(function(p){return(p.Project_Name||'').toLowerCase().indexOf(q)>=0||(p.Description||'').toLowerCase().indexOf(q)>=0})}
+  if(filterCat)filtered=filtered.filter(function(p){return p.Project_Category===filterCat});
+  if(filterStatus)filtered=filtered.filter(function(p){return p.Project_Status===filterStatus});
+
+  if(!filtered.length){
+    html+='<div style="padding:40px;text-align:center;color:var(--text-muted);font-size:13px">No projects match your filters.</div>';
+  }
+
+  // Project cards
+  filtered.forEach(function(p,i){
+    var stCls=(p.Project_Status||'').toLowerCase().replace(/\s+/g,'');
+    if(stCls==='onhold')stCls='hold';
+    var priCls=(p.Priority||'medium').toLowerCase();
+
+    html+='<div class="proj-card">';
+    html+='<div class="proj-head">';
+    html+='<span class="proj-id">'+esc(p.Project_ID)+'</span>';
+    html+='<span class="proj-name">'+esc(p.Project_Name)+'</span>';
+    if(p.Project_Category) html+='<span class="proj-pill" style="background:rgba(0,0,0,0.04);color:var(--text-secondary)">'+esc(p.Project_Category)+'</span>';
+    if(p.Project_Type) html+='<span class="proj-pill" style="background:rgba(0,0,0,0.04);color:var(--text-muted)">'+esc(p.Project_Type)+'</span>';
+    if(p.Project_Status) html+='<span class="proj-pill '+stCls+'">'+esc(p.Project_Status)+'</span>';
+    if(p.Priority) html+='<span class="proj-pill '+priCls+'">'+esc(p.Priority)+'</span>';
+    html+='</div>';
+
+    var meta=[];
+    if(p.Project_Owner) meta.push('Owner: '+p.Project_Owner);
+    if(p.Start_Date) meta.push('Start: '+p.Start_Date);
+    if(p.Target_End_Date) meta.push('End: '+p.Target_End_Date);
+    if(p.Budget_M) meta.push('Budget: $'+p.Budget_M+'M');
+    if(p.Employees_Targeted) meta.push(p.Employees_Targeted+' employees');
+    if(meta.length) html+='<div class="proj-meta">'+meta.join(' · ')+'</div>';
+
+    if(p.Description) html+='<div class="proj-desc">'+esc(p.Description.substring(0,200))+(p.Description.length>200?'...':'')+'</div>';
+
+    html+='<div class="proj-tags">';
+    (p.Required_Skills||[]).forEach(function(sk){html+='<span class="proj-tag skill">'+esc(sk)+'</span>'});
+    (p.Target_Departments||[]).forEach(function(d){html+='<span class="proj-tag dept">'+esc(d)+'</span>'});
+    html+='</div>';
+
+    html+='<div class="proj-actions">';
+    html+='<button class="btn btn-sm" onclick="deleteProject('+i+')">Delete</button>';
+    html+='</div>';
+    html+='</div>';
+  });
+
+  body.innerHTML=html;
+}
+
+function deleteProject(idx){
+  var projects=loadProjects();
+  var name=projects[idx]?projects[idx].Project_Name:'';
+  if(!confirm('Delete project "'+name+'"?'))return;
+  projects.splice(idx,1);
+  saveProjects(projects);
+  showToast('Project deleted');
+  render();
+}
+
+function clearProjects(){
+  if(!confirm('Delete all projects?'))return;
+  try{sessionStorage.removeItem('sip_talent_projects')}catch(e){}
+  try{localStorage.removeItem('sip_talent_projects')}catch(e){}
+  showToast('All projects cleared');
+  render();
+}
+
+render();
 </script>
 </body>
 </html>
