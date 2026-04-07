@@ -62,16 +62,17 @@
 .empty-title{font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--text-primary);margin-bottom:8px}
 .empty-desc{font-size:13px;color:var(--text-secondary);max-width:420px;line-height:1.6;margin-bottom:16px}
 
-/* Detail panel overlay */
-.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:800;display:none;justify-content:flex-end}
-.detail-overlay.open{display:flex}
-.detail-panel{width:540px;max-width:92vw;background:var(--card);height:100%;overflow-y:auto;box-shadow:-8px 0 30px rgba(0,0,0,0.12);animation:slideIn .25s ease}
-@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
-.dp-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;position:sticky;top:0;background:var(--card);z-index:1}
-.dp-head h2{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-primary);flex:1;margin:0}
-.dp-close{width:28px;height:28px;border:none;background:none;cursor:pointer;font-size:18px;color:var(--text-muted);border-radius:6px;display:flex;align-items:center;justify-content:center}
-.dp-close:hover{background:rgba(0,0,0,0.05)}
-.dp-body{padding:20px 22px}
+/* Detail full page */
+.dp-back{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);cursor:pointer;margin-bottom:16px;padding:6px 0;font-family:var(--font-body);border:none;background:none;transition:color .15s}
+.dp-back:hover{color:var(--accent)}
+.dp-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.dp-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.dp-header h1{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text-primary);margin:0 0 6px}
+.dp-grid{display:grid;grid-template-columns:1fr 360px;gap:20px}
+@media(max-width:900px){.dp-grid{grid-template-columns:1fr}}
+.dp-main{min-width:0}
+.dp-sidebar{min-width:0}
+.dp-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:14px}
 .dp-section{margin-bottom:18px}
 .dp-section-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
 .dp-row{display:flex;gap:12px;margin-bottom:10px}
@@ -103,19 +104,6 @@
 <div class="page-body" id="mainBody"></div>
 </div>
 </main>
-
-<!-- Detail / Edit Panel -->
-<div class="detail-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
-  <div class="detail-panel">
-    <div class="dp-head">
-      <h2 id="dpTitle">Project Details</h2>
-      <button class="btn btn-sm" id="dpEditBtn" onclick="toggleEdit()">Edit</button>
-      <button class="dp-close" onclick="closeDetail()">&times;</button>
-    </div>
-    <div class="dp-body" id="dpBody"></div>
-    <div class="dp-footer" id="dpFooter"></div>
-  </div>
-</div>
 
 <div class="toast" id="toast"></div>
 
@@ -278,11 +266,10 @@ var ASSIGN_OPTIONS=['All Employees','Engineering','Project Delivery','Digital De
 function openDetail(idx){
   detailIdx=idx;editMode=false;
   renderDetail();
-  document.getElementById('detailOverlay').classList.add('open');
 }
 function closeDetail(){
-  document.getElementById('detailOverlay').classList.remove('open');
-  detailIdx=-1;
+  detailIdx=-1;editMode=false;
+  render();
 }
 function toggleEdit(){
   editMode=!editMode;
@@ -294,61 +281,75 @@ function renderDetail(){
   var p=projects[detailIdx];
   if(!p){closeDetail();return}
 
-  document.getElementById('dpTitle').textContent=editMode?'Edit Project':'Project Details';
-  document.getElementById('dpEditBtn').textContent=editMode?'Cancel Edit':'Edit';
-
+  var body=document.getElementById('mainBody');
   var h='';
-  if(editMode){
-    h+=renderEditForm(p);
-    document.getElementById('dpFooter').innerHTML='<button class="btn btn-sm" onclick="closeDetail()">Cancel</button><button class="btn btn-primary btn-sm" onclick="saveEdit()">Save Changes</button>';
-  } else {
-    h+=renderReadonly(p);
-    document.getElementById('dpFooter').innerHTML='<button class="btn btn-sm" onclick="toggleEdit()">Edit Project</button><button class="btn btn-sm btn-danger" onclick="deleteFromDetail()">Delete</button><button class="btn btn-sm" onclick="closeDetail()">Close</button>';
-  }
-  document.getElementById('dpBody').innerHTML=h;
-}
 
-function renderReadonly(p){
-  var h='';
-  // Header badges
-  h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">';
+  // Back button
+  h+='<button class="dp-back" onclick="closeDetail()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back to All Projects</button>';
+
+  // Header
+  var stCls=(p.Project_Status||'').toLowerCase().replace(/\s+/g,'');if(stCls==='onhold')stCls='hold';
+  var priCls=(p.Priority||'').toLowerCase();
+  h+='<div class="dp-header"><div>';
+  h+='<h1>'+esc(p.Project_Name)+'</h1>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
   if(p.Project_ID) h+='<span style="font-family:var(--font-mono,monospace);font-size:10px;padding:3px 8px;border-radius:4px;background:rgba(0,0,0,0.04);color:var(--text-muted)">'+esc(p.Project_ID)+'</span>';
   if(p.Project_Category) h+='<span class="proj-pill" style="background:rgba(0,0,0,0.04);color:var(--text-secondary)">'+esc(p.Project_Category)+'</span>';
   if(p.Project_Type) h+='<span class="proj-pill" style="background:rgba(0,0,0,0.04);color:var(--text-muted)">'+esc(p.Project_Type)+'</span>';
-  var stCls=(p.Project_Status||'').toLowerCase().replace(/\s+/g,'');if(stCls==='onhold')stCls='hold';
   if(p.Project_Status) h+='<span class="proj-pill '+stCls+'">'+esc(p.Project_Status)+'</span>';
-  var priCls=(p.Priority||'').toLowerCase();
-  if(p.Priority) h+='<span class="proj-pill '+priCls+'">'+esc(p.Priority)+' Priority</span>';
-  h+='</div>';
-
-  // Core
-  h+='<div class="dp-section"><div class="dp-section-title">Project Information</div>';
-  h+=roField('Project Name',p.Project_Name);
-  h+='<div class="dp-row">'+roField('Owner',p.Project_Owner)+roField('Budget','$'+(p.Budget_M||0)+'M')+'</div>';
-  h+='<div class="dp-row">'+roField('Start Date',p.Start_Date||'—')+roField('End Date',p.Target_End_Date||'—')+'</div>';
-  h+='<div class="dp-row">'+roField('Employees Targeted',p.Employees_Targeted||'—')+roField('Created',p.Created_At?(p.Created_At.substring(0,10)):'—')+'</div>';
-  h+='</div>';
-
-  // Description
-  if(p.Description){
-    h+='<div class="dp-section"><div class="dp-section-title">Description</div>';
-    h+='<div class="dp-val" style="white-space:pre-wrap">'+esc(p.Description)+'</div></div>';
-  }
-
-  // Skills & Departments
-  h+='<div class="dp-section"><div class="dp-section-title">Skills & Departments</div>';
-  h+='<div style="margin-bottom:8px"><div class="dp-label">Key Skills</div>';
-  if((p.Required_Skills||[]).length){h+='<div class="proj-tags">';(p.Required_Skills||[]).forEach(function(sk){h+='<span class="proj-tag skill">'+esc(sk)+'</span>'});h+='</div>'}
-  else h+='<div class="dp-val">—</div>';
-  h+='</div>';
-  h+='<div><div class="dp-label">Target Departments</div>';
-  if((p.Target_Departments||[]).length){h+='<div class="proj-tags">';(p.Target_Departments||[]).forEach(function(d){h+='<span class="proj-tag dept">'+esc(d)+'</span>'});h+='</div>'}
-  else h+='<div class="dp-val">—</div>';
+  if(p.Priority) h+='<span class="proj-pill '+priCls+'">'+esc(p.Priority)+'</span>';
+  h+='</div></div>';
+  h+='<div style="display:flex;gap:8px">';
+  h+='<button class="btn btn-sm" onclick="toggleEdit()">'+(editMode?'Cancel Edit':'Edit Project')+'</button>';
+  h+='<button class="btn btn-sm btn-danger" onclick="deleteFromDetail()">Delete</button>';
   h+='</div></div>';
 
-  // Sub-Projects / Activities
+  if(editMode){
+    h+=renderEditForm(p);
+    h+='<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" onclick="saveEdit()">Save Changes</button><button class="btn" onclick="toggleEdit()">Cancel</button></div>';
+  } else {
+    h+='<div class="dp-grid"><div class="dp-main">';
+
+    // Description
+    h+='<div class="dp-card"><div class="dp-section-title">Description</div>';
+    h+='<div class="dp-val" style="white-space:pre-wrap;line-height:1.6">'+esc(p.Description||'No description provided.')+'</div></div>';
+
+    // Activities section
+    h+=renderActivitiesSection(p);
+
+    h+='</div><div class="dp-sidebar">';
+
+    // Project details sidebar
+    h+='<div class="dp-card"><div class="dp-section-title">Project Details</div>';
+    h+=roField('Owner',p.Project_Owner);
+    h+=roField('Budget','$'+(p.Budget_M||0)+'M');
+    h+=roField('Start Date',p.Start_Date||'—');
+    h+=roField('End Date',p.Target_End_Date||'—');
+    h+=roField('Employees Targeted',p.Employees_Targeted||'—');
+    h+=roField('Created',p.Created_At?(p.Created_At.substring(0,10)):'—');
+    h+='</div>';
+
+    // Skills sidebar
+    h+='<div class="dp-card"><div class="dp-section-title">Key Skills</div>';
+    if((p.Required_Skills||[]).length){h+='<div class="proj-tags">';(p.Required_Skills||[]).forEach(function(sk){h+='<span class="proj-tag skill">'+esc(sk)+'</span>'});h+='</div>'}
+    else h+='<div class="dp-val" style="font-size:12px">—</div>';
+    h+='</div>';
+
+    // Departments sidebar
+    h+='<div class="dp-card"><div class="dp-section-title">Target Departments</div>';
+    if((p.Target_Departments||[]).length){h+='<div class="proj-tags">';(p.Target_Departments||[]).forEach(function(d){h+='<span class="proj-tag dept">'+esc(d)+'</span>'});h+='</div>'}
+    else h+='<div class="dp-val" style="font-size:12px">—</div>';
+    h+='</div>';
+
+    h+='</div></div>'; // close grid
+  }
+
+  body.innerHTML=h;
+}
+
+function renderActivitiesSection(p){
   var subs=p.subProjects||[];
-  h+='<div class="dp-section"><div class="dp-section-title">Activities &amp; Delegated Tasks ('+subs.length+')</div>';
+  var h='<div class="dp-card"><div class="dp-section-title">Activities &amp; Delegated Tasks ('+subs.length+')</div>';
   if(subs.length){
     subs.forEach(function(s,si){
       var typeColors={'Survey':'#8B5CF6','Skill Assessment':'#3B82F6','Competency Assessment':'#0891B2','Training Session':'#16A34A','Workshop':'#D97706','Certification Exam':'#DC2626','Coaching Session':'#C9A84C','Review Meeting':'#6B7280','Feedback Collection':'#8B5CF6','Knowledge Test':'#3B82F6','Discovery Session':'#0891B2','OD Intervention':'#D97706'};
@@ -370,12 +371,11 @@ function renderReadonly(p){
       h+='</div>';
     });
   } else {
-    h+='<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:11.5px;border:1px dashed var(--border);border-radius:8px">No activities yet. Add surveys, assessments, training sessions, or other tasks to delegate to teams.</div>';
+    h+='<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;border:2px dashed var(--border);border-radius:8px">No activities yet. Add surveys, assessments, training sessions, or other delegated tasks.</div>';
   }
-  h+='<button class="btn btn-sm" onclick="showAddSubForm()" style="margin-top:6px"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Activity</button>';
+  h+='<button class="btn btn-sm" onclick="showAddSubForm()" style="margin-top:8px"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Activity</button>';
   h+='<div id="addSubForm" style="display:none;margin-top:10px;padding:14px;border:1px solid var(--accent);border-radius:8px;background:rgba(201,168,76,0.02)"></div>';
   h+='</div>';
-
   return h;
 }
 
