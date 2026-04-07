@@ -3529,6 +3529,16 @@ var D_PROJECT_CATEGORIES = ['Client Servicing','Employee Development'];
 var D_PROJECT_TYPES = ['Internal','Client-facing','R&D','Infrastructure','Compliance','Digital Transformation','Training Programme','Leadership Development','OD Initiative','Capability Building','Certification Drive'];
 var D_PROJECT_STATUS = ['Planned','Active','On Hold','Completed','Cancelled'];
 
+// Trainer Registry constants
+var D_TRAINER_TYPES=['Internal SME','Internal L&D','Freelance Certified','Vendor-Supplied','Academic','Executive Coach'];
+var D_TRAINER_VERIFICATION=['Unverified','Documents Submitted','Verified','Re-verification Due'];
+var D_TRAINER_ENGAGEMENT=['Per-day','Per-hour','Per-program','Revenue Share','Salaried (Internal)'];
+var D_TRAINER_TRAVEL=['Local Only','Regional','National','International'];
+var D_TRAINER_DELIVERY=['Classroom','Virtual ILT','Recorded / Async','1:1 Coaching','Workshop Facilitation','Blended'];
+var D_TRAINER_AUDIENCE=['Individual Contributors','Managers','Senior Leaders','C-Suite','Mixed / All Levels'];
+var D_TRAINER_PROFICIENCY=['Beginner','Intermediate','Advanced','Expert'];
+var D_LANG_PROFICIENCY=['Native','Fluent','Conversational'];
+
 function getBlockDData(){
   var d=getBlockState('D').data;
   if(!d.products) d.products=[];
@@ -3536,6 +3546,7 @@ function getBlockDData(){
   if(!d.productSkillMap) d.productSkillMap=[];
   if(!d.serviceSkillMap) d.serviceSkillMap=[];
   if(!d.projects) d.projects=[];
+  if(!d.trainers) d.trainers=[];
   return d;
 }
 
@@ -3554,12 +3565,14 @@ function renderBlockD_Edit(){
   var _clientProjCount=d.projects.filter(function(p){return p.Project_Category!=='Employee Development'}).length;
   var _devProjCount=d.projects.filter(function(p){return p.Project_Category==='Employee Development'}).length;
   h+='<div class="hier-tab'+(dActiveTab==='projects'?' active':'')+'" onclick="switchDTab(\'projects\')">5. Projects ('+_clientProjCount+'C / '+_devProjCount+'D)</div>';
+  h+='<div class="hier-tab'+(dActiveTab==='trainers'?' active':'')+'" onclick="switchDTab(\'trainers\')">6. Trainers ('+d.trainers.length+')</div>';
   h+='</div>';
   h+='<div class="hier-tab-content'+(dActiveTab==='products'?' active':'')+'">'+renderDTab_Products(d)+'</div>';
   h+='<div class="hier-tab-content'+(dActiveTab==='services'?' active':'')+'">'+renderDTab_Services(d)+'</div>';
   h+='<div class="hier-tab-content'+(dActiveTab==='productskill'?' active':'')+'">'+renderDTab_ProductSkillMap(d)+'</div>';
   h+='<div class="hier-tab-content'+(dActiveTab==='serviceskill'?' active':'')+'">'+renderDTab_ServiceSkillMap(d)+'</div>';
   h+='<div class="hier-tab-content'+(dActiveTab==='projects'?' active':'')+'">'+renderDTab_Projects(d)+'</div>';
+  h+='<div class="hier-tab-content'+(dActiveTab==='trainers'?' active':'')+'">'+renderDTab_Trainers(d)+'</div>';
   return h;
 }
 
@@ -3919,6 +3932,38 @@ function renderBlockD_ReadOnly(){
     h+=renderProjROList('Client Servicing Projects',clientProjs,'client');
     h+=renderProjROList('Employee Development Projects',devProjs,'dev');
   }
+  // Trainer Registry summary
+  if(d.trainers&&d.trainers.length){
+    h+='<div class="ro-card">';
+    h+='<div class="ro-card-header"><div class="ro-card-title">Trainer Registry ('+d.trainers.length+')</div>';
+    h+='<button class="ro-edit-btn" onclick="dActiveTab=\'trainers\';enterEditMode()"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button></div>';
+    // Summary by type
+    var typeCounts={};d.trainers.forEach(function(t){var tp=t.Trainer_Type||'Untyped';typeCounts[tp]=(typeCounts[tp]||0)+1});
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">';
+    Object.keys(typeCounts).forEach(function(tp){
+      var c=tp.indexOf('Internal')>=0?'var(--blue)':tp==='Vendor-Supplied'?'var(--amber)':tp==='Executive Coach'?'var(--accent)':'var(--text-t)';
+      h+='<span style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid '+c+';color:'+c+'">'+escH(tp)+' ('+typeCounts[tp]+')</span>';
+    });
+    h+='</div>';
+    d.trainers.forEach(function(t){
+      var vCls=t.Verification_Status==='Verified'?'green':t.Verification_Status==='Documents Submitted'?'blue':t.Verification_Status==='Re-verification Due'?'amber':'gray';
+      h+='<div style="padding:8px 0;border-bottom:1px solid var(--border)">';
+      h+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+      h+='<span style="font-size:11px;color:var(--text-t);font-family:var(--font-mono,monospace)">'+escH(t.Trainer_ID)+'</span>';
+      h+='<span style="font-size:13px;font-weight:600;color:var(--text);flex:1">'+escH(t.Full_Name||'\u2014')+'</span>';
+      if(t.Trainer_Type) h+='<span class="ro-tag" style="font-size:9px">'+escH(t.Trainer_Type)+'</span>';
+      if(t.Verification_Status) h+='<span class="life-badge '+vCls+'">'+escH(t.Verification_Status)+'</span>';
+      if(t.Avg_Rating) h+='<span style="font-size:11px;color:var(--accent);font-weight:600">'+t.Avg_Rating+' ★</span>';
+      h+='</div>';
+      if(t.Headline) h+='<div style="font-size:11.5px;color:var(--text-s);margin-top:2px">'+escH(t.Headline)+'</div>';
+      var meta=[];if(t.Years_Training_Exp)meta.push(t.Years_Training_Exp+'yr training');if(t.Past_Sessions)meta.push(t.Past_Sessions+' sessions');if(t.Day_Rate)meta.push('$'+t.Day_Rate+'/day');
+      if(meta.length) h+='<div style="font-size:10px;color:var(--text-t);margin-top:2px">'+meta.join(' \u00B7 ')+'</div>';
+      if(t.Primary_Skills&&t.Primary_Skills.length){h+='<div class="ro-tags" style="margin-top:4px">';t.Primary_Skills.forEach(function(sk){h+='<span class="ro-tag" style="font-size:9px;background:var(--accent-lt);color:var(--accent)">'+escH(sk)+'</span>'});h+='</div>'}
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
   // Completion
   if(!d.products.length&&!d.services.length){
     h+='<div style="padding:12px 16px;background:var(--warning-soft);border:1px solid var(--warning-border);border-radius:var(--radius-md);margin-top:14px;display:flex;align-items:center;gap:10px">';
@@ -4006,11 +4051,168 @@ function aiExtractBlockD(){
       {Project_ID:'PROJ-0008',Project_Category:'Employee Development',Project_Name:'Cloud-Native DevOps Bootcamp',Project_Type:'Capability Building',Project_Status:'Planned',Project_Owner:'Head of Digital — Marcus Tan',Start_Date:'2025-04-01',Target_End_Date:'2025-06-30',Budget_M:0.12,Team_Size:2,Linked_Product_Service:'',Client_Name:'',Target_Departments:['Digital Delivery'],Employees_Targeted:12,Required_Skills:['Kubernetes','Terraform','AWS','Docker','CI/CD'],Description:'12-week intensive bootcamp for backend engineers transitioning to cloud-native DevOps. Aligned with Kubernetes planned adoption (Block G). Target: 12 engineers certified in CKA (Certified Kubernetes Administrator).'},
       {Project_ID:'PROJ-0009',Project_Category:'Employee Development',Project_Name:'OD Initiative — Cross-Cultural Collaboration Programme',Project_Type:'OD Initiative',Project_Status:'Active',Project_Owner:'CHRO — Sarah Lim',Start_Date:'2024-10-01',Target_End_Date:'2025-09-30',Budget_M:0.15,Team_Size:2,Linked_Product_Service:'',Client_Name:'',Target_Departments:['Engineering','Project Delivery','Digital Delivery','Corporate Services','EHS & Risk','HR & Talent'],Employees_Targeted:120,Required_Skills:['Cross-Cultural Collaboration','Stakeholder Management','Team Leadership','Adaptability'],Description:'Organisation-wide OD programme addressing cross-border collaboration challenges identified in BCDR crisis comms cascade test (MY 34% non-response rate). Includes cultural intelligence workshops, bilingual communication training, and cross-office team projects.'}
     ];
+    d.trainers=[
+      {Trainer_ID:'TRN-0001',Trainer_Type:'Internal SME',Full_Name:'Chen Wei Liang',Display_Name:'Wei Liang Chen',Headline:'Principal BIM Specialist — 15yr construction BIM delivery',Bio:'Led BIM transformation for Arcova since 2018. Certified Autodesk Professional with deep expertise in LOD 400 delivery, clash detection, and 4D scheduling. Designed the internal BIM Academy curriculum.',Primary_Skills:['Revit','Navisworks','BIM Coordination','LOD Standards','Digital Twin'],Skill_Proficiency:{Revit:'Expert',Navisworks:'Expert','BIM Coordination':'Expert'},Years_Training_Exp:6,Years_Industry_Exp:15,Languages:['English — Fluent','Mandarin — Native','Malay — Conversational'],Delivery_Modes:['Classroom','Virtual ILT','Workshop Facilitation'],Audience_Levels:['Individual Contributors','Managers'],Certifications_Text:'Autodesk Certified Professional — Revit | Autodesk | 2026-08-15\nBIM Level 2 Lead Assessor | BRE Global | 2025-12-01',Verification_Status:'Verified',Verified_By:'HR — Sarah Lim',Verification_Date:'2024-11-15',Portfolio_Links:'',References:'Gamuda Berhad project team; LTA Digital Engineering Division',Past_Sessions:42,Avg_Rating:4.6,Completion_Rate:94,Pass_Rate:88,Rehire_Rate:100,Last_Active_Date:'2025-02-20',Engagement_Type:'Salaried (Internal)',Day_Rate:0,Currency:'SGD',Travel_Willingness:'Regional',Notice_Period_Days:14,Availability_Notes:'Available Mon-Wed for training; Thu-Fri on active projects',Exclusivity:false,Parent_Vendor:'',Contract_Ref:'',Markup_Pct:0,Employee_ID:'EMP-0142',Department:'Digital Delivery',Manager:'Head of Digital Delivery',Pct_Time_Training:30,Backfill_Required:true},
+      {Trainer_ID:'TRN-0002',Trainer_Type:'Internal L&D',Full_Name:'Sarah Lim',Display_Name:'Sarah Lim',Headline:'CHRO & L&D Strategy Lead — Leadership Development Specialist',Bio:'Oversees all talent development at Arcova. Designed the Leadership Pipeline programme and Cross-Cultural Collaboration initiative. ICF-certified executive coach with 12 years in L&D.',Primary_Skills:['Leadership Development','Change Management','Executive Coaching','Stakeholder Management','People Development'],Skill_Proficiency:{'Leadership Development':'Expert','Change Management':'Expert','Executive Coaching':'Advanced'},Years_Training_Exp:12,Years_Industry_Exp:18,Languages:['English — Native','Mandarin — Fluent'],Delivery_Modes:['Classroom','1:1 Coaching','Workshop Facilitation','Virtual ILT'],Audience_Levels:['Managers','Senior Leaders','C-Suite'],Certifications_Text:'ICF Professional Certified Coach (PCC) | ICF | 2026-03-01\nProsci Change Management Practitioner | Prosci | 2025-09-30\nSHRP Certified | SHRI | 2027-01-15',Verification_Status:'Verified',Verified_By:'CEO — Marcus Tan',Verification_Date:'2024-06-01',Portfolio_Links:'',References:'',Past_Sessions:86,Avg_Rating:4.8,Completion_Rate:97,Pass_Rate:0,Rehire_Rate:100,Last_Active_Date:'2025-03-01',Engagement_Type:'Salaried (Internal)',Day_Rate:0,Currency:'SGD',Travel_Willingness:'International',Notice_Period_Days:7,Availability_Notes:'Dedicated 40% to L&D programmes',Exclusivity:false,Parent_Vendor:'',Contract_Ref:'',Markup_Pct:0,Employee_ID:'EMP-0088',Department:'HR & Talent',Manager:'CEO',Pct_Time_Training:40,Backfill_Required:false},
+      {Trainer_ID:'TRN-0003',Trainer_Type:'Freelance Certified',Full_Name:'Dr. Arun Krishnamurthy',Display_Name:'Dr. Arun K.',Headline:'CNCF Ambassador — Kubernetes & Cloud-Native Architecture',Bio:'Independent cloud-native consultant and CNCF Ambassador. Delivered Kubernetes training for 40+ enterprises across APAC. Author of "Production Kubernetes" (O\'Reilly). Formerly Principal Engineer at Google Cloud.',Primary_Skills:['Kubernetes','Terraform','Docker','AWS','CI/CD','Cloud Architecture'],Skill_Proficiency:{Kubernetes:'Expert',Terraform:'Expert',AWS:'Expert'},Years_Training_Exp:8,Years_Industry_Exp:16,Languages:['English — Native','Hindi — Fluent','Tamil — Conversational'],Delivery_Modes:['Classroom','Virtual ILT','Workshop Facilitation','Recorded / Async'],Audience_Levels:['Individual Contributors','Managers'],Certifications_Text:'CKA — Certified Kubernetes Administrator | CNCF | 2026-06-30\nCKAD — Certified Kubernetes Application Developer | CNCF | 2026-06-30\nAWS Solutions Architect Professional | AWS | 2025-11-15\nHashiCorp Certified Terraform Associate | HashiCorp | 2026-02-28',Verification_Status:'Verified',Verified_By:'L&D Manager — Priya Shankar',Verification_Date:'2025-01-10',Portfolio_Links:'github.com/arunk-cloud, oreilly.com/library/view/production-kubernetes',References:'DBS Bank DevOps team; Grab SRE division; GovTech Singapore',Past_Sessions:124,Avg_Rating:4.9,Completion_Rate:92,Pass_Rate:85,Rehire_Rate:88,Last_Active_Date:'2025-02-28',Engagement_Type:'Per-day',Day_Rate:3500,Currency:'SGD',Travel_Willingness:'International',Notice_Period_Days:21,Availability_Notes:'Fully booked Apr-May 2025; available Jun onwards',Exclusivity:false,Parent_Vendor:'',Contract_Ref:'',Markup_Pct:0,Employee_ID:'',Department:'',Manager:'',Pct_Time_Training:0,Backfill_Required:false},
+      {Trainer_ID:'TRN-0004',Trainer_Type:'Vendor-Supplied',Full_Name:'Marie Dupont',Display_Name:'Marie Dupont',Headline:'Bureau Veritas Lead Auditor Trainer — ISO 45001 & ISO 14001',Bio:'Bureau Veritas certified lead trainer for management systems. Specialises in ISO 45001, ISO 14001, and ISO 9001. Has trained 800+ auditors across SE Asia in the past 5 years.',Primary_Skills:['ISO 45001','ISO 14001','ISO 9001','Safety Auditing','Risk Assessment','Incident Investigation'],Skill_Proficiency:{'ISO 45001':'Expert','ISO 14001':'Expert','Safety Auditing':'Expert'},Years_Training_Exp:10,Years_Industry_Exp:14,Languages:['English — Fluent','French — Native','Malay — Conversational'],Delivery_Modes:['Classroom','Virtual ILT'],Audience_Levels:['Individual Contributors','Managers','Senior Leaders'],Certifications_Text:'IRCA Lead Auditor ISO 45001 | IRCA | 2026-09-30\nIRCA Lead Auditor ISO 14001 | IRCA | 2026-09-30\nBureau Veritas Certified Trainer | Bureau Veritas | 2025-12-31',Verification_Status:'Verified',Verified_By:'EHS Director — Priya Shankar',Verification_Date:'2024-09-20',Portfolio_Links:'',References:'Singapore MOM Training Division; Keppel Corp; Surbana Jurong',Past_Sessions:210,Avg_Rating:4.7,Completion_Rate:96,Pass_Rate:91,Rehire_Rate:92,Last_Active_Date:'2025-01-15',Engagement_Type:'Per-day',Day_Rate:2800,Currency:'SGD',Travel_Willingness:'Regional',Notice_Period_Days:30,Availability_Notes:'Available through Bureau Veritas booking system only',Exclusivity:true,Parent_Vendor:'Bureau Veritas Singapore Pte Ltd',Contract_Ref:'MSA-BV-2024-0847',Markup_Pct:35,Employee_ID:'',Department:'',Manager:'',Pct_Time_Training:0,Backfill_Required:false},
+      {Trainer_ID:'TRN-0005',Trainer_Type:'Executive Coach',Full_Name:'James Whitfield',Display_Name:'James Whitfield',Headline:'C-Suite Executive Coach — Strategic Leadership & Board Governance',Bio:'Former CEO of Lendlease Australia. Now an independent executive coach specialising in infrastructure sector leadership. Coaches 8 C-suite leaders across APAC. Marshall Goldsmith certified.',Primary_Skills:['Strategic Leadership','Decision Making Under Uncertainty','Board Governance','Stakeholder Management','Change Management'],Skill_Proficiency:{'Strategic Leadership':'Expert','Board Governance':'Expert'},Years_Training_Exp:5,Years_Industry_Exp:28,Languages:['English — Native'],Delivery_Modes:['1:1 Coaching','Workshop Facilitation'],Audience_Levels:['Senior Leaders','C-Suite'],Certifications_Text:'Marshall Goldsmith Stakeholder Centered Coaching | MGSCC | 2027-01-01\nICF Master Certified Coach (MCC) | ICF | 2026-07-15',Verification_Status:'Verified',Verified_By:'CEO — Marcus Tan',Verification_Date:'2024-07-01',Portfolio_Links:'',References:'CEO of Lendlease AU; COO of John Holland; MD of CPB Contractors',Past_Sessions:48,Avg_Rating:4.9,Completion_Rate:100,Pass_Rate:0,Rehire_Rate:100,Last_Active_Date:'2025-03-05',Engagement_Type:'Per-hour',Day_Rate:850,Currency:'AUD',Travel_Willingness:'International',Notice_Period_Days:60,Availability_Notes:'2 slots/week; requires 60-day advance booking',Exclusivity:false,Parent_Vendor:'',Contract_Ref:'',Markup_Pct:0,Employee_ID:'',Department:'',Manager:'',Pct_Time_Training:0,Backfill_Required:false},
+      {Trainer_ID:'TRN-0006',Trainer_Type:'Academic',Full_Name:'Prof. Rajesh Venkataraman',Display_Name:'Prof. R. Venkataraman',Headline:'NUS Civil Engineering — Structural Analysis & Sustainability',Bio:'Professor of Civil & Environmental Engineering at National University of Singapore. Research focus on sustainable construction materials and structural resilience. Guest lecturer for Arcova Engineering Academy.',Primary_Skills:['Structural Analysis','Sustainability Assessment','Geotechnical Assessment','Foundation Design','Research Methods'],Skill_Proficiency:{'Structural Analysis':'Expert','Sustainability Assessment':'Expert'},Years_Training_Exp:20,Years_Industry_Exp:25,Languages:['English — Fluent','Tamil — Native','Hindi — Conversational'],Delivery_Modes:['Classroom','Virtual ILT','Recorded / Async'],Audience_Levels:['Individual Contributors','Managers','Senior Leaders'],Certifications_Text:'PE (Professional Engineer) — Singapore | PEB | 2026-12-31\nFIStructE — Fellow of Institution of Structural Engineers | IStructE | Lifetime',Verification_Status:'Verified',Verified_By:'Head of Engineering',Verification_Date:'2024-03-15',Portfolio_Links:'scholar.google.com/citations?user=rvenkat',References:'BCA Academy; NTU School of CEE; IStructE Singapore Chapter',Past_Sessions:65,Avg_Rating:4.5,Completion_Rate:90,Pass_Rate:82,Rehire_Rate:85,Last_Active_Date:'2024-12-10',Engagement_Type:'Per-program',Day_Rate:4000,Currency:'SGD',Travel_Willingness:'Local Only',Notice_Period_Days:45,Availability_Notes:'Academic calendar: available Jun-Jul and Dec-Jan semester breaks',Exclusivity:false,Parent_Vendor:'',Contract_Ref:'',Markup_Pct:0,Employee_ID:'',Department:'',Manager:'',Pct_Time_Training:0,Backfill_Required:false},
+      {Trainer_ID:'TRN-0007',Trainer_Type:'Internal SME',Full_Name:'Priya Shankar',Display_Name:'Priya Shankar',Headline:'Director of EHS — Safety Culture & Incident Investigation Expert',Bio:'Chief Risk Officer with 18 years in construction safety. Led the zero-serious-harm initiative since 2020. Certified ISO 45001 Lead Auditor and NEBOSH trainer. Delivers all internal safety induction and advanced investigation training.',Primary_Skills:['ISO 45001','Safety Leadership','Incident Investigation','Risk Assessment','Safety Auditing','Crisis Management'],Skill_Proficiency:{'ISO 45001':'Expert','Safety Leadership':'Expert','Incident Investigation':'Expert'},Years_Training_Exp:10,Years_Industry_Exp:18,Languages:['English — Fluent','Tamil — Native','Malay — Conversational'],Delivery_Modes:['Classroom','Workshop Facilitation','Virtual ILT'],Audience_Levels:['Individual Contributors','Managers','Senior Leaders'],Certifications_Text:'NEBOSH International Diploma | NEBOSH | Lifetime\nISO 45001 Lead Auditor | IRCA | 2026-06-30\nCSP — Certified Safety Professional | BCSP | 2026-03-15',Verification_Status:'Verified',Verified_By:'CEO — Marcus Tan',Verification_Date:'2024-08-01',Portfolio_Links:'',References:'MOM Workplace Safety Division; Bureau Veritas audit team',Past_Sessions:96,Avg_Rating:4.7,Completion_Rate:98,Pass_Rate:94,Rehire_Rate:100,Last_Active_Date:'2025-02-15',Engagement_Type:'Salaried (Internal)',Day_Rate:0,Currency:'SGD',Travel_Willingness:'Regional',Notice_Period_Days:7,Availability_Notes:'Available for training 2 days/week; safety reviews take priority',Exclusivity:false,Parent_Vendor:'',Contract_Ref:'',Markup_Pct:0,Employee_ID:'EMP-0045',Department:'EHS & Risk',Manager:'CEO',Pct_Time_Training:25,Backfill_Required:false},
+      {Trainer_ID:'TRN-0008',Trainer_Type:'Vendor-Supplied',Full_Name:'Omar Al-Rashid',Display_Name:'Omar Al-Rashid',Headline:'Cornerstone OnDemand — LMS Implementation & Digital Learning',Bio:'Senior Implementation Consultant at Cornerstone OnDemand. Specialises in LMS configuration, learning path design, and analytics dashboarding. Deployed Cornerstone for 15+ organisations in MEA.',Primary_Skills:['LMS Administration','Learning Path Design','Data Analysis','Digital Learning','Content Curation'],Skill_Proficiency:{'LMS Administration':'Expert','Learning Path Design':'Advanced'},Years_Training_Exp:7,Years_Industry_Exp:9,Languages:['English — Fluent','Arabic — Native'],Delivery_Modes:['Virtual ILT','1:1 Coaching','Recorded / Async'],Audience_Levels:['Individual Contributors','Managers'],Certifications_Text:'Cornerstone Certified Implementation Partner | Cornerstone | 2025-12-31\nATD Certified Professional in Talent Development | ATD | 2026-04-30',Verification_Status:'Documents Submitted',Verified_By:'',Verification_Date:'',Portfolio_Links:'',References:'ADNOC L&D team; Emirates Group HR Tech',Past_Sessions:38,Avg_Rating:4.3,Completion_Rate:89,Pass_Rate:0,Rehire_Rate:78,Last_Active_Date:'2025-01-20',Engagement_Type:'Per-day',Day_Rate:2200,Currency:'USD',Travel_Willingness:'Regional',Notice_Period_Days:14,Availability_Notes:'Bookable through Cornerstone Professional Services',Exclusivity:true,Parent_Vendor:'Cornerstone OnDemand Inc.',Contract_Ref:'SOW-CSOD-2024-ARC-012',Markup_Pct:40,Employee_ID:'',Department:'',Manager:'',Pct_Time_Training:0,Backfill_Required:false}
+    ];
     setBlockData('D',d);checkBlockDCompletion();renderBlockContent('D');editMode=true;
     document.getElementById('bpEditAllBtn').style.display='none';
-    addAiMsg("Generated <strong>3 products</strong>, <strong>4 services</strong>, <strong>7 product skill mappings</strong>, <strong>6 service skill mappings</strong>, and <strong>9 projects</strong> (4 Client Servicing + 5 Employee Development). Employee Development projects include Digital Twin Academy, Leadership Pipeline, ISO 45001 certification drive, DevOps Bootcamp, and Cross-Cultural OD initiative. Review and adjust as needed.");
-    showToast('Products, services & projects generated');
+    addAiMsg("Generated <strong>3 products</strong>, <strong>4 services</strong>, <strong>7 product skill mappings</strong>, <strong>6 service skill mappings</strong>, <strong>9 projects</strong> (4 Client + 5 Development), and <strong>8 trainers</strong> (2 Internal SME, 1 Internal L&D, 1 Freelance, 2 Vendor-Supplied, 1 Academic, 1 Executive Coach). Trainer profiles include credentials, performance history, and commercial terms. Review and adjust as needed.");
+    showToast('Products, services, projects & trainers generated');
   },1300);
+}
+
+// ── Trainer Registry Tab ──
+function genTrainerID(existing){
+  var ids=existing.map(function(t){var m=t.Trainer_ID&&t.Trainer_ID.match(/TRN-(\d+)/);return m?parseInt(m[1]):0});
+  return 'TRN-'+String((ids.length?Math.max.apply(null,ids):0)+1).padStart(4,'0');
+}
+function addDTrainer(){
+  var d=getBlockDData();
+  d.trainers.push({Trainer_ID:genTrainerID(d.trainers),Trainer_Type:'',Full_Name:'',Display_Name:'',Headline:'',Bio:'',Primary_Skills:[],Skill_Proficiency:{},Years_Training_Exp:0,Years_Industry_Exp:0,Languages:[],Delivery_Modes:[],Audience_Levels:[],Certifications:[],Verification_Status:'Unverified',Verified_By:'',Verification_Date:'',Portfolio_Links:'',References:'',Past_Sessions:0,Avg_Rating:0,Completion_Rate:0,Pass_Rate:0,Rehire_Rate:0,Last_Active_Date:'',Engagement_Type:'',Day_Rate:0,Currency:'USD',Travel_Willingness:'',Notice_Period_Days:0,Availability_Notes:'',Exclusivity:false,Parent_Vendor:'',Contract_Ref:'',Markup_Pct:0,Employee_ID:'',Department:'',Manager:'',Pct_Time_Training:0,Backfill_Required:false});
+  setBlockData('D',d);renderBlockContent('D');
+  setTimeout(function(){toggleTrainerCard(d.trainers.length-1)},50);
+}
+function removeDTrainer(i){var d=getBlockDData();d.trainers.splice(i,1);setBlockData('D',d);renderBlockContent('D')}
+function updateTrainerField(i,field,val){var d=getBlockDData();d.trainers[i][field]=val;setBlockData('D',d)}
+function toggleTrainerCard(i){var el=document.getElementById('trainerBody_'+i);if(el)el.style.display=el.style.display==='block'?'none':'block'}
+
+function renderDTab_Trainers(d){
+  var h='';
+  h+='<div class="form-section">';
+  h+='<div class="form-section-title">Trainer Registry</div>';
+  h+='<div class="form-section-desc">Structured trainer profiles for Employee Development Projects. Enables skill-to-trainer matching, quality scoring, and capacity planning. Minimum fields to create: Name, Type, Primary Skills.</div>';
+
+  if(d.trainers.length){
+    d.trainers.forEach(function(t,i){
+      var vCls=t.Verification_Status==='Verified'?'green':t.Verification_Status==='Documents Submitted'?'blue':t.Verification_Status==='Re-verification Due'?'amber':'gray';
+      var typeCls=t.Trainer_Type==='Internal SME'||t.Trainer_Type==='Internal L&D'?'blue':t.Trainer_Type==='Vendor-Supplied'?'amber':t.Trainer_Type==='Executive Coach'?'purple':'gray';
+      h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:10px">';
+      // Collapsed header
+      h+='<div style="padding:10px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--surface-alt)" onclick="toggleTrainerCard('+i+')">';
+      h+='<span style="font-size:11px;color:var(--text-t);font-family:var(--font-mono,monospace)">'+escH(t.Trainer_ID)+'</span>';
+      h+='<span style="font-size:13px;font-weight:600;color:var(--text);flex:1">'+escH(t.Full_Name||'New Trainer')+'</span>';
+      if(t.Headline) h+='<span style="font-size:11px;color:var(--text-t);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escH(t.Headline)+'</span>';
+      if(t.Trainer_Type) h+='<span class="life-badge '+typeCls+'">'+escH(t.Trainer_Type)+'</span>';
+      if(t.Verification_Status) h+='<span class="life-badge '+vCls+'">'+escH(t.Verification_Status)+'</span>';
+      if(t.Avg_Rating) h+='<span style="font-size:11px;color:var(--accent);font-weight:600">'+t.Avg_Rating+' ★</span>';
+      h+='<button class="btn btn-sm btn-danger" onclick="event.stopPropagation();removeDTrainer('+i+')" style="padding:3px 7px"><svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+      h+='</div>';
+
+      // Expandable body
+      h+='<div id="trainerBody_'+i+'" style="display:none;padding:16px">';
+      var isInternal=t.Trainer_Type==='Internal SME'||t.Trainer_Type==='Internal L&D';
+      var isVendor=t.Trainer_Type==='Vendor-Supplied';
+
+      // ── Core Fields ──
+      h+='<div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">Core Profile</div>';
+      h+='<div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Trainer Type <span class="req">*</span></label><select class="form-select" onchange="updateTrainerField('+i+',\'Trainer_Type\',this.value);renderBlockContent(\'D\')">'+renderSelectOptions(D_TRAINER_TYPES,t.Trainer_Type)+'</select></div>';
+      h+='<div class="form-group"><label class="form-label">Full Name <span class="req">*</span></label><input class="form-input" value="'+escH(t.Full_Name)+'" onblur="updateTrainerField('+i+',\'Full_Name\',this.value)"></div>';
+      h+='</div><div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Display Name (on certificates)</label><input class="form-input" value="'+escH(t.Display_Name)+'" placeholder="If different from legal name" onblur="updateTrainerField('+i+',\'Display_Name\',this.value)"></div>';
+      h+='<div class="form-group"><label class="form-label">Headline (one line)</label><input class="form-input" value="'+escH(t.Headline)+'" placeholder="e.g. CNCF Ambassador & Kubernetes Lead" onblur="updateTrainerField('+i+',\'Headline\',this.value)"></div>';
+      h+='</div><div class="form-grid single">';
+      h+='<div class="form-group"><label class="form-label">Detailed Bio</label><textarea class="form-textarea" style="min-height:40px" onblur="updateTrainerField('+i+',\'Bio\',this.value)">'+escH(t.Bio)+'</textarea></div>';
+      h+='</div><div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Primary Skills / Expertise <span class="req">*</span></label>';
+      h+=renderTagInput('trnSkills_'+i,t.Primary_Skills||[],'D');
+      h+='</div></div><div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Years Training Experience</label><input class="form-input" type="number" min="0" value="'+t.Years_Training_Exp+'" onblur="updateTrainerField('+i+',\'Years_Training_Exp\',parseInt(this.value)||0)"></div>';
+      h+='<div class="form-group"><label class="form-label">Years Industry Experience</label><input class="form-input" type="number" min="0" value="'+t.Years_Industry_Exp+'" onblur="updateTrainerField('+i+',\'Years_Industry_Exp\',parseInt(this.value)||0)"></div>';
+      h+='</div><div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Delivery Modes</label>';
+      h+=renderTagInput('trnModes_'+i,t.Delivery_Modes||[],'D');
+      h+='</div>';
+      h+='<div class="form-group"><label class="form-label">Audience Levels</label>';
+      h+=renderTagInput('trnAud_'+i,t.Audience_Levels||[],'D');
+      h+='</div></div><div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Languages (with proficiency)</label>';
+      h+=renderTagInput('trnLangs_'+i,t.Languages||[],'D');
+      h+='</div></div>';
+
+      // ── Credentials ──
+      h+='<div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)">Credentials & Verification</div>';
+      h+='<div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Verification Status</label><select class="form-select" onchange="updateTrainerField('+i+',\'Verification_Status\',this.value)">'+renderSelectOptions(D_TRAINER_VERIFICATION,t.Verification_Status)+'</select></div>';
+      h+='<div class="form-group"><label class="form-label">Verified By</label><input class="form-input" value="'+escH(t.Verified_By)+'" onblur="updateTrainerField('+i+',\'Verified_By\',this.value)"></div>';
+      h+='</div><div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Verification Date</label><input class="form-input" type="date" value="'+escH(t.Verification_Date)+'" onblur="updateTrainerField('+i+',\'Verification_Date\',this.value)"></div>';
+      h+='<div class="form-group"><label class="form-label">Portfolio / Sample Work Links</label><input class="form-input" value="'+escH(t.Portfolio_Links)+'" placeholder="URLs, comma-separated" onblur="updateTrainerField('+i+',\'Portfolio_Links\',this.value)"></div>';
+      h+='</div><div class="form-grid single">';
+      h+='<div class="form-group"><label class="form-label">Certifications Held (Name | Issuing Body | Expiry)</label><textarea class="form-textarea" style="min-height:40px" placeholder="One per line: CKA | CNCF | 2026-12-31" onblur="updateTrainerField('+i+',\'Certifications_Text\',this.value)">'+escH(t.Certifications_Text||'')+'</textarea></div>';
+      h+='</div><div class="form-grid single">';
+      h+='<div class="form-group"><label class="form-label">References (past clients / managers)</label><textarea class="form-textarea" style="min-height:30px" onblur="updateTrainerField('+i+',\'References\',this.value)">'+escH(t.References)+'</textarea></div>';
+      h+='</div>';
+
+      // ── Performance ──
+      h+='<div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)">Performance & History</div>';
+      h+='<div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Past Sessions Delivered</label><input class="form-input" type="number" min="0" value="'+t.Past_Sessions+'" onblur="updateTrainerField('+i+',\'Past_Sessions\',parseInt(this.value)||0)"></div>';
+      h+='<div class="form-group"><label class="form-label">Avg Learner Rating (1-5)</label><input class="form-input" type="number" min="0" max="5" step="0.1" value="'+t.Avg_Rating+'" onblur="updateTrainerField('+i+',\'Avg_Rating\',parseFloat(this.value)||0)"></div>';
+      h+='</div><div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Completion Rate %</label><input class="form-input" type="number" min="0" max="100" value="'+t.Completion_Rate+'" onblur="updateTrainerField('+i+',\'Completion_Rate\',parseInt(this.value)||0)"></div>';
+      h+='<div class="form-group"><label class="form-label">Assessment Pass Rate %</label><input class="form-input" type="number" min="0" max="100" value="'+t.Pass_Rate+'" onblur="updateTrainerField('+i+',\'Pass_Rate\',parseInt(this.value)||0)"></div>';
+      h+='</div><div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Re-hire Rate %</label><input class="form-input" type="number" min="0" max="100" value="'+t.Rehire_Rate+'" onblur="updateTrainerField('+i+',\'Rehire_Rate\',parseInt(this.value)||0)"></div>';
+      h+='<div class="form-group"><label class="form-label">Last Active Date</label><input class="form-input" type="date" value="'+escH(t.Last_Active_Date)+'" onblur="updateTrainerField('+i+',\'Last_Active_Date\',this.value)"></div>';
+      h+='</div>';
+
+      // ── Commercial ──
+      h+='<div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)">Commercial</div>';
+      h+='<div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Engagement Type</label><select class="form-select" onchange="updateTrainerField('+i+',\'Engagement_Type\',this.value)">'+renderSelectOptions(D_TRAINER_ENGAGEMENT,t.Engagement_Type)+'</select></div>';
+      h+='<div class="form-group"><label class="form-label">Day Rate</label><input class="form-input" type="number" min="0" value="'+t.Day_Rate+'" onblur="updateTrainerField('+i+',\'Day_Rate\',parseInt(this.value)||0)"></div>';
+      h+='</div><div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Travel Willingness</label><select class="form-select" onchange="updateTrainerField('+i+',\'Travel_Willingness\',this.value)">'+renderSelectOptions(D_TRAINER_TRAVEL,t.Travel_Willingness)+'</select></div>';
+      h+='<div class="form-group"><label class="form-label">Notice Period (days)</label><input class="form-input" type="number" min="0" value="'+t.Notice_Period_Days+'" onblur="updateTrainerField('+i+',\'Notice_Period_Days\',parseInt(this.value)||0)"></div>';
+      h+='</div><div class="form-grid">';
+      h+='<div class="form-group"><label class="form-label">Availability Notes</label><input class="form-input" value="'+escH(t.Availability_Notes)+'" placeholder="Blocked dates, constraints..." onblur="updateTrainerField('+i+',\'Availability_Notes\',this.value)"></div>';
+      h+='<div class="form-group"><label class="form-label">Exclusivity / Non-compete</label><div style="padding-top:6px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox"'+(t.Exclusivity?' checked':'')+' onchange="updateTrainerField('+i+',\'Exclusivity\',this.checked)"> <span style="font-size:12px;color:var(--text-s)">Can only be booked through parent vendor</span></label></div></div>';
+      h+='</div>';
+
+      // ── Vendor-Specific (conditional) ──
+      if(isVendor){
+        h+='<div style="font-size:11px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--warning-border)">Vendor-Specific</div>';
+        h+='<div class="form-grid">';
+        h+='<div class="form-group"><label class="form-label">Parent Vendor / Company</label><input class="form-input" value="'+escH(t.Parent_Vendor)+'" onblur="updateTrainerField('+i+',\'Parent_Vendor\',this.value)"></div>';
+        h+='<div class="form-group"><label class="form-label">Contract Reference (MSA/SOW)</label><input class="form-input" value="'+escH(t.Contract_Ref)+'" onblur="updateTrainerField('+i+',\'Contract_Ref\',this.value)"></div>';
+        h+='</div><div class="form-grid">';
+        h+='<div class="form-group"><label class="form-label">Markup / Pass-through %</label><input class="form-input" type="number" min="0" max="100" value="'+t.Markup_Pct+'" onblur="updateTrainerField('+i+',\'Markup_Pct\',parseInt(this.value)||0)"></div>';
+        h+='<div class="form-group"></div></div>';
+      }
+
+      // ── Internal-Specific (conditional) ──
+      if(isInternal){
+        h+='<div style="font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--info-soft)">Internal Employee Details</div>';
+        h+='<div class="form-grid">';
+        h+='<div class="form-group"><label class="form-label">Employee ID (HRIS)</label><input class="form-input" value="'+escH(t.Employee_ID)+'" onblur="updateTrainerField('+i+',\'Employee_ID\',this.value)"></div>';
+        h+='<div class="form-group"><label class="form-label">Department</label><input class="form-input" value="'+escH(t.Department)+'" onblur="updateTrainerField('+i+',\'Department\',this.value)"></div>';
+        h+='</div><div class="form-grid">';
+        h+='<div class="form-group"><label class="form-label">Manager (approval needed)</label><input class="form-input" value="'+escH(t.Manager)+'" onblur="updateTrainerField('+i+',\'Manager\',this.value)"></div>';
+        h+='<div class="form-group"><label class="form-label">% Time Allocated to Training</label><input class="form-input" type="number" min="0" max="100" value="'+t.Pct_Time_Training+'" onblur="updateTrainerField('+i+',\'Pct_Time_Training\',parseInt(this.value)||0)"></div>';
+        h+='</div><div class="form-grid">';
+        h+='<div class="form-group"><label class="form-label">Backfill Required?</label><div style="padding-top:6px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox"'+(t.Backfill_Required?' checked':'')+' onchange="updateTrainerField('+i+',\'Backfill_Required\',this.checked)"> <span style="font-size:12px;color:var(--text-s)">Project budget must account for backfill cost</span></label></div></div>';
+        h+='<div class="form-group"></div></div>';
+      }
+
+      h+='</div>'; // close trainerBody
+      h+='</div>'; // close card
+    });
+  } else {
+    h+='<div style="padding:28px;text-align:center;color:var(--text-t);border:2px dashed var(--border);border-radius:var(--radius-md);margin-bottom:16px">';
+    h+='<div style="font-size:14px;margin-bottom:6px">No trainers registered yet.</div>';
+    h+='<div style="font-size:12px">Add internal SMEs, freelance experts, vendor trainers, and coaches to enable project-to-trainer matching.</div></div>';
+  }
+  h+='<button class="btn btn-sm" onclick="addDTrainer()" style="margin-top:8px"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Trainer</button>';
+  h+='</div>';
+  return h;
 }
 
 BLOCK_RENDERERS['D'] = {edit:renderBlockD_Edit, ro:renderBlockD_ReadOnly};
