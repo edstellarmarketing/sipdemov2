@@ -217,6 +217,71 @@ var PROJECT_CATEGORIES=['Client Servicing','Employee Development'];
 var PROJECT_STATUSES=['Planned','Active','On Hold'];
 var RECURRENCE_OPTIONS=['One-time','Recurring — Monthly','Recurring — Quarterly','Recurring — Semi-Annual','Recurring — Annual'];
 
+var ALL_SKILLS=['Structural Analysis','Concrete Design','Foundation Design','Load Calculation','Revit','Risk Assessment','Geotechnical Assessment','Lean Construction','Sustainability Assessment','Project Governance','Stakeholder Management','Contract Management','Team Leadership','Client Management','Procurement','Navisworks','Digital Twin','Data Analysis','Drone Surveying','ISO 45001','Incident Investigation','Safety Leadership','People Development','Strategic Leadership','Decision Making Under Uncertainty','Cross-Cultural Collaboration','Adaptability','Innovation & Continuous Improvement','Change Management','Digital Fluency','Data-Driven Decision Making','Kubernetes','Terraform','AWS','Docker','CI/CD','Machine Learning','Computer Vision','Python','Power BI'];
+var ALL_DEPTS=['Engineering','Project Delivery','Digital Delivery','Corporate Services','EHS & Risk','HR & Talent'];
+
+function renderMultiSelect(id,options,selected,placeholder){
+  var sel=selected||[];
+  var h='<div style="position:relative">';
+  h+='<div class="form-input" style="min-height:34px;cursor:pointer;display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:5px 8px" onclick="toggleDropdown(\''+id+'\')" id="'+id+'_display">';
+  if(sel.length){sel.forEach(function(s){h+='<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 8px;border-radius:100px;background:rgba(59,130,246,0.06);color:#3B82F6;border:1px solid rgba(59,130,246,0.15)">'+esc(s)+' <span style="cursor:pointer;font-size:12px;color:#3B82F6" onclick="event.stopPropagation();removeMultiItem(\''+id+'\',\''+esc(s).replace(/'/g,"\\'")+'\')">×</span></span>'})}
+  else{h+='<span style="color:var(--text-muted);font-size:12px">'+esc(placeholder||'Select...')+'</span>'}
+  h+='</div>';
+  h+='<div id="'+id+'_dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;max-height:200px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:20;margin-top:2px">';
+  h+='<div style="padding:6px 8px;border-bottom:1px solid var(--border)"><input class="form-input" style="padding:5px 8px;font-size:11px" placeholder="Search..." oninput="filterMultiDropdown(\''+id+'\',this.value)"></div>';
+  h+='<div id="'+id+'_options">';
+  options.forEach(function(o){
+    var checked=sel.indexOf(o)>=0;
+    h+='<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:11.5px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,0.03)" data-val="'+esc(o)+'" onmouseover="this.style.background=\'rgba(0,0,0,0.02)\'" onmouseout="this.style.background=\'\'">';
+    h+='<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleMultiItem(\''+id+'\',\''+esc(o).replace(/'/g,"\\'")+'\',this.checked)" style="margin:0">';
+    h+='<span>'+esc(o)+'</span></label>';
+  });
+  h+='</div></div></div>';
+  return h;
+}
+
+var _multiSelections={};
+function getMultiSelected(id){return _multiSelections[id]||[]}
+function setMultiSelected(id,arr){_multiSelections[id]=arr}
+
+function toggleDropdown(id){
+  var dd=document.getElementById(id+'_dropdown');
+  dd.style.display=dd.style.display==='none'?'block':'none';
+}
+function filterMultiDropdown(id,q){
+  var opts=document.getElementById(id+'_options');
+  if(!opts)return;
+  var labels=opts.querySelectorAll('label');
+  labels.forEach(function(l){var v=l.getAttribute('data-val')||'';l.style.display=v.toLowerCase().indexOf(q.toLowerCase())>=0?'':'none'});
+}
+function toggleMultiItem(id,val,checked){
+  var sel=getMultiSelected(id).slice();
+  if(checked&&sel.indexOf(val)<0)sel.push(val);
+  if(!checked)sel=sel.filter(function(s){return s!==val});
+  setMultiSelected(id,sel);
+  refreshMultiDisplay(id);
+}
+function removeMultiItem(id,val){
+  var sel=getMultiSelected(id).filter(function(s){return s!==val});
+  setMultiSelected(id,sel);
+  // Uncheck in dropdown
+  var opts=document.getElementById(id+'_options');
+  if(opts){opts.querySelectorAll('input[type=checkbox]').forEach(function(cb){var lbl=cb.parentElement;if((lbl.getAttribute('data-val')||'')===val)cb.checked=false})}
+  refreshMultiDisplay(id);
+}
+function refreshMultiDisplay(id){
+  var sel=getMultiSelected(id);
+  var disp=document.getElementById(id+'_display');
+  if(!disp)return;
+  var h='';
+  if(sel.length){sel.forEach(function(s){h+='<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 8px;border-radius:100px;background:rgba(59,130,246,0.06);color:#3B82F6;border:1px solid rgba(59,130,246,0.15)">'+esc(s)+' <span style="cursor:pointer;font-size:12px;color:#3B82F6" onclick="event.stopPropagation();removeMultiItem(\''+id+'\',\''+s.replace(/'/g,"\\'")+'\')">×</span></span>'})}
+  else{h='<span style="color:var(--text-muted);font-size:12px">Select...</span>'}
+  disp.innerHTML=h;
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click',function(e){if(!e.target.closest('[id$=_display]')&&!e.target.closest('[id$=_dropdown]')){document.querySelectorAll('[id$=_dropdown]').forEach(function(d){d.style.display='none'})}});
+
 function getOwnerOptions(){
   var opts=[''];
   try{
@@ -359,10 +424,12 @@ function renderCreateForm(prefill){
   h+='</div>';
 
   // Right column
+  _multiSelections['fpSkills']=p.skills||[];
+  _multiSelections['fpDepts']=p.depts||[];
   h+='<div>';
-  h+='<div class="form-group"><label class="form-label">Key Skills (comma-separated)</label><input class="form-input" id="fpSkills" value="'+esc((p.skills||[]).join(', '))+'" placeholder="e.g. Kubernetes, Terraform, AWS, Docker"></div>';
-  h+='<div class="form-group"><label class="form-label">Target Departments (comma-separated)</label><input class="form-input" id="fpDepts" value="'+esc((p.depts||[]).join(', '))+'" placeholder="e.g. Digital Delivery, Engineering"></div>';
-  h+='<div class="form-group"><label class="form-label">Description &amp; Objectives</label><textarea class="form-textarea" id="fpDesc" style="min-height:160px" placeholder="Describe the project goals, scope, expected outcomes, success metrics, and any dependencies...">'+esc(p.desc||'')+'</textarea></div>';
+  h+='<div class="form-group"><label class="form-label">Key Skills</label>'+renderMultiSelect('fpSkills',ALL_SKILLS,p.skills||[],'Select skills...')+'</div>';
+  h+='<div class="form-group"><label class="form-label">Target Departments</label>'+renderMultiSelect('fpDepts',ALL_DEPTS,p.depts||[],'Select departments...')+'</div>';
+  h+='<div class="form-group"><label class="form-label">Description &amp; Objectives</label><textarea class="form-textarea" id="fpDesc" style="min-height:140px" placeholder="Describe the project goals, scope, expected outcomes, success metrics, and any dependencies...">'+esc(p.desc||'')+'</textarea></div>';
   h+='</div>';
 
   h+='</div>'; // close grid
@@ -373,7 +440,14 @@ function renderCreateForm(prefill){
   h+='<a href="talent-projects-all.html" class="btn" style="margin-left:auto">View All Projects</a>';
   h+='</div>';
   h+='</div>';
+
+  // Sub-projects section (shown after first save)
+  h+='<div id="subProjectSection"></div>';
+
   el.innerHTML=h;
+
+  // If editing a saved project, show sub-projects
+  if(window._lastSavedIdx>=0) renderSubProjects(window._lastSavedIdx);
 }
 
 function createFromSuggestion(idx){
@@ -406,8 +480,9 @@ function saveProject(){
     Target_End_Date:document.getElementById('fpEnd').value,
     Budget_M:parseFloat(document.getElementById('fpBudget').value)||0,
     Employees_Targeted:parseInt(document.getElementById('fpEmps').value)||0,
-    Required_Skills:document.getElementById('fpSkills').value.split(',').map(function(s){return s.trim()}).filter(Boolean),
-    Target_Departments:document.getElementById('fpDepts').value.split(',').map(function(s){return s.trim()}).filter(Boolean),
+    Required_Skills:getMultiSelected('fpSkills'),
+    Target_Departments:getMultiSelected('fpDepts'),
+    subProjects:[],
     Description:document.getElementById('fpDesc').value.trim(),
     Created_At:new Date().toISOString()
   };
@@ -422,11 +497,104 @@ function saveProject(){
   try{sessionStorage.setItem('sip_talent_projects',json)}catch(e){}
   try{localStorage.setItem('sip_talent_projects',json)}catch(e){}
 
-  showToast('Project "'+name+'" created — redirecting...');
-  setTimeout(function(){window.location.href='talent-projects-all.html'},600);
+  window._lastSavedIdx=projects.length-1;
+  showToast('Project "'+name+'" saved — add activities below');
+  renderSubProjects(projects.length-1);
 }
 
 // ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// SUB-PROJECTS / ACTIVITIES (on same page after save)
+// ═══════════════════════════════════════════════════════
+var SUB_TYPES=['Survey','Skill Assessment','Competency Assessment','Training Session','Workshop','Certification Exam','Coaching Session','Review Meeting','Feedback Collection','Knowledge Test','Discovery Session','OD Intervention'];
+var SUB_STATUSES=['Not Started','In Progress','Completed','Cancelled'];
+var SUB_ASSIGN=['All Employees','Engineering','Project Delivery','Digital Delivery','Corporate Services','EHS & Risk','HR & Talent','Managers Only','Senior Leaders','Custom List'];
+window._lastSavedIdx=-1;
+
+function loadProjects(){
+  var raw=null;try{raw=sessionStorage.getItem('sip_talent_projects')||localStorage.getItem('sip_talent_projects')}catch(e){}
+  if(raw){try{return JSON.parse(raw)}catch(e){}}return[];
+}
+function saveProjectsStore(projects){
+  var j=JSON.stringify(projects);try{sessionStorage.setItem('sip_talent_projects',j)}catch(e){}try{localStorage.setItem('sip_talent_projects',j)}catch(e){}
+}
+
+function renderSubProjects(projIdx){
+  var el=document.getElementById('subProjectSection');
+  if(!el)return;
+  var projects=loadProjects();
+  var p=projects[projIdx];
+  if(!p){el.innerHTML='';return}
+
+  var subs=p.subProjects||[];
+  var typeIcons={'Survey':'\uD83D\uDCCA','Skill Assessment':'\uD83D\uDCCB','Competency Assessment':'\uD83E\uDDE0','Training Session':'\uD83C\uDF93','Workshop':'\uD83D\uDEE0','Certification Exam':'\uD83D\uDCDC','Coaching Session':'\uD83D\uDCAC','Review Meeting':'\uD83D\uDCC5','Feedback Collection':'\uD83D\uDCAD','Knowledge Test':'\u270F\uFE0F','Discovery Session':'\uD83D\uDD0D','OD Intervention':'\uD83D\uDD04'};
+  var typeColors={'Survey':'#8B5CF6','Skill Assessment':'#3B82F6','Competency Assessment':'#0891B2','Training Session':'#16A34A','Workshop':'#D97706','Certification Exam':'#DC2626','Coaching Session':'#C9A84C','Review Meeting':'#6B7280','Feedback Collection':'#8B5CF6','Knowledge Test':'#3B82F6','Discovery Session':'#0891B2','OD Intervention':'#D97706'};
+
+  var h='<div class="create-panel" style="max-width:100%;margin-top:16px">';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+  h+='<div><div style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-primary)">Activities &amp; Sub-Projects</div>';
+  h+='<div style="font-size:11.5px;color:var(--text-muted)">Add surveys, assessments, training sessions, or other tasks for <strong>'+esc(p.Project_Name)+'</strong></div></div>';
+  h+='<a href="talent-projects-all.html" class="btn btn-sm">Go to All Projects &rarr;</a>';
+  h+='</div>';
+
+  // Existing activities
+  if(subs.length){
+    subs.forEach(function(s,si){
+      var col=typeColors[s.type]||'#6B7280';
+      var stCls=s.status==='Completed'?'background:var(--green-bg);color:var(--green)':s.status==='In Progress'?'background:rgba(8,145,178,0.08);color:#0891B2':s.status==='Cancelled'?'background:var(--amber-bg);color:var(--amber)':'background:rgba(0,0,0,0.04);color:var(--text-muted)';
+      h+='<div style="padding:10px 14px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;display:flex;align-items:center;gap:10px">';
+      h+='<span style="font-size:14px">'+(typeIcons[s.type]||'\uD83D\uDCCC')+'</span>';
+      h+='<span style="font-size:12px;font-weight:600;color:var(--text-primary);flex:1">'+esc(s.name)+'</span>';
+      h+='<span style="font-size:10px;color:var(--text-muted)">'+esc(s.type)+'</span>';
+      if(s.assignedTo) h+='<span style="font-size:9px;padding:2px 8px;border-radius:100px;background:rgba(139,92,246,0.06);color:#8B5CF6;border:1px solid rgba(139,92,246,0.15)">'+esc(s.assignedTo)+'</span>';
+      if(s.dueDate) h+='<span style="font-size:10px;color:var(--text-muted)">Due: '+esc(s.dueDate)+'</span>';
+      h+='<span style="font-size:9px;padding:2px 8px;border-radius:100px;'+stCls+'">'+esc(s.status)+'</span>';
+      h+='<button class="btn btn-sm" style="padding:2px 6px;font-size:9px;color:var(--red);border-color:var(--red)" onclick="removeSubFromAdd('+projIdx+','+si+')">x</button>';
+      h+='</div>';
+    });
+  }
+
+  // Add activity form
+  function selOpts(arr){return arr.map(function(v){return'<option>'+esc(v)+'</option>'}).join('')}
+  h+='<div style="padding:14px;border:1px dashed var(--accent);border-radius:8px;background:rgba(201,168,76,0.02);margin-top:8px">';
+  h+='<div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:8px">Add New Activity</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">';
+  h+='<div class="form-group"><label class="form-label">Activity Name *</label><input class="form-input" id="subName" placeholder="e.g. Pre-training Skill Assessment"></div>';
+  h+='<div class="form-group"><label class="form-label">Type</label><select class="form-select" id="subType">'+selOpts(SUB_TYPES)+'</select></div>';
+  h+='<div class="form-group"><label class="form-label">Assign To</label><select class="form-select" id="subAssign">'+selOpts(SUB_ASSIGN)+'</select></div>';
+  h+='</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:6px">';
+  h+='<div class="form-group"><label class="form-label">Status</label><select class="form-select" id="subStatus">'+selOpts(SUB_STATUSES)+'</select></div>';
+  h+='<div class="form-group"><label class="form-label">Due Date</label><input class="form-input" type="date" id="subDue"></div>';
+  h+='<div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="subNotes" placeholder="Instructions or scope..."></div>';
+  h+='</div>';
+  h+='<button class="btn btn-primary btn-sm" onclick="addSubFromAdd('+projIdx+')" style="margin-top:8px">+ Add Activity</button>';
+  h+='</div>';
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+function addSubFromAdd(projIdx){
+  var name=document.getElementById('subName').value.trim();
+  if(!name){showToast('Enter activity name');return}
+  var projects=loadProjects();
+  var p=projects[projIdx];if(!p)return;
+  if(!p.subProjects)p.subProjects=[];
+  p.subProjects.push({id:'ACT-'+String(Date.now()).slice(-6),name:name,type:document.getElementById('subType').value,assignedTo:document.getElementById('subAssign').value,status:document.getElementById('subStatus').value,dueDate:document.getElementById('subDue').value,notes:document.getElementById('subNotes').value.trim(),createdAt:new Date().toISOString()});
+  saveProjectsStore(projects);
+  renderSubProjects(projIdx);
+  showToast('Activity "'+name+'" added');
+}
+
+function removeSubFromAdd(projIdx,subIdx){
+  var projects=loadProjects();
+  var p=projects[projIdx];if(!p||!p.subProjects)return;
+  p.subProjects.splice(subIdx,1);
+  saveProjectsStore(projects);
+  renderSubProjects(projIdx);
+  showToast('Activity removed');
+}
+
 // DEMO CONTEXT LOADER — seeds org-setup & dataport data
 // ═══════════════════════════════════════════════════════
 function loadDemoContext(){
