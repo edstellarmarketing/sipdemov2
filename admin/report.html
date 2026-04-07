@@ -206,17 +206,19 @@
 .hm-filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
 /* ── VERTICAL TREND CHART ── */
-.v-trend{display:flex;flex-direction:column;gap:8px}
-.v-trend-title{font-size:12px;font-weight:600;color:var(--text-s);margin-bottom:4px}
-.v-trend-chart{display:flex;align-items:flex-end;gap:6px;height:100px;padding-top:8px}
-.v-trend-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-.v-trend-bar{width:100%;border-radius:4px 4px 0 0;transition:height .6s ease;min-height:4px}
-.v-trend-val{font-family:var(--font-display);font-size:11px;font-weight:600;color:var(--text)}
-.v-trend-label{font-size:10px;color:var(--text-t)}
-.v-trend-delta{font-size:9px;font-weight:500;padding:1px 5px;border-radius:100px;white-space:nowrap}
+.v-trend{display:flex;flex-direction:column;gap:6px}
+.v-trend-title{font-size:12px;font-weight:600;color:var(--text-s);margin-bottom:2px}
+.v-trend-chart{display:flex;align-items:stretch;gap:8px;padding:0}
+.v-trend-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:0;min-width:0}
+.v-trend-val{font-family:var(--font-display);font-size:11px;font-weight:600;color:var(--text);padding-bottom:4px;white-space:nowrap}
+.v-trend-bar-area{width:100%;height:110px;display:flex;align-items:flex-end;justify-content:center}
+.v-trend-bar{width:70%;max-width:48px;border-radius:4px 4px 0 0;transition:height .6s ease;min-height:4px}
+.v-trend-delta{font-size:9px;font-weight:500;padding:2px 5px;border-radius:100px;white-space:nowrap;margin-top:4px;min-height:16px;display:flex;align-items:center;justify-content:center}
 .v-trend-delta.up{background:var(--green-bg);color:var(--green)}
 .v-trend-delta.down{background:var(--red-bg);color:var(--red)}
 .v-trend-delta.flat{background:rgba(0,0,0,0.04);color:var(--text-t)}
+.v-trend-delta.empty{background:none}
+.v-trend-label{font-size:10px;color:var(--text-t);margin-top:4px;font-weight:500}
 </style>
 </head>
 <body>
@@ -977,14 +979,21 @@ EdstellarShell.init({
         var maxV=Math.max.apply(null,dataPoints.map(function(d){return d.value}))||1;
         var out='<div class="card"><div class="card-body"><div class="v-trend"><div class="v-trend-title">'+title+'</div><div class="v-trend-chart">';
         dataPoints.forEach(function(d,i){
-          var hPct=Math.max(8,Math.round(d.value/maxV*100));
+          var hPct=Math.max(6,Math.round(d.value/maxV*100));
           var delta='';
           if(i>0&&dataPoints[i-1].value>0){
             var ch=((d.value-dataPoints[i-1].value)/dataPoints[i-1].value*100).toFixed(1);
             var cls=ch>0?'up':ch<0?'down':'flat';
             delta='<div class="v-trend-delta '+cls+'">'+(ch>0?'+':'')+ch+'%</div>';
+          } else {
+            delta='<div class="v-trend-delta empty">&nbsp;</div>';
           }
-          out+='<div class="v-trend-bar-wrap"><div class="v-trend-val">'+(prefix||'')+d.value+(suffix||'')+'</div><div class="v-trend-bar" style="height:'+hPct+'%;background:'+color+'"></div>'+delta+'<div class="v-trend-label">'+d.year+'</div></div>';
+          out+='<div class="v-trend-bar-wrap">';
+          out+='<div class="v-trend-val">'+(prefix||'')+d.value+(suffix||'')+'</div>';
+          out+='<div class="v-trend-bar-area"><div class="v-trend-bar" style="height:'+hPct+'%;background:'+color+'"></div></div>';
+          out+=delta;
+          out+='<div class="v-trend-label">'+d.year+'</div>';
+          out+='</div>';
         });
         out+='</div></div></div></div>';
         return out;

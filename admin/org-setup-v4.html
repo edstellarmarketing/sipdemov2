@@ -691,13 +691,14 @@ var BLOCKS = [
   {id:'E',title:'Client & Market',icon:'\uD83D\uDC65',phase:2,desc:'Client registry, geographic presence'},
   {id:'F',title:'Standards & Compliance',icon:'\uD83D\uDEE1',phase:2,desc:'Certifications, regulations, compliance scope'},
   {id:'G',title:'Tools & Technologies',icon:'\uD83D\uDD27',phase:2,desc:'Tech stack, lifecycle flags, skill implications'},
+  {id:'M',title:'Business Continuity & DR',icon:'\uD83D\uDEE1\uFE0F',phase:2,desc:'BC plans, disaster recovery, risk scenarios, DR testing'},
   {id:'H',title:'Skill Criticality',icon:'\u26A1',phase:3,desc:'C1\u2013C4 scale, per-role criticality definitions'},
   {id:'I',title:'Proficiency Levels',icon:'\uD83D\uDCCA',phase:3,desc:'L1\u2013L4 definitions, construction methods'},
   {id:'J',title:'Skills Dictionary',icon:'\uD83D\uDCDA',phase:3,desc:'Full taxonomy, definitions, L1\u2013L4 indicators'},
   {id:'K',title:'Competency Framework',icon:'\uD83E\uDDED',phase:3,desc:'Core, behavioural, leadership, technical'},
   {id:'L',title:'Job Role Definitions',icon:'\uD83D\uDC64',phase:3,desc:'Deep profiles, KRAs, tasks, career paths'}
 ];
-var TOTAL_BLOCKS = BLOCKS.length; // 12
+var TOTAL_BLOCKS = BLOCKS.length; // 13
 
 // ═══════════════════════════════════════════════════════
 // STATE
@@ -770,7 +771,7 @@ function markComplete(id){
     BLOCKS.forEach(function(b){if(getBlockState(b.id).status!=='complete')allDone=false});
     if(allDone){
       setTimeout(function(){
-        addAiMsg('\uD83C\uDF89 <strong>All 12 blocks complete!</strong> Your full organisation context is captured.<br><br>\u2192 <a href="report.html" style="color:var(--accent);font-weight:600">View Reports &amp; Dashboards</a> to explore your data through interactive analytics.<br>\u2192 Or click <em>Lock Level 1 &amp; Feed AI Pipeline</em> on the dashboard to proceed to SkillForge.');
+        addAiMsg('\uD83C\uDF89 <strong>All 13 blocks complete!</strong> Your full organisation context is captured.<br><br>\u2192 <a href="report.html" style="color:var(--accent);font-weight:600">View Reports &amp; Dashboards</a> to explore your data through interactive analytics.<br>\u2192 Or click <em>Lock Level 1 &amp; Feed AI Pipeline</em> on the dashboard to proceed to SkillForge.');
       }, 600);
     }
   }
@@ -1629,6 +1630,9 @@ function autoSaveCurrentBlock(){
   }
   if(currentBlock==='G'){
     autoSaveBlockG();
+  }
+  if(currentBlock==='M'){
+    autoSaveBlockM();
   }
   if(currentBlock==='J'){
     autoSaveBlockJ();
@@ -4925,6 +4929,412 @@ function aiExtractBlockG(){
 BLOCK_RENDERERS['G'] = {edit:renderBlockG_Edit, ro:renderBlockG_ReadOnly};
 
 // ═══════════════════════════════════════════════════════
+// BLOCK M: BUSINESS CONTINUITY & DISASTER RECOVERY
+// ═══════════════════════════════════════════════════════
+var M_PLAN_TYPES=['Business Continuity Plan (BCP)','Disaster Recovery Plan (DRP)','IT Disaster Recovery Plan','Pandemic Response Plan','Cyber Incident Response Plan','Crisis Communication Plan','Supply Chain Continuity Plan'];
+var M_PLAN_STATUSES=['Draft','Under Review','Approved','Active','Expired','Needs Update'];
+var M_RISK_CATEGORIES=['Natural Disaster','Cyber Attack','Pandemic / Health Crisis','Infrastructure Failure','Supply Chain Disruption','Data Breach / Loss','Key Personnel Loss','Regulatory / Legal','Utility Outage','Civil Unrest / Political'];
+var M_PROBABILITY=['Very Low','Low','Medium','High','Very High'];
+var M_IMPACT=['Negligible','Minor','Moderate','Major','Catastrophic'];
+var M_EXERCISE_TYPES=['Tabletop Exercise','Walkthrough / Orientation','Functional Drill','Full-Scale Simulation','IT Failover Test','Communication Cascade Test'];
+var M_EXERCISE_OUTCOMES=['Passed — All objectives met','Partial — Some gaps identified','Failed — Critical gaps found','Cancelled','Deferred'];
+var blockMActiveTab='plans';
+function switchBlockMTab(tab){blockMActiveTab=tab;renderBlockContent('M');}
+
+function getBlockMData(){
+  var d=getBlockState('M').data;
+  if(!d.plans) d.plans=[];
+  if(!d.riskScenarios) d.riskScenarios=[];
+  if(!d.exercises) d.exercises=[];
+  return d;
+}
+
+function renderBlockM_Edit(){
+  var d=getBlockMData();var h='';
+
+  // Tabs
+  h+='<div class="hier-tabs">';
+  h+='<div class="hier-tab'+(blockMActiveTab==='plans'?' active':'')+'" onclick="switchBlockMTab(\'plans\')">1. BC & DR Plans ('+d.plans.length+')</div>';
+  h+='<div class="hier-tab'+(blockMActiveTab==='risks'?' active':'')+'" onclick="switchBlockMTab(\'risks\')">2. Risk Scenarios ('+d.riskScenarios.length+')</div>';
+  h+='<div class="hier-tab'+(blockMActiveTab==='exercises'?' active':'')+'" onclick="switchBlockMTab(\'exercises\')">3. DR Testing & Exercises ('+d.exercises.length+')</div>';
+  h+='</div>';
+
+  // ── Tab 1: BC & DR Plans ──
+  h+='<div class="hier-tab-content'+(blockMActiveTab==='plans'?' active':'')+'">';
+  h+='<div class="ai-suggest-zone" style="margin-bottom:20px">';
+  h+='<div class="ai-suggest-label"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> AI-Powered Input</div>';
+  h+='<p style="font-size:12.5px;color:var(--text-s);margin-bottom:10px">Let AI generate business continuity and disaster recovery plans based on your industry, geography, and risk profile.</p>';
+  h+='<button class="btn btn-ai btn-sm" onclick="aiExtractBlockM()"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate BCDR Framework</button>';
+  h+='</div>';
+  h+='<div class="form-section">';
+  h+='<div class="form-section-title">Business Continuity &amp; Disaster Recovery Plans</div>';
+  h+='<div class="form-section-desc">Each plan defines recovery objectives, ownership, and testing schedules. Plans drive mandatory skill requirements for crisis response roles.</div>';
+  d.plans.forEach(function(p,i){
+    h+='<div class="ro-card" style="margin-bottom:10px">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text)">Plan '+(i+1)+'</span>';
+    h+='<button class="btn btn-sm btn-danger" onclick="removeBlockMPlan('+i+')"><svg viewBox="0 0 24 24" style="width:12px;height:12px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remove</button></div>';
+    h+='<div class="form-grid">';
+    h+='<div class="form-group"><label class="form-label">Plan Name <span class="req">*</span></label><input class="form-input" id="f_mp_name_'+i+'" value="'+escH(p.name)+'" onblur="onBlockMPlanChange('+i+')"></div>';
+    h+='<div class="form-group"><label class="form-label">Plan Type</label><select class="form-select" id="f_mp_type_'+i+'" onchange="onBlockMPlanChange('+i+')">'+renderSelectOptions(M_PLAN_TYPES,p.planType)+'</select></div>';
+    h+='</div>';
+    h+='<div class="form-grid">';
+    h+='<div class="form-group"><label class="form-label">Scope / Coverage</label><textarea class="form-textarea" id="f_mp_scope_'+i+'" style="min-height:40px" onblur="onBlockMPlanChange('+i+')">'+escH(p.scope||'')+'</textarea></div>';
+    h+='<div class="form-group"><label class="form-label">Plan Owner</label><input class="form-input" id="f_mp_owner_'+i+'" value="'+escH(p.owner||'')+'" onblur="onBlockMPlanChange('+i+')"></div>';
+    h+='</div>';
+    h+='<div class="form-grid">';
+    h+='<div class="form-group"><label class="form-label">RTO (Recovery Time Objective)</label><input class="form-input" id="f_mp_rto_'+i+'" value="'+escH(p.rto||'')+'" placeholder="e.g. 4 hours" onblur="onBlockMPlanChange('+i+')"></div>';
+    h+='<div class="form-group"><label class="form-label">RPO (Recovery Point Objective)</label><input class="form-input" id="f_mp_rpo_'+i+'" value="'+escH(p.rpo||'')+'" placeholder="e.g. 1 hour" onblur="onBlockMPlanChange('+i+')"></div>';
+    h+='</div>';
+    h+='<div class="form-grid">';
+    h+='<div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f_mp_status_'+i+'" onchange="onBlockMPlanChange('+i+')">'+renderSelectOptions(M_PLAN_STATUSES,p.status)+'</select></div>';
+    h+='<div class="form-group"><label class="form-label">Last Review Date</label><input class="form-input" type="date" id="f_mp_lastrev_'+i+'" value="'+escH(p.lastReview||'')+'" onblur="onBlockMPlanChange('+i+')"></div>';
+    h+='</div>';
+    h+='<div class="form-grid">';
+    h+='<div class="form-group"><label class="form-label">Last Tested</label><input class="form-input" type="date" id="f_mp_lasttested_'+i+'" value="'+escH(p.lastTested||'')+'" onblur="onBlockMPlanChange('+i+')"></div>';
+    h+='<div class="form-group"><label class="form-label">Next Test Date</label><input class="form-input" type="date" id="f_mp_nexttest_'+i+'" value="'+escH(p.nextTest||'')+'" onblur="onBlockMPlanChange('+i+')"></div>';
+    h+='</div>';
+    h+='<div class="form-grid">';
+    h+='<div class="form-group"><label class="form-label">Affected Departments</label>';
+    h+=renderTagInput('mpDepts_'+i,p.affectedDepts||[],'M');
+    h+='</div>';
+    h+='<div class="form-group"><label class="form-label">Required Skills</label>';
+    h+=renderTagInput('mpSkills_'+i,p.requiredSkills||[],'M');
+    h+='</div></div></div>';
+  });
+  h+='<button class="btn btn-sm" onclick="addBlockMPlan()" style="margin-top:4px"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Plan</button>';
+  h+='</div>';
+  h+='</div>'; // close Tab 1
+
+  // ── Tab 2: Risk Scenarios ──
+  h+='<div class="hier-tab-content'+(blockMActiveTab==='risks'?' active':'')+'">';
+  h+='<div class="form-section">';
+  h+='<div class="form-section-title">Risk Scenarios</div>';
+  h+='<div class="form-section-desc">Identify and assess potential disruption scenarios. Each scenario maps to required response skills and affected business units.</div>';
+  d.riskScenarios.forEach(function(r,i){
+    h+='<div class="ro-card" style="margin-bottom:10px">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text)">Scenario '+(i+1)+'</span>';
+    h+='<button class="btn btn-sm btn-danger" onclick="removeBlockMRisk('+i+')"><svg viewBox="0 0 24 24" style="width:12px;height:12px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remove</button></div>';
+    h+='<div class="form-grid">';
+    h+='<div class="form-group"><label class="form-label">Scenario Name <span class="req">*</span></label><input class="form-input" id="f_mr_name_'+i+'" value="'+escH(r.name)+'" onblur="onBlockMRiskChange('+i+')"></div>';
+    h+='<div class="form-group"><label class="form-label">Category</label><select class="form-select" id="f_mr_cat_'+i+'" onchange="onBlockMRiskChange('+i+')">'+renderSelectOptions(M_RISK_CATEGORIES,r.category)+'</select></div>';
+    h+='</div>';
+    h+='<div class="form-grid">';
+    h+='<div class="form-group"><label class="form-label">Probability</label><select class="form-select" id="f_mr_prob_'+i+'" onchange="onBlockMRiskChange('+i+')">'+renderSelectOptions(M_PROBABILITY,r.probability)+'</select></div>';
+    h+='<div class="form-group"><label class="form-label">Impact</label><select class="form-select" id="f_mr_impact_'+i+'" onchange="onBlockMRiskChange('+i+')">'+renderSelectOptions(M_IMPACT,r.impact)+'</select></div>';
+    h+='</div>';
+    h+='<div class="form-grid single">';
+    h+='<div class="form-group"><label class="form-label">Description & Trigger Conditions</label><textarea class="form-textarea" id="f_mr_desc_'+i+'" style="min-height:45px" onblur="onBlockMRiskChange('+i+')">'+escH(r.description||'')+'</textarea></div>';
+    h+='</div>';
+    h+='<div class="form-grid single">';
+    h+='<div class="form-group"><label class="form-label">Mitigation Strategy</label><textarea class="form-textarea" id="f_mr_mitigation_'+i+'" style="min-height:45px" onblur="onBlockMRiskChange('+i+')">'+escH(r.mitigation||'')+'</textarea></div>';
+    h+='</div>';
+    h+='<div class="form-grid">';
+    h+='<div class="form-group"><label class="form-label">Affected Business Units</label>';
+    h+=renderTagInput('mrBUs_'+i,r.affectedBUs||[],'M');
+    h+='</div>';
+    h+='<div class="form-group"><label class="form-label">Response Skills Required</label>';
+    h+=renderTagInput('mrSkills_'+i,r.responseSkills||[],'M');
+    h+='</div></div></div>';
+  });
+  h+='<button class="btn btn-sm" onclick="addBlockMRisk()" style="margin-top:4px"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Risk Scenario</button>';
+  h+='</div>';
+  h+='</div>'; // close Tab 2
+
+  // ── Tab 3: DR Testing & Exercises ──
+  h+='<div class="hier-tab-content'+(blockMActiveTab==='exercises'?' active':'')+'">';
+  h+='<div class="form-section">';
+  h+='<div class="form-section-title">DR Testing &amp; Exercises</div>';
+  h+='<div class="form-section-desc">Track disaster recovery tests, tabletop exercises, and simulation drills. Results inform skill gap analysis for crisis-readiness.</div>';
+  d.exercises.forEach(function(ex,i){
+    h+='<div class="ro-card" style="margin-bottom:10px">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text)">Exercise '+(i+1)+'</span>';
+    h+='<button class="btn btn-sm btn-danger" onclick="removeBlockMExercise('+i+')"><svg viewBox="0 0 24 24" style="width:12px;height:12px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remove</button></div>';
+    h+='<div class="form-grid">';
+    h+='<div class="form-group"><label class="form-label">Exercise Name <span class="req">*</span></label><input class="form-input" id="f_me_name_'+i+'" value="'+escH(ex.name)+'" onblur="onBlockMExerciseChange('+i+')"></div>';
+    h+='<div class="form-group"><label class="form-label">Type</label><select class="form-select" id="f_me_type_'+i+'" onchange="onBlockMExerciseChange('+i+')">'+renderSelectOptions(M_EXERCISE_TYPES,ex.exerciseType)+'</select></div>';
+    h+='</div>';
+    h+='<div class="form-grid">';
+    h+='<div class="form-group"><label class="form-label">Date Conducted</label><input class="form-input" type="date" id="f_me_date_'+i+'" value="'+escH(ex.dateConducted||'')+'" onblur="onBlockMExerciseChange('+i+')"></div>';
+    h+='<div class="form-group"><label class="form-label">Linked Plan</label><select class="form-select" id="f_me_plan_'+i+'" onchange="onBlockMExerciseChange('+i+')"><option value="">— Select plan —</option>';
+    d.plans.forEach(function(p){if(p.name)h+='<option value="'+escH(p.name)+'"'+(ex.linkedPlan===p.name?' selected':'')+'>'+escH(p.name)+'</option>'});
+    h+='</select></div>';
+    h+='</div>';
+    h+='<div class="form-grid">';
+    h+='<div class="form-group"><label class="form-label">Participants Count</label><input class="form-input" type="number" id="f_me_participants_'+i+'" value="'+escH(String(ex.participants||''))+'" onblur="onBlockMExerciseChange('+i+')"></div>';
+    h+='<div class="form-group"><label class="form-label">Outcome</label><select class="form-select" id="f_me_outcome_'+i+'" onchange="onBlockMExerciseChange('+i+')">'+renderSelectOptions(M_EXERCISE_OUTCOMES,ex.outcome)+'</select></div>';
+    h+='</div>';
+    h+='<div class="form-grid single">';
+    h+='<div class="form-group"><label class="form-label">Lessons Learned & Gaps Identified</label><textarea class="form-textarea" id="f_me_lessons_'+i+'" style="min-height:50px" onblur="onBlockMExerciseChange('+i+')">'+escH(ex.lessons||'')+'</textarea></div>';
+    h+='</div>';
+    h+='<div class="form-grid">';
+    h+='<div class="form-group"><label class="form-label">Skill Gaps Identified</label>';
+    h+=renderTagInput('meGaps_'+i,ex.skillGaps||[],'M');
+    h+='</div>';
+    h+='<div class="form-group"><label class="form-label">Follow-up Actions</label>';
+    h+=renderTagInput('meActions_'+i,ex.followUpActions||[],'M');
+    h+='</div></div></div>';
+  });
+  h+='<button class="btn btn-sm" onclick="addBlockMExercise()" style="margin-top:4px"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Exercise</button>';
+  h+='</div>';
+  h+='</div>'; // close Tab 3
+
+  return h;
+}
+
+function renderBlockM_ReadOnly(){
+  var d=getBlockMData();var h='';
+
+  // Plans summary
+  if(d.plans.length){
+    h+='<div class="ro-card">';
+    h+='<div class="ro-card-header"><div class="ro-card-title">BC &amp; DR Plans ('+d.plans.length+')</div>';
+    h+='<button class="ro-edit-btn" onclick="blockMActiveTab=\'plans\';enterEditMode()"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button></div>';
+    // Status summary
+    var statusCounts={};d.plans.forEach(function(p){var s=p.status||'Draft';statusCounts[s]=(statusCounts[s]||0)+1});
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">';
+    Object.keys(statusCounts).forEach(function(s){
+      var c={'Active':'var(--green)','Approved':'var(--green)','Under Review':'var(--blue)','Draft':'var(--text-t)','Expired':'var(--red)','Needs Update':'var(--amber)'}[s]||'var(--text-t)';
+      h+='<span style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid '+c+';color:'+c+'">'+escH(s)+' ('+statusCounts[s]+')</span>';
+    });
+    h+='</div>';
+    // Overdue test warnings
+    var overdue=d.plans.filter(function(p){return p.nextTest&&new Date(p.nextTest)<new Date()});
+    if(overdue.length){
+      h+='<div style="padding:8px 12px;background:var(--danger-soft);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius-sm);margin-bottom:10px;font-size:12px;color:var(--danger)">';
+      h+='\u26A0 '+overdue.length+' plan'+(overdue.length>1?'s':'')+' overdue for testing: '+overdue.map(function(p){return escH(p.name)}).join(', ');
+      h+='</div>';
+    }
+    d.plans.forEach(function(p){
+      var sCls=p.status==='Active'||p.status==='Approved'?'green':p.status==='Draft'||p.status==='Under Review'?'blue':p.status==='Expired'||p.status==='Needs Update'?'amber':'gray';
+      h+='<div style="padding:12px 0;border-bottom:1px solid var(--border)">';
+      h+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+      h+='<span style="font-size:13px;font-weight:600;color:var(--text);flex:1;min-width:150px">'+escH(p.name)+'</span>';
+      if(p.planType) h+='<span class="life-badge blue" style="font-size:10px">'+escH(p.planType)+'</span>';
+      if(p.status) h+='<span class="life-badge '+sCls+'">'+escH(p.status)+'</span>';
+      h+='</div>';
+      var meta=[];if(p.owner)meta.push('Owner: '+p.owner);if(p.rto)meta.push('RTO: '+p.rto);if(p.rpo)meta.push('RPO: '+p.rpo);
+      if(meta.length) h+='<div style="font-size:11px;color:var(--text-t);margin-top:3px">'+meta.map(function(m){return escH(m)}).join(' \u00B7 ')+'</div>';
+      if(p.scope) h+='<div style="font-size:11.5px;color:var(--text-s);margin-top:4px">'+escH(p.scope)+'</div>';
+      var dates=[];if(p.lastTested)dates.push('Tested: '+p.lastTested);if(p.nextTest)dates.push('Next test: '+p.nextTest);if(p.lastReview)dates.push('Reviewed: '+p.lastReview);
+      if(dates.length) h+='<div style="font-size:10px;color:var(--text-t);margin-top:3px">'+dates.join(' \u00B7 ')+'</div>';
+      if(p.affectedDepts&&p.affectedDepts.length){h+='<div class="ro-tags" style="margin-top:4px">';p.affectedDepts.forEach(function(dep){h+='<span class="ro-tag" style="font-size:9px">'+escH(dep)+'</span>'});h+='</div>'}
+      if(p.requiredSkills&&p.requiredSkills.length){h+='<div class="ro-tags" style="margin-top:3px">';p.requiredSkills.forEach(function(sk){h+='<span class="ro-tag" style="font-size:9px;background:var(--accent-lt);color:var(--accent)">'+escH(sk)+'</span>'});h+='</div>'}
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
+  // Risk Scenarios summary
+  if(d.riskScenarios.length){
+    var riskMatrix={};d.riskScenarios.forEach(function(r){var c=r.category||'Uncategorised';if(!riskMatrix[c])riskMatrix[c]=[];riskMatrix[c].push(r)});
+    h+='<div class="ro-card">';
+    h+='<div class="ro-card-header"><div class="ro-card-title">Risk Scenarios ('+d.riskScenarios.length+')</div>';
+    h+='<button class="ro-edit-btn" onclick="blockMActiveTab=\'risks\';enterEditMode()"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button></div>';
+    Object.keys(riskMatrix).forEach(function(cat){
+      h+='<div class="group-heading">'+escH(cat)+'</div>';
+      riskMatrix[cat].forEach(function(r){
+        var impCls=r.impact==='Catastrophic'||r.impact==='Major'?'red':r.impact==='Moderate'?'amber':'gray';
+        var probCls=r.probability==='Very High'||r.probability==='High'?'red':r.probability==='Medium'?'amber':'gray';
+        h+='<div style="padding:10px 0;border-bottom:1px solid var(--border)">';
+        h+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+        h+='<span style="font-size:13px;font-weight:600;color:var(--text);flex:1;min-width:150px">'+escH(r.name)+'</span>';
+        if(r.probability) h+='<span class="life-badge '+probCls+'" style="font-size:10px">P: '+escH(r.probability)+'</span>';
+        if(r.impact) h+='<span class="life-badge '+impCls+'" style="font-size:10px">I: '+escH(r.impact)+'</span>';
+        h+='</div>';
+        if(r.description) h+='<div style="font-size:11.5px;color:var(--text-s);margin-top:4px">'+escH(r.description)+'</div>';
+        if(r.mitigation) h+='<div style="font-size:11px;color:var(--text-t);margin-top:3px"><strong>Mitigation:</strong> '+escH(r.mitigation)+'</div>';
+        if(r.affectedBUs&&r.affectedBUs.length){h+='<div class="ro-tags" style="margin-top:4px">';r.affectedBUs.forEach(function(bu){h+='<span class="ro-tag" style="font-size:9px">'+escH(bu)+'</span>'});h+='</div>'}
+        if(r.responseSkills&&r.responseSkills.length){h+='<div class="ro-tags" style="margin-top:3px">';r.responseSkills.forEach(function(sk){h+='<span class="ro-tag" style="font-size:9px;background:var(--accent-lt);color:var(--accent)">'+escH(sk)+'</span>'});h+='</div>'}
+        h+='</div>';
+      });
+    });
+    h+='</div>';
+  }
+
+  // Exercises summary
+  if(d.exercises.length){
+    h+='<div class="ro-card">';
+    h+='<div class="ro-card-header"><div class="ro-card-title">DR Testing &amp; Exercises ('+d.exercises.length+')</div>';
+    h+='<button class="ro-edit-btn" onclick="blockMActiveTab=\'exercises\';enterEditMode()"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button></div>';
+    var outcomeCounts={};d.exercises.forEach(function(e){var o=e.outcome||'Pending';outcomeCounts[o]=(outcomeCounts[o]||0)+1});
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">';
+    Object.keys(outcomeCounts).forEach(function(o){
+      var c=o.indexOf('Passed')===0?'var(--green)':o.indexOf('Partial')===0?'var(--amber)':o.indexOf('Failed')===0?'var(--red)':'var(--text-t)';
+      h+='<span style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid '+c+';color:'+c+'">'+escH(o)+' ('+outcomeCounts[o]+')</span>';
+    });
+    h+='</div>';
+    d.exercises.forEach(function(ex){
+      var oCls=ex.outcome&&ex.outcome.indexOf('Passed')===0?'green':ex.outcome&&ex.outcome.indexOf('Partial')===0?'amber':ex.outcome&&ex.outcome.indexOf('Failed')===0?'red':'gray';
+      h+='<div style="padding:10px 0;border-bottom:1px solid var(--border)">';
+      h+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+      h+='<span style="font-size:13px;font-weight:600;color:var(--text);flex:1;min-width:150px">'+escH(ex.name)+'</span>';
+      if(ex.exerciseType) h+='<span class="life-badge blue" style="font-size:10px">'+escH(ex.exerciseType)+'</span>';
+      if(ex.outcome) h+='<span class="life-badge '+oCls+'">'+escH(ex.outcome)+'</span>';
+      h+='</div>';
+      var meta=[];if(ex.dateConducted)meta.push(ex.dateConducted);if(ex.linkedPlan)meta.push('Plan: '+ex.linkedPlan);if(ex.participants)meta.push(ex.participants+' participants');
+      if(meta.length) h+='<div style="font-size:11px;color:var(--text-t);margin-top:3px">'+meta.join(' \u00B7 ')+'</div>';
+      if(ex.lessons) h+='<div style="font-size:11px;color:var(--text-s);margin-top:4px">'+escH(ex.lessons)+'</div>';
+      if(ex.skillGaps&&ex.skillGaps.length){h+='<div class="ro-tags" style="margin-top:4px">';ex.skillGaps.forEach(function(sg){h+='<span class="ro-tag" style="font-size:9px;background:var(--danger-soft);color:var(--danger)">Gap: '+escH(sg)+'</span>'});h+='</div>'}
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
+  // Completion warning
+  if(!d.plans.length&&!d.riskScenarios.length){
+    h+='<div style="padding:12px 16px;background:var(--warning-soft);border:1px solid var(--warning-border);border-radius:var(--radius-md);margin-top:14px;display:flex;align-items:center;gap:10px">';
+    h+='<svg style="width:16px;height:16px;stroke:var(--warning);fill:none;stroke-width:2;flex-shrink:0" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    h+='<span style="font-size:12px;color:var(--warning)">Add at least 1 BC/DR plan and 1 risk scenario to complete</span>';
+    h+='<button class="btn btn-sm btn-outline-warning" onclick="enterEditMode()" style="margin-left:auto">Continue Setup</button></div>';
+  }
+  return h;
+}
+
+// ── Block M CRUD helpers ──
+function addBlockMPlan(){
+  var d=getBlockMData();
+  d.plans.push({id:Date.now(),name:'',planType:'',scope:'',owner:'',rto:'',rpo:'',status:'Draft',lastReview:'',lastTested:'',nextTest:'',affectedDepts:[],requiredSkills:[]});
+  setBlockData('M',d);renderBlockContent('M');
+}
+function removeBlockMPlan(idx){var d=getBlockMData();d.plans.splice(idx,1);setBlockData('M',d);renderBlockContent('M');}
+function onBlockMPlanChange(idx){
+  var d=getBlockMData();var p=d.plans[idx];var el;
+  el=document.getElementById('f_mp_name_'+idx);if(el)p.name=el.value.trim();
+  el=document.getElementById('f_mp_type_'+idx);if(el)p.planType=el.value;
+  el=document.getElementById('f_mp_scope_'+idx);if(el)p.scope=el.value.trim();
+  el=document.getElementById('f_mp_owner_'+idx);if(el)p.owner=el.value.trim();
+  el=document.getElementById('f_mp_rto_'+idx);if(el)p.rto=el.value.trim();
+  el=document.getElementById('f_mp_rpo_'+idx);if(el)p.rpo=el.value.trim();
+  el=document.getElementById('f_mp_status_'+idx);if(el)p.status=el.value;
+  el=document.getElementById('f_mp_lastrev_'+idx);if(el)p.lastReview=el.value;
+  el=document.getElementById('f_mp_lasttested_'+idx);if(el)p.lastTested=el.value;
+  el=document.getElementById('f_mp_nexttest_'+idx);if(el)p.nextTest=el.value;
+  setBlockData('M',d);
+  document.getElementById('bpSaveInfo').textContent='Saved just now';
+  document.getElementById('bpSaved').innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Saved just now';
+  checkBlockMCompletion();
+}
+
+function addBlockMRisk(){
+  var d=getBlockMData();
+  d.riskScenarios.push({id:Date.now(),name:'',category:'',probability:'',impact:'',description:'',mitigation:'',affectedBUs:[],responseSkills:[]});
+  setBlockData('M',d);renderBlockContent('M');
+}
+function removeBlockMRisk(idx){var d=getBlockMData();d.riskScenarios.splice(idx,1);setBlockData('M',d);renderBlockContent('M');}
+function onBlockMRiskChange(idx){
+  var d=getBlockMData();var r=d.riskScenarios[idx];var el;
+  el=document.getElementById('f_mr_name_'+idx);if(el)r.name=el.value.trim();
+  el=document.getElementById('f_mr_cat_'+idx);if(el)r.category=el.value;
+  el=document.getElementById('f_mr_prob_'+idx);if(el)r.probability=el.value;
+  el=document.getElementById('f_mr_impact_'+idx);if(el)r.impact=el.value;
+  el=document.getElementById('f_mr_desc_'+idx);if(el)r.description=el.value.trim();
+  el=document.getElementById('f_mr_mitigation_'+idx);if(el)r.mitigation=el.value.trim();
+  setBlockData('M',d);
+  document.getElementById('bpSaveInfo').textContent='Saved just now';
+  document.getElementById('bpSaved').innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Saved just now';
+  checkBlockMCompletion();
+}
+
+function addBlockMExercise(){
+  var d=getBlockMData();
+  d.exercises.push({id:Date.now(),name:'',exerciseType:'',dateConducted:'',linkedPlan:'',participants:'',outcome:'',lessons:'',skillGaps:[],followUpActions:[]});
+  setBlockData('M',d);renderBlockContent('M');
+}
+function removeBlockMExercise(idx){var d=getBlockMData();d.exercises.splice(idx,1);setBlockData('M',d);renderBlockContent('M');}
+function onBlockMExerciseChange(idx){
+  var d=getBlockMData();var ex=d.exercises[idx];var el;
+  el=document.getElementById('f_me_name_'+idx);if(el)ex.name=el.value.trim();
+  el=document.getElementById('f_me_type_'+idx);if(el)ex.exerciseType=el.value;
+  el=document.getElementById('f_me_date_'+idx);if(el)ex.dateConducted=el.value;
+  el=document.getElementById('f_me_plan_'+idx);if(el)ex.linkedPlan=el.value;
+  el=document.getElementById('f_me_participants_'+idx);if(el)ex.participants=parseInt(el.value)||0;
+  el=document.getElementById('f_me_outcome_'+idx);if(el)ex.outcome=el.value;
+  el=document.getElementById('f_me_lessons_'+idx);if(el)ex.lessons=el.value.trim();
+  setBlockData('M',d);
+  document.getElementById('bpSaveInfo').textContent='Saved just now';
+  document.getElementById('bpSaved').innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Saved just now';
+  checkBlockMCompletion();
+}
+
+function checkBlockMCompletion(){
+  var d=getBlockMData();
+  if(d.plans.some(function(p){return !!p.name}) && d.riskScenarios.some(function(r){return !!r.name})) markComplete('M');
+}
+
+function autoSaveBlockM(){
+  var d=getBlockMData();
+  d.plans.forEach(function(p,i){
+    var el;
+    el=document.getElementById('f_mp_name_'+i);if(el)p.name=el.value.trim();
+    el=document.getElementById('f_mp_type_'+i);if(el)p.planType=el.value;
+    el=document.getElementById('f_mp_scope_'+i);if(el)p.scope=el.value.trim();
+    el=document.getElementById('f_mp_owner_'+i);if(el)p.owner=el.value.trim();
+    el=document.getElementById('f_mp_rto_'+i);if(el)p.rto=el.value.trim();
+    el=document.getElementById('f_mp_rpo_'+i);if(el)p.rpo=el.value.trim();
+    el=document.getElementById('f_mp_status_'+i);if(el)p.status=el.value;
+    el=document.getElementById('f_mp_lastrev_'+i);if(el)p.lastReview=el.value;
+    el=document.getElementById('f_mp_lasttested_'+i);if(el)p.lastTested=el.value;
+    el=document.getElementById('f_mp_nexttest_'+i);if(el)p.nextTest=el.value;
+  });
+  d.riskScenarios.forEach(function(r,i){
+    var el;
+    el=document.getElementById('f_mr_name_'+i);if(el)r.name=el.value.trim();
+    el=document.getElementById('f_mr_cat_'+i);if(el)r.category=el.value;
+    el=document.getElementById('f_mr_prob_'+i);if(el)r.probability=el.value;
+    el=document.getElementById('f_mr_impact_'+i);if(el)r.impact=el.value;
+    el=document.getElementById('f_mr_desc_'+i);if(el)r.description=el.value.trim();
+    el=document.getElementById('f_mr_mitigation_'+i);if(el)r.mitigation=el.value.trim();
+  });
+  d.exercises.forEach(function(ex,i){
+    var el;
+    el=document.getElementById('f_me_name_'+i);if(el)ex.name=el.value.trim();
+    el=document.getElementById('f_me_type_'+i);if(el)ex.exerciseType=el.value;
+    el=document.getElementById('f_me_date_'+i);if(el)ex.dateConducted=el.value;
+    el=document.getElementById('f_me_plan_'+i);if(el)ex.linkedPlan=el.value;
+    el=document.getElementById('f_me_participants_'+i);if(el)ex.participants=parseInt(el.value)||0;
+    el=document.getElementById('f_me_outcome_'+i);if(el)ex.outcome=el.value;
+    el=document.getElementById('f_me_lessons_'+i);if(el)ex.lessons=el.value.trim();
+  });
+  setBlockData('M',d);checkBlockMCompletion();
+}
+
+function aiExtractBlockM(){
+  showToast('AI generating BCDR framework...');addAiMsg("Analyzing your industry, geography, and risk profile to generate a comprehensive Business Continuity & Disaster Recovery framework...");
+  setTimeout(function(){
+    var d=getBlockMData();
+    d.plans=[
+      {id:1,name:'Enterprise Business Continuity Plan',planType:'Business Continuity Plan (BCP)',scope:'All business units across Singapore and Malaysia operations. Covers people, premises, technology, and supply chain.',owner:'Chief Risk Officer — Priya Shankar',rto:'4 hours',rpo:'1 hour',status:'Active',lastReview:'2025-11-15',lastTested:'2025-09-20',nextTest:'2026-03-20',affectedDepts:['Engineering','Project Delivery','Corporate Services','Digital Delivery','EHS & Risk'],requiredSkills:['Crisis Management','Business Impact Analysis','Emergency Response','Stakeholder Communication','Incident Command']},
+      {id:2,name:'IT Disaster Recovery Plan',planType:'IT Disaster Recovery Plan',scope:'All critical IT infrastructure — AWS cloud, SAP S/4HANA, Power BI, collaboration tools, and on-premise servers at Singapore HQ.',owner:'CIO — Marcus Tan',rto:'2 hours',rpo:'30 minutes',status:'Active',lastReview:'2025-10-01',lastTested:'2025-08-15',nextTest:'2026-02-15',affectedDepts:['Digital Delivery','Corporate Services'],requiredSkills:['Disaster Recovery','Cloud Infrastructure','Backup & Restore','Network Security','System Administration']},
+      {id:3,name:'Cyber Incident Response Plan',planType:'Cyber Incident Response Plan',scope:'Organisation-wide cyber threat response including ransomware, phishing, data exfiltration, and DDoS attacks.',owner:'CISO — Wei Chen',rto:'1 hour',rpo:'15 minutes',status:'Active',lastReview:'2026-01-10',lastTested:'2025-12-05',nextTest:'2026-06-05',affectedDepts:['Digital Delivery','Corporate Services','Engineering'],requiredSkills:['Incident Response','Threat Analysis','Digital Forensics','Malware Analysis','Security Operations']},
+      {id:4,name:'Pandemic Response Plan',planType:'Pandemic Response Plan',scope:'Organisation-wide health crisis response. Remote work enablement, site closure protocols, and essential worker management.',owner:'CHRO — Sarah Lim',rto:'24 hours',rpo:'4 hours',status:'Approved',lastReview:'2025-06-01',lastTested:'2025-03-10',nextTest:'2026-09-10',affectedDepts:['Engineering','Project Delivery','Corporate Services','Digital Delivery','EHS & Risk'],requiredSkills:['Remote Work Management','Health & Safety Compliance','Crisis Communication','Resource Reallocation','Mental Health First Aid']},
+      {id:5,name:'Supply Chain Continuity Plan',planType:'Supply Chain Continuity Plan',scope:'Critical material suppliers, subcontractors, and third-party service providers across all active construction projects.',owner:'Head of Procurement — Raj Patel',rto:'48 hours',rpo:'24 hours',status:'Under Review',lastReview:'2025-08-20',lastTested:'',nextTest:'2026-05-01',affectedDepts:['Project Delivery','Engineering','Corporate Services'],requiredSkills:['Supply Chain Management','Vendor Risk Assessment','Contract Negotiation','Alternative Sourcing','Logistics Coordination']},
+      {id:6,name:'Crisis Communication Plan',planType:'Crisis Communication Plan',scope:'Internal and external communication protocols during any crisis event — media handling, stakeholder updates, regulatory notifications.',owner:'Head of Corporate Communications — Anika Das',rto:'30 minutes',rpo:'N/A',status:'Active',lastReview:'2025-12-01',lastTested:'2025-11-15',nextTest:'2026-05-15',affectedDepts:['Corporate Services','EHS & Risk'],requiredSkills:['Crisis Communication','Media Relations','Stakeholder Management','Social Media Management','Regulatory Reporting']}
+    ];
+    d.riskScenarios=[
+      {id:1,name:'Ransomware Attack on Core Systems',category:'Cyber Attack',probability:'High',impact:'Catastrophic',description:'Targeted ransomware encrypts SAP S/4HANA, project management systems, and engineering file servers. All operations halted until decryption or recovery.',mitigation:'Air-gapped backups tested monthly, EDR on all endpoints, network segmentation, 24/7 SOC monitoring, cyber insurance ($5M coverage)',affectedBUs:['Digital Delivery','Engineering','Corporate Services','Project Delivery'],responseSkills:['Incident Response','Digital Forensics','Backup & Restore','Ransomware Negotiation','Business Continuity']},
+      {id:2,name:'Major Flood — Singapore HQ & Tuas Site',category:'Natural Disaster',probability:'Medium',impact:'Major',description:'Flash flooding disrupts Singapore HQ operations and Tuas construction site. Equipment damage, worker displacement, project timeline impact.',mitigation:'Flood barriers at Tuas site, elevated server room at HQ, cloud-first infrastructure policy, flood insurance on all assets, alternate work site agreements',affectedBUs:['Engineering','Project Delivery','Corporate Services'],responseSkills:['Emergency Response','Site Safety Management','Insurance Claims','Project Rescheduling','Environmental Assessment']},
+      {id:3,name:'Key Personnel Loss — Leadership',category:'Key Personnel Loss',probability:'Low',impact:'Major',description:'Sudden loss of 2+ C-suite executives or critical project leads. Decision-making paralysis, client confidence erosion, regulatory reporting gaps.',mitigation:'Documented succession plan for all L1-L3 roles, cross-training programme, key person insurance, shadow board initiative',affectedBUs:['Corporate Services','Engineering','Project Delivery'],responseSkills:['Succession Planning','Change Management','Leadership Development','Interim Management','Knowledge Transfer']},
+      {id:4,name:'Pandemic Resurgence — Site Closures',category:'Pandemic / Health Crisis',probability:'Medium',impact:'Moderate',description:'New pandemic wave forces construction site closures across Singapore and Malaysia. Remote work mandated for office staff, essential worker protocols activated.',mitigation:'Remote work infrastructure proven during COVID-19, PPE stockpile (90-day supply), split-team rotation model, telemedicine partnerships',affectedBUs:['Engineering','Project Delivery','EHS & Risk','Corporate Services','Digital Delivery'],responseSkills:['Remote Work Management','Health & Safety Compliance','Digital Collaboration','Mental Health Support','Workforce Scheduling']},
+      {id:5,name:'Critical Supplier Insolvency',category:'Supply Chain Disruption',probability:'Medium',impact:'Major',description:'Primary steel or concrete supplier enters insolvency during active mega-project. 60-day material supply at risk, potential liquidated damages from client.',mitigation:'Dual-source policy for critical materials (min. 2 approved suppliers), 30-day buffer stock requirement, supplier financial health monitoring (quarterly), pre-qualified alternate supplier list',affectedBUs:['Project Delivery','Engineering','Corporate Services'],responseSkills:['Vendor Risk Assessment','Alternative Sourcing','Contract Management','Logistics Coordination','Financial Analysis']},
+      {id:6,name:'Data Centre Outage — AWS Region Failure',category:'Infrastructure Failure',probability:'Low',impact:'Major',description:'AWS ap-southeast-1 region suffers extended outage (>4 hours). All cloud-hosted applications unavailable including SAP, Power BI dashboards, and collaboration tools.',mitigation:'Multi-region deployment for critical apps, cross-region replication for S3/RDS, local backup of critical project files, documented manual workaround procedures',affectedBUs:['Digital Delivery','Corporate Services','Engineering'],responseSkills:['Cloud Infrastructure','Disaster Recovery','System Administration','Network Engineering','Incident Management']},
+      {id:7,name:'Regulatory Non-Compliance Shutdown',category:'Regulatory / Legal',probability:'Low',impact:'Catastrophic',description:'MOM or BCA issues stop-work order due to safety non-compliance or expired certifications. All affected sites shut down pending investigation.',mitigation:'Automated certification expiry tracking (Block F), monthly compliance audits, dedicated EHS team on every site, pre-audit self-assessment programme',affectedBUs:['Engineering','Project Delivery','EHS & Risk'],responseSkills:['Regulatory Compliance','Safety Auditing','Legal Liaison','Corrective Action Planning','Documentation Management']}
+    ];
+    d.exercises=[
+      {id:1,name:'Annual BCP Tabletop — Leadership Team',exerciseType:'Tabletop Exercise',dateConducted:'2025-09-20',linkedPlan:'Enterprise Business Continuity Plan',participants:18,outcome:'Passed — All objectives met',lessons:'Communication chain worked well. Gap identified in cross-border coordination between SG and MY teams. Action: establish dedicated MY crisis liaison role.',skillGaps:['Cross-border Crisis Coordination','Bilingual Crisis Communication'],followUpActions:['Appoint MY Crisis Liaison','Update communication tree for MY ops','Schedule MY-specific tabletop Q1 2026']},
+      {id:2,name:'IT Failover Test — AWS DR Region',exerciseType:'IT Failover Test',dateConducted:'2025-08-15',linkedPlan:'IT Disaster Recovery Plan',participants:8,outcome:'Partial — Some gaps identified',lessons:'SAP S/4HANA failover completed in 1h 45m (within 2h RTO). Power BI dashboards took 3h to restore — exceeded RTO. Root cause: dashboard data sources not replicated to DR region.',skillGaps:['Power BI DR Configuration','Cross-Region Data Replication'],followUpActions:['Configure Power BI data source replication','Re-test Power BI failover in isolation','Update DR runbook for BI stack']},
+      {id:3,name:'Cyber Incident Simulation — Ransomware',exerciseType:'Full-Scale Simulation',dateConducted:'2025-12-05',linkedPlan:'Cyber Incident Response Plan',participants:24,outcome:'Passed — All objectives met',lessons:'Detection to containment achieved in 28 minutes (target: 30 min). Forensic imaging took longer than expected. Legal and PR teams well-coordinated. Recommend quarterly phishing simulations to maintain awareness.',skillGaps:['Forensic Imaging Speed','Endpoint Isolation Automation'],followUpActions:['Automate forensic image capture','Deploy endpoint isolation via EDR console','Schedule quarterly phishing drills']},
+      {id:4,name:'Crisis Comms Cascade Test',exerciseType:'Communication Cascade Test',dateConducted:'2025-11-15',linkedPlan:'Crisis Communication Plan',participants:42,outcome:'Partial — Some gaps identified',lessons:'98% of SG staff reached within 15 minutes. MY operations had 34% non-response rate — personal mobile numbers outdated. Social media monitoring team responded within 8 minutes.',skillGaps:['MY Emergency Contact Management','After-Hours Reach Rate'],followUpActions:['Mandate quarterly contact info verification for MY staff','Deploy WhatsApp-based backup cascade for MY','Add after-hours reach metric to monthly EHS dashboard']}
+    ];
+    setBlockData('M',d);checkBlockMCompletion();renderBlockContent('M');editMode=true;
+    document.getElementById('bpEditAllBtn').style.display='none';
+    addAiMsg("Generated a comprehensive <strong>BCDR framework</strong>:<br><br>\uD83D\uDCCB <strong>6 Plans</strong> — BCP, IT DR, Cyber Incident Response, Pandemic, Supply Chain, Crisis Comms<br>\u26A0\uFE0F <strong>7 Risk Scenarios</strong> — Ransomware (High/Catastrophic), Flood, Key Personnel Loss, Pandemic, Supplier Insolvency, AWS Outage, Regulatory Shutdown<br>\uD83E\uDDEA <strong>4 Exercises</strong> — BCP Tabletop, IT Failover, Ransomware Simulation, Comms Cascade<br><br>Key insights:<br>- Supply Chain plan is <em>Under Review</em> — needs approval before next quarter<br>- IT Failover test revealed <strong>Power BI DR gap</strong> (exceeded 2h RTO)<br>- MY operations have <strong>communication reach gap</strong> (34% non-response)<br><br>Review and adjust to match your actual BCDR posture.");
+    showToast('BCDR framework generated — 6 plans, 7 risks, 4 exercises');
+  },1500);
+}
+
+BLOCK_RENDERERS['M'] = {edit:renderBlockM_Edit, ro:renderBlockM_ReadOnly};
+
+// ═══════════════════════════════════════════════════════
 // BLOCK J: SKILLS DICTIONARY
 // ═══════════════════════════════════════════════════════
 var J_SKILL_TYPES=['Technical','Behavioural','Domain Knowledge','Tool / Platform','Process','Certification','Language'];
@@ -6817,6 +7227,14 @@ var BLOCK_GUIDES = {
     {t:'AI Suggestions', d:'Click "Generate Tech Stack" for industry-specific tool recommendations.'},
     {t:'Completion', d:'Add at least 3 tools to complete.'}
   ]},
+  M: { title:'Business Continuity & Disaster Recovery — Setup Guide', steps:[
+    {t:'BC & DR Plans', d:'Register each continuity and recovery plan — BCP, IT DRP, Cyber Response, Pandemic, Supply Chain, Crisis Comms. Set RTO/RPO targets, ownership, and testing schedules.'},
+    {t:'Risk Scenarios', d:'Identify potential disruption scenarios with probability and impact ratings. Map each scenario to affected business units and required response skills.'},
+    {t:'DR Testing & Exercises', d:'Track tabletop exercises, IT failover tests, full-scale simulations, and communication cascades. Record outcomes, lessons learned, and skill gaps discovered.'},
+    {t:'AI Generation', d:'Click "Generate BCDR Framework" to auto-create plans, risk scenarios, and exercise records based on your industry and geography.'},
+    {t:'How This Feeds SIP', d:'BCDR data drives crisis-readiness skill requirements. Plans create mandatory skills for response teams, risk scenarios surface capability gaps, and exercise results feed directly into Training Needs Analysis.'},
+    {t:'Completion', d:'Add at least 1 BC/DR plan and 1 risk scenario to complete.'}
+  ]},
   H: { title:'Skill Criticality Scale — Setup Guide', steps:[
     {t:'4-Level Scale', d:'Define what C1 (Mission Critical) through C4 (Nice to Have) means for your organisation. Each level has a label, definition, and platform behavior.'},
     {t:'Platform Behavior', d:'Describe what happens when a gap exists at each criticality level — e.g., C1 gaps trigger auto-escalation to CHRO.'},
@@ -6927,6 +7345,9 @@ function getBlockMissing(id){
     if(!(d.standards&&d.standards.length)) missing.push('At least 1 compliance standard');
   } else if(id==='G'){
     if(!(d.tools&&d.tools.length) || d.tools.length<3) missing.push('At least 3 tools/technologies');
+  } else if(id==='M'){
+    if(!(d.plans&&d.plans.length)) missing.push('At least 1 BC/DR plan');
+    if(!(d.riskScenarios&&d.riskScenarios.length)) missing.push('At least 1 risk scenario');
   } else if(id==='H'){
     var sc = d.scale||[];
     sc.forEach(function(s){if(!s.definition) missing.push(s.level+' ('+s.label+') definition')});
@@ -6963,6 +7384,7 @@ var BLOCK_UNLOCKS = {
   E: 'Client-driven skill demands, location-based compliance requirements, and geographic workforce planning',
   F: 'Mandatory certification tracking, auto-assigned compliance training, and audit-ready evidence packages',
   G: 'Tool-based skill mapping, migration skill planning for sunsetting tech, and adoption readiness scoring',
+  M: 'Crisis-readiness skill requirements, disaster response capability mapping, BCDR exercise-driven gap analysis, and resilience scoring',
   H: 'Weighted gap severity scoring, auto-escalation rules for critical gaps, and priority-based TNA ranking',
   I: 'Precise behavioural assessments, calibrated proficiency scoring, and meaningful development milestones',
   J: 'The complete skill taxonomy that powers every assessment, gap analysis, learning path, and workforce report',
@@ -6982,6 +7404,7 @@ function updateAiForBlock(id){
     'E': "Your <strong>client portfolio</strong> drives external skill demands. Client industries and locations shape certification and language requirements.",
     'F': "Every <strong>standard</strong> creates non-negotiable skill needs. Missing this means compliance gaps go undetected until audit time.",
     'G': "Your <strong>tech stack</strong> is a direct proxy for required skills. Getting this right means precise, current skill requirements \u2014 not generic ones.",
+    'M': "Your <strong>Business Continuity &amp; Disaster Recovery</strong> posture reveals critical skill needs that normal operations never surface. Plans define who must know what during a crisis, risk scenarios identify capability gaps before they become real, and exercise results prove whether your people are actually ready.",
     'H': "The <strong>criticality scale</strong> tells the AI how to prioritise gaps. A C1 gap triggers immediate action; a C4 gap is opportunistic.",
     'I': "Your <strong>proficiency definitions</strong> make assessments meaningful. Without them, 'Level 3' is subjective and inconsistent across roles.",
     'J': "The <strong>Skills Dictionary</strong> is the single source of truth. Every assessment, gap analysis, and learning path draws from this.",
@@ -6990,7 +7413,7 @@ function updateAiForBlock(id){
   };
 
   // Check for missing data in PREVIOUS blocks
-  var blockOrder = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+  var blockOrder = ['A','B','C','D','E','F','G','M','H','I','J','K','L'];
   var currentIdx = blockOrder.indexOf(id);
   var prevMissing = [];
   for(var i=0;i<currentIdx;i++){
@@ -7049,7 +7472,7 @@ function updateAiForBlock(id){
     // 5. If ALL blocks complete — grand congratulations
     if(allDone){
       setTimeout(function(){
-        addAiMsg('\uD83C\uDF89 <strong>Congratulations!</strong> All 12 blocks are complete! Your organisation context is fully captured.<br><br>\uD83D\uDCCA <strong>Your Reports are ready!</strong> Explore 8 interactive dashboards covering skills, competencies, roles, and data quality.<br><a href="report.html" style="color:var(--accent);font-weight:600;text-decoration:underline">\u2192 Open Reports &amp; Dashboards</a><br><br>You can also click <em>Lock Level 1 &amp; Feed AI Pipeline</em> on the dashboard to proceed to SkillForge framework generation.');
+        addAiMsg('\uD83C\uDF89 <strong>Congratulations!</strong> All 13 blocks are complete! Your organisation context is fully captured.<br><br>\uD83D\uDCCA <strong>Your Reports are ready!</strong> Explore 8 interactive dashboards covering skills, competencies, roles, and data quality.<br><a href="report.html" style="color:var(--accent);font-weight:600;text-decoration:underline">\u2192 Open Reports &amp; Dashboards</a><br><br>You can also click <em>Lock Level 1 &amp; Feed AI Pipeline</em> on the dashboard to proceed to SkillForge framework generation.');
       }, 500);
     }
   }, 1000);
@@ -7187,10 +7610,10 @@ function aiExtractBlockB(){
 }
 
 function autoFillAllBlocks(){
-  if(!confirm('This will populate all 12 blocks with Edstellar Infrastructure demo data. Existing data will be overwritten. Continue?')) return;
+  if(!confirm('This will populate all 13 blocks with Edstellar Infrastructure demo data. Existing data will be overwritten. Continue?')) return;
   showToast('Auto-filling all blocks...');
   var delay = 0;
-  var blocks = ['A','B','H','I','C','D','E','F','G','J','K','L'];
+  var blocks = ['A','B','H','I','C','D','E','F','G','M','J','K','L'];
   var funcs = {
     A: function(){ aiExtractBlockA_silent ? aiExtractBlockA_silent() : aiExtractBlockA(); },
     B: aiExtractBlockB,
@@ -7199,6 +7622,7 @@ function autoFillAllBlocks(){
     E: aiExtractBlockE,
     F: aiExtractBlockF,
     G: aiExtractBlockG,
+    M: aiExtractBlockM,
     H: aiExtractBlockH,
     I: aiExtractBlockI,
     J: aiExtractBlockJ,
@@ -7211,7 +7635,7 @@ function autoFillAllBlocks(){
       if(i === blocks.length - 1){
         setTimeout(function(){
           renderDashboard();
-          showToast('All 12 blocks populated with demo data!');
+          showToast('All 13 blocks populated with demo data!');
         }, 500);
       }
     }, i * 300);
