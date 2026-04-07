@@ -215,6 +215,34 @@ function generateSuggestions(){
 var PROJECT_TYPES=['Training Programme','Capability Building','Certification Drive','Leadership Development','OD Initiative','Client-facing','R&D','Infrastructure','Compliance','Digital Transformation'];
 var PROJECT_CATEGORIES=['Client Servicing','Employee Development'];
 var PROJECT_STATUSES=['Planned','Active','On Hold'];
+var RECURRENCE_OPTIONS=['One-time','Recurring — Monthly','Recurring — Quarterly','Recurring — Semi-Annual','Recurring — Annual'];
+
+function getOwnerOptions(){
+  var opts=[''];
+  try{
+    var raw=sessionStorage.getItem('sip_dataport_import')||localStorage.getItem('sip_dataport_import');
+    if(raw){
+      var data=JSON.parse(raw);
+      (data.employees||[]).forEach(function(e){
+        if(e.department==='HR & Talent'||e.role==='L&D Manager'||e.role==='L&D Coordinator'||e.role==='HR Business Partner'||e.role==='Senior HRBP'||e.role==='CHRO'||(e.department||'').indexOf('HR')>=0||(e.role||'').indexOf('L&D')>=0){
+          opts.push(e.fullName+' — '+e.role+' ('+e.id+')');
+        }
+      });
+    }
+  }catch(ex){}
+  if(opts.length<=1) opts.push('CHRO — Sarah Lim','L&D Manager','HR Business Partner','Senior HRBP');
+  return opts;
+}
+
+function renderOwnerSelect(id,currentVal){
+  var opts=getOwnerOptions();
+  var h='<select class="form-select" id="'+id+'">';
+  h+='<option value="">Select owner...</option>';
+  opts.forEach(function(o){if(o)h+='<option value="'+esc(o)+'"'+(o===currentVal?' selected':'')+'>'+esc(o)+'</option>'});
+  h+='<option value="__custom">Other (type manually)</option>';
+  h+='</select>';
+  return h;
+}
 var activeTab='create';
 
 function render(){
@@ -320,9 +348,12 @@ function renderCreateForm(prefill){
   h+='<div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="fpPriority">';
   ['Critical','High','Medium','Low'].forEach(function(pr){h+='<option'+(p.priority&&p.priority.toLowerCase()===pr.toLowerCase()?' selected':'')+'>'+pr+'</option>'});
   h+='</select></div></div>';
-  h+='<div class="form-group"><label class="form-label">Project Owner</label><input class="form-input" id="fpOwner" value="" placeholder="e.g. CHRO — Sarah Lim"></div>';
-  h+='<div class="form-row"><div class="form-group"><label class="form-label">Start Date</label><input class="form-input" type="date" id="fpStart"></div>';
-  h+='<div class="form-group"><label class="form-label">Target End Date</label><input class="form-input" type="date" id="fpEnd"></div></div>';
+  h+='<div class="form-group"><label class="form-label">Project Owner</label>'+renderOwnerSelect('fpOwner','')+'</div>';
+  h+='<div class="form-row"><div class="form-group"><label class="form-label">Recurrence</label><select class="form-select" id="fpRecurrence">';
+  RECURRENCE_OPTIONS.forEach(function(r){h+='<option>'+esc(r)+'</option>'});
+  h+='</select></div>';
+  h+='<div class="form-group"><label class="form-label">Start Date</label><input class="form-input" type="date" id="fpStart"></div></div>';
+  h+='<div class="form-row"><div class="form-group"><label class="form-label">Target End Date</label><input class="form-input" type="date" id="fpEnd"></div>';
   h+='<div class="form-row"><div class="form-group"><label class="form-label">Budget ($M)</label><input class="form-input" type="number" step="0.01" id="fpBudget" placeholder="0.15"></div>';
   h+='<div class="form-group"><label class="form-label">Employees Targeted</label><input class="form-input" type="number" id="fpEmps" value="'+(p.emps||'')+'" placeholder="20"></div></div>';
   h+='</div>';
@@ -369,7 +400,8 @@ function saveProject(){
     Project_Type:document.getElementById('fpType').value,
     Project_Status:document.getElementById('fpStatus').value,
     Priority:document.getElementById('fpPriority').value,
-    Project_Owner:document.getElementById('fpOwner').value.trim(),
+    Project_Owner:document.getElementById('fpOwner').value==='__custom'?'':document.getElementById('fpOwner').value,
+    Recurrence:document.getElementById('fpRecurrence').value,
     Start_Date:document.getElementById('fpStart').value,
     Target_End_Date:document.getElementById('fpEnd').value,
     Budget_M:parseFloat(document.getElementById('fpBudget').value)||0,

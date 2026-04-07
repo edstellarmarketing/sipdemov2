@@ -202,6 +202,7 @@ function render(){
 
     var meta=[];
     if(p.Project_Owner) meta.push('Owner: '+p.Project_Owner);
+    if(p.Recurrence&&p.Recurrence!=='One-time') meta.push(p.Recurrence);
     if(p.Start_Date) meta.push('Start: '+p.Start_Date);
     if(p.Target_End_Date) meta.push('End: '+p.Target_End_Date);
     if(p.Budget_M) meta.push('Budget: $'+p.Budget_M+'M');
@@ -259,6 +260,28 @@ var PROJECT_TYPES=['Training Programme','Capability Building','Certification Dri
 var PROJECT_CATEGORIES=['Client Servicing','Employee Development'];
 var PROJECT_STATUSES=['Planned','Active','On Hold','Completed','Cancelled'];
 var PRIORITIES=['Critical','High','Medium','Low'];
+var RECURRENCE_OPTIONS=['One-time','Recurring — Monthly','Recurring — Quarterly','Recurring — Semi-Annual','Recurring — Annual'];
+
+function getOwnerOptions(){
+  var opts=[];
+  try{
+    var raw=sessionStorage.getItem('sip_dataport_import')||localStorage.getItem('sip_dataport_import');
+    if(raw){var data=JSON.parse(raw);(data.employees||[]).forEach(function(e){
+      if(e.department==='HR & Talent'||e.role==='L&D Manager'||e.role==='L&D Coordinator'||e.role==='HR Business Partner'||e.role==='Senior HRBP'||e.role==='CHRO'||(e.department||'').indexOf('HR')>=0||(e.role||'').indexOf('L&D')>=0){
+        opts.push(e.fullName+' \u2014 '+e.role+' ('+e.id+')');
+      }
+    })}
+  }catch(ex){}
+  if(!opts.length) opts=['CHRO \u2014 Sarah Lim','L&D Manager','HR Business Partner','Senior HRBP'];
+  return opts;
+}
+function renderOwnerSelect(id,cur){
+  var opts=getOwnerOptions();
+  var h='<select class="dp-select" id="'+id+'"><option value="">Select owner...</option>';
+  opts.forEach(function(o){h+='<option value="'+esc(o)+'"'+(o===cur?' selected':'')+'>'+esc(o)+'</option>'});
+  h+='<option value="__custom">Other (type manually)</option></select>';
+  return h;
+}
 var SUB_TYPES=['Survey','Skill Assessment','Competency Assessment','Training Session','Workshop','Certification Exam','Coaching Session','Review Meeting','Feedback Collection','Knowledge Test','Discovery Session','OD Intervention'];
 var SUB_STATUSES=['Not Started','In Progress','Completed','Cancelled'];
 var ASSIGN_OPTIONS=['All Employees','Engineering','Project Delivery','Digital Delivery','Corporate Services','EHS & Risk','HR & Talent','Managers Only','Senior Leaders','Custom List'];
@@ -322,6 +345,7 @@ function renderDetail(){
     // Project details sidebar
     h+='<div class="dp-card"><div class="dp-section-title">Project Details</div>';
     h+=roField('Owner',p.Project_Owner);
+    h+=roField('Recurrence',p.Recurrence||'One-time');
     h+=roField('Budget','$'+(p.Budget_M||0)+'M');
     h+=roField('Start Date',p.Start_Date||'—');
     h+=roField('End Date',p.Target_End_Date||'—');
@@ -418,9 +442,10 @@ function renderEditForm(p){
   h+='<div class="form-group"><div class="dp-label">Type</div><select class="dp-select" id="edType">'+sel(PROJECT_TYPES,p.Project_Type)+'</select></div></div>';
   h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Status</div><select class="dp-select" id="edStatus">'+sel(PROJECT_STATUSES,p.Project_Status)+'</select></div>';
   h+='<div class="form-group"><div class="dp-label">Priority</div><select class="dp-select" id="edPriority">'+sel(PRIORITIES,p.Priority)+'</select></div></div>';
-  h+='<div class="form-group"><div class="dp-label">Owner</div><input class="dp-input" id="edOwner" value="'+esc(p.Project_Owner)+'"></div>';
-  h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Start Date</div><input class="dp-input" type="date" id="edStart" value="'+esc(p.Start_Date)+'"></div>';
-  h+='<div class="form-group"><div class="dp-label">End Date</div><input class="dp-input" type="date" id="edEnd" value="'+esc(p.Target_End_Date)+'"></div></div>';
+  h+='<div class="form-group"><div class="dp-label">Owner</div>'+renderOwnerSelect('edOwner',p.Project_Owner)+'</div>';
+  h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Recurrence</div><select class="dp-select" id="edRecurrence">'+RECURRENCE_OPTIONS.map(function(r){return'<option'+(r===p.Recurrence?' selected':'')+'>'+esc(r)+'</option>'}).join('')+'</select></div>';
+  h+='<div class="form-group"><div class="dp-label">Start Date</div><input class="dp-input" type="date" id="edStart" value="'+esc(p.Start_Date)+'"></div></div>';
+  h+='<div class="dp-row"><div class="form-group"><div class="dp-label">End Date</div><input class="dp-input" type="date" id="edEnd" value="'+esc(p.Target_End_Date)+'"></div>';
   h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Budget ($M)</div><input class="dp-input" type="number" step="0.01" id="edBudget" value="'+(p.Budget_M||'')+'"></div>';
   h+='<div class="form-group"><div class="dp-label">Employees Targeted</div><input class="dp-input" type="number" id="edEmps" value="'+(p.Employees_Targeted||'')+'"></div></div>';
   h+='</div>';
@@ -448,7 +473,9 @@ function saveEdit(){
   p.Project_Type=document.getElementById('edType').value;
   p.Project_Status=document.getElementById('edStatus').value;
   p.Priority=document.getElementById('edPriority').value;
-  p.Project_Owner=document.getElementById('edOwner').value.trim();
+  var ownerVal=document.getElementById('edOwner').value;
+  p.Project_Owner=ownerVal==='__custom'?'':ownerVal;
+  p.Recurrence=document.getElementById('edRecurrence').value;
   p.Start_Date=document.getElementById('edStart').value;
   p.Target_End_Date=document.getElementById('edEnd').value;
   p.Budget_M=parseFloat(document.getElementById('edBudget').value)||0;
