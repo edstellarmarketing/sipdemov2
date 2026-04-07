@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Servicing Projects · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<style>
+.content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.page-body{max-width:1200px;margin:0 auto;padding:28px 32px 60px;width:100%}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 32px;text-align:center}
+.empty-icon{width:64px;height:64px;border-radius:16px;background:var(--accent-lt);display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:28px}
+.empty-title{font-family:var(--font-display);font-size:20px;font-weight:600;color:var(--text-primary);margin-bottom:8px}
+.empty-desc{font-size:13px;color:var(--text-secondary);max-width:420px;line-height:1.6}
+</style>
+</head>
+<body>
+<main class="main" id="page-content">
+<div class="content">
+<div class="page-body">
+  <div class="empty-state">
+    <div class="empty-icon">📋</div>
+    <div class="empty-title">Client Servicing Projects</div>
+    <div class="empty-desc">Manage external client-facing projects, track skill deployment, and monitor workforce allocation against project demands.</div>
+  </div>
+</div>
+</div>
+</main>
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'admin',
+    activeNav: 'Client Servicing Projects',
+    breadcrumbs: ['Talent Projects', 'Client Servicing Projects'],
+    topbarActions: []
+  });
+</script>
+</body>
+</html>

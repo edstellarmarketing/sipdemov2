@@ -80,6 +80,11 @@ const EdstellarShell = (() => {
         { label: 'Data Import', icon: 'import', href: 'dataport.html', badge: '3' },
         { label: 'Employee Assessments', icon: 'scope', href: 'employee-assessments.html' },
       ]},
+      { group: 'Talent Projects', items: [
+        { label: 'Client Servicing Projects', icon: 'report', href: 'talent-projects-client.html' },
+        { label: 'Employee Development', icon: 'discovery', href: 'talent-projects-dev.html' },
+        { label: 'Trainer Registry', icon: 'users', href: 'talent-projects-trainers.html' },
+      ]},
       { group: 'Reports', items: [
         { label: 'Organization Setup Report', icon: 'report', href: 'report.html' },
         { label: 'Gap Analysis Reports', icon: 'gap', href: 'gap-analysis-reports.html' },
