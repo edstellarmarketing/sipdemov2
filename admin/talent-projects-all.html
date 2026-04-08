@@ -390,6 +390,11 @@ function renderDetail(){
       h+='<div class="dp-val" style="white-space:pre-wrap;line-height:1.6">'+esc(p.Goals_Objectives)+'</div></div>';
     }
 
+    if(p.Projected_Outcomes){
+      h+='<div class="dp-card"><div class="dp-section-title">Projected Outcomes</div>';
+      h+='<div class="dp-val" style="white-space:pre-wrap;line-height:1.6">'+esc(p.Projected_Outcomes)+'</div></div>';
+    }
+
     // Audience section
     if((audience.businessUnits||[]).length||(audience.departments||[]).length||(audience.employees||[]).length){
       h+='<div class="dp-card"><div class="dp-section-title">Audience</div>';
@@ -497,7 +502,12 @@ function renderActivitiesSection(p){
         h+='<div class="sub-meta">';
         h+='<span>'+esc(s.type)+'</span>';
         if(s.dueDate) h+='<span>Due: '+esc(s.dueDate)+'</span>';
-        if(s.assignedTo) h+='<span class="sub-assign">'+esc(s.assignedTo)+'</span>';
+        var subAud=s.audience||{};var subAudLabel=s.assignedTo||'';
+        if(subAud.departments&&subAud.departments.length) subAudLabel=subAud.departments.join(', ');
+        else if(subAud.levels&&subAud.levels.length) subAudLabel=subAud.levels.join(', ');
+        else if(subAud.roles&&subAud.roles.length) subAudLabel=subAud.roles.join(', ');
+        if(subAudLabel) h+='<span class="sub-assign">'+esc(subAudLabel)+'</span>';
+        if(subAud.employees&&subAud.employees.length) h+='<span style="font-size:9.5px;color:var(--text-muted)">'+subAud.employees.length+' employee'+(subAud.employees.length>1?'s':'')+'</span>';
         h+='</div>';
         if(s.notes) h+='<div style="font-size:10.5px;color:var(--text-secondary);margin-top:4px;line-height:1.4">'+esc(s.notes)+'</div>';
         h+='</div>';
@@ -671,7 +681,8 @@ function renderEditForm(p){
 
   h+='<div class="dp-section"><div class="dp-section-title">Description & Goals</div>';
   h+='<div class="form-group"><div class="dp-label">Description</div><textarea class="dp-textarea" id="edDesc">'+esc(p.Description)+'</textarea></div>';
-  h+='<div class="form-group"><div class="dp-label">Goals & Objectives</div><textarea class="dp-textarea" id="edGoals">'+esc(p.Goals_Objectives||'')+'</textarea></div></div>';
+  h+='<div class="form-group"><div class="dp-label">Goals & Objectives</div><textarea class="dp-textarea" id="edGoals">'+esc(p.Goals_Objectives||'')+'</textarea></div>';
+  h+='<div class="form-group"><div class="dp-label">Projected Outcomes</div><textarea class="dp-textarea" id="edOutcomes">'+esc(p.Projected_Outcomes||'')+'</textarea></div></div>';
 
   // Audience section
   var aud=(p.typeConfig&&p.typeConfig.audience)||{};
@@ -704,6 +715,7 @@ function saveEdit(){
   p.Target_End_Date=document.getElementById('edEnd').value;
   p.Description=document.getElementById('edDesc').value.trim();
   p.Goals_Objectives=(document.getElementById('edGoals')?document.getElementById('edGoals').value.trim():'');
+  p.Projected_Outcomes=(document.getElementById('edOutcomes')?document.getElementById('edOutcomes').value.trim():'');
   // Update audience in typeConfig
   if(!p.typeConfig) p.typeConfig={};
   if(!p.typeConfig.audience) p.typeConfig.audience={};

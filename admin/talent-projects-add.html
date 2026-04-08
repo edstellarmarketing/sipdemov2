@@ -60,6 +60,10 @@
 .audience-level{margin-top:8px;padding-left:0;transition:all .2s}
 .audience-level .form-label{display:flex;align-items:center;gap:6px}
 .audience-level .form-label::before{content:'';width:3px;height:12px;border-radius:2px;background:var(--accent);opacity:.4}
+.aud-tabs{display:flex;gap:0;margin-bottom:12px;border-bottom:2px solid rgba(0,0,0,0.06)}
+.aud-tab{padding:8px 18px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:var(--font-body)}
+.aud-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.aud-tab:hover{color:var(--text-primary)}
 
 .no-data{padding:40px;text-align:center;color:var(--text-muted);font-size:13px;background:var(--card);border:1px solid var(--border);border-radius:10px}
 
@@ -245,6 +249,7 @@ var DEPT_ROLES={
   'EHS & Risk':['Safety Officer','Safety Manager','Senior Safety Manager','Environmental Specialist','Risk Analyst','EHS Inspector','Director of EHS'],
   'HR & Talent':['HR Executive','HR Business Partner','L&D Manager','Talent Acquisition Specialist','Compensation & Benefits Analyst','L&D Coordinator','Senior HRBP','CHRO']
 };
+var ALL_ROLES=[];Object.keys(DEPT_ROLES).forEach(function(d){DEPT_ROLES[d].forEach(function(r){if(ALL_ROLES.indexOf(r)<0)ALL_ROLES.push(r)})});ALL_ROLES.sort();
 
 var ASSESSMENT_TYPES=['Psychometric','Technical','Leadership','360-degree','Custom'];
 var SURVEY_TYPES=['Engagement','Pulse','Exit Interview','Culture','Custom'];
@@ -356,10 +361,12 @@ function refreshMultiDisplay(id){
 document.addEventListener('click',function(e){if(!e.target.closest('[id$=_display]')&&!e.target.closest('[id$=_dropdown]')){document.querySelectorAll('[id$=_dropdown]').forEach(function(d){d.style.display='none'})}});
 
 // ═══════════════════════════════════════════════════════
-// CASCADING AUDIENCE SELECTOR
-// BU → Departments → Levels → Roles → Employees
+// AUDIENCE SELECTOR — Dual Mode
+// Mode 1: By Business Unit (cascade BU→Dept→Level→Role→Emp)
+// Mode 2: Direct Selection (all fields independent, filters employees)
 // ═══════════════════════════════════════════════════════
 var _audiencePrefixes={};
+var _audienceModes={}; // 'hierarchical' or 'direct'
 
 function deptsForBUs(buNames){
   var depts=[];
@@ -384,7 +391,6 @@ function empsForFilters(depts,levels,roles){
       (data.employees||[]).forEach(function(e){
         if(depts.length&&depts.indexOf(e.department)<0) return;
         if(levels.length){
-          var empLvlLabel=(e.jobLevel||'')+' \u2014 ';
           var matched=false;
           levels.forEach(function(l){if(l.indexOf(e.jobLevel)===0) matched=true});
           if(!matched) return;
@@ -398,18 +404,55 @@ function empsForFilters(depts,levels,roles){
   return all;
 }
 
-function renderAudienceSection(prefix,extras){
+function switchAudienceMode(prefix,mode){
+  _audienceModes[prefix]=mode;
+  // Clear all selections
+  ['_bu','_dept','_level','_role','_emp','_d_level','_d_dept','_d_role','_d_emp'].forEach(function(k){_multiSelections[prefix+k]=[]});
+  // Re-render the audience body
+  var container=document.getElementById(prefix+'_aud_body');
+  if(!container) return;
+  if(mode==='direct'){
+    container.innerHTML=renderDirectBody(prefix);
+  } else {
+    container.innerHTML=renderHierarchicalBody(prefix);
+  }
+  // Update tab active states
+  var t1=document.getElementById(prefix+'_tab_hier');
+  var t2=document.getElementById(prefix+'_tab_direct');
+  if(t1){t1.className=mode==='hierarchical'?'aud-tab active':'aud-tab'}
+  if(t2){t2.className=mode==='direct'?'aud-tab active':'aud-tab'}
+}
+
+function renderAudienceSection(prefix){
   _audiencePrefixes[prefix]=true;
-  _multiSelections[prefix+'_bu']=[];
-  _multiSelections[prefix+'_dept']=[];
-  _multiSelections[prefix+'_level']=[];
-  _multiSelections[prefix+'_role']=[];
-  _multiSelections[prefix+'_emp']=[];
+  if(!_audienceModes[prefix]) _audienceModes[prefix]='hierarchical';
+  var mode=_audienceModes[prefix];
+
+  // Init all multi-select states
+  ['_bu','_dept','_level','_role','_emp','_d_level','_d_dept','_d_role','_d_emp'].forEach(function(k){_multiSelections[prefix+k]=[]});
 
   var h='<div class="section-label audience" style="margin-top:16px">Audience</div>';
 
-  if(extras&&extras.before) h+=extras.before;
+  // Mode tabs
+  h+='<div class="aud-tabs">';
+  h+='<div class="aud-tab'+(mode==='hierarchical'?' active':'')+'" id="'+prefix+'_tab_hier" onclick="switchAudienceMode(\''+prefix+'\',\'hierarchical\')">By Business Unit</div>';
+  h+='<div class="aud-tab'+(mode==='direct'?' active':'')+'" id="'+prefix+'_tab_direct" onclick="switchAudienceMode(\''+prefix+'\',\'direct\')">Direct Selection</div>';
+  h+='</div>';
 
+  h+='<div id="'+prefix+'_aud_body">';
+  if(mode==='direct'){
+    h+=renderDirectBody(prefix);
+  } else {
+    h+=renderHierarchicalBody(prefix);
+  }
+  h+='</div>';
+
+  return h;
+}
+
+// ── Hierarchical mode (BU cascade) ──
+function renderHierarchicalBody(prefix){
+  var h='';
   h+='<div class="audience-level"><div class="form-group"><label class="form-label">Business Units</label>'+renderMultiSelect(prefix+'_bu',BU_NAMES,[],'Select business units...')+'</div></div>';
 
   h+='<div id="'+prefix+'_dept_wrap" style="display:none" class="audience-level">';
@@ -431,15 +474,49 @@ function renderAudienceSection(prefix,extras){
   h+='<div class="form-group"><label class="form-label">Employees</label>';
   h+='<div id="'+prefix+'_emp_container">'+renderMultiSelect(prefix+'_emp',getEmployeeNames(),[],'Select employees...')+'</div>';
   h+='</div></div>';
+  return h;
+}
 
-  if(extras&&extras.after) h+=extras.after;
+// ── Direct mode (all fields shown, independent filters) ──
+function renderDirectBody(prefix){
+  var h='';
+  h+='<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;padding:6px 10px;background:rgba(139,92,246,0.04);border-radius:6px;border:1px solid rgba(139,92,246,0.1)">Select any combination below. Matching employees will auto-filter based on your selections.</div>';
 
+  h+='<div class="form-row">';
+  h+='<div class="form-group audience-level"><label class="form-label">Levels</label>'+renderMultiSelect(prefix+'_d_level',JOB_LEVELS,[],'Select levels...')+'</div>';
+  h+='<div class="form-group audience-level"><label class="form-label">Departments</label>'+renderMultiSelect(prefix+'_d_dept',ALL_DEPTS,[],'Select departments...')+'</div>';
+  h+='</div>';
+
+  h+='<div class="form-group audience-level"><label class="form-label">Job Titles / Roles</label>'+renderMultiSelect(prefix+'_d_role',ALL_ROLES,[],'Select job titles...')+'</div>';
+
+  h+='<div class="form-group audience-level"><label class="form-label">Employees <span id="'+prefix+'_d_emp_count" style="font-weight:400;color:var(--text-muted);font-size:10px"></span></label>';
+  h+='<div id="'+prefix+'_d_emp_container">'+renderMultiSelect(prefix+'_d_emp',getEmployeeNames(),[],'Select employees...')+'</div>';
+  h+='</div>';
   return h;
 }
 
 function audienceCascade(changedId){
   for(var prefix in _audiencePrefixes){
-    // BU changed → show Departments + Employees
+    var mode=_audienceModes[prefix]||'hierarchical';
+
+    // ── Direct mode: any field change re-filters employees ──
+    if(mode==='direct'){
+      if(changedId===prefix+'_d_level'||changedId===prefix+'_d_dept'||changedId===prefix+'_d_role'){
+        var dLevels=getMultiSelected(prefix+'_d_level');
+        var dDepts=getMultiSelected(prefix+'_d_dept');
+        var dRoles=getMultiSelected(prefix+'_d_role');
+        var filtered=empsForFilters(dDepts,dLevels,dRoles);
+        _multiSelections[prefix+'_d_emp']=[];
+        var ec=document.getElementById(prefix+'_d_emp_container');
+        if(ec) ec.innerHTML=renderMultiSelect(prefix+'_d_emp',filtered,[],'Select employees...');
+        var countEl=document.getElementById(prefix+'_d_emp_count');
+        if(countEl) countEl.textContent='('+filtered.length+' matching)';
+        return;
+      }
+      if(changedId===prefix+'_d_emp') return;
+    }
+
+    // ── Hierarchical mode (existing cascade) ──
     if(changedId===prefix+'_bu'){
       var bus=getMultiSelected(prefix+'_bu');
       var deptWrap=document.getElementById(prefix+'_dept_wrap');
@@ -452,12 +529,10 @@ function audienceCascade(changedId){
         _multiSelections[prefix+'_dept']=[];
         var dc=document.getElementById(prefix+'_dept_container');
         if(dc) dc.innerHTML=renderMultiSelect(prefix+'_dept',filteredDepts,[],'Select departments...');
-        // Show employees directly (BU → Employees path)
         if(empWrap)empWrap.style.display='';
         _multiSelections[prefix+'_emp']=[];
         var ec=document.getElementById(prefix+'_emp_container');
         if(ec) ec.innerHTML=renderMultiSelect(prefix+'_emp',empsForFilters(filteredDepts,[],[]),[],'Select employees...');
-        // Reset levels and roles
         if(levelWrap)levelWrap.style.display='none';
         if(roleWrap)roleWrap.style.display='none';
         _multiSelections[prefix+'_level']=[];_multiSelections[prefix+'_role']=[];
@@ -470,7 +545,6 @@ function audienceCascade(changedId){
       }
       return;
     }
-    // Dept changed → show Levels + Roles filtered by dept + update Employees
     if(changedId===prefix+'_dept'){
       var depts=getMultiSelected(prefix+'_dept');
       var levelWrap=document.getElementById(prefix+'_level_wrap');
@@ -478,13 +552,11 @@ function audienceCascade(changedId){
       var empWrap=document.getElementById(prefix+'_emp_wrap');
       if(depts.length){
         if(levelWrap)levelWrap.style.display='';
-        // Show roles filtered to selected departments
         var filteredRoles=rolesForDepts(depts);
         if(roleWrap)roleWrap.style.display='';
         _multiSelections[prefix+'_role']=[];
         var rc=document.getElementById(prefix+'_role_container');
         if(rc) rc.innerHTML=renderMultiSelect(prefix+'_role',filteredRoles,[],'Select roles...');
-        // Update employees
         _multiSelections[prefix+'_emp']=[];
         var ec=document.getElementById(prefix+'_emp_container');
         if(ec) ec.innerHTML=renderMultiSelect(prefix+'_emp',empsForFilters(depts,[],[]),[],'Select employees...');
@@ -501,18 +573,7 @@ function audienceCascade(changedId){
       }
       return;
     }
-    // Level changed → filter Employees by dept + level
-    if(changedId===prefix+'_level'){
-      var depts=getMultiSelected(prefix+'_dept');
-      var levels=getMultiSelected(prefix+'_level');
-      var roles=getMultiSelected(prefix+'_role');
-      _multiSelections[prefix+'_emp']=[];
-      var ec=document.getElementById(prefix+'_emp_container');
-      if(ec) ec.innerHTML=renderMultiSelect(prefix+'_emp',empsForFilters(depts,levels,roles),[],'Select employees...');
-      return;
-    }
-    // Role changed → filter Employees by dept + level + role
-    if(changedId===prefix+'_role'){
+    if(changedId===prefix+'_level'||changedId===prefix+'_role'){
       var depts=getMultiSelected(prefix+'_dept');
       var levels=getMultiSelected(prefix+'_level');
       var roles=getMultiSelected(prefix+'_role');
@@ -1096,6 +1157,7 @@ function renderCreateForm(prefill){
   h+='<div>';
   h+='<div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="fpDesc" style="min-height:100px" placeholder="Describe the project scope, expected outcomes, and key deliverables...">'+esc(p.desc||'')+'</textarea></div>';
   h+='<div class="form-group"><label class="form-label">Goals & Objectives</label><textarea class="form-textarea" id="fpGoals" style="min-height:80px" placeholder="Define the key goals and measurable objectives for this project...">'+esc(p.goals||'')+'</textarea></div>';
+  h+='<div class="form-group"><label class="form-label">Projected Outcomes</label><textarea class="form-textarea" id="fpOutcomes" style="min-height:80px" placeholder="Describe the expected outcomes, impact, and success criteria...">'+esc(p.outcomes||'')+'</textarea></div>';
   h+='</div>';
   h+='</div>';
 
@@ -1136,7 +1198,11 @@ function floatVal(id){return parseFloat(val(id))||0}
 function checked(id){var e=document.getElementById(id);return e?e.checked:false}
 
 function collectAudience(prefix){
-  return {businessUnits:getMultiSelected(prefix+'_bu'),departments:getMultiSelected(prefix+'_dept'),levels:getMultiSelected(prefix+'_level'),roles:getMultiSelected(prefix+'_role'),employees:getMultiSelected(prefix+'_emp')};
+  var mode=_audienceModes[prefix]||'hierarchical';
+  if(mode==='direct'){
+    return {mode:'direct',businessUnits:[],departments:getMultiSelected(prefix+'_d_dept'),levels:getMultiSelected(prefix+'_d_level'),roles:getMultiSelected(prefix+'_d_role'),employees:getMultiSelected(prefix+'_d_emp')};
+  }
+  return {mode:'hierarchical',businessUnits:getMultiSelected(prefix+'_bu'),departments:getMultiSelected(prefix+'_dept'),levels:getMultiSelected(prefix+'_level'),roles:getMultiSelected(prefix+'_role'),employees:getMultiSelected(prefix+'_emp')};
 }
 
 function collectTypeConfig(){
@@ -1230,6 +1296,7 @@ function saveProject(){
     subProjects:window._pendingActivities.slice(),
     Description:document.getElementById('fpDesc').value.trim(),
     Goals_Objectives:document.getElementById('fpGoals').value.trim(),
+    Projected_Outcomes:document.getElementById('fpOutcomes').value.trim(),
     Created_At:new Date().toISOString()
   };
 
@@ -1270,7 +1337,10 @@ function renderPendingActivities(){
       h+='<span style="font-size:14px">'+(typeIcons[s.type]||'\uD83D\uDCCC')+'</span>';
       h+='<span style="font-size:12px;font-weight:600;color:var(--text-primary);flex:1">'+esc(s.name)+'</span>';
       h+='<span style="font-size:10px;color:var(--text-muted)">'+esc(s.type)+'</span>';
-      if(s.assignedTo) h+='<span style="font-size:9px;padding:2px 8px;border-radius:100px;background:rgba(139,92,246,0.06);color:#8B5CF6;border:1px solid rgba(139,92,246,0.15)">'+esc(s.assignedTo)+'</span>';
+      var sa=s.audience||{};var saSummary=s.assignedTo||'';
+      if(sa.departments&&sa.departments.length) saSummary=sa.departments.join(', ');
+      else if(sa.levels&&sa.levels.length) saSummary=sa.levels.join(', ');
+      if(saSummary) h+='<span style="font-size:9px;padding:2px 8px;border-radius:100px;background:rgba(139,92,246,0.06);color:#8B5CF6;border:1px solid rgba(139,92,246,0.15)">'+esc(saSummary)+'</span>';
       if(s.dueDate) h+='<span style="font-size:10px;color:var(--text-muted)">Due: '+esc(s.dueDate)+'</span>';
       h+='<span style="font-size:9px;padding:2px 8px;border-radius:100px;'+stCls+'">'+esc(s.status)+'</span>';
       h+='<button class="btn btn-sm" style="padding:2px 6px;font-size:9px;color:var(--red);border-color:var(--red)" onclick="removePendingActivity('+si+')">x</button>';
@@ -1280,16 +1350,16 @@ function renderPendingActivities(){
 
   h+='<div style="padding:14px;border:1px dashed var(--accent);border-radius:8px;background:rgba(201,168,76,0.02);margin-top:8px">';
   h+='<div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:8px">Add New Activity</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
   h+='<div class="form-group"><label class="form-label">Activity Name *</label><input class="form-input" id="pendSubName" placeholder="e.g. Pre-training Skill Assessment"></div>';
   h+='<div class="form-group"><label class="form-label">Type</label><select class="form-select" id="pendSubType">'+selOpts(SUB_TYPES)+'</select></div>';
-  h+='<div class="form-group"><label class="form-label">Assign To</label><select class="form-select" id="pendSubAssign">'+selOpts(SUB_ASSIGN)+'</select></div>';
   h+='</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:6px">';
   h+='<div class="form-group"><label class="form-label">Status</label><select class="form-select" id="pendSubStatus">'+selOpts(SUB_STATUSES)+'</select></div>';
   h+='<div class="form-group"><label class="form-label">Due Date</label><input class="form-input" type="date" id="pendSubDue"></div>';
   h+='<div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="pendSubNotes" placeholder="Instructions or scope..."></div>';
   h+='</div>';
+  h+=renderAudienceSection('pendSub');
   h+='<button class="btn btn-primary btn-sm" onclick="addPendingActivity()" style="margin-top:8px">+ Add Activity</button>';
   h+='</div>';
   h+='</div>';
@@ -1303,7 +1373,7 @@ function addPendingActivity(){
     id:'ACT-'+String(Date.now()).slice(-6),
     name:name,
     type:document.getElementById('pendSubType').value,
-    assignedTo:document.getElementById('pendSubAssign').value,
+    audience:collectAudience('pendSub'),
     status:document.getElementById('pendSubStatus').value,
     dueDate:document.getElementById('pendSubDue').value,
     notes:document.getElementById('pendSubNotes').value.trim(),
@@ -1351,7 +1421,10 @@ function renderSubProjects(projIdx){
       h+='<span style="font-size:14px">'+(typeIcons[s.type]||'\uD83D\uDCCC')+'</span>';
       h+='<span style="font-size:12px;font-weight:600;color:var(--text-primary);flex:1">'+esc(s.name)+'</span>';
       h+='<span style="font-size:10px;color:var(--text-muted)">'+esc(s.type)+'</span>';
-      if(s.assignedTo) h+='<span style="font-size:9px;padding:2px 8px;border-radius:100px;background:rgba(139,92,246,0.06);color:#8B5CF6;border:1px solid rgba(139,92,246,0.15)">'+esc(s.assignedTo)+'</span>';
+      var sa2=s.audience||{};var saSummary2=s.assignedTo||'';
+      if(sa2.departments&&sa2.departments.length) saSummary2=sa2.departments.join(', ');
+      else if(sa2.levels&&sa2.levels.length) saSummary2=sa2.levels.join(', ');
+      if(saSummary2) h+='<span style="font-size:9px;padding:2px 8px;border-radius:100px;background:rgba(139,92,246,0.06);color:#8B5CF6;border:1px solid rgba(139,92,246,0.15)">'+esc(saSummary2)+'</span>';
       if(s.dueDate) h+='<span style="font-size:10px;color:var(--text-muted)">Due: '+esc(s.dueDate)+'</span>';
       h+='<span style="font-size:9px;padding:2px 8px;border-radius:100px;'+stCls+'">'+esc(s.status)+'</span>';
       h+='<button class="btn btn-sm" style="padding:2px 6px;font-size:9px;color:var(--red);border-color:var(--red)" onclick="removeSubFromAdd('+projIdx+','+si+')">x</button>';
@@ -1361,16 +1434,16 @@ function renderSubProjects(projIdx){
 
   h+='<div style="padding:14px;border:1px dashed var(--accent);border-radius:8px;background:rgba(201,168,76,0.02);margin-top:8px">';
   h+='<div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:8px">Add New Activity</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
   h+='<div class="form-group"><label class="form-label">Activity Name *</label><input class="form-input" id="subName" placeholder="e.g. Pre-training Skill Assessment"></div>';
   h+='<div class="form-group"><label class="form-label">Type</label><select class="form-select" id="subType">'+selOpts(SUB_TYPES)+'</select></div>';
-  h+='<div class="form-group"><label class="form-label">Assign To</label><select class="form-select" id="subAssign">'+selOpts(SUB_ASSIGN)+'</select></div>';
   h+='</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:6px">';
   h+='<div class="form-group"><label class="form-label">Status</label><select class="form-select" id="subStatus">'+selOpts(SUB_STATUSES)+'</select></div>';
   h+='<div class="form-group"><label class="form-label">Due Date</label><input class="form-input" type="date" id="subDue"></div>';
   h+='<div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="subNotes" placeholder="Instructions or scope..."></div>';
   h+='</div>';
+  h+=renderAudienceSection('subAct');
   h+='<button class="btn btn-primary btn-sm" onclick="addSubFromAdd('+projIdx+')" style="margin-top:8px">+ Add Activity</button>';
   h+='</div>';
   h+='</div>';
@@ -1383,7 +1456,7 @@ function addSubFromAdd(projIdx){
   var projects=loadProjects();
   var p=projects[projIdx];if(!p)return;
   if(!p.subProjects)p.subProjects=[];
-  p.subProjects.push({id:'ACT-'+String(Date.now()).slice(-6),name:name,type:document.getElementById('subType').value,assignedTo:document.getElementById('subAssign').value,status:document.getElementById('subStatus').value,dueDate:document.getElementById('subDue').value,notes:document.getElementById('subNotes').value.trim(),createdAt:new Date().toISOString()});
+  p.subProjects.push({id:'ACT-'+String(Date.now()).slice(-6),name:name,type:document.getElementById('subType').value,audience:collectAudience('subAct'),status:document.getElementById('subStatus').value,dueDate:document.getElementById('subDue').value,notes:document.getElementById('subNotes').value.trim(),createdAt:new Date().toISOString()});
   saveProjectsStore(projects);
   renderSubProjects(projIdx);
   showToast('Activity "'+name+'" added');
@@ -1441,6 +1514,7 @@ function autofillDemoData(){
     setVal('fpName','Q3 2026 Technical Competency Assessment — Engineering');
     setVal('fpDesc','Comprehensive technical competency assessment targeting all Engineering and Digital Delivery staff. This assessment will baseline current proficiency levels in structural analysis, digital twin technologies, and emerging cloud-native skills to identify gaps and inform the H2 training roadmap.');
     setVal('fpGoals','1. Establish baseline proficiency levels for 300+ engineers across 12 technical competencies\n2. Identify top 20% high-performers for Digital Twin Academy nomination\n3. Map critical skill gaps to inform H2 2026 training budget allocation\n4. Achieve 90% assessment completion rate within 30 days of launch');
+    setVal('fpOutcomes','Comprehensive competency heatmap across Engineering and Digital Delivery. Prioritised training investment plan for H2 2026. Shortlist of 40+ engineers for Digital Twin Academy. Baseline data for annual skill progression tracking.');
     setVal('fpPriority','High');
     setVal('asmt_type','Technical');setVal('asmt_timeLimit','90');
     setToggle('asmt_qualitative',true);
@@ -1451,6 +1525,7 @@ function autofillDemoData(){
     setVal('fpName','Engineering Skills Matrix — Structural & Digital Twin');
     setVal('fpDesc','Create a comprehensive skills matrix mapping proficiency levels across structural engineering and digital twin capabilities for the Engineering and Digital Delivery departments. This will inform succession planning and targeted upskilling.');
     setVal('fpGoals','1. Map 6 core structural & digital twin skills across Engineering and Digital Delivery\n2. Identify succession risks where fewer than 3 employees hold expert-level proficiency\n3. Enable quarterly tracking of skill progression against department benchmarks\n4. Feed skills data into the talent review and promotion readiness pipeline');
+    setVal('fpOutcomes','Visual skills heatmap identifying critical gaps. Succession risk register for expert-level roles. Quarterly benchmark reports feeding into talent review cycle. Data-driven L&D budget allocation for FY2027.');
     setVal('fpPriority','Medium');
     setMulti('sm_skills',['Structural Analysis','Concrete Design','Digital Twin','Revit','Load Calculation','Geotechnical Assessment']);
     setVal('sm_scale','Novice to Expert');setToggle('sm_selfAssess',true);
@@ -1461,6 +1536,7 @@ function autofillDemoData(){
     setVal('fpName','Q2 2026 Employee Engagement Pulse Survey');
     setVal('fpDesc','Quick pulse survey to measure employee engagement, satisfaction with learning opportunities, and readiness for the upcoming digital transformation initiatives across all Arcova offices.');
     setVal('fpGoals','1. Achieve 75%+ response rate across all 4 office locations\n2. Benchmark engagement score against Q1 baseline (currently 7.2/10)\n3. Identify top 3 barriers to digital transformation readiness\n4. Gather qualitative feedback on L&D programme effectiveness');
+    setVal('fpOutcomes','Engagement score benchmark report for leadership review. Actionable insights on digital transformation readiness gaps. Targeted intervention plan for low-scoring departments. Input data for annual people strategy planning.');
     setVal('fpPriority','Medium');
     setVal('srv_type','Pulse');setVal('srv_totalQ','15');
     setToggle('srv_anonymous',true);setToggle('srv_comments',true);setToggle('srv_progress',true);
@@ -1473,6 +1549,7 @@ function autofillDemoData(){
     setVal('fpName','Digital Twin Academy — 10-Week Certification');
     setVal('fpDesc','Intensive 10-week training program to certify 20 engineers in digital twin development. Addresses the critical shortage identified in market skill demand analysis. Combines instructor-led workshops with hands-on project work using Arcova\'s existing Revit and Navisworks infrastructure.');
     setVal('fpGoals','1. Certify 20 engineers in digital twin development by end of program\n2. Reduce external hiring dependency for digital twin roles by 60%\n3. Achieve 85%+ pass rate on final certification assessment\n4. Deliver 3 pilot digital twin models on active client projects within 30 days of completion');
+    setVal('fpOutcomes','20 certified digital twin practitioners. 3 live pilot models deployed on client projects. Reduced external hiring costs by $300K annually. Internal capability to bid on digital twin-enabled contracts independently.');
     setVal('fpPriority','Critical');
     setVal('trn_category','Technical');setVal('trn_delivery','Blended');
     setVal('trn_duration','80');setVal('trn_modules','10');
@@ -1486,6 +1563,7 @@ function autofillDemoData(){
     setVal('fpName','Senior Leadership Coaching — Digital Transformation Readiness');
     setVal('fpDesc','Executive coaching program for senior leaders to build strategic capabilities in leading digital transformation initiatives. Focus on decision-making under uncertainty, change management, and data-driven leadership.');
     setVal('fpGoals','1. Improve leadership readiness scores by 25% for digital transformation initiatives\n2. Each coachee to deliver a strategic change proposal by session 8\n3. Achieve 90%+ coachee satisfaction rating\n4. Measurable improvement in 360-degree feedback scores within 6 months');
+    setVal('fpOutcomes','5 strategic change proposals ready for executive review. Measurable uplift in 360-degree leadership scores. Stronger digital transformation sponsorship across senior leadership. Pipeline of change-ready leaders for 2027 initiatives.');
     setVal('fpPriority','High');
     setVal('coach_focus','Strategic Thinking');setVal('coach_type','Executive Coaching');
     setVal('coach_sessions','12');setVal('coach_duration','60');setVal('coach_frequency','Bi-weekly');
@@ -1502,6 +1580,7 @@ function autofillDemoData(){
     setVal('fpName','Cross-Functional Mentoring Program — Engineering × Digital');
     setVal('fpDesc','6-month cross-functional mentoring program pairing experienced structural engineers with digital delivery specialists. Goal: accelerate knowledge transfer of domain expertise while building digital fluency across the Engineering department.');
     setVal('fpGoals','1. Successfully pair 6 mentor-mentee partnerships across Engineering and Digital Delivery\n2. Each mentee to complete a cross-functional mini-project by month 4\n3. Increase digital fluency scores in Engineering department by 30%\n4. Develop 3 internal candidates for cross-functional leadership roles');
+    setVal('fpOutcomes','6 cross-functional mini-projects delivered. 30% improvement in digital fluency scores in Engineering. 3 employees ready for cross-functional leadership roles. Stronger collaboration culture between Engineering and Digital Delivery.');
     setVal('fpPriority','Medium');
     setVal('mnt_theme','Cross-functional Exposure');setVal('mnt_type','Cross-functional Mentoring');
     setVal('mnt_durationMonths','6');setVal('mnt_frequency','Bi-weekly');
@@ -1517,6 +1596,7 @@ function autofillDemoData(){
     setVal('fpName','Cloud-Native DevOps Fundamentals — Kubernetes & Terraform');
     setVal('fpDesc','Mandatory eLearning assignment for Digital Delivery team members to complete Cloud Fundamentals course covering Kubernetes orchestration and Terraform infrastructure-as-code. Addresses the high-demand gap in cloud-native DevOps skills.');
     setVal('fpGoals','1. 100% completion rate for all Digital Delivery engineers within 60 days\n2. Achieve 75%+ average passing score on final quiz\n3. Close the cloud-native DevOps skill gap from 6 to 18 certified employees\n4. Enable team to independently manage Kubernetes deployments by Q4');
+    setVal('fpOutcomes','18 certified cloud-native DevOps engineers (up from 6). Team self-sufficiency in Kubernetes deployments. Reduced dependency on external cloud consultants. Foundation for Terraform infrastructure-as-code adoption across all environments.');
     setVal('fpPriority','High');
     setVal('el_category','Tools & Platforms');setVal('el_course','Cloud Fundamentals');
     setVal('el_duration','12');setVal('el_completion','Pass final quiz');
@@ -1533,6 +1613,7 @@ function autofillDemoData(){
     setVal('fpName','AI in Infrastructure Engineering — Industry Trends Webinar');
     setVal('fpDesc','Live webinar featuring external speakers on the latest applications of AI and machine learning in infrastructure engineering. Covers predictive maintenance, computer vision for site inspection, and generative design. Open to all Arcova staff.');
     setVal('fpGoals','1. Attract 200+ attendees across all 4 Arcova offices\n2. Increase awareness of AI/ML applications in engineering among 50%+ of attendees\n3. Generate 10+ ideas for internal AI pilot projects from Q&A and post-webinar survey\n4. Record for on-demand replay with target 500 total views within 30 days');
+    setVal('fpOutcomes','Increased AI/ML awareness across engineering staff. 10+ actionable AI pilot project proposals. On-demand recording as a reusable learning asset. Stronger industry speaker network for future webinars.');
     setVal('fpPriority','Low');
     setVal('web_category','Innovation');
     setMulti('web_tags',['AI/ML','Innovation','Engineering']);
@@ -1548,6 +1629,7 @@ function autofillDemoData(){
     setVal('fpName','High-Potential Leadership Development Program — 2026 Cohort');
     setVal('fpDesc','Comprehensive 6-month talent development program for high-potential employees identified through the annual talent review. Combines assessments, training, coaching, mentoring, and eLearning into a structured development pathway preparing the next generation of Arcova leaders.');
     setVal('fpGoals','1. Graduate 25 high-potential employees through the full development pathway\n2. Promote 40% of cohort participants within 12 months of program completion\n3. Fill 5 critical succession pipeline gaps identified in the annual talent review\n4. Achieve Net Promoter Score of 80+ from program participants');
+    setVal('fpOutcomes','25 program graduates with validated leadership capabilities. 10 promotions within 12 months. 5 succession pipeline gaps filled. Repeatable program framework for annual cohorts. NPS 80+ establishing program as employer brand differentiator.');
     setVal('fpPriority','Critical');
     setVal('td_programType','High-Potential Program');
     setToggle('td_sequential',false);
