@@ -3001,6 +3001,9 @@ function buildOverview() {
   // ══════════════════════════════════════════════════════════
   // SECTION 7: SKILL HEALTH → ACTION PIPELINE
   // ══════════════════════════════════════════════════════════
+  // Helper: link to org-setup-v4 block
+  const setupLink = (blockId) => 'org-setup-v4.html#block-'+blockId;
+
   const skillHealthData = [
     {
       id:'scr', sev:'ACT NOW', sevColor:C.red, status:'red',
@@ -3009,9 +3012,9 @@ function buildOverview() {
       subtitle:'32 of 60 skills covered by training programs — Gap: 28 skills with zero coverage',
       impact:'8 C1-critical skills (LLM, Python, Azure) untrained — blocks Gen AI product launch',
       origins:[
-        {label:'Skill Inventory', icon:'📊', link:"javascript:showPage('skill-inv',document.querySelector('[data-page=skill-inv]'))"},
-        {label:'Employee Assessments', icon:'🔬', link:'employee-assessments.html'},
-        {label:'Training Records (821)', icon:'📋', link:"javascript:showPage('emp-skills',document.querySelector('[data-page=emp-skills]'))"},
+        {label:'Block J · Skills Dictionary', icon:'📖', link:setupLink('J'), block:'J'},
+        {label:'Block L · Job Role Definitions', icon:'📋', link:setupLink('L'), block:'L'},
+        {label:'Block H · Skill Criticality Scale', icon:'⚖️', link:setupLink('H'), block:'H'},
       ],
       actions:[
         {label:'Create Skill Gap Project', href:'talent-projects-add.html', primary:true, icon:'<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'},
@@ -3027,8 +3030,9 @@ function buildOverview() {
       subtitle:'Org competency score ÷ industry benchmark — Cognitive & Technical competencies below peer median',
       impact:'Technical competency at 0.70 vs 0.88 peer avg — widening gap threatens delivery quality',
       origins:[
-        {label:'Competency Inventory', icon:'🧭', link:"javascript:showPage('comp-inv',document.querySelector('[data-page=comp-inv]'))"},
-        {label:'Industry Benchmark', icon:'🏆', link:"javascript:showPage('benchmark',document.querySelector('[data-page=benchmark]'))"},
+        {label:'Block K · Competency Framework', icon:'🧭', link:setupLink('K'), block:'K'},
+        {label:'Block I · Proficiency Levels', icon:'📏', link:setupLink('I'), block:'I'},
+        {label:'Block A · Org Identity (industry)', icon:'🏢', link:setupLink('A'), block:'A'},
       ],
       actions:[
         {label:'Create Competency Project', href:'talent-projects-add.html', primary:true, icon:'<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'},
@@ -3043,8 +3047,9 @@ function buildOverview() {
       subtitle:'Avg proficient skills ÷ role-required skills — only 20 of 50 employees assessed',
       impact:'60% of workforce is capability-unknown — all downstream indices have low confidence',
       origins:[
-        {label:'Employee Profiles', icon:'👤', link:"javascript:showPage('emp-skills',document.querySelector('[data-page=emp-skills]'))"},
-        {label:'Role-Skill Matrix', icon:'⚡', link:"javascript:showPage('role-matrix',document.querySelector('[data-page=role-matrix]'))"},
+        {label:'Block L · Job Role Definitions', icon:'📋', link:setupLink('L'), block:'L'},
+        {label:'Block J · Skills Dictionary', icon:'📖', link:setupLink('J'), block:'J'},
+        {label:'Block I · Proficiency Levels', icon:'📏', link:setupLink('I'), block:'I'},
       ],
       actions:[
         {label:'Launch Self-Assessment', href:'assess-engine.html', primary:true, icon:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>'},
@@ -3059,8 +3064,8 @@ function buildOverview() {
       subtitle:'3.3× above industry minimum — 821 records, 100% completion rate',
       impact:null,
       origins:[
-        {label:'Training Records', icon:'📋', link:"javascript:showPage('emp-skills',document.querySelector('[data-page=emp-skills]'))"},
-        {label:'L&D Dashboard', icon:'📚', link:'../manager/clo-dashboard.html'},
+        {label:'Block D · Products, Services & Projects', icon:'📦', link:setupLink('D'), block:'D'},
+        {label:'Block J · Skills Dictionary', icon:'📖', link:setupLink('J'), block:'J'},
       ],
       actions:[
         {label:'View Training Details', href:"javascript:showPage('emp-skills',document.querySelector('[data-page=emp-skills]'))", icon:'<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'},
@@ -3090,7 +3095,7 @@ function buildOverview() {
       </div>
       ${d.impact?`<div class="act-impact"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${d.impact}</div>`:''}
       <div class="act-origin">
-        <span class="act-origin-lbl">Source:</span>
+        <span class="act-origin-lbl">Org Setup Source:</span>
         ${d.origins.map(o => `<a class="act-origin-link" href="${o.link}">${o.icon} ${o.label}</a>`).join('')}
         <span class="act-status-chip" style="color:${d.statusChip.color};background:${d.statusChip.bg};border:1px solid ${d.statusChip.color}30">${d.statusChip.label}</span>
       </div>
@@ -3138,8 +3143,9 @@ function buildOverview() {
       title:'LLM Skill Coverage at 8%',
       msg:'Only 4 of 50 employees have LLM/Gen AI proficiency — Gen AI product launch at delivery risk',
       origins:[
-        {label:'Skill Inventory', icon:'📊', link:"javascript:showPage('skill-inv',document.querySelector('[data-page=skill-inv]'))"},
-        {label:'Employee Profiles', icon:'👤', link:"javascript:showPage('emp-skills',document.querySelector('[data-page=emp-skills]'))"},
+        {label:'Block J · Skills Dictionary', icon:'📖', link:setupLink('J')},
+        {label:'Block L · Job Role Definitions', icon:'📋', link:setupLink('L')},
+        {label:'Block D · Products & Projects', icon:'📦', link:setupLink('D')},
       ],
       actions:[
         {label:'Create LLM Bootcamp Project', href:'talent-projects-add.html', primary:true},
@@ -3153,8 +3159,9 @@ function buildOverview() {
       title:'SCR 58% — 28 Skills Untrained',
       msg:'28 skills including Python, Azure, React have zero training program coverage',
       origins:[
-        {label:'Skill Inventory (60 skills)', icon:'📊', link:"javascript:showPage('skill-inv',document.querySelector('[data-page=skill-inv]'))"},
-        {label:'Training Records (821)', icon:'📋', link:"javascript:showPage('emp-skills',document.querySelector('[data-page=emp-skills]'))"},
+        {label:'Block J · Skills Dictionary (60 skills)', icon:'📖', link:setupLink('J')},
+        {label:'Block H · Skill Criticality Scale', icon:'⚖️', link:setupLink('H')},
+        {label:'Block D · Services & Training', icon:'📦', link:setupLink('D')},
       ],
       actions:[
         {label:'Create Training Project', href:'talent-projects-add.html', primary:true},
@@ -3167,8 +3174,9 @@ function buildOverview() {
       title:'CSI 0.82 — Below Industry Target',
       msg:'Cognitive & Technical competency gaps widening vs industry benchmark of 0.90',
       origins:[
-        {label:'Competency Inventory', icon:'🧭', link:"javascript:showPage('comp-inv',document.querySelector('[data-page=comp-inv]'))"},
-        {label:'Benchmark', icon:'🏆', link:"javascript:showPage('benchmark',document.querySelector('[data-page=benchmark]'))"},
+        {label:'Block K · Competency Framework', icon:'🧭', link:setupLink('K')},
+        {label:'Block A · Org Identity (industry)', icon:'🏢', link:setupLink('A')},
+        {label:'Block I · Proficiency Levels', icon:'📏', link:setupLink('I')},
       ],
       actions:[
         {label:'Create Competency Dev Project', href:'talent-projects-add.html', primary:true},
@@ -3181,12 +3189,13 @@ function buildOverview() {
       title:'Role Density Index 0.70',
       msg:'35 roles for 50 employees creates accountability fragmentation and slows role→skill mapping',
       origins:[
-        {label:'Role-Skill Matrix', icon:'⚡', link:"javascript:showPage('role-matrix',document.querySelector('[data-page=role-matrix]'))"},
-        {label:'Employee Directory', icon:'👥', link:'employee-directory.html'},
+        {label:'Block B · Hierarchy Architecture', icon:'🏗️', link:setupLink('B')},
+        {label:'Block L · Job Role Definitions', icon:'📋', link:setupLink('L')},
+        {label:'Block A · Org Identity (headcount)', icon:'🏢', link:setupLink('A')},
       ],
       actions:[
         {label:'Review Scope Management', href:'scope-management.html', primary:true},
-        {label:'View Role Matrix', href:"javascript:showPage('role-matrix',document.querySelector('[data-page=role-matrix]'))"},
+        {label:'Edit Role Definitions', href:setupLink('L')},
       ],
       statusChip:{label:'No action', color:'var(--text-muted)', bg:'var(--surface-alt)'}
     },
@@ -3195,8 +3204,9 @@ function buildOverview() {
       title:'Dir. Engineering Succession Exposed',
       msg:'Harish Patel (successor) flagged as high flight risk — RREI 4.8/5, no secondary backup',
       origins:[
-        {label:'Employee Directory', icon:'👥', link:'employee-directory.html'},
-        {label:'Org Journey (SPOFs)', icon:'🌐', link:"javascript:showPage('org-journey',document.querySelector('[data-page=org-journey]'))"},
+        {label:'Block L · Job Role Definitions', icon:'📋', link:setupLink('L')},
+        {label:'Block B · Hierarchy Architecture', icon:'🏗️', link:setupLink('B')},
+        {label:'Block M · Business Continuity', icon:'🛡️', link:setupLink('M')},
       ],
       actions:[
         {label:'Start Succession Plan', href:'../manager/succession.html', primary:true},
@@ -3221,7 +3231,7 @@ function buildOverview() {
       </div>
       <div class="risk-detail">
         <div class="act-origin" style="padding:7px 14px">
-          <span class="act-origin-lbl">Detected from:</span>
+          <span class="act-origin-lbl">Org Setup Source:</span>
           ${r.origins.map(o => `<a class="act-origin-link" href="${o.link}" onclick="event.stopPropagation()">${o.icon} ${o.label}</a>`).join('')}
         </div>
         <div class="act-actions" style="padding:8px 14px">
