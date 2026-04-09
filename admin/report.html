@@ -279,13 +279,11 @@ canvas{max-height:260px}
 .risk-expand.open .risk-toggle svg{transform:rotate(180deg)}
 .risk-toggle:hover{background:var(--surface-alt);border-color:var(--text-muted)}
 
-/* ── L1 MILESTONE BADGE ── */
-.l1-badge{display:flex;align-items:center;gap:10px;padding:0 20px;flex-shrink:0;border-right:1px solid var(--border)}
-.l1-badge-inner{display:flex;align-items:center;gap:8px;padding:6px 16px;border-radius:100px;background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.04));border:1.5px solid rgba(16,185,129,0.3);animation:l1Glow 3s ease-in-out infinite}
-.l1-badge-icon{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#10B981,#059669);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 8px rgba(16,185,129,0.3)}
-.l1-badge-icon svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.5}
-.l1-badge-text{font-family:var(--font-display);font-size:12px;font-weight:700;color:#059669;letter-spacing:.02em;white-space:nowrap}
-.l1-badge-sub{font-size:9px;color:var(--text-muted);font-weight:500;white-space:nowrap}
+/* ── L1 MILESTONE BADGE (topbar) ── */
+.l1-badge{display:flex;align-items:center;gap:8px;padding:5px 14px;border-radius:100px;background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.04));border:1.5px solid rgba(16,185,129,0.3);margin-right:4px;animation:l1Glow 3s ease-in-out infinite;cursor:default}
+.l1-badge-icon{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#10B981,#059669);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 6px rgba(16,185,129,0.3)}
+.l1-badge-icon svg{width:11px;height:11px;stroke:#fff;fill:none;stroke-width:2.5}
+.l1-badge-text{font-family:var(--font-display);font-size:11.5px;font-weight:700;color:#059669;letter-spacing:.02em;white-space:nowrap}
 @keyframes l1Glow{0%,100%{box-shadow:0 0 4px rgba(16,185,129,0.15)}50%{box-shadow:0 0 12px rgba(16,185,129,0.25)}}
 </style>
 </head>
@@ -296,15 +294,6 @@ canvas{max-height:260px}
 
 <!-- ══ HORIZONTAL TAB BAR ══ -->
 <div class="rpt-tabs" id="rptTabs">
-  <div class="l1-badge">
-    <div class="l1-badge-inner">
-      <div class="l1-badge-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-      <div>
-        <div class="l1-badge-text">Level 1 Compliant</div>
-        <div class="l1-badge-sub">All 60 QC checks passed</div>
-      </div>
-    </div>
-  </div>
   <button class="rpt-tab active" data-page="overview"><span class="ni">🏠</span> Org Overview <span class="tb gold">L1</span></button>
   <button class="rpt-tab" data-page="skill-inv"><span class="ni">📊</span> Skill Inventory <span class="tb gold">L1</span></button>
   <button class="rpt-tab" data-page="comp-inv"><span class="ni">🧭</span> Competency Inv. <span class="tb gold">L1</span></button>
@@ -6359,6 +6348,16 @@ EdstellarShell.init({
   breadcrumbs: ['Reports', 'Organization Setup Report'],
   topbarActions: []
 });
+
+// Inject L1 Compliant badge into topbar before notification icon
+(function(){
+  var notif = document.querySelector('.topbar-actions .notif-btn');
+  if (!notif) return;
+  var badge = document.createElement('div');
+  badge.className = 'l1-badge';
+  badge.innerHTML = '<div class="l1-badge-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="l1-badge-text">Level 1 Compliant</div>';
+  notif.parentNode.insertBefore(badge, notif);
+})();
 </script>
 </body>
 </html>
