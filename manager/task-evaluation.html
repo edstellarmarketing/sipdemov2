@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task Evaluation · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<style>
+  /* ══════════════════════════════════════════════════════════════
+     TASK EVALUATION — PAGE-SPECIFIC STYLES
+     ══════════════════════════════════════════════════════════════ */
+
+  .content { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+  .content > * { flex-shrink: 0; }
+  .content::-webkit-scrollbar { width: 4px; }
+  .content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
+
+  /* ── PANELS ── */
+  .panel { background: var(--card); border: 1px solid rgba(0,0,0,0.07); border-radius: 12px; overflow: hidden; }
+  .panel-head { padding: 14px 20px; border-bottom: 1px solid rgba(0,0,0,0.07); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .panel-title { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text-primary); flex: 1; min-width: 120px; }
+  .panel-badge { padding: 2px 8px; border-radius: 100px; font-size: 10px; font-weight: 500; }
+  .panel-body { padding: 18px 20px; }
+
+  /* ── STATS ROW ── */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 960px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .stat-label { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+  .stat-val { font-family: var(--font-display); font-size: 24px; font-weight: 600; line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--text-secondary); }
+
+  /* ── TWO COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 960px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── TASK GRID ── */
+  .task-grid-wrap { overflow-x: auto; margin: -4px; }
+  .task-grid-wrap::-webkit-scrollbar { height: 4px; }
+  .task-grid-wrap::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
+  .task-grid { border-collapse: separate; border-spacing: 3px; width: 100%; min-width: 700px; }
+  .task-grid th {
+    font-size: 10px; color: var(--text-secondary); letter-spacing: .06em;
+    text-transform: uppercase; padding: 8px 10px; text-align: center;
+    white-space: nowrap; font-weight: 500; font-family: var(--font-body);
+  }
+  .task-grid th:first-child { text-align: left; min-width: 200px; }
+  .task-grid td { padding: 0; }
+
+  .tg-row-label { font-size: 11px; color: var(--text-secondary); padding: 8px 10px; white-space: nowrap; vertical-align: middle; }
+  .tg-row-label.critical { color: var(--red); }
+  .tg-row-label .crit-flag {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--red); margin-right: 6px; vertical-align: middle;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .tg-cell {
+    border-radius: 8px; padding: 10px 8px; text-align: center;
+    cursor: pointer; transition: transform .15s, box-shadow .15s; vertical-align: middle;
+  }
+  .tg-cell:hover { transform: scale(1.04); box-shadow: 0 4px 16px rgba(0,0,0,0.10); z-index: 2; position: relative; }
+  .tg-freq { font-size: 10px; font-weight: 500; margin-bottom: 3px; letter-spacing: .02em; }
+  .tg-conf { font-family: var(--font-mono); font-size: 10px; font-weight: 400; opacity: .85; }
+
+  .tg-coaches     { background: var(--green-bg); border: 1px solid rgba(22,163,74,0.25); color: var(--green); }
+  .tg-independent { background: rgba(22,163,74,0.06); border: 1px solid rgba(22,163,74,0.15); color: var(--green); }
+  .tg-guided      { background: var(--amber-bg); border: 1px solid rgba(217,119,6,0.25); color: var(--amber); }
+  .tg-never       { background: var(--red-bg); border: 1px solid rgba(220,38,38,0.20); color: var(--red); }
+
+  /* ── LINKAGE ── */
+  .link-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+  .link-row:last-child { border-bottom: none; }
+  .link-task { font-size: 12px; color: var(--text-primary); font-weight: 500; width: 200px; flex-shrink: 0; }
+  .link-arrow { color: var(--text-muted); font-size: 12px; flex-shrink: 0; }
+  .link-skills { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; }
+  .link-skill { padding: 3px 10px; border-radius: 5px; font-size: 10px; border: 1px solid rgba(0,0,0,0.08); color: var(--text-secondary); background: rgba(0,0,0,0.02); }
+
+  /* ── CRITICALITY ── */
+  .crit-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+  .crit-item:last-child { border-bottom: none; }
+  .crit-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .crit-name { font-size: 12px; color: var(--text-primary); font-weight: 500; flex: 1; min-width: 0; }
+  .crit-reason { font-size: 10px; color: var(--text-secondary); flex: 1; min-width: 0; }
+  .crit-level { padding: 3px 10px; border-radius: 100px; font-size: 9px; font-weight: 500; flex-shrink: 0; }
+
+  /* ── DEPT SELECTOR ── */
+  .dept-select {
+    padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.12);
+    background: var(--card); color: var(--text-primary); font-size: 11px;
+    font-family: var(--font-body); cursor: pointer; outline: none;
+  }
+  .dept-select:focus { border-color: var(--accent-bd); }
+
+  /* ── LEGEND SWATCH ── */
+  .legend-bar { display: flex; gap: 16px; margin-top: 14px; flex-wrap: wrap; font-size: 10px; color: var(--text-secondary); }
+  .legend-bar .swatch {
+    display: inline-block; width: 10px; height: 10px; border-radius: 3px;
+    margin-right: 4px; vertical-align: middle;
+  }
+
+  /* ── CONFIDENCE FOOTER ── */
+  .conf-footer {
+    display: flex; align-items: center; gap: 10px; padding: 10px 28px;
+    background: var(--accent-lt); border-top: 1px solid var(--accent-bd); flex-shrink: 0;
+  }
+  .conf-footer span { font-size: 11px; color: var(--accent); font-weight: 500; letter-spacing: .03em; }
+  .conf-footer .conf-tag { margin-left: auto; font-size: 10px; color: var(--text-secondary); letter-spacing: .06em; text-transform: uppercase; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .5; transform: scale(1.3); } }
+  .fade-up { animation: fadeUp .4s ease both; }
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <div class="content">
+
+    <!-- STATS ROW -->
+    <div class="stats-row fade-up">
+      <div class="stat-card"><div class="stat-label">Total Tasks Mapped</div><div class="stat-val" style="color:var(--blue)">84</div><div class="stat-sub">Across all departments</div></div>
+      <div class="stat-card"><div class="stat-label">Roles Covered</div><div class="stat-val" style="color:var(--purple)">6</div><div class="stat-sub">Engineering &amp; delivery roles</div></div>
+      <div class="stat-card"><div class="stat-label">Avg Confidence</div><div class="stat-val" style="color:var(--amber)">3.2<span style="font-size:13px;font-weight:600;color:var(--text-muted)">/4</span></div><div class="stat-sub">Scale: Never(1) to Coaches(4)</div></div>
+      <div class="stat-card"><div class="stat-label">Critical Tasks</div><div class="stat-val" style="color:var(--red)">18</div><div class="stat-sub">Safety &amp; compliance flagged</div></div>
+    </div>
+
+    <!-- TASK x EMPLOYEE GRID -->
+    <div class="panel fade-up" style="animation-delay:.06s">
+      <div class="panel-head">
+        <svg style="width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        <div class="panel-title">Task &times; Employee Grid &mdash; Frequency &amp; Confidence</div>
+        <select class="dept-select" id="deptSelector" onchange="switchDept()">
+          <option selected>Structural Engineering</option>
+          <option>Civil & Geotechnical</option>
+          <option>BIM & Digital Delivery</option>
+          <option>Project Delivery</option>
+          <option>EHS & Risk Management</option>
+          <option>Finance & Procurement</option>
+        </select>
+        <div class="panel-badge" style="background:var(--blue-bg);color:var(--blue)">8 tasks &middot; 4 employees</div>
+      </div>
+      <div class="panel-body">
+        <div class="task-grid-wrap">
+          <table class="task-grid" id="taskGrid"></table>
+        </div>
+        <div class="legend-bar">
+          <span><span class="swatch" style="background:var(--green-bg);border:1px solid rgba(22,163,74,0.25)"></span>Coaches Others</span>
+          <span><span class="swatch" style="background:rgba(22,163,74,0.06);border:1px solid rgba(22,163,74,0.15)"></span>Independent</span>
+          <span><span class="swatch" style="background:var(--amber-bg);border:1px solid rgba(217,119,6,0.25)"></span>Guided</span>
+          <span><span class="swatch" style="background:var(--red-bg);border:1px solid rgba(220,38,38,0.20)"></span>Never</span>
+          <span style="margin-left:8px;border-left:1px solid rgba(0,0,0,0.08);padding-left:12px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red);margin-right:4px;vertical-align:middle"></span>Critical task</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TWO COL: Task-to-Skill Linkage + Criticality -->
+    <div class="two-col">
+      <!-- TASK-TO-SKILL LINKAGE -->
+      <div class="panel fade-up" style="animation-delay:.12s">
+        <div class="panel-head">
+          <svg style="width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <div class="panel-title">Task-to-Skill Linkage</div>
+          <div class="panel-badge" style="background:var(--accent-lt);color:var(--accent)">12 mappings</div>
+        </div>
+        <div class="panel-body" id="linkageBody"></div>
+      </div>
+
+      <!-- TASK CRITICALITY -->
+      <div class="panel fade-up" style="animation-delay:.18s">
+        <div class="panel-head">
+          <svg style="width:14px;height:14px;stroke:var(--red);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div class="panel-title">Task Criticality Breakdown</div>
+          <div class="panel-badge" style="background:var(--red-bg);color:var(--red)">18 flagged</div>
+        </div>
+        <div class="panel-body" id="critBody"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CONFIDENCE FOOTER -->
+  <div class="conf-footer">
+    <svg style="width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <span>Manager-rated task data &middot; Frequency &times; Confidence matrix &middot; Feeds skill gap engine automatically</span>
+    <span class="conf-tag">L2 Task Eval</span>
+  </div>
+
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal: 'manager',
+  activeNav: 'Task Evaluation',
+  breadcrumbs: ['People', 'Task Evaluation'],
+  topbarActions: []
+});
+</script>
+
+<script>
+// ── DATA ──
+var deptData = {
+  'Structural Engineering': {
+    employees: [
+      {name:'Priya Menon', init:'PM', role:'Sr. Structural Engineer'},
+      {name:'Karthik Subramanian', init:'KS', role:'Structural Design Lead'},
+      {name:'Rajesh Gupta', init:'RG', role:'Structural Engineer'},
+      {name:'Anitha Balakrishnan', init:'AB', role:'Jr. Structural Engineer'}
+    ],
+    tasks: [
+      {name:'Load calculation & analysis', critical:true, data:[
+        {freq:'Daily',conf:'Coaches Others'},{freq:'Daily',conf:'Independent'},{freq:'Daily',conf:'Guided'},{freq:'Weekly',conf:'Guided'}
+      ]},
+      {name:'FEM modelling', critical:true, data:[
+        {freq:'Daily',conf:'Coaches Others'},{freq:'Daily',conf:'Independent'},{freq:'Weekly',conf:'Guided'},{freq:'Monthly',conf:'Never'}
+      ]},
+      {name:'Design verification', critical:true, data:[
+        {freq:'Daily',conf:'Independent'},{freq:'Weekly',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Guided'}
+      ]},
+      {name:'Code compliance check', critical:true, data:[
+        {freq:'Weekly',conf:'Independent'},{freq:'Daily',conf:'Coaches Others'},{freq:'Weekly',conf:'Guided'},{freq:'Rarely',conf:'Never'}
+      ]},
+      {name:'Drawing review & markup', critical:false, data:[
+        {freq:'Daily',conf:'Independent'},{freq:'Weekly',conf:'Independent'},{freq:'Daily',conf:'Independent'},{freq:'Weekly',conf:'Guided'}
+      ]},
+      {name:'Site inspection report', critical:true, data:[
+        {freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Guided'},{freq:'Weekly',conf:'Coaches Others'},{freq:'Monthly',conf:'Guided'}
+      ]},
+      {name:'Foundation design', critical:true, data:[
+        {freq:'Weekly',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Guided'},{freq:'Rarely',conf:'Never'}
+      ]},
+      {name:'Clash detection coordination', critical:false, data:[
+        {freq:'Daily',conf:'Independent'},{freq:'Daily',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Weekly',conf:'Guided'}
+      ]}
+    ]
+  },
+  'Civil & Geotechnical': {
+    employees: [
+      {name:'Vikram Patel', init:'VP', role:'Sr. Geotech Engineer'},
+      {name:'Deepa Nair', init:'DN', role:'Civil Design Lead'},
+      {name:'Suresh Kumar', init:'SK', role:'Geotech Engineer'},
+      {name:'Lakshmi Rao', init:'LR', role:'Jr. Civil Engineer'}
+    ],
+    tasks: [
+      {name:'Soil investigation review', critical:true, data:[
+        {freq:'Weekly',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Independent'},{freq:'Monthly',conf:'Guided'}
+      ]},
+      {name:'Slope stability analysis', critical:true, data:[
+        {freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Guided'},{freq:'Weekly',conf:'Guided'},{freq:'Rarely',conf:'Never'}
+      ]},
+      {name:'Earth retaining design', critical:false, data:[
+        {freq:'Monthly',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Guided'},{freq:'Rarely',conf:'Never'}
+      ]},
+      {name:'Drainage design & layout', critical:false, data:[
+        {freq:'Weekly',conf:'Independent'},{freq:'Daily',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Weekly',conf:'Guided'}
+      ]},
+      {name:'Road geometry check', critical:false, data:[
+        {freq:'Weekly',conf:'Independent'},{freq:'Weekly',conf:'Independent'},{freq:'Daily',conf:'Coaches Others'},{freq:'Monthly',conf:'Guided'}
+      ]},
+      {name:'Bearing capacity calculation', critical:true, data:[
+        {freq:'Monthly',conf:'Coaches Others'},{freq:'Monthly',conf:'Independent'},{freq:'Weekly',conf:'Guided'},{freq:'Rarely',conf:'Never'}
+      ]},
+      {name:'Ground improvement spec', critical:false, data:[
+        {freq:'Monthly',conf:'Independent'},{freq:'Monthly',conf:'Guided'},{freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Guided'}
+      ]},
+      {name:'Pile design verification', critical:true, data:[
+        {freq:'Weekly',conf:'Independent'},{freq:'Weekly',conf:'Guided'},{freq:'Monthly',conf:'Guided'},{freq:'Rarely',conf:'Never'}
+      ]}
+    ]
+  },
+  'BIM & Digital Delivery': {
+    employees: [
+      {name:'Arjun Mehta', init:'AM', role:'BIM Manager'},
+      {name:'Sneha Reddy', init:'SR', role:'BIM Coordinator'},
+      {name:'Faizal Ahmed', init:'FA', role:'Digital Delivery Lead'},
+      {name:'Pooja Sharma', init:'PS', role:'BIM Modeller'}
+    ],
+    tasks: [
+      {name:'Model federation & audit', critical:true, data:[
+        {freq:'Daily',conf:'Coaches Others'},{freq:'Daily',conf:'Independent'},{freq:'Weekly',conf:'Independent'},{freq:'Daily',conf:'Guided'}
+      ]},
+      {name:'Clash detection run', critical:false, data:[
+        {freq:'Daily',conf:'Independent'},{freq:'Daily',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Daily',conf:'Guided'}
+      ]},
+      {name:'LOD compliance check', critical:true, data:[
+        {freq:'Weekly',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Guided'},{freq:'Weekly',conf:'Guided'}
+      ]},
+      {name:'4D schedule integration', critical:false, data:[
+        {freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Guided'},{freq:'Daily',conf:'Coaches Others'},{freq:'Rarely',conf:'Never'}
+      ]},
+      {name:'Point cloud processing', critical:false, data:[
+        {freq:'Monthly',conf:'Independent'},{freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Guided'},{freq:'Weekly',conf:'Guided'}
+      ]},
+      {name:'CDE management', critical:true, data:[
+        {freq:'Daily',conf:'Coaches Others'},{freq:'Daily',conf:'Independent'},{freq:'Daily',conf:'Independent'},{freq:'Weekly',conf:'Guided'}
+      ]},
+      {name:'Quantity extraction', critical:false, data:[
+        {freq:'Weekly',conf:'Independent'},{freq:'Weekly',conf:'Coaches Others'},{freq:'Monthly',conf:'Independent'},{freq:'Weekly',conf:'Independent'}
+      ]},
+      {name:'As-built model update', critical:false, data:[
+        {freq:'Monthly',conf:'Independent'},{freq:'Monthly',conf:'Independent'},{freq:'Weekly',conf:'Guided'},{freq:'Monthly',conf:'Guided'}
+      ]}
+    ]
+  },
+  'Project Delivery': {
+    employees: [
+      {name:'Sanjay Iyer', init:'SI', role:'Sr. Project Manager'},
+      {name:'Nandini Das', init:'ND', role:'Project Controls Lead'},
+      {name:'Ravi Krishnamurthy', init:'RK2', role:'Project Engineer'},
+      {name:'Kavitha Sundaram', init:'KV', role:'Planning Engineer'}
+    ],
+    tasks: [
+      {name:'Schedule baseline review', critical:true, data:[
+        {freq:'Weekly',conf:'Coaches Others'},{freq:'Daily',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Daily',conf:'Independent'}
+      ]},
+      {name:'Cost variance analysis', critical:true, data:[
+        {freq:'Weekly',conf:'Independent'},{freq:'Daily',conf:'Coaches Others'},{freq:'Monthly',conf:'Guided'},{freq:'Weekly',conf:'Independent'}
+      ]},
+      {name:'Risk register update', critical:true, data:[
+        {freq:'Weekly',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Guided'}
+      ]},
+      {name:'Stakeholder reporting', critical:false, data:[
+        {freq:'Weekly',conf:'Coaches Others'},{freq:'Monthly',conf:'Independent'},{freq:'Monthly',conf:'Guided'},{freq:'Rarely',conf:'Never'}
+      ]},
+      {name:'Procurement tracking', critical:false, data:[
+        {freq:'Daily',conf:'Independent'},{freq:'Weekly',conf:'Coaches Others'},{freq:'Weekly',conf:'Guided'},{freq:'Weekly',conf:'Independent'}
+      ]},
+      {name:'Variation order management', critical:true, data:[
+        {freq:'Weekly',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Guided'},{freq:'Monthly',conf:'Guided'}
+      ]},
+      {name:'Site progress verification', critical:false, data:[
+        {freq:'Daily',conf:'Independent'},{freq:'Weekly',conf:'Guided'},{freq:'Daily',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'}
+      ]},
+      {name:'Milestone payment cert', critical:true, data:[
+        {freq:'Monthly',conf:'Coaches Others'},{freq:'Monthly',conf:'Independent'},{freq:'Rarely',conf:'Never'},{freq:'Monthly',conf:'Guided'}
+      ]}
+    ]
+  },
+  'EHS & Risk Management': {
+    employees: [
+      {name:'Dr. Meena Joshi', init:'MJ', role:'EHS Director'},
+      {name:'Arun Tiwari', init:'AT', role:'Safety Manager'},
+      {name:'Pallavi Deshmukh', init:'PD', role:'Risk Analyst'},
+      {name:'Harish Bhat', init:'HB', role:'EHS Officer'}
+    ],
+    tasks: [
+      {name:'HIRA review & update', critical:true, data:[
+        {freq:'Weekly',conf:'Coaches Others'},{freq:'Daily',conf:'Independent'},{freq:'Weekly',conf:'Independent'},{freq:'Daily',conf:'Guided'}
+      ]},
+      {name:'Permit-to-work audit', critical:true, data:[
+        {freq:'Daily',conf:'Coaches Others'},{freq:'Daily',conf:'Coaches Others'},{freq:'Monthly',conf:'Guided'},{freq:'Daily',conf:'Independent'}
+      ]},
+      {name:'Incident investigation', critical:true, data:[
+        {freq:'Weekly',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Guided'},{freq:'Weekly',conf:'Guided'}
+      ]},
+      {name:'Emergency drill planning', critical:true, data:[
+        {freq:'Monthly',conf:'Coaches Others'},{freq:'Monthly',conf:'Independent'},{freq:'Rarely',conf:'Never'},{freq:'Monthly',conf:'Guided'}
+      ]},
+      {name:'PPE compliance check', critical:false, data:[
+        {freq:'Weekly',conf:'Independent'},{freq:'Daily',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Daily',conf:'Independent'}
+      ]},
+      {name:'Environmental monitoring', critical:false, data:[
+        {freq:'Weekly',conf:'Independent'},{freq:'Weekly',conf:'Guided'},{freq:'Weekly',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'}
+      ]},
+      {name:'Contractor safety induction', critical:true, data:[
+        {freq:'Daily',conf:'Independent'},{freq:'Daily',conf:'Coaches Others'},{freq:'Monthly',conf:'Guided'},{freq:'Daily',conf:'Independent'}
+      ]},
+      {name:'Risk register escalation', critical:true, data:[
+        {freq:'Weekly',conf:'Coaches Others'},{freq:'Weekly',conf:'Independent'},{freq:'Weekly',conf:'Independent'},{freq:'Monthly',conf:'Guided'}
+      ]}
+    ]
+  },
+  'Finance & Procurement': {
+    employees: [
+      {name:'Manoj Desai', init:'MD', role:'Finance Controller'},
+      {name:'Asha Venkatesh', init:'AV', role:'Procurement Lead'},
+      {name:'Rohan Pillai', init:'RP', role:'Cost Analyst'},
+      {name:'Divya Nambiar', init:'DN2', role:'Jr. Procurement Officer'}
+    ],
+    tasks: [
+      {name:'Budget variance reporting', critical:true, data:[
+        {freq:'Weekly',conf:'Coaches Others'},{freq:'Monthly',conf:'Guided'},{freq:'Daily',conf:'Independent'},{freq:'Monthly',conf:'Guided'}
+      ]},
+      {name:'Vendor evaluation scoring', critical:false, data:[
+        {freq:'Monthly',conf:'Independent'},{freq:'Weekly',conf:'Coaches Others'},{freq:'Monthly',conf:'Independent'},{freq:'Weekly',conf:'Guided'}
+      ]},
+      {name:'Invoice reconciliation', critical:false, data:[
+        {freq:'Daily',conf:'Independent'},{freq:'Weekly',conf:'Independent'},{freq:'Daily',conf:'Coaches Others'},{freq:'Daily',conf:'Guided'}
+      ]},
+      {name:'Contract compliance audit', critical:true, data:[
+        {freq:'Monthly',conf:'Coaches Others'},{freq:'Monthly',conf:'Independent'},{freq:'Rarely',conf:'Never'},{freq:'Monthly',conf:'Guided'}
+      ]},
+      {name:'Cash flow forecasting', critical:true, data:[
+        {freq:'Weekly',conf:'Coaches Others'},{freq:'Rarely',conf:'Never'},{freq:'Weekly',conf:'Independent'},{freq:'Rarely',conf:'Never'}
+      ]},
+      {name:'Purchase order processing', critical:false, data:[
+        {freq:'Weekly',conf:'Independent'},{freq:'Daily',conf:'Coaches Others'},{freq:'Weekly',conf:'Guided'},{freq:'Daily',conf:'Independent'}
+      ]},
+      {name:'Subcontractor payment cert', critical:true, data:[
+        {freq:'Monthly',conf:'Coaches Others'},{freq:'Monthly',conf:'Independent'},{freq:'Monthly',conf:'Guided'},{freq:'Rarely',conf:'Never'}
+      ]},
+      {name:'Financial risk assessment', critical:true, data:[
+        {freq:'Monthly',conf:'Coaches Others'},{freq:'Rarely',conf:'Never'},{freq:'Monthly',conf:'Guided'},{freq:'Rarely',conf:'Never'}
+      ]}
+    ]
+  }
+};
+
+var linkageData = {
+  'Structural Engineering': [
+    {task:'Load calculation & analysis', skills:['Structural Analysis','IS 456/800 Code Knowledge','Mathematics & Mechanics']},
+    {task:'FEM modelling', skills:['FEA Software (STAAD/ETABS)','Structural Analysis','Computational Methods']},
+    {task:'Design verification', skills:['Quality Assurance','Peer Review Protocol','Structural Analysis']},
+    {task:'Code compliance check', skills:['IS/BS/EN Code Knowledge','Regulatory Compliance','Technical Writing']},
+    {task:'Drawing review & markup', skills:['AutoCAD/Revit','Detailing Standards','Communication']},
+    {task:'Site inspection report', skills:['Field Assessment','Report Writing','Safety Awareness']},
+    {task:'Foundation design', skills:['Geotechnical Integration','Structural Design','Foundation Engineering']},
+    {task:'Clash detection coordination', skills:['BIM Coordination','Navisworks/Solibri','Cross-discipline Communication']}
+  ],
+  'Civil & Geotechnical': [
+    {task:'Soil investigation review', skills:['Geotechnical Analysis','Lab Interpretation','Field Assessment']},
+    {task:'Slope stability analysis', skills:['GeoStudio/PLAXIS','Soil Mechanics','Risk Assessment']},
+    {task:'Bearing capacity calculation', skills:['Foundation Engineering','IS 6403','Geotechnical Analysis']},
+    {task:'Drainage design & layout', skills:['Hydraulic Design','AutoCAD Civil 3D','Stormwater Management']},
+    {task:'Pile design verification', skills:['Deep Foundation Design','IS 2911','Structural Integration']}
+  ],
+  'BIM & Digital Delivery': [
+    {task:'Model federation & audit', skills:['Navisworks/Solibri','BIM Standards','Model Management']},
+    {task:'LOD compliance check', skills:['LOD Specification','BIM Execution Plan','Quality Audit']},
+    {task:'CDE management', skills:['ACC/BIM 360','ISO 19650','Document Control']},
+    {task:'4D schedule integration', skills:['Synchro/Navisworks','Schedule Reading','Digital Twin Concepts']}
+  ],
+  'Project Delivery': [
+    {task:'Schedule baseline review', skills:['Primavera P6','Critical Path Method','Schedule Analysis']},
+    {task:'Cost variance analysis', skills:['EVM Methodology','Financial Analysis','Reporting']},
+    {task:'Risk register update', skills:['Risk Management','Probability Assessment','Mitigation Planning']},
+    {task:'Variation order management', skills:['Contract Administration','Claim Assessment','Negotiation']}
+  ],
+  'EHS & Risk Management': [
+    {task:'HIRA review & update', skills:['Hazard Identification','Risk Matrix','IS 14489']},
+    {task:'Permit-to-work audit', skills:['PTW Systems','Safety Audit','Regulatory Compliance']},
+    {task:'Incident investigation', skills:['Root Cause Analysis','Investigation Protocol','Report Writing']},
+    {task:'Contractor safety induction', skills:['Training Delivery','Safety Standards','Communication']}
+  ],
+  'Finance & Procurement': [
+    {task:'Budget variance reporting', skills:['Financial Analysis','ERP Systems','Report Writing']},
+    {task:'Contract compliance audit', skills:['Contract Law','Audit Methodology','Documentation']},
+    {task:'Cash flow forecasting', skills:['Financial Modelling','Forecasting Methods','Risk Assessment']},
+    {task:'Vendor evaluation scoring', skills:['Procurement Strategy','Scoring Methodology','Market Analysis']}
+  ]
+};
+
+var critData = {
+  'Structural Engineering': [
+    {name:'Load calculation & analysis', level:'High', reason:'Structural integrity — life safety', color:'var(--red)'},
+    {name:'FEM modelling', level:'High', reason:'Governs design adequacy verification', color:'var(--red)'},
+    {name:'Design verification', level:'High', reason:'Prevents design errors propagating', color:'var(--red)'},
+    {name:'Code compliance check', level:'High', reason:'Regulatory & legal obligation', color:'var(--red)'},
+    {name:'Site inspection report', level:'Medium', reason:'Construction quality assurance', color:'var(--amber)'},
+    {name:'Foundation design', level:'High', reason:'Subsurface failure risk — catastrophic', color:'var(--red)'}
+  ],
+  'Civil & Geotechnical': [
+    {name:'Soil investigation review', level:'High', reason:'Foundation of all geotechnical decisions', color:'var(--red)'},
+    {name:'Slope stability analysis', level:'High', reason:'Landslide / failure risk — life safety', color:'var(--red)'},
+    {name:'Bearing capacity calculation', level:'High', reason:'Foundation adequacy — structural risk', color:'var(--red)'},
+    {name:'Pile design verification', level:'Medium', reason:'Deep foundation cost & safety', color:'var(--amber)'}
+  ],
+  'BIM & Digital Delivery': [
+    {name:'Model federation & audit', level:'Medium', reason:'Data integrity for all disciplines', color:'var(--amber)'},
+    {name:'LOD compliance check', level:'Medium', reason:'Contractual BIM requirements', color:'var(--amber)'},
+    {name:'CDE management', level:'High', reason:'Single source of truth — ISO 19650', color:'var(--red)'}
+  ],
+  'Project Delivery': [
+    {name:'Schedule baseline review', level:'High', reason:'Project timeline control', color:'var(--red)'},
+    {name:'Cost variance analysis', level:'High', reason:'Budget overrun prevention', color:'var(--red)'},
+    {name:'Risk register update', level:'High', reason:'Proactive risk management', color:'var(--red)'},
+    {name:'Variation order management', level:'Medium', reason:'Contractual & financial exposure', color:'var(--amber)'},
+    {name:'Milestone payment cert', level:'High', reason:'Cash flow & contractor relations', color:'var(--red)'}
+  ],
+  'EHS & Risk Management': [
+    {name:'HIRA review & update', level:'High', reason:'Worker safety — regulatory mandate', color:'var(--red)'},
+    {name:'Permit-to-work audit', level:'High', reason:'Prevents unauthorized high-risk work', color:'var(--red)'},
+    {name:'Incident investigation', level:'High', reason:'Legal & prevention obligation', color:'var(--red)'},
+    {name:'Emergency drill planning', level:'High', reason:'Emergency preparedness — life safety', color:'var(--red)'},
+    {name:'Contractor safety induction', level:'High', reason:'Legal compliance & site safety', color:'var(--red)'},
+    {name:'Risk register escalation', level:'Medium', reason:'Timely risk communication', color:'var(--amber)'}
+  ],
+  'Finance & Procurement': [
+    {name:'Budget variance reporting', level:'High', reason:'Financial governance', color:'var(--red)'},
+    {name:'Contract compliance audit', level:'High', reason:'Legal & financial risk', color:'var(--red)'},
+    {name:'Cash flow forecasting', level:'High', reason:'Liquidity & project continuity', color:'var(--red)'},
+    {name:'Subcontractor payment cert', level:'Medium', reason:'Contractual obligation & relations', color:'var(--amber)'},
+    {name:'Financial risk assessment', level:'High', reason:'Enterprise risk governance', color:'var(--red)'}
+  ]
+};
+
+// ── RENDER GRID ──
+function renderGrid(dept) {
+  var d = deptData[dept];
+  if (!d) return;
+  var h = '<thead><tr><th>Task</th>';
+  d.employees.forEach(function(e) {
+    h += '<th>' + e.name + '<br><span style="font-size:9px;color:var(--text-muted);text-transform:none;letter-spacing:0;font-weight:400">' + e.role + '</span></th>';
+  });
+  h += '</tr></thead><tbody>';
+
+  d.tasks.forEach(function(t) {
+    h += '<tr><td class="tg-row-label' + (t.critical ? ' critical' : '') + '">';
+    if (t.critical) h += '<span class="crit-flag"></span>';
+    h += t.name + '</td>';
+    t.data.forEach(function(cell) {
+      var cls = 'tg-never';
+      if (cell.conf === 'Coaches Others') cls = 'tg-coaches';
+      else if (cell.conf === 'Independent') cls = 'tg-independent';
+      else if (cell.conf === 'Guided') cls = 'tg-guided';
+      h += '<td class="tg-cell ' + cls + '" onclick="showToast(\'' + t.name + ' — ' + cell.freq + ' / ' + cell.conf + '\')">';
+      h += '<div class="tg-freq">' + cell.freq + '</div>';
+      h += '<div class="tg-conf">' + cell.conf + '</div>';
+      h += '</td>';
+    });
+    h += '</tr>';
+  });
+  h += '</tbody>';
+  document.getElementById('taskGrid').innerHTML = h;
+}
+
+// ── RENDER LINKAGE ──
+function renderLinkage(dept) {
+  var links = linkageData[dept] || [];
+  var h = '';
+  links.forEach(function(l) {
+    h += '<div class="link-row">';
+    h += '<div class="link-task">' + l.task + '</div>';
+    h += '<div class="link-arrow">&rarr;</div>';
+    h += '<div class="link-skills">';
+    l.skills.forEach(function(s) {
+      h += '<span class="link-skill">' + s + '</span>';
+    });
+    h += '</div></div>';
+  });
+  if (links.length === 0) h = '<div style="font-size:11px;color:var(--text-secondary)">No linkage data for this department yet.</div>';
+  document.getElementById('linkageBody').innerHTML = h;
+}
+
+// ── RENDER CRITICALITY ──
+function renderCriticality(dept) {
+  var crits = critData[dept] || [];
+  var h = '';
+  crits.forEach(function(c) {
+    h += '<div class="crit-item">';
+    h += '<div class="crit-dot" style="background:' + c.color + '"></div>';
+    h += '<div class="crit-name">' + c.name + '</div>';
+    h += '<div class="crit-reason">' + c.reason + '</div>';
+    h += '<div class="crit-level" style="background:' + (c.level === 'High' ? 'var(--red-bg);color:var(--red)' : 'var(--amber-bg);color:var(--amber)') + '">' + c.level + '</div>';
+    h += '</div>';
+  });
+  if (crits.length === 0) h = '<div style="font-size:11px;color:var(--text-secondary)">No criticality data for this department yet.</div>';
+  document.getElementById('critBody').innerHTML = h;
+}
+
+// ── DEPT SWITCH ──
+function switchDept() {
+  var dept = document.getElementById('deptSelector').value;
+  renderGrid(dept);
+  renderLinkage(dept);
+  renderCriticality(dept);
+  // Update badge
+  var d = deptData[dept];
+  if (d) {
+    var badge = document.querySelector('.panel-head .panel-badge');
+    if (badge) badge.textContent = d.tasks.length + ' tasks \u00B7 ' + d.employees.length + ' employees';
+  }
+  showToast('Switched to ' + dept);
+}
+
+// ── TOAST ──
+function showToast(msg){var t=document.getElementById('sip-toast');if(!t){t=document.createElement('div');t.id='sip-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:var(--font-body);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08)';document.body.appendChild(t)}t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)'},2400)}
+
+document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.getAttribute('href')==='#'){e.preventDefault();showToast((a.textContent||'').trim().substring(0,36)+' \u2014 available in full platform')}});
+
+// ── INIT ──
+renderGrid('Structural Engineering');
+renderLinkage('Structural Engineering');
+renderCriticality('Structural Engineering');
+</script>
+</body>
+</html>

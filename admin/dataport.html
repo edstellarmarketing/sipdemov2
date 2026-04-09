@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataPort — Data Import · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   DATAPORT — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── CONTENT ── */
+.content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
+
+/* ── WIZARD STEPS STRIP ── */
+.wizard-strip {
+  padding: 0 28px;
+  background: var(--card);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  display: flex; align-items: stretch;
+  flex-shrink: 0;
+  animation: fadeDown .4s ease both;
+}
+.wz-step {
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 10px;
+  position: relative; cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: border-color .2s;
+  flex-shrink: 0;
+}
+.wz-step.active { border-bottom-color: var(--teal); }
+.wz-step.done   { border-bottom-color: var(--green); }
+.wz-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  background: rgba(0,0,0,0.04); color: var(--text-muted);
+  border: 1px solid rgba(0,0,0,0.08); flex-shrink: 0;
+  transition: all .2s;
+}
+.wz-step.active .wz-num { background: var(--teal-bg); color: var(--teal); border-color: rgba(8,145,178,0.3); }
+.wz-step.done   .wz-num { background: var(--green-bg); color: var(--green); border-color: rgba(22,163,74,0.3); }
+.wz-label { font-size: 12px; color: var(--text-muted); transition: color .2s; white-space: nowrap; }
+.wz-step.active .wz-label { color: var(--text-primary); font-weight: 500; }
+.wz-step.done   .wz-label { color: var(--green); }
+.wz-arrow { width: 16px; color: rgba(0,0,0,0.12); font-size: 14px; flex-shrink: 0; }
+
+/* ── STEP PANELS ── */
+.step-panel { display: none; flex: 1; flex-direction: column; padding: 24px 28px; gap: 18px; animation: fadeUp .4s ease both; }
+.step-panel.active { display: flex; }
+
+/* ── STEP 1A — UPLOAD ── */
+.upload-zone {
+  border: 2px dashed rgba(8,145,178,0.3);
+  border-radius: 14px;
+  padding: 52px 32px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  text-align: center; cursor: pointer;
+  transition: border-color .2s, background .2s;
+  background: rgba(8,145,178,0.03);
+}
+.upload-zone:hover { border-color: rgba(8,145,178,0.5); background: rgba(8,145,178,0.06); }
+.upload-icon { width: 56px; height: 56px; border-radius: 14px; background: var(--teal-bg); border: 1px solid rgba(8,145,178,0.2); display: flex; align-items: center; justify-content: center; }
+.upload-icon svg { width: 26px; height: 26px; stroke: var(--teal); fill: none; stroke-width: 1.5; stroke-linecap: round; }
+.upload-title { font-family: var(--font-display); font-size: 18px; font-weight: 400; color: var(--text-primary); }
+.upload-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 420px; }
+.upload-formats { display: flex; gap: 8px; margin-top: 4px; }
+.fmt-chip { padding: 4px 10px; border-radius: 100px; font-size: 11px; border: 1px solid rgba(8,145,178,0.2); color: var(--teal); background: var(--teal-bg); font-family: var(--font-mono); }
+
+.hris-strip {
+  background: var(--card); border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px; padding: 18px 22px;
+  display: flex; align-items: center; gap: 20px;
+}
+.hris-label { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+.hris-options { display: flex; gap: 10px; flex-wrap: wrap; }
+.hris-btn { padding: 8px 16px; border-radius: 7px; border: 1px solid rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); font-size: 12px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 7px; transition: border-color .15s, color .15s, background .15s; font-family: var(--font-body); }
+.hris-btn:hover { border-color: rgba(8,145,178,0.3); color: var(--text-primary); background: var(--teal-bg); }
+.hris-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); }
+.hris-btn.connected .hris-dot { background: var(--green); }
+.hris-btn.connected { border-color: rgba(22,163,74,0.3); color: var(--green); background: var(--green-bg); }
+
+/* ── INTEGRATIONS MODAL ── */
+.intg-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:900;display:none;align-items:center;justify-content:center;animation:fadeIn .2s ease}
+.intg-overlay.open{display:flex}
+.intg-modal{background:var(--card);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,0.18);width:90%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden}
+.intg-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(0,0,0,0.08);flex-shrink:0}
+.intg-title{font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--text-primary)}
+.intg-close{width:28px;height:28px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--text-muted);font-size:18px}
+.intg-close:hover{background:rgba(0,0,0,0.05);color:var(--text-primary)}
+.intg-body{padding:20px 22px;overflow-y:auto;flex:1}
+.intg-search{width:100%;padding:9px 14px;border:1px solid rgba(0,0,0,0.1);border-radius:8px;font-size:12px;font-family:var(--font-body);color:var(--text-primary);margin-bottom:18px}
+.intg-search:focus{outline:none;border-color:var(--accent)}
+.intg-category{margin-bottom:20px}
+.intg-cat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.intg-cat-label::after{content:'';flex:1;height:1px;background:rgba(0,0,0,0.06)}
+.intg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.intg-card{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid rgba(0,0,0,0.08);border-radius:8px;cursor:pointer;transition:all .15s;background:var(--card)}
+.intg-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,0.06);transform:translateY(-1px)}
+.intg-card.active{border-color:var(--green);background:var(--green-bg)}
+.intg-card .intg-logo{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--text-muted);flex-shrink:0;background:rgba(0,0,0,0.03);overflow:hidden}
+.intg-card .intg-info{flex:1;min-width:0}
+.intg-card .intg-name{font-size:12px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.intg-card .intg-desc{font-size:10px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.intg-card .intg-status{font-size:9px;padding:2px 7px;border-radius:100px;font-weight:500;flex-shrink:0;white-space:nowrap}
+.intg-card .intg-status.connected{background:var(--green-bg);color:var(--green)}
+.intg-card .intg-status.available{background:rgba(0,0,0,0.04);color:var(--text-muted)}
+
+.template-card { background: var(--card); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; }
+.tc-icon { width: 40px; height: 40px; border-radius: 9px; background: var(--accent-lt); border: 1px solid var(--accent-bd); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.tc-icon svg { width: 19px; height: 19px; stroke: var(--accent); fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.tc-text { flex: 1; }
+.tc-title { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+.tc-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.tc-btn { padding: 8px 16px; border-radius: 6px; border: 1px solid var(--accent-bd); color: var(--accent); background: transparent; font-size: 12px; cursor: pointer; font-family: var(--font-body); white-space: nowrap; transition: background .15s; }
+.tc-btn:hover { background: var(--accent-lt); }
+
+/* ── STEP 1B — PARSING ── */
+.parse-header {
+  background: var(--card); border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px; padding: 18px 22px;
+  display: flex; align-items: center; gap: 16px;
+}
+.parse-file-icon { width: 40px; height: 40px; border-radius: 9px; background: var(--green-bg); border: 1px solid rgba(22,163,74,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.parse-file-icon svg { width: 19px; height: 19px; stroke: var(--green); fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.parse-info { flex: 1; }
+.parse-filename { font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); }
+.parse-meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.parse-status { font-size: 12px; color: var(--green); display: flex; align-items: center; gap: 6px; }
+
+.sheets-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.sheet-card {
+  background: var(--card); border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 10px; overflow: hidden;
+  cursor: pointer; transition: border-color .2s;
+}
+.sheet-card:hover { border-color: rgba(8,145,178,0.3); }
+.sheet-card.has-errors { border-color: rgba(220,38,38,0.3); }
+.sheet-card.clean { border-color: rgba(22,163,74,0.2); }
+.sc-head { padding: 12px 14px; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; gap: 9px; }
+.sheet-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sheet-icon svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; }
+.sc-name { font-size: 12px; color: var(--text-primary); font-weight: 500; flex: 1; }
+.sc-badge { padding: 2px 7px; border-radius: 100px; font-size: 9.5px; border: 1px solid; white-space: nowrap; }
+.scb-clean { border-color: rgba(22,163,74,0.3); color: var(--green); background: var(--green-bg); }
+.scb-warn  { border-color: rgba(220,38,38,0.3);  color: var(--red);   background: var(--red-bg); }
+.scb-ok    { border-color: rgba(201,168,76,0.3); color: var(--accent); background: var(--accent-lt); }
+.sc-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+.sc-stat { display: flex; justify-content: space-between; font-size: 11px; }
+.sc-stat-key { color: var(--text-muted); }
+.sc-stat-val { color: var(--text-secondary); font-family: var(--font-mono); }
+.sc-stat-val.red   { color: var(--red); }
+.sc-stat-val.green { color: var(--green); }
+
+/* ── STEP 1C — VALIDATION ── */
+.val-summary {
+  background: var(--card); border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px; padding: 16px 22px;
+  display: flex; gap: 28px; align-items: center;
+}
+.vs-item { display: flex; flex-direction: column; gap: 3px; }
+.vs-val { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--text-primary); }
+.vs-val.green { color: var(--green); }
+.vs-val.red   { color: var(--red); }
+.vs-val.amber { color: var(--amber); }
+.vs-key { font-size: 10px; color: var(--text-muted); letter-spacing: .07em; text-transform: uppercase; }
+.vs-div { width: 1px; background: rgba(0,0,0,0.08); align-self: stretch; }
+
+.error-table { width: 100%; border-collapse: collapse; }
+.error-table th { font-size: 10px; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase; text-align: left; padding: 10px 16px; font-weight: 400; border-bottom: 1px solid rgba(0,0,0,0.08); }
+.error-table th:nth-child(4) { text-align: center; }
+.error-table tr { border-bottom: 1px solid rgba(0,0,0,0.04); }
+.error-table tr:last-child { border-bottom: none; }
+.error-table td { padding: 10px 16px; font-size: 12px; color: var(--text-secondary); }
+.error-table td:first-child { font-family: var(--font-mono); color: var(--text-muted); font-size: 11px; }
+.err-sev { padding: 2px 7px; border-radius: 100px; font-size: 10px; border: 1px solid; }
+.es-err  { border-color: rgba(220,38,38,0.4); color: var(--red); background: var(--red-bg); }
+.es-warn { border-color: rgba(217,119,6,0.4); color: var(--amber); background: var(--amber-bg); }
+.err-action { display: flex; gap: 5px; justify-content: center; }
+.era-btn { padding: 3px 10px; border-radius: 5px; font-size: 11px; cursor: pointer; border: 1px solid; transition: opacity .15s; font-family: var(--font-body); }
+.era-fix  { border-color: rgba(37,99,235,0.3); color: var(--blue); background: var(--blue-bg); }
+.era-skip { border-color: rgba(0,0,0,0.08); color: var(--text-muted); background: transparent; }
+.era-btn:hover { opacity: .78; }
+
+/* ── STEP 1D — CONFIRM ── */
+.confirm-banner {
+  background: linear-gradient(135deg, rgba(22,163,74,0.08) 0%, transparent 60%);
+  border: 1px solid rgba(22,163,74,0.2);
+  border-radius: 14px; padding: 24px 28px;
+  display: flex; align-items: center; gap: 20px;
+}
+.conf-check { width: 52px; height: 52px; border-radius: 50%; background: var(--green-bg); border: 1px solid rgba(22,163,74,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.conf-check svg { width: 24px; height: 24px; stroke: var(--green); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.conf-info { flex: 1; }
+.conf-title { font-family: var(--font-display); font-size: 18px; font-weight: 400; color: var(--text-primary); margin-bottom: 5px; }
+.conf-sub   { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
+.conf-stats { display: flex; gap: 20px; }
+.conf-stat  { display: flex; flex-direction: column; gap: 3px; align-items: center; }
+.conf-stat-val { font-family: var(--font-display); font-size: 20px; font-weight: 400; color: var(--green); }
+.conf-stat-key { font-size: 10px; color: var(--text-muted); letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
+
+.meter-card { background: var(--card); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+.meter-title { font-family: var(--font-display); font-size: 13px; font-weight: 400; color: var(--text-primary); }
+.meter-bar-track { height: 10px; background: rgba(0,0,0,0.04); border-radius: 5px; overflow: hidden; }
+.meter-bar-fill  { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--teal), var(--green)); transition: width 1.4s ease; }
+.meter-labels { display: flex; justify-content: space-between; font-size: 11px; }
+.meter-label-key { color: var(--text-muted); }
+.meter-label-val { color: var(--teal); font-weight: 500; }
+
+.data-preview { background: var(--card); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; }
+.dp-head { padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; }
+.dp-title { font-family: var(--font-display); font-size: 12px; font-weight: 400; color: var(--text-primary); }
+.dp-count { font-size: 10px; color: var(--teal); background: var(--teal-bg); padding: 2px 8px; border-radius: 100px; }
+.preview-table { width: 100%; border-collapse: collapse; }
+.preview-table th { font-size: 10px; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase; text-align: left; padding: 9px 14px; font-weight: 400; border-bottom: 1px solid rgba(0,0,0,0.06); background: rgba(0,0,0,0.02); }
+.preview-table tr { border-bottom: 1px solid rgba(0,0,0,0.04); }
+.preview-table tr:last-child { border-bottom: none; }
+.preview-table td { padding: 9px 14px; font-size: 11.5px; color: var(--text-secondary); }
+.preview-table td:first-child { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); }
+.status-dot-cell { display: flex; align-items: center; gap: 5px; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+.import-actions { display: flex; gap: 10px; align-items: center; padding: 18px 22px; background: var(--card); border: 1px solid rgba(8,145,178,0.15); border-radius: 12px; }
+.import-note { flex: 1; font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.import-note strong { color: var(--text-primary); font-weight: 500; }
+.ia-btn { padding: 12px 28px; border-radius: 8px; font-family: var(--font-display); font-size: 13px; font-weight: 400; letter-spacing: .02em; cursor: pointer; border: 1px solid; transition: opacity .15s; white-space: nowrap; }
+.ia-btn.primary { background: var(--teal); border-color: var(--teal); color: #fff; box-shadow: 0 4px 20px rgba(8,145,178,0.2); }
+.ia-btn.primary:hover { opacity: .88; }
+.ia-btn.outline { background: transparent; border-color: rgba(0,0,0,0.1); color: var(--text-secondary); }
+.ia-btn.outline:hover { border-color: rgba(0,0,0,0.2); color: var(--text-primary); }
+
+/* ── CONTEXT METER ── */
+.context-meter {
+  background: var(--card); border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px; padding: 16px 20px;
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; gap: 20px;
+}
+.cm-label { font-size: 11px; color: var(--text-muted); letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
+.cm-bar-track { flex: 1; height: 7px; background: rgba(0,0,0,0.04); border-radius: 4px; overflow: hidden; }
+.cm-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--teal), var(--green)); }
+.cm-pct { font-family: var(--font-display); font-size: 15px; font-weight: 400; color: var(--teal); min-width: 36px; }
+.cm-segments { display: flex; gap: 12px; }
+.cm-seg { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+.cm-seg-val { font-family: var(--font-display); font-size: 14px; font-weight: 400; color: var(--text-primary); }
+.cm-seg-key { font-size: 9px; color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+
+/* ── WIZARD NAV ── */
+.wizard-nav {
+  padding: 16px 28px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  background: var(--card);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-shrink: 0;
+}
+.wn-info { font-size: 11px; color: var(--text-muted); }
+.wn-actions { display: flex; gap: 10px; }
+.wn-btn { padding: 9px 20px; border-radius: 7px; font-family: var(--font-body); font-size: 12.5px; cursor: pointer; border: 1px solid; transition: opacity .15s; font-weight: 500; }
+.wn-btn.back    { background: transparent; border-color: rgba(0,0,0,0.1); color: var(--text-secondary); }
+.wn-btn.back:hover { border-color: rgba(0,0,0,0.2); color: var(--text-primary); }
+.wn-btn.next    { background: var(--teal); border-color: var(--teal); color: #fff; font-family: var(--font-display); font-weight: 400; letter-spacing: .02em; font-size: 12px; }
+.wn-btn.next:hover { opacity: .88; }
+.wn-btn.finish  { background: var(--green); border-color: var(--green); color: #fff; font-family: var(--font-display); font-weight: 400; letter-spacing: .02em; font-size: 12px; }
+.wn-btn.finish:hover { opacity: .88; }
+
+/* ── DONE STATE ── */
+#doneScreen {
+  display: none; flex: 1; flex-direction: column;
+  align-items: center; justify-content: center; gap: 28px;
+  padding: 40px 28px; text-align: center;
+  animation: fadeUp .5s ease both;
+}
+.done-ring { position: relative; width: 100px; height: 100px; }
+.done-ring svg { width: 100%; height: 100%; }
+.done-icon-inner { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.done-icon-inner svg { width: 40px; height: 40px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.done-title { font-family: var(--font-display); font-size: 32px; font-weight: 400; color: var(--text-primary); line-height: 1.1; }
+.done-title span { color: var(--green); }
+.done-sub { font-size: 14px; color: var(--text-secondary); max-width: 480px; line-height: 1.7; }
+.done-stats { display: flex; gap: 32px; }
+.ds-item { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.ds-val { font-family: var(--font-display); font-size: 28px; font-weight: 400; color: var(--green); }
+.ds-key { font-size: 11px; color: var(--text-muted); letter-spacing: .07em; text-transform: uppercase; }
+.done-actions { display: flex; gap: 12px; }
+.done-btn { padding: 12px 28px; border-radius: 8px; font-family: var(--font-display); font-size: 13px; font-weight: 400; letter-spacing: .02em; cursor: pointer; border: 1px solid; transition: opacity .15s; }
+.done-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.done-btn.outline { background: transparent; border-color: rgba(0,0,0,0.12); color: var(--text-secondary); }
+.done-btn:hover { opacity: .84; }
+
+/* ── TOPBAR EXTRAS ── */
+.tb-pill { padding: 4px 11px; border-radius: 100px; font-size: 11px; border: 1px solid; white-space: nowrap; }
+.tb-pill.teal { border-color: rgba(8,145,178,0.25); color: var(--teal); }
+.tb-pill.gold { border-color: var(--accent-bd); color: var(--accent); }
+
+@keyframes fadeUp   { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes dashAnim { to { stroke-dashoffset: 0; } }
+
+.spinner-sm { width: 14px; height: 14px; border: 2px solid rgba(8,145,178,0.2); border-top-color: var(--teal); border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; }
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <!-- WIZARD STRIP -->
+  <div class="wizard-strip">
+    <div class="wz-step active" id="wz-1a" onclick="goStep('1a')">
+      <div class="wz-num">1A</div><div class="wz-label">Upload file</div>
+    </div>
+    <div class="wz-arrow">&rsaquo;</div>
+    <div class="wz-step" id="wz-1b" onclick="goStep('1b')">
+      <div class="wz-num">1B</div><div class="wz-label">Sheet preview</div>
+    </div>
+    <div class="wz-arrow">&rsaquo;</div>
+    <div class="wz-step" id="wz-1c" onclick="goStep('1c')">
+      <div class="wz-num">1C</div><div class="wz-label">Validation</div>
+    </div>
+    <div class="wz-arrow">&rsaquo;</div>
+    <div class="wz-step" id="wz-1d" onclick="goStep('1d')">
+      <div class="wz-num">1D</div><div class="wz-label">Confirm import</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ── STEP 1A — UPLOAD ── -->
+    <div class="step-panel active" id="panel-1a" style="justify-content:center;gap:16px">
+      <div class="upload-zone" onclick="goStep('1b')">
+        <div class="upload-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="upload-title">Drop your workforce file here</div>
+        <div class="upload-sub">Upload an Excel (.xlsx) file using the Edstellar DataPort template. The platform will parse all sheets automatically and flag any errors row by row.</div>
+        <div class="upload-formats">
+          <div class="fmt-chip">.xlsx</div>
+          <div class="fmt-chip">.xls</div>
+          <div class="fmt-chip">.csv</div>
+        </div>
+      </div>
+
+      <div class="hris-strip">
+        <div class="hris-label">Or sync from HRIS</div>
+        <div class="hris-options">
+          <button class="hris-btn connected" onclick="openIntegrations()"><img src="https://www.google.com/s2/favicons?sz=64&domain=workday.com" style="width:16px;height:16px;border-radius:2px"> Workday · Connected</button>
+          <button class="hris-btn" onclick="openIntegrations()"><img src="https://www.google.com/s2/favicons?sz=64&domain=bamboohr.com" style="width:16px;height:16px;border-radius:2px"> BambooHR</button>
+          <button class="hris-btn" onclick="openIntegrations()"><img src="https://www.google.com/s2/favicons?sz=64&domain=sap.com" style="width:16px;height:16px;border-radius:2px"> SAP SuccessFactors</button>
+          <button class="hris-btn" onclick="openIntegrations()" style="background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.03));border:1px solid rgba(201,168,76,0.35);color:var(--accent);font-weight:600"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:2;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Explore 100+ Integrations</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="tc-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="tc-text">
+          <div class="tc-title">Edstellar DataPort Template v3</div>
+          <div class="tc-sub">8 sheets · Employee Profile, Roles, Departments, Skills, Certifications, Training History, Teams, Org Chart</div>
+        </div>
+        <button class="tc-btn">Download template</button>
+      </div>
+
+      <!-- Resume Upload Section -->
+      <div class="template-card" style="margin-top:8px;border:1px dashed rgba(201,168,76,0.3);background:rgba(201,168,76,0.02)">
+        <div class="tc-icon" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2)"><svg viewBox="0 0 24 24" style="stroke:#3B82F6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+        <div class="tc-text">
+          <div class="tc-title">Employee Resume Upload</div>
+          <div class="tc-sub">Bulk upload employee resumes (.pdf, .docx). Files are linked to employee profiles and used by AI for skill extraction and gap analysis.</div>
+        </div>
+        <label style="padding:8px 16px;border-radius:6px;border:1px solid rgba(59,130,246,0.3);color:#3B82F6;background:transparent;font-size:12px;cursor:pointer;font-family:var(--font-body);white-space:nowrap;transition:background .15s;display:inline-flex;align-items:center;gap:6px" onmouseover="this.style.background='rgba(59,130,246,0.06)'" onmouseout="this.style.background=''">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Resumes
+          <input type="file" accept=".pdf,.docx,.doc" multiple style="display:none" onchange="handleResumeUpload(this)">
+        </label>
+      </div>
+
+      <div style="text-align:center;padding:16px 0 8px;border-top:1px dashed rgba(0,0,0,0.08);margin-top:8px">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">Or try with sample data</div>
+        <button onclick="demoFillDataport()" style="padding:10px 24px;font-size:13px;font-weight:600;background:linear-gradient(135deg,#C9A84C,#D4B65A);color:#fff;border:none;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .15s,box-shadow .15s;box-shadow:0 2px 8px rgba(201,168,76,0.3)" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Auto-Fill Demo Data
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 1B — SHEET PREVIEW ── -->
+    <div class="step-panel" id="panel-1b">
+      <div class="parse-header">
+        <div class="parse-file-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="parse-info">
+          <div class="parse-filename">Arcova_Workforce_DataPort_March2026.xlsx</div>
+          <div class="parse-meta">3.4 MB · Uploaded 18 Mar 2026 · 09:02 SGT · 8 sheets detected</div>
+        </div>
+        <div class="parse-status">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><polyline points="20 6 9 17 4 12"/></svg>
+          Parsed successfully
+        </div>
+      </div>
+
+      <div class="sheets-grid">
+        <div class="sheet-card clean">
+          <div class="sc-head">
+            <div class="sheet-icon" style="background:var(--green-bg);color:var(--green)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            <div class="sc-name">Employee Profile</div>
+            <div class="sc-badge scb-clean">Clean</div>
+          </div>
+          <div class="sc-body">
+            <div class="sc-stat"><span class="sc-stat-key">Rows</span><span class="sc-stat-val green">812</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Errors</span><span class="sc-stat-val green">0</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Columns mapped</span><span class="sc-stat-val">24 / 24</span></div>
+          </div>
+        </div>
+        <div class="sheet-card has-errors">
+          <div class="sc-head">
+            <div class="sheet-icon" style="background:var(--amber-bg);color:var(--amber)"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+            <div class="sc-name">Roles & Departments</div>
+            <div class="sc-badge scb-warn">7 errors</div>
+          </div>
+          <div class="sc-body">
+            <div class="sc-stat"><span class="sc-stat-key">Rows</span><span class="sc-stat-val">288</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Errors</span><span class="sc-stat-val red">7</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Columns mapped</span><span class="sc-stat-val">18 / 18</span></div>
+          </div>
+        </div>
+        <div class="sheet-card clean">
+          <div class="sc-head">
+            <div class="sheet-icon" style="background:var(--blue-bg);color:var(--blue)"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+            <div class="sc-name">Certifications</div>
+            <div class="sc-badge scb-clean">Clean</div>
+          </div>
+          <div class="sc-body">
+            <div class="sc-stat"><span class="sc-stat-key">Rows</span><span class="sc-stat-val green">1,204</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Errors</span><span class="sc-stat-val green">0</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Columns mapped</span><span class="sc-stat-val">12 / 12</span></div>
+          </div>
+        </div>
+        <div class="sheet-card clean">
+          <div class="sc-head">
+            <div class="sheet-icon" style="background:var(--purple-bg);color:var(--purple)"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+            <div class="sc-name">Training History</div>
+            <div class="sc-badge scb-clean">Clean</div>
+          </div>
+          <div class="sc-body">
+            <div class="sc-stat"><span class="sc-stat-key">Rows</span><span class="sc-stat-val green">3,841</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Errors</span><span class="sc-stat-val green">0</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Columns mapped</span><span class="sc-stat-val">16 / 16</span></div>
+          </div>
+        </div>
+        <div class="sheet-card has-errors">
+          <div class="sc-head">
+            <div class="sheet-icon" style="background:var(--teal-bg);color:var(--teal)"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <div class="sc-name">Skills (Self-Declared)</div>
+            <div class="sc-badge scb-warn">3 errors</div>
+          </div>
+          <div class="sc-body">
+            <div class="sc-stat"><span class="sc-stat-key">Rows</span><span class="sc-stat-val">4,218</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Errors</span><span class="sc-stat-val red">3</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Columns mapped</span><span class="sc-stat-val">10 / 10</span></div>
+          </div>
+        </div>
+        <div class="sheet-card clean">
+          <div class="sc-head">
+            <div class="sheet-icon" style="background:var(--accent-lt);color:var(--accent)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="sc-name">Teams & Cohorts</div>
+            <div class="sc-badge scb-ok">2 warnings</div>
+          </div>
+          <div class="sc-body">
+            <div class="sc-stat"><span class="sc-stat-key">Rows</span><span class="sc-stat-val">142</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Errors</span><span class="sc-stat-val" style="color:var(--amber)">2 warn</span></div>
+            <div class="sc-stat"><span class="sc-stat-key">Columns mapped</span><span class="sc-stat-val">8 / 8</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STEP 1C — VALIDATION ── -->
+    <div class="step-panel" id="panel-1c">
+      <div class="val-summary">
+        <div class="vs-item"><div class="vs-val">10,507</div><div class="vs-key">Total rows</div></div>
+        <div class="vs-div"></div>
+        <div class="vs-item"><div class="vs-val green">10,497</div><div class="vs-key">Valid rows</div></div>
+        <div class="vs-div"></div>
+        <div class="vs-item"><div class="vs-val red">7</div><div class="vs-key">Errors</div></div>
+        <div class="vs-div"></div>
+        <div class="vs-item"><div class="vs-val amber">5</div><div class="vs-key">Warnings</div></div>
+        <div class="vs-div"></div>
+        <div class="vs-item"><div class="vs-val">812</div><div class="vs-key">Employees</div></div>
+        <div class="vs-div"></div>
+        <div class="vs-item"><div class="vs-val green">99.9%</div><div class="vs-key">Data quality</div></div>
+      </div>
+
+      <div class="data-preview">
+        <div class="dp-head">
+          <div class="dp-title">Row-level errors — Fix or skip before importing</div>
+          <div class="dp-count">7 errors · 5 warnings</div>
+        </div>
+        <table class="error-table">
+          <thead>
+            <tr>
+              <th>Row ref</th>
+              <th>Sheet</th>
+              <th>Issue</th>
+              <th>Severity</th>
+              <th style="text-align:center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>R114</td>
+              <td>Roles & Depts</td>
+              <td style="color:var(--text-primary)">Department "Infra Solutions" not found in OrgSetup — no matching BU</td>
+              <td><span class="err-sev es-err">Error</span></td>
+              <td><div class="err-action"><button class="era-btn era-fix">Fix</button><button class="era-btn era-skip">Skip</button></div></td>
+            </tr>
+            <tr>
+              <td>R203</td>
+              <td>Roles & Depts</td>
+              <td style="color:var(--text-primary)">Job title "Snr BIM Engr" — abbreviation not mapped to role taxonomy</td>
+              <td><span class="err-sev es-err">Error</span></td>
+              <td><div class="err-action"><button class="era-btn era-fix">Fix</button><button class="era-btn era-skip">Skip</button></div></td>
+            </tr>
+            <tr>
+              <td>R441–R447</td>
+              <td>Roles & Depts</td>
+              <td style="color:var(--text-primary)">5 rows: Employee IDs duplicated across two departments</td>
+              <td><span class="err-sev es-err">Error</span></td>
+              <td><div class="err-action"><button class="era-btn era-fix">Fix</button><button class="era-btn era-skip">Skip row</button></div></td>
+            </tr>
+            <tr>
+              <td>R2871</td>
+              <td>Skills</td>
+              <td style="color:var(--text-primary)">Skill "Revit 2019" — not in framework taxonomy; nearest match "BIM"</td>
+              <td><span class="err-sev es-warn">Warning</span></td>
+              <td><div class="err-action"><button class="era-btn era-fix">Map &rarr;BIM</button><button class="era-btn era-skip">Skip</button></div></td>
+            </tr>
+            <tr>
+              <td>R3104</td>
+              <td>Skills</td>
+              <td style="color:var(--text-primary)">Proficiency value "5" out of range — scale is 1–4</td>
+              <td><span class="err-sev es-err">Error</span></td>
+              <td><div class="err-action"><button class="era-btn era-fix">Cap at 4</button><button class="era-btn era-skip">Skip</button></div></td>
+            </tr>
+            <tr>
+              <td>R78, R91</td>
+              <td>Teams</td>
+              <td style="color:var(--text-primary)">Team lead EMP-ID not found in Employee Profile sheet</td>
+              <td><span class="err-sev es-warn">Warning</span></td>
+              <td><div class="err-action"><button class="era-btn era-fix">Fix</button><button class="era-btn era-skip">Skip</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── STEP 1D — CONFIRM ── -->
+    <div class="step-panel" id="panel-1d">
+      <div class="confirm-banner">
+        <div class="conf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="conf-info">
+          <div class="conf-title">Ready to import — 10,497 valid rows</div>
+          <div class="conf-sub">5 errors fixed · 2 rows skipped · Data quality score: 99.9% · Workday sync active · SkillForge pipeline will be triggered automatically after import confirms.</div>
+        </div>
+        <div class="conf-stats">
+          <div class="conf-stat"><div class="conf-stat-val">812</div><div class="conf-stat-key">Employees</div></div>
+          <div class="conf-stat"><div class="conf-stat-val">32</div><div class="conf-stat-key">Roles</div></div>
+          <div class="conf-stat"><div class="conf-stat-val">1,204</div><div class="conf-stat-key">Certs</div></div>
+        </div>
+      </div>
+
+      <div class="meter-card">
+        <div class="meter-title">Data Context Meter — Post Import Estimate</div>
+        <div class="meter-bar-track">
+          <div class="meter-bar-fill" style="width:91%" id="meterFill"></div>
+        </div>
+        <div class="meter-labels">
+          <span class="meter-label-key">AI confidence · SkillForge pipeline readiness</span>
+          <span class="meter-label-val">91% — High confidence · Ready to generate</span>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:4px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green)"><div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div>Employee profiles complete</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green)"><div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div>Role architecture mapped</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green)"><div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div>Training history loaded</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--amber)"><div style="width:7px;height:7px;border-radius:50%;background:var(--amber)"></div>Skills self-declared only — assessment pending</div>
+        </div>
+      </div>
+
+      <div class="data-preview">
+        <div class="dp-head">
+          <div class="dp-title">Employee data preview — first 5 rows</div>
+          <div class="dp-count">812 employees total</div>
+        </div>
+        <table class="preview-table">
+          <thead>
+            <tr>
+              <th>Emp ID</th>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Location</th>
+              <th>Certs</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>EMP-001</td>
+              <td style="color:var(--text-primary)">Priya Menon</td>
+              <td>Sr Project Manager</td>
+              <td>Project Delivery</td>
+              <td>Singapore</td>
+              <td>2</td>
+              <td><div class="status-dot-cell"><div class="status-dot" style="background:var(--green)"></div>Ready</div></td>
+            </tr>
+            <tr>
+              <td>EMP-002</td>
+              <td style="color:var(--text-primary)">Tariq Al-Rashidi</td>
+              <td>BIM Manager</td>
+              <td>BIM & Digital Delivery</td>
+              <td>Dubai</td>
+              <td>1</td>
+              <td><div class="status-dot-cell"><div class="status-dot" style="background:var(--green)"></div>Ready</div></td>
+            </tr>
+            <tr>
+              <td>EMP-003</td>
+              <td style="color:var(--text-primary)">Ananya Krishnaswamy</td>
+              <td>EHS Auditor</td>
+              <td>EHS & Risk</td>
+              <td>Mumbai</td>
+              <td>2</td>
+              <td><div class="status-dot-cell"><div class="status-dot" style="background:var(--green)"></div>Ready</div></td>
+            </tr>
+            <tr>
+              <td>EMP-004</td>
+              <td style="color:var(--text-primary)">Darren Loh</td>
+              <td>Data Analyst</td>
+              <td>IT Infrastructure</td>
+              <td>Singapore</td>
+              <td>0</td>
+              <td><div class="status-dot-cell"><div class="status-dot" style="background:var(--green)"></div>Ready</div></td>
+            </tr>
+            <tr>
+              <td>EMP-005</td>
+              <td style="color:var(--text-primary)">Kavitha Ramachandran</td>
+              <td>L&D Manager</td>
+              <td>Human Resources</td>
+              <td>Singapore</td>
+              <td>2</td>
+              <td><div class="status-dot-cell"><div class="status-dot" style="background:var(--green)"></div>Ready</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="import-actions">
+        <div class="import-note">Confirming import will create <strong>812 Skill Passports</strong>, populate the DataPort layer, and queue the <strong>SkillForge 7-prompt pipeline</strong>. This action is logged and versioned — previous data is preserved as a snapshot.</div>
+        <button class="ia-btn outline" onclick="goStep('1c')">&#8592; Back to validation</button>
+        <button class="ia-btn primary" onclick="confirmImport()">
+          Confirm Import &#8594;
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- WIZARD NAV -->
+  <div class="wizard-nav" id="wizNav">
+    <div class="wn-info" id="wizNavInfo">Step 1A of 4 — Upload your workforce Excel file</div>
+    <div class="wn-actions">
+      <button class="wn-btn back" id="backBtn" onclick="stepBack()" style="display:none">&#8592; Back</button>
+      <button class="wn-btn next" id="nextBtn" onclick="stepNext()">Next &#8594;</button>
+    </div>
+  </div>
+
+  <!-- DONE SCREEN -->
+  <div id="doneScreen">
+    <div class="done-ring">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(22,163,74,0.15)" stroke-width="4"/>
+        <circle cx="50" cy="50" r="44" fill="none" stroke="#16A34A" stroke-width="4"
+          stroke-dasharray="276" stroke-dashoffset="276"
+          style="transform:rotate(-90deg);transform-origin:50% 50%;animation:dashAnim 1.2s ease .3s forwards"/>
+      </svg>
+      <div class="done-icon-inner">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+    </div>
+    <div class="done-title">&#127881; Import <span>complete!</span></div>
+    <div class="done-sub" id="doneSummary">812 employee records imported · 1,204 certificates loaded · 3,841 training history entries processed · 812 Skill Passports created</div>
+    <div class="done-stats" id="doneStats">
+      <div class="ds-item"><div class="ds-val">812</div><div class="ds-key">Employees</div></div>
+      <div class="ds-item"><div class="ds-val">1,204</div><div class="ds-key">Certificates</div></div>
+      <div class="ds-item"><div class="ds-val">3,841</div><div class="ds-key">Training entries</div></div>
+      <div class="ds-item"><div class="ds-val">91%</div><div class="ds-key">Data quality</div></div>
+    </div>
+    <div style="max-width:520px;margin:0 auto 20px;padding:16px 20px;background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.02));border:1px solid rgba(201,168,76,0.2);border-radius:10px;text-align:center">
+      <div style="font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:6px">Congratulations! Your workforce data is ready</div>
+      <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">All employee records have been imported successfully. Head to the <strong>Employee Directory</strong> to view, search, and manage your workforce.</div>
+    </div>
+    <div class="done-actions">
+      <button class="done-btn outline" onclick="resetWizard()">Import another file</button>
+      <a href="employee-directory.html" class="done-btn primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        View Employee Directory &#8594;
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'admin',
+    activeNav: 'Data Import',
+    breadcrumbs: ['Setup', 'Data Import'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+const STEPS = ['1a','1b','1c','1d'];
+const LABELS = {
+  '1a': 'Step 1A of 4 — Upload your workforce Excel file',
+  '1b': 'Step 1B of 4 — Review sheet-by-sheet parse results',
+  '1c': 'Step 1C of 4 — Fix or skip row-level validation errors',
+  '1d': 'Step 1D of 4 — Confirm import and queue SkillForge'
+};
+let currentStep = '1a';
+
+function goStep(s) {
+  // hide all panels
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.wz-step').forEach(w => {
+    w.classList.remove('active');
+    const idx = STEPS.indexOf(w.id.replace('wz-',''));
+    const cur = STEPS.indexOf(s);
+    if (idx < cur) w.classList.add('done'); else w.classList.remove('done');
+  });
+
+  document.getElementById('panel-' + s).classList.add('active');
+  document.getElementById('wz-' + s).classList.add('active');
+  document.getElementById('wz-' + s).classList.remove('done');
+  document.getElementById('wizNavInfo').textContent = LABELS[s];
+  currentStep = s;
+
+  // back/next buttons
+  const idx = STEPS.indexOf(s);
+  document.getElementById('backBtn').style.display = idx > 0 ? 'block' : 'none';
+  const nextBtn = document.getElementById('nextBtn');
+
+  nextBtn.className = 'wn-btn next';
+  nextBtn.textContent = 'Next \u2192';
+  nextBtn.onclick = stepNext;
+}
+
+function stepNext() {
+  const idx = STEPS.indexOf(currentStep);
+  if (idx < STEPS.length - 1) goStep(STEPS[idx + 1]);
+}
+
+function stepBack() {
+  const idx = STEPS.indexOf(currentStep);
+  if (idx > 0) goStep(STEPS[idx - 1]);
+}
+
+function confirmImport() {
+  // hide wizard UI
+  document.getElementById('wizNav').style.display = 'none';
+  document.querySelector('.wizard-strip').style.display = 'none';
+  document.querySelector('.content').style.display = 'none';
+  document.getElementById('doneScreen').style.display = 'flex';
+
+  // mark all steps done
+  document.querySelectorAll('.wz-step').forEach(w => {
+    w.classList.remove('active'); w.classList.add('done');
+  });
+}
+
+function resetWizard() {
+  document.getElementById('wizNav').style.display = 'flex';
+  document.querySelector('.wizard-strip').style.display = 'flex';
+  document.querySelector('.content').style.display = 'flex';
+  document.getElementById('doneScreen').style.display = 'none';
+  goStep('1a');
+}
+
+function generateArcovaDemoEmployees(){
+  // ── Synced with org-setup-v4.html Arcova Infrastructure demo data ──
+  // Locations from Block E: Singapore 320, Mumbai 280, Dubai 120, Sydney 92 = 812
+  var locations=[
+    {id:'LOC-0001',name:'Singapore',count:320,phones:['+65-8','+65-9'],zone:'SG'},
+    {id:'LOC-0006',name:'Mumbai',count:280,phones:['+91-7','+91-8','+91-9'],zone:'IN'},
+    {id:'LOC-0004',name:'Dubai',count:120,phones:['+971-5'],zone:'AE'},
+    {id:'LOC-0005',name:'Sydney',count:92,phones:['+61-4'],zone:'AU'}
+  ];
+  // Departments from Blocks B/G — distribution per location proportional
+  var departments=[
+    {name:'Engineering',pct:0.30,manager:'Head of Engineering',roles:[
+      {title:'Structural Engineer',level:'L2',sal:[55000,72000]},
+      {title:'Senior Structural Engineer',level:'L4',sal:[88000,115000]},
+      {title:'Civil Engineer',level:'L2',sal:[52000,68000]},
+      {title:'Senior Civil Engineer',level:'L4',sal:[85000,110000]},
+      {title:'Geotechnical Engineer',level:'L3',sal:[68000,88000]},
+      {title:'Design Engineer',level:'L3',sal:[65000,82000]},
+      {title:'BIM Modeller',level:'L3',sal:[60000,78000]},
+      {title:'Principal Engineer',level:'L5',sal:[120000,155000]},
+      {title:'Engineering Manager',level:'L5',sal:[125000,160000]},
+      {title:'Director of Engineering',level:'L6',sal:[165000,210000]}
+    ]},
+    {name:'Project Delivery',pct:0.25,manager:'Head of Project Delivery',roles:[
+      {title:'Project Coordinator',level:'L2',sal:[48000,62000]},
+      {title:'Project Engineer',level:'L3',sal:[65000,82000]},
+      {title:'Project Manager',level:'L4',sal:[90000,120000]},
+      {title:'Senior Project Manager',level:'L5',sal:[125000,160000]},
+      {title:'Quantity Surveyor',level:'L3',sal:[62000,80000]},
+      {title:'Site Supervisor',level:'L3',sal:[55000,72000]},
+      {title:'Construction Manager',level:'L5',sal:[115000,150000]},
+      {title:'Contracts Manager',level:'L4',sal:[92000,118000]},
+      {title:'Director of Projects',level:'L6',sal:[170000,220000]}
+    ]},
+    {name:'Digital Delivery',pct:0.15,manager:'Head of Digital Delivery',roles:[
+      {title:'BIM Coordinator',level:'L3',sal:[62000,80000]},
+      {title:'Senior BIM Coordinator',level:'L4',sal:[85000,108000]},
+      {title:'Cloud Architect',level:'L5',sal:[130000,170000]},
+      {title:'Data Analyst',level:'L3',sal:[60000,78000]},
+      {title:'Software Developer',level:'L3',sal:[65000,85000]},
+      {title:'DevOps Engineer',level:'L3',sal:[68000,88000]},
+      {title:'Digital Twin Specialist',level:'L4',sal:[95000,125000]},
+      {title:'IT Systems Administrator',level:'L3',sal:[58000,75000]},
+      {title:'Director of Digital',level:'L6',sal:[160000,205000]}
+    ]},
+    {name:'Corporate Services',pct:0.12,manager:'Chief Financial Officer',roles:[
+      {title:'Finance Analyst',level:'L3',sal:[58000,75000]},
+      {title:'Senior Finance Analyst',level:'L4',sal:[80000,105000]},
+      {title:'Procurement Officer',level:'L3',sal:[55000,72000]},
+      {title:'Procurement Manager',level:'L4',sal:[85000,110000]},
+      {title:'Legal Counsel',level:'L4',sal:[90000,120000]},
+      {title:'Facilities Manager',level:'L4',sal:[78000,100000]},
+      {title:'Administrative Coordinator',level:'L2',sal:[42000,55000]},
+      {title:'CFO',level:'L6',sal:[180000,230000]}
+    ]},
+    {name:'EHS & Risk',pct:0.10,manager:'Head of EHS & Risk',roles:[
+      {title:'Safety Officer',level:'L2',sal:[48000,62000]},
+      {title:'Safety Manager',level:'L4',sal:[85000,112000]},
+      {title:'Senior Safety Manager',level:'L5',sal:[115000,148000]},
+      {title:'Environmental Specialist',level:'L3',sal:[62000,80000]},
+      {title:'Risk Analyst',level:'L3',sal:[60000,78000]},
+      {title:'EHS Inspector',level:'L3',sal:[55000,72000]},
+      {title:'Director of EHS',level:'L6',sal:[155000,200000]}
+    ]},
+    {name:'HR & Talent',pct:0.08,manager:'CHRO',roles:[
+      {title:'HR Executive',level:'L2',sal:[45000,58000]},
+      {title:'HR Business Partner',level:'L4',sal:[82000,108000]},
+      {title:'L&D Manager',level:'L4',sal:[80000,105000]},
+      {title:'Talent Acquisition Specialist',level:'L3',sal:[58000,75000]},
+      {title:'Compensation & Benefits Analyst',level:'L3',sal:[60000,78000]},
+      {title:'L&D Coordinator',level:'L2',sal:[44000,56000]},
+      {title:'Senior HRBP',level:'L5',sal:[110000,142000]},
+      {title:'CHRO',level:'L6',sal:[175000,225000]}
+    ]}
+  ];
+  var firstNamesM=['Arun','Rajan','Vikram','Suresh','Pradeep','Rajesh','Karthik','Anand','Deepak','Sanjay','Vivek','Rohit','Amit','Omar','Wei','Liang','James','Chen','Marcus','Daniel','Raj','Nikhil','Harish','Vinod','Manoj','Ashok','Naveen','Prasad','Girish','Mohan','Arjun','Dinesh','Ganesh','Hari','Ramesh','Santosh','Anil','Balaji','Venkat','Kishore','Ajay','Pranav','Ishaan','Ravi','Sameer','Aakash','Sahil','Kunal','Tarun','Abhishek'];
+  var firstNamesF=['Priya','Ananya','Sneha','Pooja','Divya','Lakshmi','Sara','Nisha','Sunita','Meera','Kavitha','Bhavna','Chitra','Tanya','Uma','Swathi','Aisha','Leila','Fatima','Sophie','Amirah','Rachel','Emma','Rina','Deepa','Geeta','Jaya','Kala','Mala','Neha','Padma','Radha','Sita','Usha','Vani','Yamini','Zara','Indira','Hema','Gita','Kamala','Lata','Nalini','Parvati','Rekha','Shanti','Veena','Aruna','Bhanu','Charulata'];
+  var lastNames=['Shankar','Tan','Kumar','Patel','Singh','Verma','Gupta','Sharma','Khan','Malik','Reddy','Menon','Krishnan','Iyer','Nair','Bose','Joshi','Shetty','Pillai','Das','Rao','Lim','Wong','Lee','Chen','Whitfield','Al-Hassan','Johnson','Davis','Liu','Wang','Brown','Binti Yusof','Ali','Kapoor','Saxena','Thakur','Mishra','Chauhan','Pandey','Tiwari','Dubey','Yadav','Bhatt','Jain','Agarwal','Banerjee','Mukherjee','Sen','Dutta'];
+  var educations=["Bachelor's","Bachelor's","Bachelor's","Master's","Master's","PhD"];
+  var empTypes=['Full-Time','Full-Time','Full-Time','Full-Time','Full-Time','Full-Time','Full-Time','Full-Time','Contract','Part-Time'];
+  var workModes=['Hybrid','Hybrid','Hybrid','Hybrid','On-site','On-site','Remote'];
+  var skillStatuses=['Complete','Complete','Complete','Partial','Partial','Draft'];
+  var careerPaths=['IC Track','IC Track','Management Track','Management Track','Specialist Track'];
+  var genders=['Male','Female'];
+
+  // Resume Skills pools — synced with org-setup Block J skills + realistic resume keywords per role
+  var RESUME_SKILL_POOLS={
+    'Engineering':['Structural Analysis','Concrete Design','Foundation Design','Load Calculation','AutoCAD','Revit','SAP2000','ETABS','Tekla Structures','Geotechnical Assessment','Soil Mechanics','Steel Design','Seismic Analysis','Finite Element Analysis','Construction Drawings','Building Codes','Sustainability Assessment','Lean Construction','Quality Assurance','Technical Report Writing'],
+    'Project Delivery':['Project Management','Stakeholder Management','Contract Management','Risk Assessment','Primavera P6','MS Project','Cost Estimation','Quantity Surveying','Site Management','Health & Safety','Client Management','Procurement','Budget Management','Scheduling','Earned Value Management','Claims Management','Tender Preparation','Construction Law'],
+    'Digital Delivery':['Revit','Navisworks','BIM Coordination','Digital Twin','Data Analysis','Python','Power BI','SQL','Cloud Architecture','AWS','Azure','Kubernetes','Docker','DevOps','CI/CD','JavaScript','GIS','Drone Surveying','IoT','Machine Learning'],
+    'Corporate Services':['Financial Analysis','SAP S/4HANA','Procurement','Contract Negotiation','Budgeting','Forecasting','Compliance','Audit','Risk Management','Vendor Management','Legal Research','Corporate Governance','Excel Advanced','Power BI','Stakeholder Management','Policy Development','Accounts Payable','Tax Planning'],
+    'EHS & Risk':['ISO 45001','Risk Assessment','Incident Investigation','Safety Leadership','Safety Auditing','Environmental Compliance','NEBOSH','Hazard Identification','Emergency Response','Fire Safety','Confined Space','Working at Heights','Permit to Work','Workplace Inspections','OSHA Standards','HSE Management Systems','Environmental Impact Assessment','Waste Management'],
+    'HR & Talent':['Talent Acquisition','Employee Relations','Performance Management','Learning & Development','HRIS (Workday)','Compensation & Benefits','Succession Planning','Organisational Development','Change Management','Employee Engagement','Training Needs Analysis','Competency Mapping','HR Analytics','Labour Law','Onboarding','Employer Branding','Coaching','Diversity & Inclusion']
+  };
+
+  function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+  function pickN(arr,min,max){var n=Math.floor(Math.random()*(max-min+1))+min;var copy=arr.slice();var result=[];for(var i=0;i<n&&copy.length;i++){var idx=Math.floor(Math.random()*copy.length);result.push(copy.splice(idx,1)[0])}return result}
+  function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+  function pad4(n){return ('0000'+n).slice(-4)}
+
+  var employees=[];
+  var empIdx=0;
+  locations.forEach(function(loc){
+    for(var i=0;i<loc.count;i++){
+      empIdx++;
+      var dept=function(){var r=Math.random(),cum=0;for(var d=0;d<departments.length;d++){cum+=departments[d].pct;if(r<cum)return departments[d]}return departments[0]}();
+      var role=pick(dept.roles);
+      var gender=pick(genders);
+      var fn=gender==='Male'?pick(firstNamesM):pick(firstNamesF);
+      var ln=pick(lastNames);
+      var fullName=fn+' '+ln;
+      var emailName=(fn+'.'+ln).toLowerCase().replace(/\s+/g,'').replace(/[^a-z.]/g,'');
+      var phonePrefix=pick(loc.phones);
+      var phone=phonePrefix+randInt(1000000,9999999);
+      var joinYear=randInt(2010,2024);
+      var joinMonth=randInt(1,12);
+      var joinDay=randInt(1,28);
+      var joinDate=joinYear+'-'+('0'+joinMonth).slice(-2)+'-'+('0'+joinDay).slice(-2);
+      var tenure=Math.round((2025-joinYear-(joinMonth>6?0:0.5))*10)/10;
+      if(tenure<0.5)tenure=0.5;
+      var totalExp=Math.max(tenure,randInt(Math.ceil(tenure),tenure+10));
+      var salary=randInt(role.sal[0],role.sal[1]);
+      var isCritical=role.level==='L5'||role.level==='L6'||Math.random()<0.12?'Yes':'No';
+      var hiPo=(role.level==='L3'||role.level==='L4')&&Math.random()<0.18?'Yes':'No';
+
+      employees.push({
+        id:'EMP-'+pad4(empIdx),
+        firstName:fn,lastName:ln,fullName:fullName,
+        email:emailName+'@arcova-infra.com',
+        phone:phone,gender:gender,
+        locationId:loc.id,location:loc.name,
+        department:dept.name,role:role.title,jobLevel:role.level,
+        education:pick(educations),reportsTo:dept.manager,
+        joinDate:joinDate,tenureYears:tenure,
+        salary:salary,employmentType:pick(empTypes),
+        criticalRole:isCritical,status:'Active',
+        totalExp:Math.round(totalExp),workMode:pick(workModes),
+        highPotential:hiPo,
+        skillProfileStatus:pick(skillStatuses),
+        careerPath:pick(careerPaths),
+        resumeFile:Math.random()>0.35?fn.toLowerCase()+'_'+ln.toLowerCase().replace(/\s+/g,'')+'_resume.pdf':'',
+        resumeUploadedAt:Math.random()>0.35?joinYear+'-'+('0'+randInt(1,12)).slice(-2)+'-'+('0'+randInt(1,28)).slice(-2):'',
+        resumeSkills:pickN(RESUME_SKILL_POOLS[dept.name]||RESUME_SKILL_POOLS['Corporate Services'],4,8).join(', ')
+      });
+    }
+  });
+  return employees;
+}
+
+function demoFillDataport() {
+  var steps = ['1a','1b','1c','1d'];
+  var stepLabels = ['Uploading Arcova Infrastructure employee file...','Parsing Employee_Master sheet...','Validating 812 employee records...','Importing employees...'];
+  var i = 0;
+  function nextStep() {
+    if (i < steps.length) {
+      goStep(steps[i]);
+      document.getElementById('wizNavInfo').textContent = stepLabels[i];
+      i++;
+      setTimeout(nextStep, 600);
+    } else {
+      var demoEmployees = generateArcovaDemoEmployees();
+
+      var totalCerts = 0;
+      var totalTrainingEntries = 0;
+      demoEmployees.forEach(function(e){
+        e.certCount = Math.floor(Math.random()*4)+1;
+        e.trainingHours = Math.floor(Math.random()*60)+20;
+        totalCerts += e.certCount;
+        totalTrainingEntries += Math.floor(e.trainingHours/8);
+      });
+
+      var importData = {
+        importedAt: new Date().toISOString(),
+        totalEmployees: demoEmployees.length,
+        totalCertificates: totalCerts,
+        totalTrainingEntries: totalTrainingEntries,
+        dataQuality: 94,
+        employees: demoEmployees
+      };
+
+      var json = JSON.stringify(importData);
+      try{sessionStorage.setItem('sip_dataport_import',json)}catch(ex){}
+      try{localStorage.setItem('sip_dataport_import',json)}catch(ex){}
+
+      document.getElementById('doneSummary').textContent =
+        importData.totalEmployees+' employee records imported \u00B7 '+
+        importData.totalCertificates+' certificates loaded \u00B7 '+
+        importData.totalTrainingEntries+' training history entries processed \u00B7 '+
+        importData.totalEmployees+' Skill Passports created';
+
+      document.getElementById('doneStats').innerHTML =
+        '<div class="ds-item"><div class="ds-val">'+importData.totalEmployees+'</div><div class="ds-key">Employees</div></div>'+
+        '<div class="ds-item"><div class="ds-val">'+importData.totalCertificates+'</div><div class="ds-key">Certificates</div></div>'+
+        '<div class="ds-item"><div class="ds-val">'+importData.totalTrainingEntries+'</div><div class="ds-key">Training entries</div></div>'+
+        '<div class="ds-item"><div class="ds-val">'+importData.dataQuality+'%</div><div class="ds-key">Data quality</div></div>';
+
+      confirmImport();
+    }
+  }
+  nextStep();
+}
+
+</script>
+
+<script>
+(function(){
+  var toast = document.createElement("div");
+  toast.id = "sip-toast";
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#ffffff;border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:'DM Sans',sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08);";
+  document.body.appendChild(toast);
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){
+      toast.style.opacity="0";
+      toast.style.transform="translateX(-50%) translateY(8px)";
+    }, 2400);
+  }
+  document.addEventListener("click", function(e){
+    var a = e.target.closest("a");
+    if(a && a.getAttribute("href") === "#"){
+      e.preventDefault();
+      var label = (a.textContent || "").trim().replace(/\s+/g," ").substring(0,36);
+      showToast(label + " \u2014 available in full platform");
+    }
+  });
+})();
+
+// ═══════════════════════════════════════════════════════
+// RESUME UPLOAD
+// ═══════════════════════════════════════════════════════
+function handleResumeUpload(input){
+  if(!input.files||!input.files.length)return;
+  var count=input.files.length;
+  var names=[];
+  for(var i=0;i<count;i++)names.push(input.files[i].name);
+  // Store resume filenames — try to match to employees by name pattern
+  var raw=null;
+  try{raw=sessionStorage.getItem('sip_dataport_import')}catch(e){}
+  if(!raw){try{raw=localStorage.getItem('sip_dataport_import')}catch(e){}}
+  if(raw){
+    try{
+      var data=JSON.parse(raw);
+      var matched=0;
+      names.forEach(function(fname){
+        // Try to match filename to employee (e.g. "priya_shankar_resume.pdf")
+        var clean=fname.toLowerCase().replace(/[_\-\.]/g,' ').replace(/resume|cv|pdf|docx|doc/gi,'').trim();
+        var parts=clean.split(/\s+/);
+        if(parts.length>=2){
+          var emp=data.employees.find(function(e){
+            return e.firstName.toLowerCase()===parts[0]&&e.lastName.toLowerCase().indexOf(parts[1])===0;
+          });
+          if(emp){emp.resumeFile=fname;emp.resumeUploadedAt=new Date().toISOString().substring(0,10);matched++}
+        }
+      });
+      var json=JSON.stringify(data);
+      try{sessionStorage.setItem('sip_dataport_import',json)}catch(e){}
+      try{localStorage.setItem('sip_dataport_import',json)}catch(e){}
+      showToast(count+' resume'+(count>1?'s':'')+' uploaded — '+matched+' matched to employees');
+    }catch(e){showToast(count+' resume'+(count>1?'s':'')+' uploaded')}
+  } else {
+    showToast(count+' resume'+(count>1?'s':'')+' uploaded — import employees first to auto-link');
+  }
+  input.value='';
+}
+
+// ═══════════════════════════════════════════════════════
+// INTEGRATIONS POPUP
+// ═══════════════════════════════════════════════════════
+// Logo URLs from official domains via clearbit logo API
+var INTEGRATIONS = [
+  // HRMS / HRIS
+  {cat:'HRMS / HRIS',name:'Workday',desc:'Cloud HCM & payroll',status:'connected',domain:'workday.com'},
+  {cat:'HRMS / HRIS',name:'SAP SuccessFactors',desc:'Enterprise HR suite',status:'available',domain:'sap.com'},
+  {cat:'HRMS / HRIS',name:'BambooHR',desc:'SMB-friendly HRIS',status:'available',domain:'bamboohr.com'},
+  {cat:'HRMS / HRIS',name:'Oracle HCM Cloud',desc:'Enterprise HR & talent',status:'available',domain:'oracle.com'},
+  {cat:'HRMS / HRIS',name:'ADP Workforce Now',desc:'Payroll & HR management',status:'available',domain:'adp.com'},
+  {cat:'HRMS / HRIS',name:'Darwinbox',desc:'APAC-focused HR platform',status:'available',domain:'darwinbox.com'},
+  {cat:'HRMS / HRIS',name:'Zoho People',desc:'HR management suite',status:'available',domain:'zoho.com'},
+  {cat:'HRMS / HRIS',name:'Keka HR',desc:'India-focused payroll & HR',status:'available',domain:'keka.com'},
+  {cat:'HRMS / HRIS',name:'Personio',desc:'EU HR & recruiting',status:'available',domain:'personio.com'},
+  {cat:'HRMS / HRIS',name:'HiBob',desc:'Modern people platform',status:'available',domain:'hibob.com'},
+
+  // LMS / LXP
+  {cat:'LMS / LXP',name:'Cornerstone OnDemand',desc:'Enterprise LMS & talent',status:'connected',domain:'cornerstoneondemand.com'},
+  {cat:'LMS / LXP',name:'SAP Litmos',desc:'Cloud learning platform',status:'available',domain:'litmos.com'},
+  {cat:'LMS / LXP',name:'Docebo',desc:'AI-powered LMS',status:'available',domain:'docebo.com'},
+  {cat:'LMS / LXP',name:'Absorb LMS',desc:'Flexible learning platform',status:'available',domain:'absorblms.com'},
+  {cat:'LMS / LXP',name:'360Learning',desc:'Collaborative learning',status:'available',domain:'360learning.com'},
+  {cat:'LMS / LXP',name:'Degreed',desc:'Upskilling & LXP',status:'available',domain:'degreed.com'},
+  {cat:'LMS / LXP',name:'EdCast (Cornerstone)',desc:'Learning experience platform',status:'available',domain:'edcast.com'},
+  {cat:'LMS / LXP',name:'TalentLMS',desc:'Easy-to-use LMS',status:'available',domain:'talentlms.com'},
+  {cat:'LMS / LXP',name:'Moodle',desc:'Open-source LMS',status:'available',domain:'moodle.org'},
+  {cat:'LMS / LXP',name:'Udemy Business',desc:'Marketplace-based learning',status:'available',domain:'udemy.com'},
+  {cat:'LMS / LXP',name:'LinkedIn Learning',desc:'Professional skill courses',status:'available',domain:'linkedin.com'},
+  {cat:'LMS / LXP',name:'Coursera for Business',desc:'University-grade learning',status:'available',domain:'coursera.org'},
+
+  // CRM
+  {cat:'CRM',name:'Salesforce',desc:'Enterprise CRM platform',status:'available',domain:'salesforce.com'},
+  {cat:'CRM',name:'HubSpot CRM',desc:'Inbound marketing & sales',status:'available',domain:'hubspot.com'},
+  {cat:'CRM',name:'Microsoft Dynamics 365',desc:'CRM & ERP suite',status:'available',domain:'microsoft.com'},
+  {cat:'CRM',name:'Zoho CRM',desc:'Affordable CRM',status:'available',domain:'zoho.com'},
+  {cat:'CRM',name:'Pipedrive',desc:'Sales pipeline CRM',status:'available',domain:'pipedrive.com'},
+  {cat:'CRM',name:'Freshsales (Freshworks)',desc:'AI-powered CRM',status:'available',domain:'freshworks.com'},
+  {cat:'CRM',name:'monday CRM',desc:'Work OS with CRM',status:'available',domain:'monday.com'},
+
+  // Knowledge Management Systems
+  {cat:'Knowledge Management',name:'Confluence',desc:'Team wiki & knowledge base',status:'available',domain:'atlassian.com'},
+  {cat:'Knowledge Management',name:'Notion',desc:'All-in-one workspace',status:'available',domain:'notion.so'},
+  {cat:'Knowledge Management',name:'SharePoint',desc:'Microsoft document management',status:'connected',domain:'microsoft.com'},
+  {cat:'Knowledge Management',name:'Guru',desc:'AI-powered knowledge base',status:'available',domain:'getguru.com'},
+  {cat:'Knowledge Management',name:'Bloomfire',desc:'Knowledge engagement',status:'available',domain:'bloomfire.com'},
+  {cat:'Knowledge Management',name:'Tettra',desc:'Company knowledge base',status:'available',domain:'tettra.com'},
+  {cat:'Knowledge Management',name:'Slite',desc:'Team knowledge hub',status:'available',domain:'slite.com'},
+  {cat:'Knowledge Management',name:'Document360',desc:'SaaS knowledge base',status:'available',domain:'document360.com'},
+  {cat:'Knowledge Management',name:'Nuclino',desc:'Lightweight wiki',status:'available',domain:'nuclino.com'}
+];
+
+function openIntegrations(){
+  document.getElementById('intgOverlay').classList.add('open');
+  renderIntegrations('');
+}
+function closeIntegrations(){
+  document.getElementById('intgOverlay').classList.remove('open');
+}
+function renderIntegrations(query){
+  var q = query.toLowerCase();
+  var filtered = INTEGRATIONS;
+  if(q) filtered = INTEGRATIONS.filter(function(i){return i.name.toLowerCase().indexOf(q)>=0 || i.cat.toLowerCase().indexOf(q)>=0 || i.desc.toLowerCase().indexOf(q)>=0});
+
+  var cats = {};
+  filtered.forEach(function(i){if(!cats[i.cat])cats[i.cat]=[];cats[i.cat].push(i)});
+  var catOrder = ['HRMS / HRIS','LMS / LXP','CRM','Knowledge Management'];
+
+  var h = '';
+  catOrder.forEach(function(cat){
+    if(!cats[cat]) return;
+    var items = cats[cat];
+    h += '<div class="intg-category">';
+    h += '<div class="intg-cat-label">' + cat + ' (' + items.length + ')</div>';
+    h += '<div class="intg-grid">';
+    items.forEach(function(i){
+      var cls = i.status === 'connected' ? 'active' : '';
+      var stCls = i.status === 'connected' ? 'connected' : 'available';
+      var stText = i.status === 'connected' ? 'Connected' : 'Available';
+      h += '<div class="intg-card ' + cls + '" onclick="toggleIntegration(this,\'' + i.name.replace(/'/g,"\\'") + '\')">';
+      h += '<div class="intg-logo"><img src="https://www.google.com/s2/favicons?sz=128&domain=' + i.domain + '" alt="" style="width:28px;height:28px;border-radius:4px;object-fit:contain" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<span style=font-size:15px;font-weight:700;color:var(--text-muted)>' + i.name.charAt(0) + '</span>\'"></div>';
+      h += '<div class="intg-info"><div class="intg-name">' + i.name + '</div><div class="intg-desc">' + i.desc + '</div></div>';
+      h += '<div class="intg-status ' + stCls + '">' + stText + '</div>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+  });
+
+  if(!filtered.length) h = '<div style="padding:32px;text-align:center;color:var(--text-muted);font-size:13px">No integrations match your search.</div>';
+
+  document.getElementById('intgGrid').innerHTML = h;
+}
+function filterIntegrations(val){
+  renderIntegrations(val);
+}
+function toggleIntegration(el, name){
+  var card = el;
+  var statusEl = card.querySelector('.intg-status');
+  if(card.classList.contains('active')){
+    card.classList.remove('active');
+    statusEl.className = 'intg-status available';
+    statusEl.textContent = 'Available';
+    showToast(name + ' disconnected');
+  } else {
+    card.classList.add('active');
+    statusEl.className = 'intg-status connected';
+    statusEl.textContent = 'Connected';
+    showToast(name + ' connected successfully');
+  }
+}
+</script>
+
+<!-- Integrations Modal -->
+<div class="intg-overlay" id="intgOverlay" onclick="if(event.target===this)closeIntegrations()">
+<div class="intg-modal">
+  <div class="intg-head">
+    <div class="intg-title">Platform Integrations <span style="font-size:12px;font-weight:400;color:var(--text-muted);margin-left:6px">100+ tools supported</span></div>
+    <button class="intg-close" onclick="closeIntegrations()">&times;</button>
+  </div>
+  <div class="intg-body">
+    <input class="intg-search" type="text" placeholder="Search integrations by name or category..." oninput="filterIntegrations(this.value)">
+    <div id="intgGrid"></div>
+  </div>
+</div>
+</div>
+
+</body>
+</html>

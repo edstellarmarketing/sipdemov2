@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edstellar SIP — Screen Flow Build Order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0e14;
+  --surface: #13161e;
+  --surface2: #1a1e29;
+  --border: rgba(255,255,255,0.07);
+  --border-hover: rgba(255,255,255,0.14);
+  --text: #e8eaf0;
+  --text-muted: #6b7280;
+  --text-dim: #3d4455;
+
+  --blue:   #3d7fff;
+  --blue-bg: rgba(61,127,255,0.10);
+  --blue-bd: rgba(61,127,255,0.25);
+
+  --purple:   #7c5af6;
+  --purple-bg: rgba(124,90,246,0.10);
+  --purple-bd: rgba(124,90,246,0.25);
+
+  --teal:   #0ea5e9;
+  --teal-bg: rgba(14,165,233,0.10);
+  --teal-bd: rgba(14,165,233,0.25);
+
+  --amber:   #f59e0b;
+  --amber-bg: rgba(245,158,11,0.10);
+  --amber-bd: rgba(245,158,11,0.25);
+
+  --green:   #22c55e;
+  --green-bg: rgba(34,197,94,0.10);
+  --green-bd: rgba(34,197,94,0.25);
+
+  --coral:   #f97316;
+  --coral-bg: rgba(249,115,22,0.10);
+  --coral-bd: rgba(249,115,22,0.25);
+
+  --pink:   #ec4899;
+  --pink-bg: rgba(236,72,153,0.10);
+  --pink-bd: rgba(236,72,153,0.25);
+
+  --indigo:   #818cf8;
+  --indigo-bg: rgba(129,140,248,0.10);
+  --indigo-bd: rgba(129,140,248,0.25);
+
+  --gray-bg: rgba(255,255,255,0.04);
+  --gray-bd: rgba(255,255,255,0.08);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0 0 80px;
+}
+
+/* ── HEADER ─────────────────────────────────────────── */
+.header {
+  padding: 56px 60px 48px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content:'';
+  position: absolute;
+  top: -120px; left: -80px;
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse at center, rgba(61,127,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.header-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 16px;
+}
+.header h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.header h1 em {
+  font-style: italic;
+  color: var(--text-muted);
+}
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.meta-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.meta-pill.total  { background: var(--blue-bg); border-color: var(--blue-bd); color: var(--blue); }
+.meta-pill.rule   { background: var(--gray-bg); border-color: var(--gray-bd); color: var(--text-muted); }
+
+/* ── LEGEND ──────────────────────────────────────────── */
+.legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 20px 60px;
+  border-bottom: 1px solid var(--border);
+}
+.leg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+.leg-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+
+/* ── LAYOUT ──────────────────────────────────────────── */
+.content {
+  padding: 0 60px;
+}
+
+/* ── PHASE BLOCK ─────────────────────────────────────── */
+.phase-block {
+  margin-top: 48px;
+}
+.phase-header {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.phase-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.phase-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+.phase-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-left: auto;
+}
+
+/* ── FLOW GRID ───────────────────────────────────────── */
+.flow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 10px;
+}
+
+/* ── FLOW CARD ───────────────────────────────────────── */
+.flow-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  cursor: default;
+  transition: border-color 0.18s, background 0.18s;
+  position: relative;
+  overflow: hidden;
+}
+.flow-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 10px 0 0 10px;
+  opacity: 0;
+  transition: opacity 0.18s;
+}
+.flow-card:hover {
+  background: var(--surface2);
+  border-color: var(--border-hover);
+}
+.flow-card:hover::before { opacity: 1; }
+
+/* colour variants */
+.fc-foundation::before { background: var(--blue); }
+.fc-foundation:hover { border-color: var(--blue-bd); }
+
+.fc-l1::before { background: var(--purple); }
+.fc-l1:hover { border-color: var(--purple-bd); }
+
+.fc-l2::before { background: var(--teal); }
+.fc-l2:hover { border-color: var(--teal-bd); }
+
+.fc-l3::before { background: var(--amber); }
+.fc-l3:hover { border-color: var(--amber-bd); }
+
+.fc-l45::before { background: var(--green); }
+.fc-l45:hover { border-color: var(--green-bd); }
+
+.fc-market::before { background: var(--coral); }
+.fc-market:hover { border-color: var(--coral-bd); }
+
+.fc-internal::before { background: var(--pink); }
+.fc-internal:hover { border-color: var(--pink-bd); }
+
+.fc-saas::before { background: var(--indigo); }
+.fc-saas:hover { border-color: var(--indigo-bd); }
+
+/* flow number badge */
+.flow-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.fc-foundation .flow-num { background: var(--blue-bg); color: var(--blue); }
+.fc-l1         .flow-num { background: var(--purple-bg); color: var(--purple); }
+.fc-l2         .flow-num { background: var(--teal-bg); color: var(--teal); }
+.fc-l3         .flow-num { background: var(--amber-bg); color: var(--amber); }
+.fc-l45        .flow-num { background: var(--green-bg); color: var(--green); }
+.fc-market     .flow-num { background: var(--coral-bg); color: var(--coral); }
+.fc-internal   .flow-num { background: var(--pink-bg); color: var(--pink); }
+.fc-saas       .flow-num { background: var(--indigo-bg); color: var(--indigo); }
+
+.flow-body { flex: 1; min-width: 0; }
+.flow-title {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+.flow-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.flow-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+.flow-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text-dim);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ── ORDERING LOGIC BAR ──────────────────────────────── */
+.logic-bar {
+  margin: 40px 60px 0;
+  padding: 20px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.logic-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1;
+  min-width: 200px;
+}
+.logic-icon {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--blue);
+  padding: 3px 8px;
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-bd);
+  border-radius: 4px;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+.logic-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ── DIVIDER ─────────────────────────────────────────── */
+.phase-divider {
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+  margin: 40px 0 0;
+}
+
+/* ── FOOTER ──────────────────────────────────────────── */
+.footer {
+  margin-top: 64px;
+  padding: 24px 60px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.footer-text {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.footer-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--blue);
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-bd);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-eyebrow">Edstellar Skills Intelligence Platform</div>
+  <h1>Screen flow build order<br><em>67 flows across 8 phases</em></h1>
+  <div class="header-meta">
+    <span class="meta-pill total">67 total flows</span>
+    <span class="meta-pill rule">Data dependency first</span>
+    <span class="meta-pill rule">Commercial value second</span>
+    <span class="meta-pill rule">L1 gates L2 · L2 gates L3</span>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:var(--blue)"></div> Foundation</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--purple)"></div> L1 Context Setting</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--teal)"></div> L2 Assessment & Analysis</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--amber)"></div> L3 Training Execution</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--green)"></div> L4/L5 Intelligence & Planning</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--coral)"></div> Marketplace</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--pink)"></div> Edstellar Internal</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--indigo)"></div> SaaS Platform Admin</div>
+</div>
+
+<!-- ORDERING LOGIC -->
+<div class="logic-bar">
+  <div class="logic-item">
+    <span class="logic-icon">Rule 1</span>
+    <span class="logic-text">Data dependency first. A flow is only buildable once the data it reads from exists.</span>
+  </div>
+  <div class="logic-item">
+    <span class="logic-icon">Rule 2</span>
+    <span class="logic-text">Flows that unblock the most downstream work come before flows that depend on them.</span>
+  </div>
+  <div class="logic-item">
+    <span class="logic-icon">Rule 3</span>
+    <span class="logic-text">Admin and infrastructure flows precede the user-facing flows they power.</span>
+  </div>
+  <div class="logic-item">
+    <span class="logic-icon">Rule 4</span>
+    <span class="logic-text">Internal Edstellar tools come last — they read from a live, populated platform.</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ════════════════════════════════════════
+     PHASE 0 — FOUNDATION
+════════════════════════════════════════ -->
+<div class="phase-block">
+  <div class="phase-header">
+    <span class="phase-label" style="background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd)">Foundation</span>
+    <span class="phase-name">No dependencies — must exist before everything else</span>
+    <span class="phase-count">Flows 1–2</span>
+  </div>
+  <div class="flow-grid">
+
+    <div class="flow-card fc-foundation">
+      <div class="flow-num">01</div>
+      <div class="flow-body">
+        <div class="flow-title">Authentication and portal routing</div>
+        <div class="flow-sub">Sign-up, login, MFA, SSO, role-based portal dispatch to Admin / Manager / Employee portals</div>
+        <div class="flow-tags"><span class="flow-tag">All portals</span><span class="flow-tag">All roles</span><span class="flow-tag">Multi-tenant</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-foundation">
+      <div class="flow-num">02</div>
+      <div class="flow-body">
+        <div class="flow-title">Organisation onboarding and context setup</div>
+        <div class="flow-sub">Org identity → hierarchy builder → strategic context → AI pipeline → 3-tier approval → FrameworkBible → InsightBoard L1 → L2 gate unlock</div>
+        <div class="flow-tags"><span class="flow-tag">Super Admin</span><span class="flow-tag">OrgSetup</span><span class="flow-tag">SkillForge</span><span class="flow-tag">ApprovalHub</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PHASE 1 — L1 CONTEXT SETTING
+════════════════════════════════════════ -->
+<div class="phase-block">
+  <div class="phase-header">
+    <span class="phase-label" style="background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd)">L1 — Context Setting</span>
+    <span class="phase-name">After foundation. All must complete before L2 begins.</span>
+    <span class="phase-count">Flows 3–14</span>
+  </div>
+  <div class="flow-grid">
+
+    <div class="flow-card fc-l1">
+      <div class="flow-num">03</div>
+      <div class="flow-body">
+        <div class="flow-title">DataPort — Excel import and validation wizard</div>
+        <div class="flow-sub">Upload, client-side parse, sheet-by-sheet preview, row-level error highlighting, skip-or-fix workflow, Data Context Meter, import confirmation</div>
+        <div class="flow-tags"><span class="flow-tag">Super Admin</span><span class="flow-tag">DataPort</span><span class="flow-tag">Screens 1A–1D</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l1">
+      <div class="flow-num">04</div>
+      <div class="flow-body">
+        <div class="flow-title">DataPort — Manual employee entry and inline record editing</div>
+        <div class="flow-sub">Add single employee, edit individual record fields, add certification or training, manage team membership — all without file upload. Duplicate detection and real-time Context Meter update.</div>
+        <div class="flow-tags"><span class="flow-tag">HR Admin</span><span class="flow-tag">DataPort</span><span class="flow-tag">Manual Entry</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l1">
+      <div class="flow-num">05</div>
+      <div class="flow-body">
+        <div class="flow-title">DataPort — HRIS sync configuration and delta review</div>
+        <div class="flow-sub">Connect Workday / BambooHR / SAP, map fields, run first sync, review delta (new / changed / removed), commit or reject changes</div>
+        <div class="flow-tags"><span class="flow-tag">Super Admin</span><span class="flow-tag">HRIS Sync</span><span class="flow-tag">Delta Import</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l1">
+      <div class="flow-num">06</div>
+      <div class="flow-body">
+        <div class="flow-title">SkillForge — AI pipeline trigger, prompt progress, and output preview</div>
+        <div class="flow-sub">Trigger button, real-time prompt-by-prompt progress (1 of 7 → 7 of 7), output preview of generated skills and competencies, pipeline status and error handling</div>
+        <div class="flow-tags"><span class="flow-tag">Super Admin</span><span class="flow-tag">SkillForge</span><span class="flow-tag">7-Prompt Pipeline</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l1">
+      <div class="flow-num">07</div>
+      <div class="flow-body">
+        <div class="flow-title">ApprovalHub — Tier 1 Admin review and edit</div>
+        <div class="flow-sub">Review AI-generated skills and competencies, inline editing, flag items for Tier 2 attention, partial approval, audit trail per edit, submit to Tier 2</div>
+        <div class="flow-tags"><span class="flow-tag">Admin</span><span class="flow-tag">ApprovalHub</span><span class="flow-tag">Tier 1</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l1">
+      <div class="flow-num">08</div>
+      <div class="flow-body">
+        <div class="flow-title">ApprovalHub — Tier 2 Department Head review</div>
+        <div class="flow-sub">Department-scoped view, review flagged items, approve or edit skills within their remit, resolve flags raised by Tier 1, submit to Tier 3</div>
+        <div class="flow-tags"><span class="flow-tag">Dept Head</span><span class="flow-tag">ApprovalHub</span><span class="flow-tag">Tier 2</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l1">
+      <div class="flow-num">09</div>
+      <div class="flow-body">
+        <div class="flow-title">ApprovalHub — Tier 3 HR Head publish and FrameworkBible lock</div>
+        <div class="flow-sub">Org-wide rollup view, department approval status, review all pending flags, Approve and Publish All action, FrameworkBible auto-generated and locked at Version 1.0</div>
+        <div class="flow-tags"><span class="flow-tag">HR Head</span><span class="flow-tag">ApprovalHub</span><span class="flow-tag">Tier 3</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l1">
+      <div class="flow-num">10</div>
+      <div class="flow-body">
+        <div class="flow-title">FrameworkBible — view, version history, and PDF export</div>
+        <div class="flow-sub">Read-only published framework dictionary with taxonomy hierarchy, version history, Super Admin edit flow with re-approval trigger, branded PDF export</div>
+        <div class="flow-tags"><span class="flow-tag">All roles</span><span class="flow-tag">FrameworkBible</span><span class="flow-tag">M5</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l1">
+      <div class="flow-num">11</div>
+      <div class="flow-body">
+        <div class="flow-title">InsightBoard — L1 persona dashboards</div>
+        <div class="flow-sub">All 5 persona views (CHRO, CLO, HR Manager, L&D Manager, HRBP), AI-estimated data clearly labelled, 56 charts, global filters, AI conversational layer on every widget</div>
+        <div class="flow-tags"><span class="flow-tag">All admin roles</span><span class="flow-tag">InsightBoard</span><span class="flow-tag">AI-estimated</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l1">
+      <div class="flow-num">12</div>
+      <div class="flow-body">
+        <div class="flow-title">ReportGen — L1 Completion Report generation and download</div>
+        <div class="flow-sub">Auto-generate branded PDF on FrameworkBible publish, executive summary, org DNA, risk/opportunity matrix, shareable link, next steps CTA</div>
+        <div class="flow-tags"><span class="flow-tag">HR Head</span><span class="flow-tag">ReportGen</span><span class="flow-tag">PDF Export</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l1">
+      <div class="flow-num">13</div>
+      <div class="flow-body">
+        <div class="flow-title">Employee Scope Management — rule configuration and individual override</div>
+        <div class="flow-sub">Set Scope Status rules by employment type or department, individual overrides with mandatory reason, scope preview before applying, audit trail of all changes</div>
+        <div class="flow-tags"><span class="flow-tag">HR Admin</span><span class="flow-tag">Scope Status</span><span class="flow-tag">DataPort</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l1">
+      <div class="flow-num">14</div>
+      <div class="flow-body">
+        <div class="flow-title">Skill Passport — employee profile view (Admin perspective, L1 state)</div>
+        <div class="flow-sub">Employee record with AI-estimated baselines, certifications, training history, QR/barcode, export flow, credential distribution management</div>
+        <div class="flow-tags"><span class="flow-tag">HR Admin</span><span class="flow-tag">SkillPassport</span><span class="flow-tag">L1 state</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PHASE 2 — L2 ASSESSMENT & ANALYSIS
+════════════════════════════════════════ -->
+<div class="phase-block">
+  <div class="phase-header">
+    <span class="phase-label" style="background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-bd)">L2 — Assessment & Analysis</span>
+    <span class="phase-name">Requires L1 FrameworkBible published. All must complete before L3.</span>
+    <span class="phase-count">Flows 15–32</span>
+  </div>
+  <div class="flow-grid">
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">15</div>
+      <div class="flow-body">
+        <div class="flow-title">Assessment Distribution Engine — cycle creation, targeting, and dispatch</div>
+        <div class="flow-sub">Create cycle, configure population (hierarchy / role / scope filters), exclusion rules, schedule, preview headcount, dispatch, 8-status tracking dashboard, reminders and escalation</div>
+        <div class="flow-tags"><span class="flow-tag">L&D Manager</span><span class="flow-tag">HR Admin</span><span class="flow-tag">AssessEngine</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">16</div>
+      <div class="flow-body">
+        <div class="flow-title">AssessEngine — Skills and competency assessment (manager + self)</div>
+        <div class="flow-sub">Simultaneous manager and self-rating, AI-estimated baseline shown as starting reference, per-skill proficiency slider, observation notes, auto-save every 60s, submit</div>
+        <div class="flow-tags"><span class="flow-tag">Manager</span><span class="flow-tag">Employee</span><span class="flow-tag">Category A</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">17</div>
+      <div class="flow-body">
+        <div class="flow-title">AssessEngine — Psychometric and behavioural assessment</div>
+        <div class="flow-sub">Third-party instrument delivery (Big 5, DISC, MBTI, cognitive ability), secure authenticated session, results capture to Skill Passport, profile generation</div>
+        <div class="flow-tags"><span class="flow-tag">Employee</span><span class="flow-tag">Category B</span><span class="flow-tag">Psychometric</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">18</div>
+      <div class="flow-body">
+        <div class="flow-title">AssessEngine — Knowledge test builder and delivery</div>
+        <div class="flow-sub">AI-built or manual question bank, multiple choice and scenario-based, pre/post/retention test scheduling, automatic scoring, pre-post delta calculation</div>
+        <div class="flow-tags"><span class="flow-tag">L&D Manager</span><span class="flow-tag">Employee</span><span class="flow-tag">Category C</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">19</div>
+      <div class="flow-body">
+        <div class="flow-title">AssessEngine — 360-degree feedback (rater assignment and collection)</div>
+        <div class="flow-sub">Rater assignment per ratee, tokenised external rater access, anonymity enforcement (minimum rater threshold), rater replacement flow, perception gap aggregation</div>
+        <div class="flow-tags"><span class="flow-tag">HR Admin</span><span class="flow-tag">All raters</span><span class="flow-tag">Category D</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">20</div>
+      <div class="flow-body">
+        <div class="flow-title">AssessEngine — Org survey builder and distribution</div>
+        <div class="flow-sub">Engagement, change readiness, culture pulse, strategy alignment surveys; anonymous response collection; aggregate-only results dashboard; trend tracking</div>
+        <div class="flow-tags"><span class="flow-tag">L&D Manager</span><span class="flow-tag">All employees</span><span class="flow-tag">Category E</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">21</div>
+      <div class="flow-body">
+        <div class="flow-title">AssessEngine — L&D discovery session capture</div>
+        <div class="flow-sub">Structured 1:1 meeting notes form, focus group observation capture, AI theme extraction across sessions, employee-declared learning need feeds LNA multiplier</div>
+        <div class="flow-tags"><span class="flow-tag">L&D Manager</span><span class="flow-tag">Employee</span><span class="flow-tag">Category F</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">22</div>
+      <div class="flow-body">
+        <div class="flow-title">Skills Matrix — self + manager rating, heat map, perception gap</div>
+        <div class="flow-sub">Employee × skill grid, current vs required proficiency, heat map colour coding by gap severity, perception gap flag, concentration risk flag, team/dept/org drill-down</div>
+        <div class="flow-tags"><span class="flow-tag">Manager</span><span class="flow-tag">HR Manager</span><span class="flow-tag">Skills Matrix</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">23</div>
+      <div class="flow-body">
+        <div class="flow-title">Task Evaluation Layer — frequency and confidence rating</div>
+        <div class="flow-sub">Task × employee grid, frequency scale (Daily / Weekly / Monthly / Rarely), confidence scale (Never / Guided / Independent / Coaches Others), task criticality flag, task-to-skill linkage</div>
+        <div class="flow-tags"><span class="flow-tag">Manager</span><span class="flow-tag">Employee</span><span class="flow-tag">Task Evaluation</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">24</div>
+      <div class="flow-body">
+        <div class="flow-title">Gap Analysis — individual, role, department, and org heat map</div>
+        <div class="flow-sub">Four views of the same gap data; talent mobility signal (surplus proficiency cells); strategic gap risk scoring; drill-down from org to individual</div>
+        <div class="flow-tags"><span class="flow-tag">HR Manager</span><span class="flow-tag">HRBP</span><span class="flow-tag">Gap Analysis</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">25</div>
+      <div class="flow-body">
+        <div class="flow-title">Weighted LNA/TNA engine — gap score output and intervention classification</div>
+        <div class="flow-sub">5-multiplier weighted gap score per employee-skill pair, AI intervention type classification (7 types), TNA filtered brief, content commissioning flags for unmatched gaps</div>
+        <div class="flow-tags"><span class="flow-tag">L&D Manager</span><span class="flow-tag">HR Head</span><span class="flow-tag">LNA Engine</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">26</div>
+      <div class="flow-body">
+        <div class="flow-title">LNI — individual learning needs brief per employee</div>
+        <div class="flow-sub">8-component personalised brief: who, what, intervention type, sequence, aspiration vs role priorities, experience gaps from CV, dev timeline, success indicators</div>
+        <div class="flow-tags"><span class="flow-tag">Manager</span><span class="flow-tag">Employee</span><span class="flow-tag">LNI</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">27</div>
+      <div class="flow-body">
+        <div class="flow-title">LearnPath — AI-generated personalised learning path and IDP</div>
+        <div class="flow-sub">AI learning path with wellbeing-adjusted timeline, IDP with aspiration vs role blend, Fast / Standard / Minimum viable tracks, manager co-approval, milestone tracking</div>
+        <div class="flow-tags"><span class="flow-tag">Employee</span><span class="flow-tag">Manager</span><span class="flow-tag">LearnPath</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">28</div>
+      <div class="flow-body">
+        <div class="flow-title">Succession Planning — pipeline view, readiness banding, risk alerts</div>
+        <div class="flow-sub">Critical role designation, candidate pipeline per role, Ready Now / 12M / 24M / Development Required banding, AI risk alerts, what-if modelling</div>
+        <div class="flow-tags"><span class="flow-tag">HR Head</span><span class="flow-tag">CHRO</span><span class="flow-tag">Succession</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">29</div>
+      <div class="flow-body">
+        <div class="flow-title">Wellbeing Intelligence — pulse survey, burnout risk dashboard, manager prompt</div>
+        <div class="flow-sub">Anonymous pulse survey delivery, AI Burnout Risk Score composite (Low/Moderate/Elevated/High), team aggregate dashboard, manager conversation prompt, dev timeline adjustment</div>
+        <div class="flow-tags"><span class="flow-tag">Employee</span><span class="flow-tag">Manager</span><span class="flow-tag">Wellbeing</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">30</div>
+      <div class="flow-body">
+        <div class="flow-title">InsightBoard — L2 transition (AI-estimated → validated data)</div>
+        <div class="flow-sub">All 5 persona dashboards update from AI-estimated to validated proficiencies post-assessment cycle, data provenance labels change, new L2 widgets unlock</div>
+        <div class="flow-tags"><span class="flow-tag">All admin roles</span><span class="flow-tag">InsightBoard</span><span class="flow-tag">L2 state</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">31</div>
+      <div class="flow-body">
+        <div class="flow-title">ReportGen — L2 reports</div>
+        <div class="flow-sub">LNA report, TNA report, Skills Matrix report, Wellbeing report, Perception Gap analysis — all with AI narrative, persona-adaptive rendering, PDF and PPT export</div>
+        <div class="flow-tags"><span class="flow-tag">HR Head</span><span class="flow-tag">L&D Manager</span><span class="flow-tag">ReportGen</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l2">
+      <div class="flow-num">32</div>
+      <div class="flow-body">
+        <div class="flow-title">Skill Passport — employee self-service view (L2 state)</div>
+        <div class="flow-sub">Employee portal showing validated proficiencies, IDP, learning path progress, certifications, badges, career timeline, QR export, mobile app parity</div>
+        <div class="flow-tags"><span class="flow-tag">Employee</span><span class="flow-tag">SkillPassport</span><span class="flow-tag">L2 validated</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PHASE 3 — L3 TRAINING EXECUTION
+════════════════════════════════════════ -->
+<div class="phase-block">
+  <div class="phase-header">
+    <span class="phase-label" style="background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)">L3 — Training Execution</span>
+    <span class="phase-name">Requires at least one full L2 assessment cycle. Unlocks after >80% employees validated.</span>
+    <span class="phase-count">Flows 33–41</span>
+  </div>
+  <div class="flow-grid">
+
+    <div class="flow-card fc-l3">
+      <div class="flow-num">33</div>
+      <div class="flow-body">
+        <div class="flow-title">AI Content Outline Generation — gap-to-brief, structure, trainer delivery</div>
+        <div class="flow-sub">Gap brief input → AI-generated programme outline (audience analysis, learning outcomes, module structure, measurement plan), trainer receives brief on booking confirmation</div>
+        <div class="flow-tags"><span class="flow-tag">L&D Manager</span><span class="flow-tag">Trainer</span><span class="flow-tag">AI Content</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l3">
+      <div class="flow-num">34</div>
+      <div class="flow-body">
+        <div class="flow-title">L&D/OD Project Management Engine — project creation and tracking</div>
+        <div class="flow-sub">8 project types, milestone creation, activity management, budget tracking, AI project suggestion from TNA, project status dashboard</div>
+        <div class="flow-tags"><span class="flow-tag">L&D Manager</span><span class="flow-tag">M14</span><span class="flow-tag">Project Engine</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l3">
+      <div class="flow-num">35</div>
+      <div class="flow-body">
+        <div class="flow-title">Org-Wide Execution Plan — AI-suggested sequenced intervention plan</div>
+        <div class="flow-sub">AI sequences all interventions across the full population, dependency management, budget allocation by department, build vs buy vs train decision, TMS/LMS auto-enrolment</div>
+        <div class="flow-tags"><span class="flow-tag">L&D Manager</span><span class="flow-tag">HR Head</span><span class="flow-tag">Execution Plan</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l3">
+      <div class="flow-num">36</div>
+      <div class="flow-body">
+        <div class="flow-title">TrainConnect — course marketplace browsing and enrolment</div>
+        <div class="flow-sub">Browse and search by skill / level / format / vendor, AI-matched recommendations from TNA, enrolment flow, cohort grouping, calendar scheduling</div>
+        <div class="flow-tags"><span class="flow-tag">L&D Manager</span><span class="flow-tag">Employee</span><span class="flow-tag">TrainConnect</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l3">
+      <div class="flow-num">37</div>
+      <div class="flow-body">
+        <div class="flow-title">TrainConnect — LMS integration and SCORM/xAPI delivery tracking</div>
+        <div class="flow-sub">LMS connector configuration, SCORM/xAPI launch and completion tracking, progress sync back to Skill Passport, post-training reassessment trigger</div>
+        <div class="flow-tags"><span class="flow-tag">L&D Manager</span><span class="flow-tag">Employee</span><span class="flow-tag">LMS</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l3">
+      <div class="flow-num">38</div>
+      <div class="flow-body">
+        <div class="flow-title">Certificate Engine — template builder, auto-issuance, QR verification</div>
+        <div class="flow-sub">Branded template designer, auto-issuance on completion trigger, email + portal distribution, LinkedIn share, QR verification endpoint, expiry and renewal alerts</div>
+        <div class="flow-tags"><span class="flow-tag">L&D Manager</span><span class="flow-tag">Employee</span><span class="flow-tag">Certificates</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l3">
+      <div class="flow-num">39</div>
+      <div class="flow-body">
+        <div class="flow-title">Coaching and Mentoring Management — AI matching and programme tracking</div>
+        <div class="flow-sub">AI coach/mentor matching (methodology, accreditation, availability), structured programme setup, milestone tracking, session note capture, competency change measurement</div>
+        <div class="flow-tags"><span class="flow-tag">L&D Manager</span><span class="flow-tag">Employee</span><span class="flow-tag">Coaching</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l3">
+      <div class="flow-num">40</div>
+      <div class="flow-body">
+        <div class="flow-title">Kirkpatrick Measurement — L1–L4 data collection and effectiveness report</div>
+        <div class="flow-sub">L1 reaction survey, L2 knowledge test delta, L3 behaviour change assessment (30/60/90 days post-training), L4 KPI correlation, effectiveness report per programme</div>
+        <div class="flow-tags"><span class="flow-tag">Employee</span><span class="flow-tag">Manager</span><span class="flow-tag">Kirkpatrick</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l3">
+      <div class="flow-num">41</div>
+      <div class="flow-body">
+        <div class="flow-title">ReportGen — L3 reports</div>
+        <div class="flow-sub">Training Effectiveness report, Certificate Registry, Compliance Status report — all with Kirkpatrick data, ROI per programme, AI recommendations for redesign or retirement</div>
+        <div class="flow-tags"><span class="flow-tag">CLO</span><span class="flow-tag">L&D Manager</span><span class="flow-tag">ReportGen</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PHASE 4 — L4/L5 INTELLIGENCE
+════════════════════════════════════════ -->
+<div class="phase-block">
+  <div class="phase-header">
+    <span class="phase-label" style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)">L4/L5 — Intelligence & Strategic Planning</span>
+    <span class="phase-name">Requires L3 training data. L5 requires 90+ days of continuous tracking.</span>
+    <span class="phase-count">Flows 42–49</span>
+  </div>
+  <div class="flow-grid">
+
+    <div class="flow-card fc-l45">
+      <div class="flow-num">42</div>
+      <div class="flow-body">
+        <div class="flow-title">PulseStrategy — real-time skill tracking and external signal integration</div>
+        <div class="flow-sub">Connect Jira, Salesforce, GitHub, calendar; automated proficiency micro-updates from project signals; update source labelling in Skill Passport</div>
+        <div class="flow-tags"><span class="flow-tag">Super Admin</span><span class="flow-tag">PulseStrategy</span><span class="flow-tag">Integrations</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l45">
+      <div class="flow-num">43</div>
+      <div class="flow-body">
+        <div class="flow-title">Predictive and Proactive Engine — forecasting, alerts, and auto-triggers</div>
+        <div class="flow-sub">Emerging gap forecasting (3–12 month horizon), early warning alerts to managers and HR, pre-emptive LNA cycle trigger, predictive IDP updates, wellbeing manager prompts</div>
+        <div class="flow-tags"><span class="flow-tag">HR Head</span><span class="flow-tag">Manager</span><span class="flow-tag">Predictive</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l45">
+      <div class="flow-num">44</div>
+      <div class="flow-body">
+        <div class="flow-title">Workforce Transformation Control — Transformation Dial and Meter</div>
+        <div class="flow-sub">Dial settings (−5 to +5 per skill domain), impact preview before applying, change governance workflow, staged rollout, Transformation Meter vs Year 1/2/3 targets</div>
+        <div class="flow-tags"><span class="flow-tag">HR Head</span><span class="flow-tag">CHRO</span><span class="flow-tag">Transformation</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l45">
+      <div class="flow-num">45</div>
+      <div class="flow-body">
+        <div class="flow-title">Scenario Modelling — what-if analysis and M&A skill due diligence</div>
+        <div class="flow-sub">Scenario creation (e.g. "what if this role disappears"), comparative analysis output, M&A target skill gap overlay, board-ready scenario report</div>
+        <div class="flow-tags"><span class="flow-tag">CHRO</span><span class="flow-tag">Board</span><span class="flow-tag">PulseStrategy L5</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l45">
+      <div class="flow-num">46</div>
+      <div class="flow-body">
+        <div class="flow-title">PulseStrategy — board-level dashboards and executive reporting</div>
+        <div class="flow-sub">Multi-year investment planning, board-ready visualisations, transformation roadmap, workforce strategy report with AI narrative, executive-ready PDF and PowerPoint</div>
+        <div class="flow-tags"><span class="flow-tag">Board</span><span class="flow-tag">CHRO</span><span class="flow-tag">L5</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l45">
+      <div class="flow-num">47</div>
+      <div class="flow-body">
+        <div class="flow-title">Cross-Org Benchmarking — benchmark dimensions and premium report access</div>
+        <div class="flow-sub">6 benchmark dimensions, anonymised peer group data (min 10 orgs per cell), opt-in contribution settings, standalone industry benchmark report purchase</div>
+        <div class="flow-tags"><span class="flow-tag">CHRO</span><span class="flow-tag">CLO</span><span class="flow-tag">Benchmarking</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l45">
+      <div class="flow-num">48</div>
+      <div class="flow-body">
+        <div class="flow-title">Skill Passport Verification — hiring company portal and ATS integration</div>
+        <div class="flow-sub">4 verification tiers, employee consent and control flow, hiring company portal with bulk verification, ATS integration (Workday Recruiting, Greenhouse, Lever)</div>
+        <div class="flow-tags"><span class="flow-tag">Hiring Co</span><span class="flow-tag">Employee</span><span class="flow-tag">Verification</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-l45">
+      <div class="flow-num">49</div>
+      <div class="flow-body">
+        <div class="flow-title">Public API and Developer Portal — key management and rate limit dashboard</div>
+        <div class="flow-sub">API key generation, scope permissions, rate limit tiers, Swagger documentation, sandbox with NovaTech data, SDK downloads, webhook configuration</div>
+        <div class="flow-tags"><span class="flow-tag">Super Admin</span><span class="flow-tag">Developer</span><span class="flow-tag">API</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PHASE 5 — MARKETPLACE
+════════════════════════════════════════ -->
+<div class="phase-block">
+  <div class="phase-header">
+    <span class="phase-label" style="background:var(--coral-bg);color:var(--coral);border:1px solid var(--coral-bd)">Marketplace</span>
+    <span class="phase-name">Can be built in parallel with L4/L5 once L3 is stable. Reads from live TNA data.</span>
+    <span class="phase-count">Flows 50–53</span>
+  </div>
+  <div class="flow-grid">
+
+    <div class="flow-card fc-market">
+      <div class="flow-num">50</div>
+      <div class="flow-body">
+        <div class="flow-title">Trainer and Coach Platform — profile builder and self-service dashboard</div>
+        <div class="flow-sub">Profile creation (public teaser + full profile), qualifications and accreditations, rate card, availability calendar, earnings dashboard, performance analytics, opportunity inbox</div>
+        <div class="flow-tags"><span class="flow-tag">Trainer</span><span class="flow-tag">Coach</span><span class="flow-tag">Trainer Platform</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-market">
+      <div class="flow-num">51</div>
+      <div class="flow-body">
+        <div class="flow-title">Trainer and Coach Platform — search, credit-based discovery, booking flow</div>
+        <div class="flow-sub">Gap-matched search, public teaser preview, credit unlock for full profile, 8-step booking workflow, escrow payment, AI Content Outline delivery to trainer on confirmation</div>
+        <div class="flow-tags"><span class="flow-tag">Client org</span><span class="flow-tag">Training Co</span><span class="flow-tag">Credits</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-market">
+      <div class="flow-num">52</div>
+      <div class="flow-body">
+        <div class="flow-title">Training Vendor Platform — vendor profile, gap brief, proposal submission</div>
+        <div class="flow-sub">Vendor profile and capability listing, gap brief receipt from client, structured RFP response, side-by-side proposal comparison view, AI analysis, selection with audit trail</div>
+        <div class="flow-tags"><span class="flow-tag">Vendor</span><span class="flow-tag">Client org</span><span class="flow-tag">Vendor Platform</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-market">
+      <div class="flow-num">53</div>
+      <div class="flow-body">
+        <div class="flow-title">Referral Programme — submission, pipeline tracking, commission dashboard</div>
+        <div class="flow-sub">4 referral type submission forms, unique trackable referral URL, 9-status pipeline view, partner tier progress, commission tracker, tax documentation export</div>
+        <div class="flow-tags"><span class="flow-tag">Trainer</span><span class="flow-tag">Partner</span><span class="flow-tag">Referral</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PHASE 6 — EDSTELLAR INTERNAL
+════════════════════════════════════════ -->
+<div class="phase-block">
+  <div class="phase-header">
+    <span class="phase-label" style="background:var(--pink-bg);color:var(--pink);border:1px solid var(--pink-bd)">Edstellar Internal</span>
+    <span class="phase-name">Built last. Reads from a live, populated platform. Edstellar team only.</span>
+    <span class="phase-count">Flows 54–59</span>
+  </div>
+  <div class="flow-grid">
+
+    <div class="flow-card fc-internal">
+      <div class="flow-num">54</div>
+      <div class="flow-body">
+        <div class="flow-title">Opportunity Intelligence Dashboard — gap pipeline and proposal pipeline</div>
+        <div class="flow-sub">Aggregate unaddressed gaps across all client orgs, match scores, opportunity size, Transformation Dial forward signals, proposal stage tracking, revenue forecast, network utilisation</div>
+        <div class="flow-tags"><span class="flow-tag">Account Manager</span><span class="flow-tag">Commercial Director</span><span class="flow-tag">Internal</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-internal">
+      <div class="flow-num">55</div>
+      <div class="flow-body">
+        <div class="flow-title">AI Proposal Engine — generation, review, edit, and one-click send</div>
+        <div class="flow-sub">Auto-generated proposal (7 components) from opportunity trigger, account manager review queue, edit interface, one-click send to client, read receipt, won/lost tracking</div>
+        <div class="flow-tags"><span class="flow-tag">Account Manager</span><span class="flow-tag">Proposal Engine</span><span class="flow-tag">Internal</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-internal">
+      <div class="flow-num">56</div>
+      <div class="flow-body">
+        <div class="flow-title">Admin Console — client master switches and feature enablement</div>
+        <div class="flow-sub">Per-client feature toggles (10 master switches), credit tier configuration, complimentary credit grants, commercial agreement reference logging, change requires sign-off</div>
+        <div class="flow-tags"><span class="flow-tag">Marketplace Ops</span><span class="flow-tag">Admin Console</span><span class="flow-tag">Internal</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-internal">
+      <div class="flow-num">57</div>
+      <div class="flow-body">
+        <div class="flow-title">Admin Console — commission and credit pricing management</div>
+        <div class="flow-sub">Commission rates by category, engagement type, value band, client tier; credit pricing by buyer type and tier; revenue simulation before any rate change; audit trail</div>
+        <div class="flow-tags"><span class="flow-tag">Commercial Director</span><span class="flow-tag">Finance</span><span class="flow-tag">Internal</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-internal">
+      <div class="flow-num">58</div>
+      <div class="flow-body">
+        <div class="flow-title">Admin Console — marketplace operations and network health dashboard</div>
+        <div class="flow-sub">Platform health metrics (live), revenue dashboard by stream, network health (topic coverage map, trainer attrition, onboarding pipeline), dispute analytics, fraud detection alerts</div>
+        <div class="flow-tags"><span class="flow-tag">Marketplace Ops</span><span class="flow-tag">Finance</span><span class="flow-tag">Internal</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-internal">
+      <div class="flow-num">59</div>
+      <div class="flow-body">
+        <div class="flow-title">Admin Console — quality governance, trainer verification, and dispute management</div>
+        <div class="flow-sub">Trainer application review (6-stage verification), suspicious review detection, trainer suspension workflow, dispute evidence review and decision, fraud detection alert management</div>
+        <div class="flow-tags"><span class="flow-tag">Marketplace Ops</span><span class="flow-tag">Head of Quality</span><span class="flow-tag">Internal</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<!-- ════════════════════════════════════════
+     PHASE 7 — SAAS PLATFORM ADMINISTRATION
+════════════════════════════════════════ -->
+<div class="phase-block">
+  <div class="phase-header">
+    <span class="phase-label" style="background:var(--indigo-bg);color:var(--indigo);border:1px solid var(--indigo-bd)">SaaS Platform Admin</span>
+    <span class="phase-name">Built with internal systems. Governs the platform as a SaaS product. Edstellar CS and engineering teams only.</span>
+    <span class="phase-count">Flows 60–67</span>
+  </div>
+  <div class="flow-grid">
+
+    <div class="flow-card fc-saas">
+      <div class="flow-num">60</div>
+      <div class="flow-body">
+        <div class="flow-title">Tenant provisioning — create, configure, and activate</div>
+        <div class="flow-sub">New tenant creation with tier, CSM, data residency, and contract dates. Schema provisioning, Super Admin credential generation, welcome email dispatch, activation log.</div>
+        <div class="flow-tags"><span class="flow-tag">Edstellar Ops</span><span class="flow-tag">Tenant Management</span><span class="flow-tag">Section 27.1</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-saas">
+      <div class="flow-num">61</div>
+      <div class="flow-body">
+        <div class="flow-title">Tenant administration dashboard — all-tenant view and impersonation</div>
+        <div class="flow-sub">All-tenant list with level, tier, churn risk, last activity, onboarding stage. Level progression signals. Support impersonation flow (read-only, logged, client notified).</div>
+        <div class="flow-tags"><span class="flow-tag">Edstellar CS</span><span class="flow-tag">Tenant Dashboard</span><span class="flow-tag">Section 27.1</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-saas">
+      <div class="flow-num">62</div>
+      <div class="flow-body">
+        <div class="flow-title">Subscription and billing management — invoices, upgrades, overdue handling</div>
+        <div class="flow-sub">Billing on Active Participant count, auto invoice generation with line items, overdue escalation (7d reminder → 14d warning → 30d auto-suspend), plan upgrade and downgrade flows, MRR/ARR revenue dashboard.</div>
+        <div class="flow-tags"><span class="flow-tag">Finance</span><span class="flow-tag">Edstellar CS</span><span class="flow-tag">Section 27.2</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-saas">
+      <div class="flow-num">63</div>
+      <div class="flow-body">
+        <div class="flow-title">Platform configuration — global feature flags and prompt version management</div>
+        <div class="flow-sub">Platform-wide feature flags with audit trail, AI pipeline prompt versioning (one-click rollback), maintenance mode activation, API rate limit defaults, notification template management, data retention policy.</div>
+        <div class="flow-tags"><span class="flow-tag">Engineering</span><span class="flow-tag">Feature Flags</span><span class="flow-tag">Section 27.3</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-saas">
+      <div class="flow-num">64</div>
+      <div class="flow-body">
+        <div class="flow-title">Platform health monitoring — uptime, AI pipeline, error rates, security events</div>
+        <div class="flow-sub">Real-time uptime per portal, AI pipeline p95 and failure rates, NotifyEngine delivery rate, DB pool utilisation, API error rate dashboard, cross-tenant query detection (must always be zero), alerting thresholds.</div>
+        <div class="flow-tags"><span class="flow-tag">Engineering</span><span class="flow-tag">DevOps</span><span class="flow-tag">Section 27.4</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-saas">
+      <div class="flow-num">65</div>
+      <div class="flow-body">
+        <div class="flow-title">Onboarding pipeline management — 7-stage tracker and stall alerts</div>
+        <div class="flow-sub">Per-tenant progress through 7 onboarding stages, stall flag thresholds, automated CSM notifications on stall, onboarding health score, time-to-value KPI tracking (activation → FrameworkBible, activation → first cycle).</div>
+        <div class="flow-tags"><span class="flow-tag">Edstellar CS</span><span class="flow-tag">Onboarding</span><span class="flow-tag">Section 27.5</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-saas">
+      <div class="flow-num">66</div>
+      <div class="flow-body">
+        <div class="flow-title">User management and support tools — cross-tenant search, resets, unlocks</div>
+        <div class="flow-sub">Cross-tenant user search by email, support-initiated password reset and account unlock, cross-tenant query (read-only with audit log and tenant notification), support ticket context view.</div>
+        <div class="flow-tags"><span class="flow-tag">Edstellar Support</span><span class="flow-tag">User Mgmt</span><span class="flow-tag">Section 27.6</span></div>
+      </div>
+    </div>
+
+    <div class="flow-card fc-saas">
+      <div class="flow-num">67</div>
+      <div class="flow-body">
+        <div class="flow-title">Incident management — incident log, status page, and tenant communication</div>
+        <div class="flow-sub">P1/P2/P3 incident logging, public status page (auto-updated from monitoring), Super Admin status page subscriptions, post-incident review log, audit log export for support investigations.</div>
+        <div class="flow-tags"><span class="flow-tag">Engineering</span><span class="flow-tag">Edstellar CS</span><span class="flow-tag">Section 27.7</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+</div><!-- /content -->
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-text">Edstellar Skills Intelligence Platform · Screen Flow Build Order · Product Document v21 + SIP Flowchart v8</span>
+  <span class="footer-badge">67 flows · 8 phases</span>
+</div>
+
+</body>
+</html>

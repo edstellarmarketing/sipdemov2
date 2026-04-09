@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLO Dashboard · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  /* ══════════════════════════════════════════════════════════════
+     CLO DASHBOARD — PAGE-SPECIFIC STYLES
+     ══════════════════════════════════════════════════════════════ */
+
+  /* ── KPI STRIP ── */
+  .kpi-strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 10px;
+    padding: 16px 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+  .kpi-card:nth-child(2) { animation-delay: 0.10s; }
+  .kpi-card:nth-child(3) { animation-delay: 0.15s; }
+  .kpi-card:nth-child(4) { animation-delay: 0.20s; }
+  .kpi-card:nth-child(5) { animation-delay: 0.25s; }
+  .kpi-card:nth-child(6) { animation-delay: 0.30s; }
+
+  .kpi-label { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; }
+  .kpi-value { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+  .kpi-value.gold  { color: var(--accent); }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.red   { color: var(--red); }
+
+  .kpi-sub { font-size: 10px; display: flex; align-items: center; gap: 4px; }
+  .kpi-up   { color: var(--green); }
+  .kpi-down { color: var(--red); }
+  .kpi-neu  { color: var(--text-secondary); }
+
+  /* ── ROW: Charts ── */
+  .row-charts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; animation: fadeUp 0.5s ease 0.2s both; }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--card);
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-head {
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .panel-title { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .panel-sub   { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+  .panel-tag {
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid;
+  }
+
+  .panel-tag.gold   { border-color: var(--accent-bd); color: var(--accent); }
+  .panel-tag.red    { border-color: rgba(220,38,38,0.3);  color: var(--red); }
+  .panel-tag.green  { border-color: rgba(22,163,74,0.3);  color: var(--green); }
+  .panel-tag.blue   { border-color: rgba(37,99,235,0.3);  color: var(--blue); }
+
+  .panel-body { flex: 1; padding: 14px 18px; min-height: 0; }
+  .panel-body.no-pad { padding: 0; }
+
+  /* Chart wrapper */
+  .chart-wrap { position: relative; }
+
+  /* ── PROGRAMME TABLE ── */
+  .prog-table { width: 100%; border-collapse: collapse; }
+
+  .prog-table th {
+    font-size: 10px;
+    color: var(--text-secondary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 0 12px 10px;
+    font-weight: 400;
+  }
+
+  .prog-table th:not(:first-child) { text-align: center; }
+
+  .prog-table tr { border-bottom: 1px solid rgba(0,0,0,0.07); }
+  .prog-table tr:last-child { border-bottom: none; }
+
+  .prog-table td {
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .prog-table td:first-child { color: var(--text-primary); font-size: 12.5px; }
+  .prog-table td:not(:first-child) { text-align: center; }
+
+  /* Status chip */
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  .status-chip.completed  { background: var(--green-bg); color: var(--green); }
+  .status-chip.inprogress { background: var(--blue-bg);  color: var(--blue); }
+  .status-chip.upcoming   { background: rgba(0,0,0,0.05); color: var(--text-secondary); }
+
+  /* ROI chip */
+  .roi-chip {
+    display: inline-flex;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  .roi-chip.high     { background: var(--green-bg); color: var(--green); }
+  .roi-chip.veryhigh { background: var(--green-bg); color: var(--green); }
+  .roi-chip.pending  { background: rgba(0,0,0,0.05); color: var(--text-secondary); }
+  .roi-chip.na       { color: var(--text-muted); }
+
+  /* Completion bar */
+  .cbar-wrap { width: 70px; height: 5px; background: rgba(0,0,0,0.08); border-radius: 3px; display: inline-block; vertical-align: middle; }
+  .cbar-fill { height: 100%; border-radius: 3px; }
+
+  /* ── VELOCITY BARS ── */
+  .vel-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.07); }
+  .vel-row:last-child { border-bottom: none; }
+  .vel-label { font-size: 12px; color: var(--text-primary); width: 140px; flex-shrink: 0; }
+  .vel-bar-track { flex: 1; height: 8px; background: rgba(0,0,0,0.06); border-radius: 4px; overflow: hidden; }
+  .vel-bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+  .vel-value { font-size: 11px; width: 90px; flex-shrink: 0; text-align: right; font-weight: 500; }
+  .vel-speed { font-size: 10px; width: 70px; flex-shrink: 0; text-align: center; padding: 2px 6px; border-radius: 100px; font-weight: 500; }
+  .vel-speed.fast { background: var(--green-bg); color: var(--green); }
+  .vel-speed.good { background: var(--amber-bg); color: var(--amber); }
+  .vel-speed.moderate { background: var(--amber-bg); color: var(--amber); }
+  .vel-speed.slow { background: var(--red-bg); color: var(--red); }
+
+  /* AI insight box */
+  .ai-insight {
+    margin: 14px 18px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--blue-bg);
+    border: 1px solid rgba(37,99,235,0.15);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .ai-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .ai-icon svg { width: 10px; height: 10px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; }
+
+  .ai-text { font-size: 11.5px; color: var(--text-secondary); line-height: 1.6; }
+  .ai-text strong { color: var(--text-primary); font-weight: 500; }
+
+  /* ── ROW BOTTOM ── */
+  .row-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; animation: fadeUp 0.5s ease 0.35s both; }
+
+  /* ── CONTENT SCROLL ── */
+  .content { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0);    }
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+
+  /* Scrollbar */
+  .content::-webkit-scrollbar { width: 4px; }
+  .content::-webkit-scrollbar-track { background: transparent; }
+  .content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
+
+  /* ── LEVEL BANNER ── */
+  .level-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 28px;
+    height: 36px;
+    background: linear-gradient(90deg, rgba(201,168,76,0.08) 0%, transparent 60%);
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .level-banner:hover { background: linear-gradient(90deg, rgba(201,168,76,0.14) 0%, transparent 70%); }
+
+  /* ── CONFIDENCE STATEMENT ── */
+  .confidence-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 28px;
+    background: rgba(201,168,76,0.06);
+    border-top: 1px solid rgba(201,168,76,0.12);
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <!-- SCROLLABLE CONTENT -->
+  <div class="content">
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <div class="kpi-label">Training Investment</div>
+        <div class="kpi-value gold">SGD 142K</div>
+        <div class="kpi-sub kpi-neu">Total L3 spend</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Programmes Active</div>
+        <div class="kpi-value">7</div>
+        <div class="kpi-sub kpi-neu">3 completed, 4 in progress</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Employees Enrolled</div>
+        <div class="kpi-value">284</div>
+        <div class="kpi-sub kpi-neu">35% of workforce</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Completion</div>
+        <div class="kpi-value green">87%</div>
+        <div class="kpi-sub kpi-up">&#8593; 12pts vs target</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Kirkpatrick L1</div>
+        <div class="kpi-value">4.2<span style="font-size:13px;color:var(--text-secondary)">/5</span></div>
+        <div class="kpi-sub kpi-neu">Reaction score</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Certificates Issued</div>
+        <div class="kpi-value">186</div>
+        <div class="kpi-sub kpi-neu">This cycle</div>
+      </div>
+    </div>
+
+    <!-- PROGRAMME EFFECTIVENESS TABLE -->
+    <div class="panel" style="animation:fadeUp 0.5s ease 0.2s both">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Programme Effectiveness</div>
+          <div class="panel-sub">7 programmes · L3 training cycle · Oct 2025 – Mar 2026</div>
+        </div>
+        <div class="panel-tag gold">Live Tracking</div>
+      </div>
+      <div class="panel-body no-pad" style="overflow-x:auto">
+        <table class="prog-table">
+          <thead>
+            <tr>
+              <th>Programme</th>
+              <th>Enrolled</th>
+              <th>Completed</th>
+              <th>Completion</th>
+              <th>Score</th>
+              <th>Status</th>
+              <th>Cost</th>
+              <th>ROI Signal</th>
+            </tr>
+          </thead>
+          <tbody id="progTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ROW: 3 Charts -->
+    <div class="row-charts">
+
+      <!-- Chart 1: Training Spend vs Gap Closure -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Spend vs Gap Closure</div>
+            <div class="panel-sub">Cumulative SGD spend &amp; gap closure %</div>
+          </div>
+          <div class="panel-tag gold">Dual Axis</div>
+        </div>
+        <div class="panel-body">
+          <div class="chart-wrap" style="height:180px">
+            <canvas id="spendChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart 2: Completion Rate by Department -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Completion by Department</div>
+            <div class="panel-sub">Top 5 departments · Completion rate</div>
+          </div>
+          <div class="panel-tag green">Target 75%</div>
+        </div>
+        <div class="panel-body">
+          <div class="chart-wrap" style="height:180px">
+            <canvas id="deptChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart 3: Kirkpatrick Scores -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Kirkpatrick Scores</div>
+            <div class="panel-sub">4-level evaluation model</div>
+          </div>
+          <div class="panel-tag blue">L1–L4</div>
+        </div>
+        <div class="panel-body">
+          <div class="chart-wrap" style="height:180px">
+            <canvas id="kirkChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ROW: Skill Velocity + AI Insights -->
+    <div class="row-bottom">
+
+      <!-- SKILL VELOCITY -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Skill Velocity</div>
+            <div class="panel-sub">Gap closure speed · points/month</div>
+          </div>
+          <div class="panel-tag green">Tracking</div>
+        </div>
+        <div class="panel-body" id="velocityBody">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- AI INSIGHTS -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">AI Insights</div>
+            <div class="panel-sub">Automated learning intelligence</div>
+          </div>
+          <div class="panel-tag blue">3 Insights</div>
+        </div>
+        <div class="panel-body" style="padding:0;display:flex;flex-direction:column">
+          <div class="ai-insight" style="margin-top:10px">
+            <div class="ai-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div>
+            <div class="ai-text"><strong>ISO 45001 Lead Implementer</strong> delivered the highest ROI: 81% score at SGD 389/employee. The EHS department closed 4 of 6 gaps directly attributable to this programme. Recommend this as the benchmark model for future programmes.</div>
+          </div>
+          <div class="ai-insight">
+            <div class="ai-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div>
+            <div class="ai-text"><strong>AI &amp; Data Literacy</strong> completion rate (57%) is below the 75% target. 14 employees are overdue. Risk: if completion doesn't reach 70% by April, the L3 gap closure target for Digital &amp; Technology BU will be missed.</div>
+          </div>
+          <div class="ai-insight" style="margin-bottom:10px">
+            <div class="ai-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div>
+            <div class="ai-text"><strong>Strategic Leadership Programme</strong> has the highest per-employee cost (SGD 879) but is critical for succession pipeline. 3 of 5 succession candidates are enrolled. Do not cut — this is the pipeline investment.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- level-banner-strip -->
+  <a href="../level-journey.html" class="level-banner">
+    <div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite"></div><span style="font-size:10px;font-family:var(--font-display);font-weight:600;letter-spacing:0.08em;color:var(--accent)">L3 ACTIVE</span></div>
+    <div style="width:1px;height:14px;background:rgba(201,168,76,0.2)"></div>
+    <div style="font-size:11px;color:var(--text-secondary)">Training Execution &amp; Delivery</div>
+    <div style="width:80px;height:4px;background:rgba(0,0,0,0.07);border-radius:2px;overflow:hidden"><div style="width:63%;height:100%;background:var(--accent);border-radius:2px"></div></div>
+    <div style="font-size:11px;color:var(--accent);font-weight:500">63% complete</div>
+    <div style="width:1px;height:14px;background:rgba(201,168,76,0.2)"></div>
+    <div style="font-size:11px;color:var(--text-secondary)">2 actions to unlock L4 &rarr;</div>
+    <div style="margin-left:auto;font-size:10px;font-family:var(--font-display);font-weight:600;letter-spacing:0.06em;color:var(--accent);text-transform:uppercase">View full journey &rarr;</div>
+  </a>
+
+  <!-- confidence-statement -->
+  <div class="confidence-bar">
+    <svg style="width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <span style="font-size:11px;color:var(--accent);font-weight:500;letter-spacing:0.03em">Edstellar &nbsp;&middot;&nbsp; Day 14. First verified intelligence. 748 passports live.</span>
+    <span style="margin-left:auto;font-size:10px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase">Time to value</span>
+  </div>
+
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'manager',
+    activeNav: 'CLO Dashboard',
+    breadcrumbs: ['Dashboards', 'CLO Dashboard'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────
+const PROGRAMMES = [
+  { name: "BIM Fundamentals & Revit",       enrolled: 54, completed: 48, score: 76, status: "Completed",   cost: "SGD 18.2K", roi: "High" },
+  { name: "Digital Project Delivery",        enrolled: 62, completed: 57, score: 72, status: "Completed",   cost: "SGD 22.4K", roi: "High" },
+  { name: "ISO 45001 Lead Implementer",      enrolled: 38, completed: 34, score: 81, status: "Completed",   cost: "SGD 14.8K", roi: "Very High" },
+  { name: "AI & Data Literacy for Engineers", enrolled: 72, completed: 41, score: 68, status: "In Progress", cost: "SGD 28.4K", roi: "Pending" },
+  { name: "Advanced Risk & Contract Mgmt",   enrolled: 44, completed: 18, score: 71, status: "In Progress", cost: "SGD 16.2K", roi: "Pending" },
+  { name: "Strategic Leadership Programme",  enrolled: 28, completed: 8,  score: 74, status: "In Progress", cost: "SGD 24.6K", roi: "Pending" },
+  { name: "ESG & Carbon Reporting",          enrolled: 46, completed: 0,  score: null, status: "Upcoming",  cost: "SGD 17.8K", roi: null }
+];
+
+const VELOCITY = [
+  { skill: "ISO 45001",       velocity: 0.8, label: "Fast",     cls: "fast" },
+  { skill: "BIM Fundamentals", velocity: 0.6, label: "Good",     cls: "good" },
+  { skill: "Digital Delivery", velocity: 0.4, label: "Moderate", cls: "moderate" },
+  { skill: "Risk Management",  velocity: 0.3, label: "Moderate", cls: "moderate" },
+  { skill: "AI & ML Literacy", velocity: 0.2, label: "Slow",     cls: "slow" }
+];
+
+// ── CHART DEFAULTS ────────────────────────────────────────────
+Chart.defaults.color = "#6B7280";
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size = 11;
+
+function makeGradient(ctx, color) {
+  const g = ctx.createLinearGradient(0, 0, 0, 180);
+  g.addColorStop(0, color + "44");
+  g.addColorStop(1, color + "00");
+  return g;
+}
+
+// ── PROGRAMME TABLE ──────────────────────────────────────────
+(function() {
+  const tbody = document.getElementById("progTableBody");
+  PROGRAMMES.forEach(p => {
+    const pct = p.enrolled > 0 && p.completed > 0 ? Math.round((p.completed / p.enrolled) * 100) : 0;
+    const barColor = pct >= 80 ? "#16A34A" : pct >= 50 ? "#D97706" : pct > 0 ? "#DC2626" : "rgba(0,0,0,0.1)";
+    const statusClass = p.status === "Completed" ? "completed" : p.status === "In Progress" ? "inprogress" : "upcoming";
+    const roiClass = p.roi === "Very High" ? "veryhigh" : p.roi === "High" ? "high" : p.roi === "Pending" ? "pending" : "na";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${p.name}</td>
+      <td>${p.enrolled}</td>
+      <td>${p.completed}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+          <div class="cbar-wrap"><div class="cbar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+          <span style="font-size:11px;color:${barColor};width:30px">${pct > 0 ? pct + '%' : '—'}</span>
+        </div>
+      </td>
+      <td>${p.score !== null ? p.score + '%' : '—'}</td>
+      <td><span class="status-chip ${statusClass}">${p.status}</span></td>
+      <td>${p.cost}</td>
+      <td>${p.roi ? '<span class="roi-chip ' + roiClass + '">' + p.roi + '</span>' : '—'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+})();
+
+// ── CHART 1: Spend vs Gap Closure ────────────────────────────
+(function() {
+  const ctx = document.getElementById("spendChart").getContext("2d");
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
+      datasets: [
+        {
+          label: "Cumulative Spend (SGD K)",
+          data: [18, 42, 68, 96, 122, 142],
+          borderColor: "#C9A84C",
+          borderWidth: 2,
+          backgroundColor: makeGradient(ctx, "#C9A84C"),
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: "#C9A84C",
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          yAxisID: "y"
+        },
+        {
+          label: "Gap Closure %",
+          data: [5, 10, 16, 20, 24, 27],
+          borderColor: "#16A34A",
+          borderWidth: 2,
+          borderDash: [4, 3],
+          fill: false,
+          tension: 0.4,
+          pointBackgroundColor: "#16A34A",
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          yAxisID: "y1"
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, labels: { boxWidth: 12, padding: 10, font: { size: 10 } } },
+        tooltip: {
+          backgroundColor: "#ffffff",
+          titleColor: "#0F1117",
+          bodyColor: "#6B7280",
+          borderColor: "rgba(0,0,0,0.1)",
+          borderWidth: 1
+        }
+      },
+      scales: {
+        x: { grid: { color: "rgba(0,0,0,0.04)" }, border: { display: false } },
+        y: {
+          position: "left",
+          min: 0, max: 160,
+          grid: { color: "rgba(0,0,0,0.04)" },
+          border: { display: false },
+          ticks: { callback: v => "SGD " + v + "K" }
+        },
+        y1: {
+          position: "right",
+          min: 0, max: 40,
+          grid: { display: false },
+          border: { display: false },
+          ticks: { callback: v => v + "%" }
+        }
+      }
+    }
+  });
+})();
+
+// ── CHART 2: Completion by Department ────────────────────────
+(function() {
+  const ctx = document.getElementById("deptChart").getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["EHS & Risk", "Project Delivery", "Structural Eng", "BIM & Digital", "IT Infra"],
+      datasets: [{
+        data: [92, 84, 78, 71, 58],
+        backgroundColor: ["#16A34A", "#16A34A", "#2563EB", "#D97706", "#DC2626"],
+        borderRadius: 5,
+        borderWidth: 0
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#ffffff",
+          titleColor: "#0F1117",
+          bodyColor: "#6B7280",
+          borderColor: "rgba(0,0,0,0.1)",
+          borderWidth: 1,
+          callbacks: { label: ctx => " Completion: " + ctx.raw + "%" }
+        }
+      },
+      scales: {
+        x: { min: 0, max: 100, grid: { color: "rgba(0,0,0,0.04)" }, border: { display: false },
+             ticks: { callback: v => v + "%" } },
+        y: { grid: { display: false }, border: { display: false } }
+      }
+    }
+  });
+})();
+
+// ── CHART 3: Kirkpatrick Scores ──────────────────────────────
+(function() {
+  const ctx = document.getElementById("kirkChart").getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["L1 Reaction", "L2 Learning", "L3 Behaviour", "L4 Results"],
+      datasets: [{
+        data: [84, 74, 15, 5],
+        backgroundColor: ["#16A34A", "#2563EB", "#D97706", "#6B7280"],
+        borderRadius: 5,
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#ffffff",
+          titleColor: "#0F1117",
+          bodyColor: "#6B7280",
+          borderColor: "rgba(0,0,0,0.1)",
+          borderWidth: 1,
+          callbacks: {
+            label: function(ctx) {
+              if (ctx.dataIndex === 0) return " 4.2/5 (Reaction)";
+              if (ctx.dataIndex === 1) return " 74% (Learning)";
+              if (ctx.dataIndex === 2) return " In Progress";
+              return " Pending";
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, border: { display: false } },
+        y: { min: 0, max: 100, grid: { color: "rgba(0,0,0,0.04)" }, border: { display: false },
+             ticks: { callback: v => v + "%" } }
+      }
+    },
+    plugins: [{
+      id: "kirkLabels",
+      afterDraw: function(chart) {
+        const ctx2 = chart.ctx;
+        const labels = ["4.2/5", "74%", "In Progress", "Pending"];
+        chart.data.datasets[0].data.forEach(function(val, i) {
+          const meta = chart.getDatasetMeta(0).data[i];
+          ctx2.save();
+          ctx2.fillStyle = "#0F1117";
+          ctx2.font = "500 10px 'DM Sans', sans-serif";
+          ctx2.textAlign = "center";
+          ctx2.fillText(labels[i], meta.x, meta.y - 6);
+          ctx2.restore();
+        });
+      }
+    }]
+  });
+})();
+
+// ── SKILL VELOCITY ───────────────────────────────────────────
+(function() {
+  const body = document.getElementById("velocityBody");
+  VELOCITY.forEach(v => {
+    const maxVel = 1.0;
+    const pct = Math.round((v.velocity / maxVel) * 100);
+    const barColor = v.cls === "fast" ? "#16A34A" : v.cls === "slow" ? "#DC2626" : "#D97706";
+    const row = document.createElement("div");
+    row.className = "vel-row";
+    row.innerHTML = `
+      <div class="vel-label">${v.skill}</div>
+      <div class="vel-bar-track"><div class="vel-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      <div class="vel-value" style="color:${barColor}">${v.velocity}/month</div>
+      <div class="vel-speed ${v.cls}">${v.label}</div>
+    `;
+    body.appendChild(row);
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var toast = document.createElement("div");
+  toast.id = "sip-toast";
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#ffffff;border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:'DM Sans',sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08)";
+  document.body.appendChild(toast);
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){
+      toast.style.opacity="0";
+      toast.style.transform="translateX(-50%) translateY(8px)";
+    }, 2400);
+  }
+  document.addEventListener("click", function(e){
+    var a = e.target.closest("a");
+    if(a && a.getAttribute("href") === "#"){
+      e.preventDefault();
+      var label = (a.textContent || "").trim().replace(/\s+/g," ").substring(0,36);
+      showToast(label + " — available in full platform");
+    }
+  });
+})();
+</script>
+</body>
+</html>

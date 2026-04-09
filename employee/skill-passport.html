@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill Passport · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+
+/* ── CONTENT ── */
+.content { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; gap: 20px; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
+
+/* ── LEFT COLUMN ── */
+.col-left { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; }
+
+/* Identity card */
+.id-card {
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 14px; overflow: hidden;
+  animation: fadeUp .5s ease .05s both;
+}
+
+.id-card-top {
+  padding: 24px 20px 20px;
+  background: linear-gradient(160deg, rgba(37,99,235,.08) 0%, rgba(255,255,255,0) 60%);
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
+}
+
+.avatar-ring {
+  width: 72px; height: 72px; border-radius: 50%;
+  border: 2px solid var(--accent);
+  padding: 3px;
+  position: relative;
+}
+.avatar-inner {
+  width: 100%; height: 100%; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue) 0%, #1E40AF 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 22px; font-weight: 800; color: #fff;
+  overflow: hidden;
+}
+.avatar-inner img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.verified-badge {
+  position: absolute; bottom: 0; right: 0;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--green);
+  border: 2px solid var(--card);
+  display: flex; align-items: center; justify-content: center;
+}
+.verified-badge svg { width: 10px; height: 10px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+.id-name { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text-primary); line-height: 1.1; }
+.id-role { font-size: 12px; color: var(--text-secondary); }
+.id-dept { font-size: 11px; color: var(--text-muted); }
+
+.id-tags { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 4px; }
+.id-tag { padding: 3px 9px; border-radius: 100px; font-size: 10px; border: 1px solid rgba(0,0,0,0.1); color: var(--text-secondary); }
+
+.id-card-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; }
+.id-row { display: flex; align-items: center; justify-content: space-between; }
+.id-key { font-size: 11px; color: var(--text-muted); }
+.id-val { font-size: 12px; color: var(--text-primary); font-weight: 500; }
+
+/* Readiness score card */
+.readiness-card {
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 12px; padding: 18px;
+  animation: fadeUp .5s ease .1s both;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.rc-head { display: flex; align-items: center; justify-content: space-between; }
+.rc-title { font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--text-primary); }
+.rc-val { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--accent); line-height: 1; }
+.rc-sub { font-size: 10px; color: var(--text-muted); }
+
+.radial-wrap { position: relative; width: 100px; height: 100px; margin: 0 auto; }
+.radial-wrap canvas { position: absolute; top: 0; left: 0; }
+.radial-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.radial-pct { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--accent); }
+.radial-lbl { font-size: 9px; color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; }
+
+.rc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.rc-stat { padding: 8px 10px; background: rgba(0,0,0,0.03); border-radius: 7px; border: 1px solid rgba(0,0,0,0.05); }
+.rc-stat-val { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text-primary); }
+.rc-stat-key { font-size: 9.5px; color: var(--text-muted); margin-top: 2px; }
+
+/* Certs */
+.certs-card {
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 12px; overflow: hidden;
+  animation: fadeUp .5s ease .15s both;
+}
+.card-head { padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.07); display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--text-primary); }
+.card-count { font-size: 10px; color: var(--accent); background: var(--accent-lt); padding: 2px 7px; border-radius: 100px; }
+.cert-row { padding: 11px 16px; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; align-items: center; gap: 10px; }
+.cert-row:last-child { border-bottom: none; }
+.cert-icon { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cert-icon svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.cert-info { flex: 1; min-width: 0; }
+.cert-name { font-size: 11.5px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cert-issuer { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.cert-badge { padding: 2px 7px; border-radius: 100px; font-size: 9.5px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+.cert-badge.v { border-color: rgba(22,163,74,.4); color: var(--green); }
+.cert-badge.qr { border-color: var(--accent-bd); color: var(--accent); cursor: pointer; }
+
+/* ── RIGHT COLUMN ── */
+.col-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+
+/* Tab bar */
+.tab-bar { display: flex; gap: 2px; padding: 4px; background: var(--card); border: 1px solid rgba(0,0,0,0.07); border-radius: 10px; align-self: flex-start; animation: fadeUp .4s ease both; }
+.tab-btn { padding: 7px 16px; border-radius: 7px; border: none; background: transparent; font-family: 'DM Sans',sans-serif; font-size: 12px; color: var(--text-secondary); cursor: pointer; transition: background .15s, color .15s; white-space: nowrap; }
+.tab-btn.active { background: var(--card-hover); color: var(--text-primary); font-weight: 500; }
+.tab-btn:hover:not(.active) { color: var(--text-primary); }
+
+.tab-panel { display: none; flex-direction: column; gap: 14px; }
+.tab-panel.active { display: flex; animation: fadeUp .35s ease both; }
+
+/* ── SKILLS PANEL ── */
+.skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.domain-card { background: var(--card); border: 1px solid rgba(0,0,0,0.07); border-radius: 12px; overflow: hidden; }
+.domain-head { padding: 11px 14px; border-bottom: 1px solid rgba(0,0,0,0.07); display: flex; align-items: center; gap: 8px; }
+.domain-pip { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.domain-title { font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--text-primary); flex: 1; }
+.domain-avg { font-size: 10px; color: var(--text-muted); }
+
+.skill-list { padding: 8px 0; }
+.skill-row { padding: 7px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(0,0,0,0.03); }
+.skill-row:last-child { border-bottom: none; }
+.skill-name { font-size: 11.5px; color: var(--text-secondary); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.skill-source { font-size: 9px; color: var(--text-muted); background: rgba(0,0,0,0.04); padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
+
+.prof-track { display: flex; gap: 3px; flex-shrink: 0; }
+.prof-pip {
+  width: 16px; height: 16px; border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono',monospace; font-size: 8px; font-weight: 500;
+  background: rgba(0,0,0,0.05); color: var(--text-muted);
+  border: 1px solid rgba(0,0,0,0.06);
+  position: relative;
+}
+.prof-pip.filled-current { background: var(--blue-bg); color: var(--blue); border-color: rgba(37,99,235,.35); }
+.prof-pip.filled-target  { background: var(--accent-lt); color: var(--accent); border-color: var(--accent-bd); }
+.prof-pip.gap { background: var(--red-bg); color: var(--red); border-color: rgba(220,38,38,.3); }
+.prof-pip.match { background: var(--green-bg); color: var(--green); border-color: rgba(22,163,74,.35); }
+
+/* ── GAPS PANEL ── */
+.gap-banner { padding: 14px 18px; background: var(--red-bg); border: 1px solid rgba(220,38,38,.3); border-radius: 10px; display: flex; align-items: center; gap: 12px; }
+.gap-banner svg { width: 18px; height: 18px; stroke: var(--red); fill: none; stroke-width: 1.6; stroke-linecap: round; flex-shrink: 0; }
+.gap-banner-text { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; }
+.gap-banner-text strong { color: var(--text-primary); font-weight: 500; }
+
+.gap-table { background: var(--card); border: 1px solid rgba(0,0,0,0.07); border-radius: 12px; overflow: hidden; }
+.gt-head { display: grid; grid-template-columns: 1fr 80px 80px 90px 100px; gap: 0; padding: 10px 16px; border-bottom: 1px solid rgba(0,0,0,0.07); }
+.gt-th { font-size: 10px; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase; font-weight: 400; }
+.gt-row { display: grid; grid-template-columns: 1fr 80px 80px 90px 100px; padding: 11px 16px; border-bottom: 1px solid rgba(0,0,0,0.04); align-items: center; transition: background .15s; cursor: pointer; }
+.gt-row:last-child { border-bottom: none; }
+.gt-row:hover { background: rgba(0,0,0,0.025); }
+.gt-skill { font-size: 12.5px; color: var(--text-primary); }
+.gt-num { font-size: 12px; text-align: center; font-family: 'DM Mono',monospace; }
+.gt-score { font-size: 13px; font-family: var(--font-display); font-weight: 700; text-align: center; }
+.priority-chip { padding: 3px 9px; border-radius: 100px; font-size: 10px; font-weight: 500; text-align: center; border: 1px solid; display: inline-block; }
+.p-critical { border-color: rgba(220,38,38,.5); color: var(--red); background: var(--red-bg); }
+.p-high     { border-color: rgba(217,119,6,.5); color: var(--amber); background: var(--amber-bg); }
+.p-medium   { border-color: rgba(37,99,235,.4); color: var(--blue); background: var(--blue-bg); }
+
+.intervention-chip { padding: 3px 9px; border-radius: 100px; font-size: 10px; border: 1px solid rgba(0,0,0,0.1); color: var(--text-secondary); }
+
+/* ── LEARNING PATH PANEL ── */
+.lp-timeline { display: flex; flex-direction: column; gap: 0; }
+.lp-item { display: flex; gap: 14px; position: relative; }
+.lp-item:not(:last-child) .lp-line { position: absolute; left: 13px; top: 28px; bottom: -10px; width: 1px; background: rgba(0,0,0,0.08); }
+.lp-dot-wrap { width: 28px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; padding-top: 10px; position: relative; z-index: 1; }
+.lp-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.lp-dot svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.lp-dot.done   { border-color: var(--green);  background: var(--green-bg);  color: var(--green); }
+.lp-dot.active { border-color: var(--accent);  background: var(--accent-lt); color: var(--accent); }
+.lp-dot.queued { border-color: rgba(0,0,0,0.12); background: transparent; color: var(--text-muted); }
+.lp-body { flex: 1; padding: 8px 0 20px; }
+.lp-card { background: var(--card); border: 1px solid rgba(0,0,0,0.07); border-radius: 10px; padding: 14px 16px; }
+.lp-card.active-card { border-color: var(--accent-bd); }
+.lp-prog-name { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+.lp-meta { display: flex; gap: 14px; margin-bottom: 10px; }
+.lp-meta-item { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+.lp-meta-item svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.lp-bar-track { height: 5px; background: rgba(0,0,0,0.07); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+.lp-bar-fill { height: 100%; border-radius: 3px; transition: width 1.2s ease; }
+.lp-bar-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); }
+.lp-skills-covered { margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap; }
+.lp-skill-pill { padding: 2px 8px; border-radius: 100px; font-size: 10px; border: 1px solid rgba(0,0,0,0.08); color: var(--text-secondary); }
+
+/* IDP */
+.idp-card { background: var(--card); border: 1px solid rgba(0,0,0,0.07); border-radius: 12px; overflow: hidden; }
+.idp-goal-row { padding: 13px 16px; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; align-items: flex-start; gap: 12px; }
+.idp-goal-row:last-child { border-bottom: none; }
+.idp-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.idp-icon svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.idp-goal-text { flex: 1; font-size: 12.5px; color: var(--text-primary); line-height: 1.5; }
+.idp-goal-status { padding: 3px 8px; border-radius: 100px; font-size: 10px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+.s-on-track  { border-color: rgba(22,163,74,.4); color: var(--green); }
+.s-in-prog   { border-color: var(--accent-bd); color: var(--accent); }
+.s-completed { border-color: rgba(37,99,235,.4); color: var(--blue); }
+
+/* Radar chart */
+.radar-wrap { background: var(--card); border: 1px solid rgba(0,0,0,0.07); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 16px; }
+.radar-canvas-wrap { position: relative; width: 180px; height: 180px; flex-shrink: 0; }
+.radar-legend { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.rl-item { display: flex; align-items: center; gap: 8px; }
+.rl-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.rl-lbl  { font-size: 11px; color: var(--text-secondary); }
+.rl-val  { margin-left: auto; font-family: 'DM Mono',monospace; font-size: 11px; }
+
+/* Assessment history */
+.assess-row { padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; align-items: center; gap: 12px; }
+.assess-row:last-child { border-bottom: none; }
+.assess-score { width: 42px; height: 42px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 15px; font-weight: 800; flex-shrink: 0; }
+.as-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(22,163,74,.3); }
+.as-gold  { background: var(--accent-lt); color: var(--accent); border: 1px solid var(--accent-bd); }
+.assess-info { flex: 1; }
+.assess-name { font-size: 12.5px; color: var(--text-primary); margin-bottom: 3px; }
+.assess-meta { font-size: 11px; color: var(--text-muted); display: flex; gap: 12px; }
+.assess-chip { padding: 3px 9px; border-radius: 100px; font-size: 10px; }
+
+/* Export banner */
+.export-banner {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(37,99,235,.06) 0%, rgba(201,168,76,.06) 100%);
+  border: 1px solid var(--accent-bd);
+  border-radius: 12px;
+  display: flex; align-items: center; gap: 16px;
+}
+.eb-icon { width: 40px; height: 40px; border-radius: 9px; background: var(--accent-lt); border: 1px solid var(--accent-bd); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.eb-icon svg { width: 19px; height: 19px; stroke: var(--accent); fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.eb-text { flex: 1; }
+.eb-title { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.eb-sub   { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+.eb-actions { display: flex; gap: 8px; }
+.eb-btn { padding: 8px 16px; border-radius: 6px; font-family: 'DM Sans',sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid; transition: opacity .15s; }
+.eb-btn.outline { border-color: var(--accent-bd); color: var(--accent); background: transparent; }
+.eb-btn.filled  { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 700; }
+.eb-btn:hover   { opacity: .82; }
+
+/* QR popup */
+.qr-modal { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; align-items: center; justify-content: center; z-index: 100; }
+.qr-modal.open { display: flex; }
+.qr-box { background: var(--card); border: 1px solid var(--accent-bd); border-radius: 16px; padding: 32px; text-align: center; max-width: 280px; animation: fadeUp .3s ease both; }
+.qr-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+.qr-sub   { font-size: 11px; color: var(--text-muted); margin-bottom: 20px; }
+.qr-code  { width: 160px; height: 160px; margin: 0 auto 16px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; background: #fff; display: grid; place-items: center; }
+.qr-id    { font-family: 'DM Mono',monospace; font-size: 10px; color: var(--text-muted); margin-bottom: 16px; }
+.qr-close { padding: 8px 24px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); background: transparent; color: var(--text-secondary); font-family: 'DM Sans',sans-serif; font-size: 12px; cursor: pointer; }
+
+/* Topbar pills & buttons (page-specific) */
+.tb-pill { padding: 4px 12px; border-radius: 100px; font-size: 11px; border: 1px solid; }
+.tb-pill.verified { border-color: rgba(22,163,74,.4); color: var(--green); background: var(--green-bg); }
+.tb-pill.gold { border-color: var(--accent-bd); color: var(--accent); }
+.tb-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); background: transparent; color: var(--text-secondary); font-family: 'DM Sans',sans-serif; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background .15s, color .15s; }
+.tb-btn:hover { background: rgba(0,0,0,0.05); color: var(--text-primary); }
+.tb-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.tb-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.tb-btn.primary:hover { opacity: .88; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+  <div class="content">
+
+    <!-- LEFT COLUMN -->
+    <div class="col-left">
+
+      <!-- Identity Card -->
+      <div class="id-card">
+        <div class="id-card-top">
+          <div class="avatar-ring">
+            <div class="avatar-inner"><img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Priya Menon"></div>
+            <div class="verified-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="id-name">Priya Menon</div>
+          <div class="id-role">Senior Project Manager</div>
+          <div class="id-dept">Project Delivery · Engineering & Delivery BU</div>
+          <div class="id-tags">
+            <span class="id-tag">Singapore</span>
+            <span class="id-tag">Full-time</span>
+            <span class="id-tag">6 yrs tenure</span>
+          </div>
+        </div>
+        <div class="id-card-body">
+          <div class="id-row"><span class="id-key">Employee ID</span><span class="id-val">EMP-001</span></div>
+          <div class="id-row"><span class="id-key">Reports to</span><span class="id-val">Rahul Kapoor</span></div>
+          <div class="id-row"><span class="id-key">Passport created</span><span class="id-val">14 Oct 2025</span></div>
+          <div class="id-row"><span class="id-key">Last updated</span><span class="id-val">18 Mar 2026</span></div>
+          <div class="id-row"><span class="id-key">Data confidence</span><span class="id-val" style="color:var(--green)">High · Assessment-backed</span></div>
+        </div>
+      </div>
+
+      <!-- Readiness Card -->
+      <div class="readiness-card">
+        <div class="rc-head">
+          <div>
+            <div class="rc-title">Readiness Score</div>
+            <div class="rc-sub">Role target vs current proficiency</div>
+          </div>
+        </div>
+        <div class="radial-wrap">
+          <canvas id="radialChart" width="100" height="100"></canvas>
+          <div class="radial-center">
+            <div class="radial-pct">74%</div>
+            <div class="radial-lbl">Ready</div>
+          </div>
+        </div>
+        <div class="rc-stats">
+          <div class="rc-stat">
+            <div class="rc-stat-val" style="color:var(--green)">3</div>
+            <div class="rc-stat-key">Skills at target</div>
+          </div>
+          <div class="rc-stat">
+            <div class="rc-stat-val" style="color:var(--red)">4</div>
+            <div class="rc-stat-key">Gaps identified</div>
+          </div>
+          <div class="rc-stat">
+            <div class="rc-stat-val">2.9</div>
+            <div class="rc-stat-key">Avg proficiency</div>
+          </div>
+          <div class="rc-stat">
+            <div class="rc-stat-val" style="color:var(--accent)">↑ 12%</div>
+            <div class="rc-stat-key">vs last cycle</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certificates -->
+      <div class="certs-card">
+        <div class="card-head">
+          <div class="card-title">Certificates</div>
+          <div class="card-count">2 verified</div>
+        </div>
+        <div class="cert-row">
+          <div class="cert-icon" style="background:var(--amber-bg);color:var(--amber)">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">Project Management Professional (PMP)</div>
+            <div class="cert-issuer">PMI · Issued 2022 · Exp. 2025 (renewal pending)</div>
+          </div>
+          <div class="cert-badge v">Verified</div>
+        </div>
+        <div class="cert-row">
+          <div class="cert-icon" style="background:var(--blue-bg);color:var(--blue)">
+            <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">Digital Project Delivery — L2</div>
+            <div class="cert-issuer">Edstellar · Dec 2025 · QR Authenticated</div>
+          </div>
+          <div class="cert-badge qr" onclick="document.querySelector('.qr-modal').classList.add('open')">QR ↗</div>
+        </div>
+      </div>
+
+      <!-- Resume Skills (AI-Extracted) -->
+      <div class="certs-card" id="resumeSkillsCard">
+        <div class="card-head">
+          <div class="card-title">Resume Skills</div>
+          <div class="card-count" id="resumeSkillsCount">AI-Extracted</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.5">Skills automatically extracted from uploaded resume. These are matched against the organisation's skill taxonomy for gap analysis.</div>
+        <div id="resumeSkillsTags" style="display:flex;flex-wrap:wrap;gap:5px">
+          <span style="display:inline-block;padding:4px 10px;border-radius:100px;font-size:10.5px;font-weight:500;background:rgba(59,130,246,0.07);color:#3B82F6;border:1px solid rgba(59,130,246,0.15)">Project Planning & Scheduling</span>
+          <span style="display:inline-block;padding:4px 10px;border-radius:100px;font-size:10.5px;font-weight:500;background:rgba(59,130,246,0.07);color:#3B82F6;border:1px solid rgba(59,130,246,0.15)">Stakeholder Management</span>
+          <span style="display:inline-block;padding:4px 10px;border-radius:100px;font-size:10.5px;font-weight:500;background:rgba(59,130,246,0.07);color:#3B82F6;border:1px solid rgba(59,130,246,0.15)">Risk Assessment</span>
+          <span style="display:inline-block;padding:4px 10px;border-radius:100px;font-size:10.5px;font-weight:500;background:rgba(59,130,246,0.07);color:#3B82F6;border:1px solid rgba(59,130,246,0.15)">Contract Management</span>
+          <span style="display:inline-block;padding:4px 10px;border-radius:100px;font-size:10.5px;font-weight:500;background:rgba(59,130,246,0.07);color:#3B82F6;border:1px solid rgba(59,130,246,0.15)">Primavera P6</span>
+          <span style="display:inline-block;padding:4px 10px;border-radius:100px;font-size:10.5px;font-weight:500;background:rgba(59,130,246,0.07);color:#3B82F6;border:1px solid rgba(59,130,246,0.15)">MS Project</span>
+          <span style="display:inline-block;padding:4px 10px;border-radius:100px;font-size:10.5px;font-weight:500;background:rgba(59,130,246,0.07);color:#3B82F6;border:1px solid rgba(59,130,246,0.15)">Budget Management</span>
+          <span style="display:inline-block;padding:4px 10px;border-radius:100px;font-size:10.5px;font-weight:500;background:rgba(201,168,76,0.08);color:var(--accent);border:1px solid rgba(201,168,76,0.2)">Earned Value Management</span>
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:var(--text-muted)"><svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:-1px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Source: priya_menon_resume.pdf · Extracted 14 Oct 2025</div>
+      </div>
+
+    </div><!-- /col-left -->
+
+    <!-- RIGHT COLUMN -->
+    <div class="col-right">
+
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('skills',this)">Skills</button>
+        <button class="tab-btn" onclick="switchTab('gaps',this)">Gaps & Priorities</button>
+        <button class="tab-btn" onclick="switchTab('learning',this)">Learning Path</button>
+        <button class="tab-btn" onclick="switchTab('assessments',this)">Assessments</button>
+      </div>
+
+      <!-- SKILLS TAB -->
+      <div class="tab-panel active" id="tab-skills">
+        <div class="radar-wrap">
+          <div class="radar-canvas-wrap"><canvas id="radarChart"></canvas></div>
+          <div class="radar-legend">
+            <div style="font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Proficiency by Domain</div>
+            <div class="rl-item"><div class="rl-dot" style="background:#C9A84C"></div><div class="rl-lbl">Engineering & Technical</div><div class="rl-val" style="color:#C9A84C">3.0</div></div>
+            <div class="rl-item"><div class="rl-dot" style="background:#2563EB"></div><div class="rl-lbl">Project Management</div><div class="rl-val" style="color:#2563EB">3.0</div></div>
+            <div class="rl-item"><div class="rl-dot" style="background:#0891B2"></div><div class="rl-lbl">Digital & Technology</div><div class="rl-val" style="color:#0891B2">1.7</div></div>
+            <div class="rl-item"><div class="rl-dot" style="background:#DC2626"></div><div class="rl-lbl">EHS & Sustainability</div><div class="rl-val" style="color:#DC2626">2.0</div></div>
+            <div class="rl-item"><div class="rl-dot" style="background:#16A34A"></div><div class="rl-lbl">Leadership & People</div><div class="rl-val" style="color:#16A34A">3.0</div></div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:8px;line-height:1.5">Skills verified via assessment (Nov 2025). Self-declared skills shown with lower confidence weighting.</div>
+          </div>
+        </div>
+
+        <div class="skills-grid" id="skillsGridDynamic">
+          <!-- Project Management Domain -->
+          <div class="domain-card">
+            <div class="domain-head">
+              <div class="domain-pip" style="background:#2563EB"></div>
+              <div class="domain-title">Project Management</div>
+              <div class="domain-avg">avg 3.0</div>
+            </div>
+            <div class="skill-list">
+              <div class="skill-row">
+                <div class="skill-name">Project Planning & Scheduling</div>
+                <div class="skill-source">Assessed</div>
+                <div class="prof-track">
+                  <div class="prof-pip match" title="L1">1</div>
+                  <div class="prof-pip match" title="L2">2</div>
+                  <div class="prof-pip match" title="L3 — Current = Target">3✓</div>
+                  <div class="prof-pip" title="L4">4</div>
+                </div>
+              </div>
+              <div class="skill-row">
+                <div class="skill-name">Risk Management</div>
+                <div class="skill-source">Assessed</div>
+                <div class="prof-track">
+                  <div class="prof-pip match">1</div>
+                  <div class="prof-pip filled-current">2</div>
+                  <div class="prof-pip gap" title="Target L3 — Gap">3△</div>
+                  <div class="prof-pip">4</div>
+                </div>
+              </div>
+              <div class="skill-row">
+                <div class="skill-name">Stakeholder Management</div>
+                <div class="skill-source">Assessed</div>
+                <div class="prof-track">
+                  <div class="prof-pip match">1</div>
+                  <div class="prof-pip match">2</div>
+                  <div class="prof-pip match">3✓</div>
+                  <div class="prof-pip">4</div>
+                </div>
+              </div>
+              <div class="skill-row">
+                <div class="skill-name">Budget Control & Cost Mgmt</div>
+                <div class="skill-source">Assessed</div>
+                <div class="prof-track">
+                  <div class="prof-pip match">1</div>
+                  <div class="prof-pip match">2</div>
+                  <div class="prof-pip match">3✓</div>
+                  <div class="prof-pip">4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Digital & Technology -->
+          <div class="domain-card">
+            <div class="domain-head">
+              <div class="domain-pip" style="background:#0891B2"></div>
+              <div class="domain-title">Digital & Technology</div>
+              <div class="domain-avg" style="color:var(--red)">avg 1.7 ⚠</div>
+            </div>
+            <div class="skill-list">
+              <div class="skill-row">
+                <div class="skill-name">Digital Project Delivery</div>
+                <div class="skill-source">Assessed</div>
+                <div class="prof-track">
+                  <div class="prof-pip match">1</div>
+                  <div class="prof-pip filled-current">2</div>
+                  <div class="prof-pip gap">3△</div>
+                  <div class="prof-pip">4</div>
+                </div>
+              </div>
+              <div class="skill-row">
+                <div class="skill-name">AI & ML Literacy</div>
+                <div class="skill-source">Assessed</div>
+                <div class="prof-track">
+                  <div class="prof-pip filled-current">1</div>
+                  <div class="prof-pip gap">2△</div>
+                  <div class="prof-pip">3</div>
+                  <div class="prof-pip">4</div>
+                </div>
+              </div>
+              <div class="skill-row">
+                <div class="skill-name">BIM</div>
+                <div class="skill-source">Self-decl.</div>
+                <div class="prof-track">
+                  <div class="prof-pip filled-current">1</div>
+                  <div class="prof-pip gap">2△</div>
+                  <div class="prof-pip">3</div>
+                  <div class="prof-pip">4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Engineering -->
+          <div class="domain-card">
+            <div class="domain-head">
+              <div class="domain-pip" style="background:#C9A84C"></div>
+              <div class="domain-title">Engineering & Technical</div>
+              <div class="domain-avg">avg 2.5</div>
+            </div>
+            <div class="skill-list">
+              <div class="skill-row">
+                <div class="skill-name">Structural Engineering (Basics)</div>
+                <div class="skill-source">Assessed</div>
+                <div class="prof-track">
+                  <div class="prof-pip match">1</div>
+                  <div class="prof-pip match">2✓</div>
+                  <div class="prof-pip">3</div>
+                  <div class="prof-pip">4</div>
+                </div>
+              </div>
+              <div class="skill-row">
+                <div class="skill-name">Value Engineering</div>
+                <div class="skill-source">Assessed</div>
+                <div class="prof-track">
+                  <div class="prof-pip match">1</div>
+                  <div class="prof-pip match">2</div>
+                  <div class="prof-pip match">3✓</div>
+                  <div class="prof-pip">4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Leadership -->
+          <div class="domain-card">
+            <div class="domain-head">
+              <div class="domain-pip" style="background:#16A34A"></div>
+              <div class="domain-title">Leadership & People</div>
+              <div class="domain-avg">avg 3.0</div>
+            </div>
+            <div class="skill-list">
+              <div class="skill-row">
+                <div class="skill-name">Team Leadership & Development</div>
+                <div class="skill-source">360°</div>
+                <div class="prof-track">
+                  <div class="prof-pip match">1</div>
+                  <div class="prof-pip match">2</div>
+                  <div class="prof-pip match">3✓</div>
+                  <div class="prof-pip">4</div>
+                </div>
+              </div>
+              <div class="skill-row">
+                <div class="skill-name">Cross-Cultural Communication</div>
+                <div class="skill-source">360°</div>
+                <div class="prof-track">
+                  <div class="prof-pip match">1</div>
+                  <div class="prof-pip match">2</div>
+                  <div class="prof-pip match">3✓</div>
+                  <div class="prof-pip">4</div>
+                </div>
+              </div>
+              <div class="skill-row">
+                <div class="skill-name">Change Management</div>
+                <div class="skill-source">Assessed</div>
+                <div class="prof-track">
+                  <div class="prof-pip match">1</div>
+                  <div class="prof-pip match">2✓</div>
+                  <div class="prof-pip">3</div>
+                  <div class="prof-pip">4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GAPS TAB -->
+      <div class="tab-panel" id="tab-gaps">
+        <div class="gap-banner">
+          <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div class="gap-banner-text"><strong>4 skill gaps</strong> identified for Priya Menon. 1 critical gap (AI Literacy) directly linked to Arcova's digital transformation strategic goal. Interventions recommended below.</div>
+        </div>
+        <div class="gap-table">
+          <div class="gt-head">
+            <div class="gt-th">Skill</div>
+            <div class="gt-th" style="text-align:center">Current</div>
+            <div class="gt-th" style="text-align:center">Target</div>
+            <div class="gt-th" style="text-align:center">Priority</div>
+            <div class="gt-th" style="text-align:center">Intervention</div>
+          </div>
+          <div class="gt-row">
+            <div class="gt-skill">AI & ML Literacy</div>
+            <div class="gt-num" style="color:var(--red)">L1</div>
+            <div class="gt-num" style="color:var(--green)">L2</div>
+            <div><span class="priority-chip p-critical">Critical</span></div>
+            <div><span class="intervention-chip">Programme ↗</span></div>
+          </div>
+          <div class="gt-row">
+            <div class="gt-skill">Digital Project Delivery</div>
+            <div class="gt-num" style="color:var(--amber)">L2</div>
+            <div class="gt-num" style="color:var(--green)">L3</div>
+            <div><span class="priority-chip p-high">High</span></div>
+            <div><span class="intervention-chip">In Progress ↗</span></div>
+          </div>
+          <div class="gt-row">
+            <div class="gt-skill">Risk Management</div>
+            <div class="gt-num" style="color:var(--amber)">L2</div>
+            <div class="gt-num" style="color:var(--green)">L3</div>
+            <div><span class="priority-chip p-high">High</span></div>
+            <div><span class="intervention-chip">Scheduled</span></div>
+          </div>
+          <div class="gt-row">
+            <div class="gt-skill">BIM</div>
+            <div class="gt-num" style="color:var(--red)">L1</div>
+            <div class="gt-num" style="color:var(--green)">L2</div>
+            <div><span class="priority-chip p-medium">Medium</span></div>
+            <div><span class="intervention-chip">Coaching</span></div>
+          </div>
+        </div>
+        <div class="idp-card" style="margin-top:4px">
+          <div class="card-head"><div class="card-title">Individual Development Plan (IDP)</div><div class="card-count">Next review: Jun 2026</div></div>
+          <div class="idp-goal-row">
+            <div class="idp-icon" style="background:var(--accent-lt);color:var(--accent)"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <div class="idp-goal-text">Achieve BIM Coordinator proficiency (L2) by Q3 2026</div>
+            <div class="idp-goal-status s-on-track">On Track</div>
+          </div>
+          <div class="idp-goal-row">
+            <div class="idp-icon" style="background:var(--blue-bg);color:var(--blue)"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+            <div class="idp-goal-text">Complete PMP recertification (Cycle 3) by Q2 2026</div>
+            <div class="idp-goal-status s-on-track">On Track</div>
+          </div>
+          <div class="idp-goal-row">
+            <div class="idp-icon" style="background:var(--amber-bg);color:var(--amber)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="idp-goal-text">Lead one full digital delivery project end-to-end in FY2026</div>
+            <div class="idp-goal-status s-in-prog">In Progress</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEARNING PATH TAB -->
+      <div class="tab-panel" id="tab-learning">
+        <div class="lp-timeline">
+          <div class="lp-item">
+            <div class="lp-dot-wrap"><div class="lp-dot done"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="lp-line"></div></div>
+            <div class="lp-body">
+              <div class="lp-card">
+                <div class="lp-prog-name">Digital Project Delivery</div>
+                <div class="lp-meta">
+                  <div class="lp-meta-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Completed Dec 2025</div>
+                  <div class="lp-meta-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>57 enrolled</div>
+                  <div class="lp-meta-item" style="color:var(--green)">Score: 72%</div>
+                </div>
+                <div class="lp-bar-track"><div class="lp-bar-fill" style="width:100%;background:var(--green)"></div></div>
+                <div class="lp-bar-label"><span>Complete</span><span>100%</span></div>
+                <div class="lp-skills-covered">
+                  <div class="lp-skill-pill">Digital Delivery L2 → L3</div>
+                  <div class="lp-skill-pill">Stakeholder Mgmt</div>
+                  <div class="lp-skill-pill">+1 cert issued</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="lp-item">
+            <div class="lp-dot-wrap"><div class="lp-dot active"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div class="lp-line"></div></div>
+            <div class="lp-body">
+              <div class="lp-card active-card">
+                <div class="lp-prog-name">AI & Data Literacy for Engineers</div>
+                <div class="lp-meta">
+                  <div class="lp-meta-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Due Apr 2026</div>
+                  <div class="lp-meta-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>72 enrolled</div>
+                  <div class="lp-meta-item" style="color:var(--accent)">In Progress</div>
+                </div>
+                <div class="lp-bar-track"><div class="lp-bar-fill" style="width:64%;background:var(--accent)"></div></div>
+                <div class="lp-bar-label"><span>64% complete</span><span>Module 5 of 8</span></div>
+                <div class="lp-skills-covered">
+                  <div class="lp-skill-pill">AI Literacy L1 → L2</div>
+                  <div class="lp-skill-pill">Data Analytics basics</div>
+                  <div class="lp-skill-pill">Closes critical gap</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="lp-item">
+            <div class="lp-dot-wrap"><div class="lp-dot queued"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div></div>
+            <div class="lp-body">
+              <div class="lp-card">
+                <div class="lp-prog-name">Advanced Risk & Contract Management</div>
+                <div class="lp-meta">
+                  <div class="lp-meta-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Due Jun 2026</div>
+                  <div class="lp-meta-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>44 enrolled</div>
+                  <div class="lp-meta-item" style="color:var(--text-muted)">Not started</div>
+                </div>
+                <div class="lp-bar-track"><div class="lp-bar-fill" style="width:0%;background:var(--blue)"></div></div>
+                <div class="lp-bar-label"><span>Not yet started</span><span>0%</span></div>
+                <div class="lp-skills-covered">
+                  <div class="lp-skill-pill">Risk Mgmt L2 → L3</div>
+                  <div class="lp-skill-pill">Contract Law</div>
+                  <div class="lp-skill-pill">Claims handling</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ASSESSMENTS TAB -->
+      <div class="tab-panel" id="tab-assessments">
+        <div class="idp-card">
+          <div class="card-head"><div class="card-title">Assessment History</div><div class="card-count">2 completed</div></div>
+          <div class="assess-row">
+            <div class="assess-score as-gold">74%</div>
+            <div class="assess-info">
+              <div class="assess-name">L2 Skills Assessment — Project Management Track</div>
+              <div class="assess-meta">
+                <span>Nov 2025</span>
+                <span>62 questions · 48 min</span>
+                <span style="color:var(--green)">Validated</span>
+              </div>
+            </div>
+            <span class="assess-chip" style="background:var(--accent-lt);color:var(--accent);border:1px solid var(--accent-bd);font-size:10px;padding:3px 9px;border-radius:100px">Score-based</span>
+          </div>
+          <div class="assess-row">
+            <div class="assess-score as-green">78%</div>
+            <div class="assess-info">
+              <div class="assess-name">360° Feedback — Leadership & Collaboration</div>
+              <div class="assess-meta">
+                <span>Dec 2025</span>
+                <span>8 raters · Peers + manager</span>
+                <span style="color:var(--green)">Validated</span>
+              </div>
+            </div>
+            <span class="assess-chip" style="background:var(--blue-bg);color:var(--blue);border:1px solid rgba(37,99,235,.3);font-size:10px;padding:3px 9px;border-radius:100px">360°</span>
+          </div>
+        </div>
+        <div class="gap-banner" style="background:var(--blue-bg);border-color:rgba(37,99,235,.3)">
+          <svg viewBox="0 0 24 24" style="stroke:var(--blue)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="gap-banner-text">Next scheduled assessment: <strong style="color:var(--text-primary)">L2 Reassessment — Risk Management Track</strong> · Scheduled May 2026 · Pre-assessment IDP review recommended.</div>
+        </div>
+      </div>
+
+      <!-- Export Banner (always visible) -->
+      <div class="export-banner">
+        <div class="eb-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></div>
+        <div class="eb-text">
+          <div class="eb-title">Export Skill Passport</div>
+          <div class="eb-sub">Portable verified record · QR-authenticated · Priya carries this when she leaves Arcova</div>
+        </div>
+        <div class="eb-actions">
+          <button class="eb-btn outline" onclick="document.querySelector('.qr-modal').classList.add('open')">QR Code</button>
+          <button class="eb-btn outline">Share Link</button>
+          <button class="eb-btn filled">Download PDF</button>
+        </div>
+      </div>
+
+    </div><!-- /col-right -->
+
+  </div><!-- /content -->
+
+  <!-- confidence-statement -->
+  <div style="display:flex;align-items:center;gap:10px;padding:10px 28px;background:rgba(201,168,76,0.06);border-top:1px solid rgba(201,168,76,0.15);flex-shrink:0">
+    <svg style="width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+    <span style="font-size:11px;color:var(--accent);font-weight:500;letter-spacing:0.03em">Your skills. Your record. Yours to export when you leave.</span>
+    <span style="margin-left:auto;font-size:10px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase">Employee ownership</span>
+  </div>
+</main>
+
+<!-- QR Modal -->
+<div class="qr-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="qr-box">
+    <div class="qr-title">Passport Verification</div>
+    <div class="qr-sub">Scan to verify Priya Menon's credentials</div>
+    <div class="qr-code">
+      <svg width="120" height="120" viewBox="0 0 120 120">
+        <!-- simplified QR pattern -->
+        <rect width="120" height="120" fill="white"/>
+        <rect x="10" y="10" width="30" height="30" fill="#111"/>
+        <rect x="14" y="14" width="22" height="22" fill="white"/>
+        <rect x="18" y="18" width="14" height="14" fill="#111"/>
+        <rect x="80" y="10" width="30" height="30" fill="#111"/>
+        <rect x="84" y="14" width="22" height="22" fill="white"/>
+        <rect x="88" y="18" width="14" height="14" fill="#111"/>
+        <rect x="10" y="80" width="30" height="30" fill="#111"/>
+        <rect x="14" y="84" width="22" height="22" fill="white"/>
+        <rect x="18" y="88" width="14" height="14" fill="#111"/>
+        <rect x="50" y="10" width="5" height="5" fill="#111"/><rect x="58" y="10" width="5" height="5" fill="#111"/>
+        <rect x="50" y="18" width="5" height="5" fill="#111"/><rect x="62" y="18" width="5" height="5" fill="#111"/>
+        <rect x="55" y="25" width="5" height="5" fill="#111"/>
+        <rect x="50" y="50" width="5" height="5" fill="#111"/><rect x="60" y="50" width="5" height="5" fill="#111"/><rect x="70" y="50" width="5" height="5" fill="#111"/>
+        <rect x="55" y="57" width="5" height="5" fill="#111"/><rect x="65" y="57" width="5" height="5" fill="#111"/>
+        <rect x="50" y="65" width="5" height="5" fill="#111"/><rect x="68" y="65" width="5" height="5" fill="#111"/>
+        <rect x="80" y="50" width="5" height="5" fill="#111"/><rect x="88" y="50" width="5" height="5" fill="#111"/>
+        <rect x="83" y="57" width="5" height="5" fill="#111"/>
+        <rect x="80" y="65" width="5" height="5" fill="#111"/><rect x="90" y="65" width="5" height="5" fill="#111"/>
+        <rect x="80" y="80" width="5" height="5" fill="#111"/><rect x="88" y="80" width="5" height="5" fill="#111"/>
+        <rect x="83" y="88" width="5" height="5" fill="#111"/><rect x="92" y="88" width="5" height="5" fill="#111"/>
+        <rect x="80" y="95" width="5" height="5" fill="#111"/>
+        <rect x="50" y="80" width="5" height="5" fill="#111"/><rect x="58" y="80" width="5" height="5" fill="#111"/>
+        <rect x="55" y="88" width="5" height="5" fill="#111"/>
+        <rect x="50" y="95" width="5" height="5" fill="#111"/><rect x="62" y="95" width="5" height="5" fill="#111"/>
+      </svg>
+    </div>
+    <div class="qr-id">SIP-EMP-001-2025 · Edstellar SIP</div>
+    <button class="qr-close" onclick="document.querySelector('.qr-modal').classList.remove('open')">Close</button>
+  </div>
+</div>
+
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'employee',
+    activeNav: 'Skill Passport',
+    breadcrumbs: ['My Profile', 'Skill Passport'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+Chart.defaults.color = "#6B7280";
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+// Radial readiness gauge
+(function(){
+  const ctx = document.getElementById('radialChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [74, 26],
+        backgroundColor: ['#C9A84C', 'rgba(0,0,0,0.06)'],
+        borderWidth: 0, hoverOffset: 0
+      }]
+    },
+    options: {
+      responsive: false, cutout: '72%', rotation: -90, circumference: 360,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      animation: { animateRotate: true, duration: 1200 }
+    }
+  });
+})();
+
+// Radar chart
+(function(){
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Engineering', 'Project Mgmt', 'Digital', 'EHS', 'Leadership'],
+      datasets: [
+        {
+          label: 'Current',
+          data: [2.5, 3.0, 1.7, 2.0, 3.0],
+          borderColor: '#2563EB',
+          backgroundColor: 'rgba(37,99,235,0.10)',
+          borderWidth: 2,
+          pointBackgroundColor: '#2563EB',
+          pointRadius: 3
+        },
+        {
+          label: 'Target',
+          data: [3.0, 3.0, 3.0, 2.5, 3.0],
+          borderColor: 'rgba(201,168,76,0.6)',
+          backgroundColor: 'rgba(201,168,76,0.06)',
+          borderWidth: 1.5,
+          borderDash: [4, 3],
+          pointBackgroundColor: '#C9A84C',
+          pointRadius: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      scales: {
+        r: {
+          min: 0, max: 4,
+          ticks: { stepSize: 1, display: false },
+          grid:  { color: 'rgba(0,0,0,0.07)' },
+          angleLines: { color: 'rgba(0,0,0,0.07)' },
+          pointLabels: { font: { size: 10 }, color: '#6B7280' }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: '#ffffff', titleColor: '#0F1117', bodyColor: '#6B7280', borderColor: 'rgba(0,0,0,0.1)', borderWidth: 1 }
+      }
+    }
+  });
+})();
+
+// Tab switching
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+
+<script>
+(function(){
+  var toast = document.createElement("div");
+  toast.id = "sip-toast";
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#ffffff;border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:'DM Sans',sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08)";
+  document.body.appendChild(toast);
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){
+      toast.style.opacity="0";
+      toast.style.transform="translateX(-50%) translateY(8px)";
+    }, 2400);
+  }
+  document.addEventListener("click", function(e){
+    var a = e.target.closest("a");
+    if(a && a.getAttribute("href") === "#"){
+      e.preventDefault();
+      var label = (a.textContent || "").trim().replace(/\s+/g," ").substring(0,36);
+      showToast(label + " — available in full platform");
+    }
+  });
+})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DYNAMIC ASSESSMENT DATA OVERLAY
+// Enriches the Skill Passport with imported assessment data
+// ═══════════════════════════════════════════════════════
+(function(){
+  var PASSPORT_EMP_ID='EMP-0001'; // Priya Menon — hardcoded passport
+
+  // Load assessment data
+  var skillData=null,compData=null;
+  try{var sr=sessionStorage.getItem('sip_employee_assessments')||localStorage.getItem('sip_employee_assessments');if(sr)skillData=JSON.parse(sr)}catch(e){}
+  try{var cr=sessionStorage.getItem('sip_competency_assessments')||localStorage.getItem('sip_competency_assessments');if(cr)compData=JSON.parse(cr)}catch(e){}
+
+  // Find this employee's records
+  var empSkills=null;
+  if(skillData&&skillData.records){
+    for(var i=0;i<skillData.records.length;i++){
+      if(skillData.records[i].employeeId===PASSPORT_EMP_ID){empSkills=skillData.records[i];break}
+    }
+  }
+  var empComps=[];
+  if(compData&&compData.records){
+    empComps=compData.records.filter(function(r){return r.employeeId===PASSPORT_EMP_ID});
+  }
+
+  if(!empSkills&&!empComps.length) return; // No assessment data — keep hardcoded view
+
+  var grid=document.getElementById('skillsGridDynamic');
+  if(!grid) return;
+
+  // Build dynamic content that APPENDS to existing hardcoded skills
+  var h='';
+
+  // ── Imported Skills Assessment Section ──
+  if(empSkills&&empSkills.assessments.length){
+    var latest=empSkills.assessments[empSkills.assessments.length-1];
+    h+='<div class="domain-card" style="border:1px solid rgba(59,130,246,0.2)">';
+    h+='<div class="domain-head"><div class="domain-pip" style="background:#3B82F6"></div>';
+    h+='<div class="domain-title">Imported Skills Assessment ('+latest.year+')</div>';
+    var avg=0;if(latest.skills.length){var s=0;latest.skills.forEach(function(sk){s+=sk.managedScore});avg=Math.round(s/latest.skills.length*10)/10}
+    var avgColor=avg>=3?'var(--green)':avg>=2?'var(--amber)':'var(--red)';
+    h+='<div class="domain-avg" style="color:'+avgColor+'">avg '+avg+'</div></div>';
+    h+='<div class="skill-list">';
+    latest.skills.forEach(function(sk){
+      h+='<div class="skill-row">';
+      h+='<div class="skill-name">'+sk.skillName+'</div>';
+      h+='<div class="skill-source">Assessed</div>';
+      h+='<div class="prof-track">';
+      for(var l=1;l<=4;l++){
+        var cls='prof-pip';
+        if(l<=sk.managedScore&&l<=sk.requiredScore) cls+=' match';
+        else if(l<=sk.managedScore) cls+=' filled-current';
+        else if(l<=sk.requiredScore) cls+=' gap';
+        var label=String(l);
+        if(l===sk.managedScore&&l===sk.requiredScore) label+='✓';
+        else if(l===sk.requiredScore&&sk.managedScore<sk.requiredScore) label+='△';
+        h+='<div class="'+cls+'" title="L'+l+'">'+label+'</div>';
+      }
+      h+='</div></div>';
+    });
+    h+='</div></div>';
+  }
+
+  // ── Imported Competency Assessment Section ──
+  if(empComps.length){
+    h+='<div class="domain-card" style="border:1px solid rgba(139,92,246,0.2)">';
+    h+='<div class="domain-head"><div class="domain-pip" style="background:#8B5CF6"></div>';
+    h+='<div class="domain-title">Imported Competency Assessment (2024)</div>';
+    var cavg=0;var cs=0;empComps.forEach(function(c){cs+=(c.weightedScore||c.selfScore||0)});
+    cavg=Math.round(cs/empComps.length*10)/10;
+    var cavgColor=cavg>=2?'var(--green)':cavg>=1.5?'var(--amber)':'var(--red)';
+    h+='<div class="domain-avg" style="color:'+cavgColor+'">avg '+cavg+'</div></div>';
+    h+='<div class="skill-list">';
+    empComps.forEach(function(c){
+      var achieved=Math.round(c.weightedScore||c.selfScore||0);
+      var required=Math.round(c.requiredProf||2);
+      h+='<div class="skill-row">';
+      h+='<div class="skill-name">'+c.compName+' <span style="font-size:9px;padding:1px 5px;border-radius:100px;background:rgba(139,92,246,0.08);color:#8B5CF6">Competency</span></div>';
+      h+='<div class="skill-source">'+c.source+'</div>';
+      h+='<div class="prof-track">';
+      for(var l=1;l<=4;l++){
+        var cls='prof-pip';
+        if(l<=achieved&&l<=required) cls+=' match';
+        else if(l<=achieved) cls+=' filled-current';
+        else if(l<=required) cls+=' gap';
+        var label=String(l);
+        if(l===achieved&&l===required) label+='✓';
+        else if(l===required&&achieved<required) label+='△';
+        h+='<div class="'+cls+'" title="L'+l+'">'+label+'</div>';
+      }
+      h+='</div></div>';
+    });
+    h+='</div></div>';
+  }
+
+  if(h){
+    // Append the imported data cards to the existing skills grid
+    grid.insertAdjacentHTML('beforeend',h);
+
+    // Update the resume skills card count
+    var countEl=document.getElementById('resumeSkillsCount');
+    if(countEl){
+      var total=(empSkills&&empSkills.assessments.length?empSkills.assessments[empSkills.assessments.length-1].skills.length:0)+empComps.length;
+      countEl.textContent='AI-Extracted + '+total+' Assessed';
+    }
+  }
+})();
+</script>
+</body>
+</html>

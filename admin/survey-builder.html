@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survey Builder · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   SURVEY BUILDER — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── CONTENT ── */
+.content { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; }
+.content>* { flex-shrink: 0; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
+
+/* ── KPI STRIP ── */
+.kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; animation: fadeUp .4s ease both; }
+.kpi-card { background: var(--card); border: 1px solid #E5E7EB; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.kpi-card:nth-child(1) { animation-delay: 0.05s; }
+.kpi-card:nth-child(2) { animation-delay: 0.10s; }
+.kpi-card:nth-child(3) { animation-delay: 0.15s; }
+.kpi-card:nth-child(4) { animation-delay: 0.20s; }
+.kpi-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.kpi-value { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--text-primary); line-height: 1; letter-spacing: -0.02em; }
+.kpi-value.gold  { color: var(--accent); }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red   { color: var(--red); }
+.kpi-value.teal  { color: var(--teal); }
+.kpi-sub { font-size: 10px; display: flex; align-items: center; gap: 4px; color: var(--text-muted); }
+.kpi-up   { color: var(--green); }
+.kpi-down { color: var(--red); }
+
+/* ── PANELS ── */
+.panel { background: var(--card); border: 1px solid #E5E7EB; border-radius: 14px; display: flex; flex-direction: column; overflow: hidden; }
+.panel-head { padding: 14px 18px 12px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.panel-title { font-family: var(--font-display); font-size: 13px; font-weight: 400; color: var(--text-primary); }
+.panel-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.panel-tag { padding: 3px 8px; border-radius: 100px; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid; }
+.panel-tag.teal  { border-color: rgba(8,145,178,.3); color: var(--teal); background: var(--teal-bg); }
+.panel-tag.gold  { border-color: var(--accent-bd); color: var(--accent); background: var(--accent-lt); }
+.panel-tag.red   { border-color: rgba(220,38,38,.3); color: var(--red); background: var(--red-bg); }
+.panel-tag.green { border-color: rgba(22,163,74,.3); color: var(--green); background: var(--green-bg); }
+.panel-tag.blue  { border-color: rgba(37,99,235,.3); color: var(--blue); background: var(--blue-bg); }
+.panel-body { flex: 1; padding: 14px 18px; }
+.panel-body.no-pad { padding: 0; }
+
+/* ── STATUS CHIPS ── */
+.status-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 100px; font-size: 10px; font-weight: 500;
+}
+.status-chip.active   { background: var(--teal-bg); color: var(--teal); }
+.status-chip.complete { background: var(--green-bg); color: var(--green); }
+.status-chip.template { background: var(--purple-bg); color: var(--purple); }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; }
+.status-chip.active .status-dot   { background: var(--teal); animation: blink 1.5s infinite; }
+.status-chip.complete .status-dot { background: var(--green); }
+.status-chip.template .status-dot { background: var(--purple); }
+
+/* ── SURVEY LIBRARY TABLE ── */
+.survey-table { width: 100%; border-collapse: collapse; }
+.survey-table th {
+  font-size: 10px; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase;
+  text-align: left; padding: 0 12px 10px; font-weight: 400;
+}
+.survey-table th:nth-child(n+3) { text-align: center; }
+.survey-table tr { border-bottom: 1px solid #E5E7EB; }
+.survey-table tr:last-child { border-bottom: none; }
+.survey-table td { padding: 10px 12px; font-size: 12px; color: var(--text-secondary); }
+.survey-table td:first-child { color: var(--text-primary); font-weight: 500; }
+.survey-table td:nth-child(n+3) { text-align: center; }
+
+.rate-bar { width: 70px; height: 5px; background: rgba(0,0,0,.07); border-radius: 3px; display: inline-block; vertical-align: middle; }
+.rate-fill { height: 100%; border-radius: 3px; }
+
+.action-btn {
+  padding: 4px 10px; border-radius: 5px; font-size: 10px; font-family: 'DM Sans',sans-serif;
+  cursor: pointer; transition: opacity .15s, background .15s; border: 1px solid #E5E7EB; background: transparent;
+  color: var(--text-secondary); white-space: nowrap;
+}
+.action-btn:hover { background: rgba(0,0,0,0.04); color: var(--text-primary); }
+.action-btn.primary { background: var(--teal-bg); border-color: rgba(8,145,178,.25); color: var(--teal); }
+.action-btn.primary:hover { background: rgba(8,145,178,.15); }
+
+/* ── SURVEY BUILDER FORM ── */
+.builder-form { display: flex; flex-direction: column; gap: 14px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 10px; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase; font-weight: 500; }
+.form-input, .form-select {
+  background: var(--bg); border: 1px solid #E5E7EB; border-radius: 6px;
+  padding: 9px 12px; font-size: 12px; font-family: 'DM Sans',sans-serif; color: var(--text-primary);
+  outline: none; transition: border-color .15s;
+}
+.form-input:focus, .form-select:focus { border-color: rgba(8,145,178,.5); }
+.form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239CA3AF' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 30px; cursor: pointer; }
+.form-select option { background: var(--card); color: var(--text-primary); }
+
+.toggle-row { display: flex; align-items: center; gap: 10px; }
+.toggle-switch {
+  width: 36px; height: 20px; border-radius: 10px; background: var(--bg); border: 1px solid #E5E7EB;
+  position: relative; cursor: pointer; transition: background .2s;
+}
+.toggle-switch.on { background: var(--teal); border-color: var(--teal); }
+.toggle-dot {
+  width: 14px; height: 14px; border-radius: 50%; background: var(--text-muted);
+  position: absolute; top: 2px; left: 2px; transition: transform .2s, background .2s;
+}
+.toggle-switch.on .toggle-dot { transform: translateX(16px); background: #fff; }
+.toggle-label { font-size: 12px; color: var(--text-secondary); }
+
+/* ── QUESTION CARDS ── */
+.question-card {
+  background: var(--bg); border: 1px solid #E5E7EB; border-radius: 10px;
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
+}
+.q-header { display: flex; align-items: center; gap: 8px; }
+.q-num {
+  width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono',monospace; font-size: 10px; font-weight: 600; flex-shrink: 0;
+  background: var(--teal-bg); color: var(--teal); border: 1px solid rgba(8,145,178,.25);
+}
+.q-type {
+  padding: 2px 7px; border-radius: 100px; font-size: 9px; font-weight: 500; letter-spacing: .04em;
+  margin-left: auto;
+}
+.q-type.likert  { background: var(--blue-bg); color: var(--blue); }
+.q-type.open    { background: var(--purple-bg); color: var(--purple); }
+.q-type.rating  { background: var(--accent-lt); color: var(--accent); }
+.q-text { font-size: 12.5px; color: var(--text-primary); line-height: 1.5; }
+.q-preview { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+.likert-preview { display: flex; gap: 6px; margin-top: 2px; }
+.likert-option {
+  padding: 4px 10px; border-radius: 5px; font-size: 10px; color: var(--text-muted);
+  background: rgba(0,0,0,.02); border: 1px solid #E5E7EB;
+}
+.likert-option.selected { background: var(--teal-bg); border-color: rgba(8,145,178,.25); color: var(--teal); }
+
+.rating-preview { display: flex; gap: 4px; margin-top: 2px; }
+.rating-star { font-size: 16px; color: var(--text-muted); cursor: default; }
+.rating-star.filled { color: var(--accent); }
+
+.open-text-preview {
+  background: rgba(0,0,0,.02); border: 1px solid #E5E7EB; border-radius: 6px;
+  padding: 8px 10px; font-size: 11px; color: var(--text-muted); font-style: italic; margin-top: 2px;
+}
+
+/* ── TREND CHART ── */
+.trend-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* ── TOOLBAR BUTTONS ── */
+.tb-btn { padding: 7px 14px; border-radius: 6px; border: 1px solid #E5E7EB; background: transparent; color: var(--text-secondary); font-family: 'DM Sans',sans-serif; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: background .15s, color .15s; }
+.tb-btn:hover { background: rgba(0,0,0,0.04); color: var(--text-primary); }
+.tb-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.tb-btn.primary { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 600; }
+.tb-btn.primary:hover { opacity: .88; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.5; transform:scale(1.3); } }
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <!-- SCROLLABLE CONTENT -->
+  <div class="content">
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <div class="kpi-label">Active Surveys</div>
+        <div class="kpi-value teal">3</div>
+        <div class="kpi-sub kpi-up">Collecting responses</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total Responses</div>
+        <div class="kpi-value" style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500">1,842</div>
+        <div class="kpi-sub kpi-up">+312 this month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Response Rate</div>
+        <div class="kpi-value green">76%</div>
+        <div class="kpi-sub kpi-up">+8pts vs Q4 2025</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Trend Datapoints</div>
+        <div class="kpi-value gold">12</div>
+        <div class="kpi-sub">Across 4 quarters</div>
+      </div>
+    </div>
+
+    <!-- SURVEY LIBRARY -->
+    <div class="panel" style="animation: fadeUp .5s ease .1s both">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Survey Library</div>
+          <div class="panel-sub">5 surveys · 3 active · 1 completed · 1 template</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <div class="panel-tag teal">3 Active</div>
+          <div class="panel-tag green">76% Avg Rate</div>
+        </div>
+      </div>
+      <div class="panel-body no-pad" style="overflow-x:auto">
+        <table class="survey-table">
+          <thead>
+            <tr>
+              <th>Survey Name</th>
+              <th>Status</th>
+              <th>Responses</th>
+              <th>Rate</th>
+              <th style="text-align:right;padding-right:14px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Employee Engagement Pulse Q1 2026</td>
+              <td><span class="status-chip active"><span class="status-dot"></span>Active</span></td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px">634</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+                  <span class="rate-bar"><span class="rate-fill" style="width:78%;background:var(--teal)"></span></span>
+                  <span style="font-size:11px;color:var(--teal);font-family:'DM Mono',monospace">78%</span>
+                </div>
+              </td>
+              <td style="text-align:right;padding-right:14px">
+                <div style="display:flex;gap:5px;justify-content:flex-end">
+                  <button class="action-btn primary">View Results</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-btn">Clone</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Change Readiness Assessment</td>
+              <td><span class="status-chip active"><span class="status-dot"></span>Active</span></td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px">412</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+                  <span class="rate-bar"><span class="rate-fill" style="width:51%;background:var(--amber)"></span></span>
+                  <span style="font-size:11px;color:var(--amber);font-family:'DM Mono',monospace">51%</span>
+                </div>
+              </td>
+              <td style="text-align:right;padding-right:14px">
+                <div style="display:flex;gap:5px;justify-content:flex-end">
+                  <button class="action-btn primary">View Results</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-btn">Clone</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Culture Alignment Survey</td>
+              <td><span class="status-chip active"><span class="status-dot"></span>Active</span></td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px">796</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+                  <span class="rate-bar"><span class="rate-fill" style="width:98%;background:var(--green)"></span></span>
+                  <span style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace">98%</span>
+                </div>
+              </td>
+              <td style="text-align:right;padding-right:14px">
+                <div style="display:flex;gap:5px;justify-content:flex-end">
+                  <button class="action-btn primary">View Results</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-btn">Clone</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Strategy Awareness Check</td>
+              <td><span class="status-chip complete"><span class="status-dot"></span>Completed</span></td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted)">Q4 2025</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+                  <span class="rate-bar"><span class="rate-fill" style="width:82%;background:var(--green)"></span></span>
+                  <span style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace">82%</span>
+                </div>
+              </td>
+              <td style="text-align:right;padding-right:14px">
+                <div style="display:flex;gap:5px;justify-content:flex-end">
+                  <button class="action-btn primary">View Results</button>
+                  <button class="action-btn">Edit</button>
+                  <button class="action-btn">Clone</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Post-Training Satisfaction</td>
+              <td><span class="status-chip template"><span class="status-dot"></span>Template</span></td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted)">Not deployed</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+                  <span class="rate-bar"><span class="rate-fill" style="width:0%"></span></span>
+                  <span style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace">--</span>
+                </div>
+              </td>
+              <td style="text-align:right;padding-right:14px">
+                <div style="display:flex;gap:5px;justify-content:flex-end">
+                  <button class="action-btn">Edit</button>
+                  <button class="action-btn">Clone</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SURVEY BUILDER PANEL -->
+    <div class="panel" id="builderPanel" style="animation: fadeUp .5s ease .2s both">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Survey Builder</div>
+          <div class="panel-sub">Create and configure a new org survey · AI-assisted question generation</div>
+        </div>
+        <div class="panel-tag teal">Builder</div>
+      </div>
+      <div class="panel-body">
+        <div class="builder-form">
+
+          <!-- Row 1: Name + Type -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Survey Name</label>
+              <input class="form-input" type="text" value="Employee Wellbeing Pulse — Q2 2026" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Survey Type</label>
+              <select class="form-select">
+                <option selected>Engagement</option>
+                <option>Change Readiness</option>
+                <option>Culture</option>
+                <option>Strategy</option>
+                <option>Custom</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 2: Audience + Anonymous -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Target Audience</label>
+              <select class="form-select">
+                <option selected>All Employees (812)</option>
+                <option>Engineering Track (324)</option>
+                <option>Digital & Tech (118)</option>
+                <option>EHS & Risk (96)</option>
+                <option>BIM & Digital Delivery (54)</option>
+                <option>Senior Managers (28)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Anonymous Responses</label>
+              <div class="toggle-row" style="margin-top:4px">
+                <div class="toggle-switch on" id="anonToggle" onclick="this.classList.toggle('on')">
+                  <div class="toggle-dot"></div>
+                </div>
+                <span class="toggle-label">Anonymous mode enabled — responses aggregated at team level</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div style="border-top:1px solid #E5E7EB;margin:4px 0"></div>
+
+          <!-- Question Builder Header -->
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-family:var(--font-display);font-size:12px;font-weight:400;color:var(--text-primary)">Question Builder</div>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:2px">3 sample questions · Drag to reorder · Add or remove</div>
+            </div>
+            <button class="tb-btn primary" style="padding:6px 14px;font-size:11px" id="aiGenBtn">
+              <svg viewBox="0 0 24 24" style="width:12px;height:12px"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+              Generate Questions with AI
+            </button>
+          </div>
+
+          <!-- Question 1: Likert -->
+          <div class="question-card">
+            <div class="q-header">
+              <div class="q-num">Q1</div>
+              <span style="font-size:11px;color:var(--text-primary);font-weight:500">Likert Scale</span>
+              <div class="q-type likert">5-point Likert</div>
+            </div>
+            <div class="q-text">I feel valued and supported in my current role at Edstellar.</div>
+            <div class="likert-preview">
+              <div class="likert-option">Strongly Disagree</div>
+              <div class="likert-option">Disagree</div>
+              <div class="likert-option">Neutral</div>
+              <div class="likert-option selected">Agree</div>
+              <div class="likert-option">Strongly Agree</div>
+            </div>
+          </div>
+
+          <!-- Question 2: Open Text -->
+          <div class="question-card">
+            <div class="q-header">
+              <div class="q-num">Q2</div>
+              <span style="font-size:11px;color:var(--text-primary);font-weight:500">Open Text</span>
+              <div class="q-type open">Free Text</div>
+            </div>
+            <div class="q-text">What is the single most important change that would improve your day-to-day work experience?</div>
+            <div class="open-text-preview">Type your response here...</div>
+          </div>
+
+          <!-- Question 3: Rating -->
+          <div class="question-card">
+            <div class="q-header">
+              <div class="q-num">Q3</div>
+              <span style="font-size:11px;color:var(--text-primary);font-weight:500">Rating</span>
+              <div class="q-type rating">1-5 Stars</div>
+            </div>
+            <div class="q-text">How would you rate the quality and relevance of L&D programmes available to you?</div>
+            <div class="rating-preview">
+              <span class="rating-star filled">&#9733;</span>
+              <span class="rating-star filled">&#9733;</span>
+              <span class="rating-star filled">&#9733;</span>
+              <span class="rating-star filled">&#9733;</span>
+              <span class="rating-star">&#9733;</span>
+              <span style="font-size:11px;color:var(--text-muted);margin-left:6px;font-family:'DM Mono',monospace">4 / 5</span>
+            </div>
+          </div>
+
+          <!-- Builder Actions -->
+          <div style="display:flex;gap:10px;margin-top:4px">
+            <button class="tb-btn primary">Save & Preview</button>
+            <button class="tb-btn">Add Question</button>
+            <button class="tb-btn">Import Template</button>
+            <button class="tb-btn">Distribute Survey</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- AGGREGATE TREND DASHBOARD -->
+    <div class="trend-row" style="animation: fadeUp .5s ease .3s both">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Aggregate Trend Dashboard</div>
+            <div class="panel-sub">Engagement score trending · 4 quarters · Likert average (1-5)</div>
+          </div>
+          <div class="panel-tag gold">Trending</div>
+        </div>
+        <div class="panel-body">
+          <div style="height:220px;position:relative">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Response Rate by Survey</div>
+            <div class="panel-sub">Active surveys · Participation tracking</div>
+          </div>
+          <div class="panel-tag teal">Live</div>
+        </div>
+        <div class="panel-body">
+          <div style="height:220px;position:relative">
+            <canvas id="responseChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal: 'admin',
+  activeNav: 'Survey Builder',
+  breadcrumbs: ['Assess', 'Survey Builder'],
+  topbarActions: []
+});
+</script>
+
+<script>
+// Chart defaults
+Chart.defaults.color = "#9CA3AF";
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size = 11;
+
+// Engagement Trend Chart
+(function() {
+  var ctx = document.getElementById("trendChart").getContext("2d");
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: ["Q2 2025", "Q3 2025", "Q4 2025", "Q1 2026"],
+      datasets: [{
+        label: "Engagement Score",
+        data: [3.2, 3.4, 3.6, 3.7],
+        borderColor: "#C9A84C",
+        backgroundColor: "rgba(201,168,76,0.08)",
+        borderWidth: 2,
+        pointBackgroundColor: "#C9A84C",
+        pointBorderColor: "#C9A84C",
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        fill: true,
+        tension: 0.35
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#ffffff",
+          titleColor: "#0F1117",
+          bodyColor: "#6B7280",
+          borderColor: "rgba(0,0,0,0.1)",
+          borderWidth: 1,
+          callbacks: { label: function(ctx) { return " Score: " + ctx.raw + " / 5.0"; } }
+        }
+      },
+      scales: {
+        x: { grid: { color: "rgba(0,0,0,0.04)" }, border: { display: false } },
+        y: {
+          min: 2.5, max: 4.5,
+          grid: { color: "rgba(0,0,0,0.04)" }, border: { display: false },
+          ticks: { callback: function(v) { return v.toFixed(1); } }
+        }
+      }
+    }
+  });
+})();
+
+// Response Rate by Survey Chart
+(function() {
+  var ctx = document.getElementById("responseChart").getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Engagement\nPulse Q1", "Change\nReadiness", "Culture\nAlignment", "Strategy\nAwareness", "Post-Training\nSatisfaction"],
+      datasets: [{
+        label: "Response Rate",
+        data: [78, 51, 98, 82, 0],
+        backgroundColor: [
+          "rgba(8,145,178,0.3)",
+          "rgba(217,119,6,0.3)",
+          "rgba(22,163,74,0.3)",
+          "rgba(37,99,235,0.3)",
+          "rgba(0,0,0,0.04)"
+        ],
+        borderColor: [
+          "#0891B2",
+          "#D97706",
+          "#16A34A",
+          "#2563EB",
+          "rgba(0,0,0,0.1)"
+        ],
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#ffffff",
+          titleColor: "#0F1117",
+          bodyColor: "#6B7280",
+          borderColor: "rgba(0,0,0,0.1)",
+          borderWidth: 1,
+          callbacks: { label: function(ctx) { return " " + ctx.raw + "% response rate"; } }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, border: { display: false } },
+        y: {
+          min: 0, max: 100,
+          grid: { color: "rgba(0,0,0,0.04)" }, border: { display: false },
+          ticks: { callback: function(v) { return v + "%"; } }
+        }
+      }
+    }
+  });
+})();
+
+// Toast for placeholder links
+(function(){
+  var toast = document.createElement("div");
+  toast.id = "sip-toast";
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#ffffff;border:1px solid rgba(0,0,0,0.1);color:#6B7280;font-size:12px;font-family:'DM Sans',sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08)";
+  document.body.appendChild(toast);
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){
+      toast.style.opacity="0";
+      toast.style.transform="translateX(-50%) translateY(8px)";
+    }, 2400);
+  }
+  document.addEventListener("click", function(e){
+    var a = e.target.closest("a");
+    if(a && a.getAttribute("href") === "#"){
+      e.preventDefault();
+      var label = (a.textContent || "").trim().replace(/\s+/g," ").substring(0,36);
+      showToast(label + " \u2014 available in full platform");
+    }
+    var btn = e.target.closest(".action-btn, .tb-btn");
+    if(btn && !btn.closest("a")) {
+      var label = (btn.textContent || "").trim().substring(0,40);
+      showToast(label + " \u2014 available in full platform");
+    }
+  });
+})();
+</script>
+</body>
+</html>

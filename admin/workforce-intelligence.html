@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workforce Intelligence · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   WORKFORCE INTELLIGENCE — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── SPLIT LAYOUT ── */
+.main-body{display:flex;flex:1;overflow:hidden}
+.content-left{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+.content-left>*{flex-shrink:0}
+.content-left::-webkit-scrollbar{width:4px}
+.content-left::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+
+/* ── AI PANEL ── */
+.ai-panel{width:310px;flex-shrink:0;border-left:1px solid rgba(0,0,0,0.08);background:linear-gradient(180deg,#ffffff 0%,#F5F4F0 100%);display:flex;flex-direction:column;overflow:hidden}
+.ai-header{padding:14px 16px;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;gap:10px}
+.ai-avatar-ring{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple) 0%,var(--blue) 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.ai-avatar-ring::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid transparent;border-top-color:var(--purple);animation:spin 3s linear infinite}
+.ai-avatar-ring svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.8}
+.ai-name{font-family:var(--font-display);font-size:11px;font-weight:700;color:var(--text-primary)}
+.ai-status{font-size:9px;color:var(--green);display:flex;align-items:center;gap:4px}
+.ai-status-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+.ai-chat{flex:1;overflow-y:auto;padding:14px 14px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.ai-chat>*{flex-shrink:0}
+.ai-chat::-webkit-scrollbar{width:3px}
+.ai-chat::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.06);border-radius:2px}
+.ai-footer{padding:10px 14px;border-top:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;gap:8px}
+.ai-footer-step{font-size:9px;color:var(--text-muted);flex:1}
+.ai-footer-progress{width:60px;height:4px;border-radius:2px;background:rgba(0,0,0,0.06);overflow:hidden}
+.ai-footer-bar{height:100%;background:var(--purple);border-radius:2px;transition:width .6s ease}
+
+/* AI Bubbles */
+.ai-bubble{display:flex;gap:8px;animation:fadeUp .35s ease both}
+.ai-bubble-avatar{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--purple) 0%,var(--blue) 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.ai-bubble-avatar svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2}
+.ai-msg{background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.12);border-radius:2px 10px 10px 10px;padding:10px 13px;font-size:11px;color:var(--text-secondary);line-height:1.65;max-width:100%}
+.ai-msg strong{color:var(--text-primary);font-weight:500}
+.ai-msg em{color:var(--accent);font-style:normal}
+
+/* AI Typing dots */
+.ai-typing{display:flex;gap:4px;padding:10px 16px}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);animation:typingDot 1.4s ease-in-out infinite}
+.ai-dot:nth-child(2){animation-delay:.2s}
+.ai-dot:nth-child(3){animation-delay:.4s}
+
+/* AI Context Card */
+.ai-context-card{background:linear-gradient(135deg,rgba(201,168,76,0.06) 0%,rgba(124,58,237,0.04) 100%);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:10px 12px;animation:fadeUp .4s ease both}
+.ai-context-card h5{font-family:var(--font-display);font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
+.ai-context-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.03)}
+.ai-context-row:last-child{border:none}
+.ai-context-key{font-size:9px;color:var(--text-muted)}
+.ai-context-val{font-size:10px;color:var(--text-primary);font-weight:500}
+
+/* AI Suggest Cards (sidebar) */
+.ai-suggest-card{background:var(--card);border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:10px 12px;transition:all .25s;position:relative;overflow:hidden}
+.ai-suggest-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:2px 0 0 2px}
+.ai-suggest-card.priority-high::before{background:var(--red)}
+.ai-suggest-card.priority-medium::before{background:var(--amber)}
+.ai-suggest-card.priority-low::before{background:var(--blue)}
+.ai-suggest-title{font-size:11px;font-weight:500;color:var(--text-primary);margin-bottom:2px}
+.ai-suggest-detail{font-size:9px;color:var(--text-muted);margin-bottom:6px;line-height:1.4}
+.ai-suggest-actions{display:flex;gap:6px}
+.ai-suggest-btn{padding:3px 10px;border-radius:5px;font-size:9px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+.ai-accept{background:var(--green-bg);color:var(--green);border:1px solid rgba(22,163,74,0.2)}
+.ai-accept:hover{background:rgba(22,163,74,0.15)}
+.ai-dismiss{background:transparent;color:var(--text-muted);border:1px solid rgba(0,0,0,0.08)}
+.ai-dismiss:hover{color:var(--red);border-color:rgba(220,38,38,0.3)}
+.ai-suggest-card.accepted{border-color:rgba(22,163,74,0.3);background:var(--green-bg);opacity:.7;pointer-events:none}
+.ai-suggest-card.dismissed{opacity:0;transform:translateX(-20px);height:0;padding:0;margin:0;border:none;overflow:hidden;transition:all .3s ease}
+
+/* ── PANELS ── */
+.panel{background:var(--card);border:1px solid rgba(0,0,0,0.08);border-radius:12px;overflow:hidden}
+.panel-head{padding:12px 18px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-title{font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--text-primary);flex:1;min-width:120px}
+.panel-body{padding:16px 18px}
+
+/* ── STEPPER ── */
+.stepper-bar{display:flex;align-items:center;gap:0;padding:8px 0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.stepper-bar::-webkit-scrollbar{height:2px}
+.stepper-bar::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.06);border-radius:2px}
+.step-item{display:flex;align-items:center;gap:4px;cursor:pointer;padding:4px 6px;border-radius:6px;transition:background .15s;flex-shrink:0}
+.step-item:hover{background:rgba(0,0,0,0.04)}
+.step-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:8px;font-weight:500;border:2px solid rgba(0,0,0,0.08);color:var(--text-muted);transition:all .3s;flex-shrink:0}
+.step-label{font-size:8px;color:var(--text-muted);transition:color .3s;white-space:nowrap}
+.step-item.active .step-num{border-color:var(--purple);color:var(--purple);background:var(--purple-bg)}
+.step-item.active .step-label{color:var(--purple);font-weight:500}
+.step-item.done .step-num{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.step-item.done .step-label{color:var(--green)}
+.step-conn{width:8px;height:2px;background:rgba(0,0,0,0.08);flex-shrink:0}
+.step-conn.done{background:var(--green)}
+
+/* ── PROGRESS METER ── */
+.progress-meter{display:flex;align-items:center;gap:16px;padding:14px 18px;background:linear-gradient(135deg,var(--card) 0%,rgba(124,58,237,0.04) 100%);border:1px solid rgba(124,58,237,0.15);border-radius:12px}
+.progress-ring-wrap{position:relative;width:56px;height:56px;flex-shrink:0}
+.progress-ring-wrap svg{width:100%;height:100%}
+.progress-ring-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:14px;font-weight:800;color:var(--purple)}
+.progress-info{flex:1;min-width:0}
+.progress-title{font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--text-primary);margin-bottom:2px}
+.progress-sub{font-size:10px;color:var(--text-secondary)}
+
+/* ── FORMS ── */
+.form-group{margin-bottom:10px}
+.form-label{display:block;font-size:9px;color:var(--text-muted);letter-spacing:.04em;margin-bottom:3px;text-transform:uppercase}.form-label span{font-size:7px;letter-spacing:.02em;font-family:var(--font-mono);vertical-align:middle;margin-left:3px}
+.form-input,.form-select,.form-textarea{width:100%;padding:7px 11px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:#ffffff;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:11.5px;outline:none;transition:border-color .2s,box-shadow .2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,0.08)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--text-muted)}
+.form-select option{background:#ffffff;color:var(--text-primary)}
+.form-textarea{resize:vertical;min-height:52px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:1100px){.form-row,.form-row-3{grid-template-columns:1fr}}
+.form-input.ai-filled,.form-select.ai-filled,.form-textarea.ai-filled{border-color:rgba(124,58,237,0.25);background:linear-gradient(135deg,#ffffff 0%,rgba(124,58,237,0.03) 100%)}
+
+.btn{padding:7px 16px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:var(--text-secondary);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.btn:hover{background:rgba(0,0,0,0.04);color:var(--text-primary)}
+.btn-gold{background:var(--accent);border-color:var(--accent);color:#ffffff;font-weight:600}
+.btn-gold:hover{opacity:.88;background:var(--accent);color:#ffffff}
+.btn-blue{background:var(--blue);border-color:var(--blue);color:#ffffff;font-weight:500}
+.btn-blue:hover{opacity:.88}
+.btn-sm{padding:4px 10px;font-size:10px}
+
+.section-desc{font-size:10px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;padding:8px 12px;background:rgba(0,0,0,0.02);border-radius:7px;border-left:3px solid var(--purple)}
+
+/* ── DYNAMIC LISTS ── */
+.added-items{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.added-chip{padding:4px 9px;border-radius:5px;font-size:10px;color:var(--text-primary);border:1px solid rgba(0,0,0,0.08);background:#ffffff;display:flex;align-items:center;gap:5px;transition:all .2s}
+.added-chip:hover{border-color:rgba(124,58,237,0.25)}
+.remove-chip{cursor:pointer;opacity:.4;transition:opacity .15s;font-size:12px}
+.remove-chip:hover{opacity:1;color:var(--red)}
+.dashed-box{border:1px dashed rgba(0,0,0,0.12);border-radius:9px;padding:12px 14px;margin-top:10px}
+.dashed-title{font-size:11px;font-weight:500;color:var(--text-primary);margin-bottom:6px}
+.add-row{display:flex;gap:8px;align-items:flex-end}
+.add-row .form-group{margin-bottom:0;flex:1}
+
+/* ── STEP PANELS ── */
+.step-panel{display:none;opacity:0;transform:translateX(20px)}
+.step-panel.visible{display:block;animation:slideIn .4s ease both}
+
+/* ── CHECKBOX STYLES ── */
+.check-list{display:flex;flex-direction:column;gap:6px}
+.check-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:#ffffff;border:1px solid rgba(0,0,0,0.08);cursor:pointer;font-size:11px;transition:border-color .2s}
+.check-item:hover{border-color:var(--purple)}
+.check-item input[type=checkbox]{accent-color:var(--purple)}
+
+/* ── SUCCESS ── */
+.success-banner{display:none;padding:16px 20px;background:linear-gradient(135deg,var(--green-bg) 0%,rgba(124,58,237,0.04) 100%);border:1px solid rgba(22,163,74,0.3);border-radius:12px;align-items:center;gap:14px}
+.success-banner.show{display:flex;animation:fadeUp .5s ease both}
+
+/* ── TOAST ── */
+.toast-msg{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(124,58,237,0.25);color:var(--purple);font-size:11px;font-family:'DM Sans',sans-serif;padding:8px 18px;border-radius:8px;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+.toast-msg.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* AI SUGGESTION CHIPS */
+.ai-suggestion-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;margin-bottom:4px;animation:fadeUp .3s ease both}
+.ai-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px 3px 7px;border-radius:6px;font-size:10px;color:var(--purple);background:linear-gradient(135deg,rgba(124,58,237,0.06) 0%,rgba(37,99,235,0.04) 100%);border:1px solid rgba(124,58,237,0.15);cursor:pointer;transition:all .2s;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.ai-chip:hover{background:rgba(124,58,237,0.1);border-color:rgba(124,58,237,0.3);transform:translateY(-1px);box-shadow:0 3px 10px rgba(124,58,237,0.1)}
+.ai-chip:active{transform:scale(0.97)}
+.ai-chip.applied{background:var(--green-bg);border-color:rgba(22,163,74,0.3);color:var(--green);pointer-events:none;opacity:.7}
+.ai-chip svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+.ai-chip-label{font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;font-family:var(--font-mono);display:flex;align-items:center;gap:4px}
+.ai-chip-label svg{width:10px;height:10px;stroke:var(--purple);fill:none;stroke-width:1.8}
+
+/* AI suggestion card for list items */
+.ai-list-suggestion{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:linear-gradient(135deg,rgba(124,58,237,0.04) 0%,rgba(37,99,235,0.03) 100%);border:1px solid rgba(124,58,237,0.12);margin-bottom:6px;transition:all .2s;animation:fadeUp .3s ease both}
+.ai-list-suggestion:hover{border-color:rgba(124,58,237,0.3);background:rgba(124,58,237,0.06)}
+.ai-list-suggestion.applied{border-color:rgba(22,163,74,0.3);background:var(--green-bg);opacity:.6;pointer-events:none}
+.ai-list-suggestion-icon{width:24px;height:24px;border-radius:6px;background:var(--purple-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ai-list-suggestion-icon svg{width:12px;height:12px;stroke:var(--purple);fill:none;stroke-width:2}
+.ai-list-suggestion-text{flex:1;min-width:0}
+.ai-list-suggestion-title{font-size:10px;color:var(--text-primary);font-weight:500}
+.ai-list-suggestion-detail{font-size:8px;color:var(--text-muted);margin-top:1px}
+.ai-list-suggestion-btn{padding:4px 10px;border-radius:5px;font-size:9px;cursor:pointer;border:1px solid rgba(124,58,237,0.2);background:var(--purple-bg);color:var(--purple);font-family:'DM Sans',sans-serif;transition:all .15s;flex-shrink:0}
+.ai-list-suggestion-btn:hover{background:rgba(124,58,237,0.12);border-color:rgba(124,58,237,0.3)}
+.ai-list-suggestion .applied-label{font-size:9px;color:var(--green);flex-shrink:0}
+
+/* AI suggestion group header */
+.ai-suggestions-header{display:flex;align-items:center;gap:6px;margin:10px 0 6px;padding:6px 0;border-top:1px solid rgba(124,58,237,0.08)}
+.ai-suggestions-header svg{width:14px;height:14px;stroke:var(--purple);fill:none;stroke-width:1.8}
+.ai-suggestions-header span{font-size:9px;color:var(--purple);font-family:var(--font-display);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.ai-suggestions-header .apply-all-btn{margin-left:auto;padding:2px 8px;border-radius:4px;font-size:8px;cursor:pointer;border:1px solid rgba(124,58,237,0.2);background:transparent;color:var(--purple);font-family:'DM Sans',sans-serif;transition:all .15s}
+.ai-suggestions-header .apply-all-btn:hover{background:var(--purple-bg);border-color:rgba(124,58,237,0.3)}
+
+/* ── UPLOAD ZONE (per-step) ── */
+.upload-zone{border:1px dashed rgba(124,58,237,0.2);border-radius:10px;padding:12px 14px;margin-bottom:12px;background:rgba(124,58,237,0.02);transition:all .25s;cursor:pointer;position:relative}
+.upload-zone:hover{border-color:var(--purple);background:rgba(124,58,237,0.04)}
+.upload-zone.drag-over{border-color:var(--accent);background:rgba(201,168,76,0.06)}
+.upload-zone-inner{display:flex;align-items:center;gap:10px}
+.upload-icon-sm{width:28px;height:28px;border-radius:7px;background:var(--purple-bg);border:1px solid rgba(124,58,237,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.upload-icon-sm svg{width:14px;height:14px;stroke:var(--purple);fill:none;stroke-width:1.8}
+.upload-zone p{font-size:9px;color:var(--text-muted)}
+.upload-zone .upload-link{color:var(--purple);text-decoration:underline;cursor:pointer}
+.upload-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-progress{margin-top:8px;display:none}
+.upload-progress.active{display:block;animation:fadeUp .3s ease both}
+.upload-file-badge{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#ffffff;border:1px solid rgba(0,0,0,0.08);border-radius:6px;margin-bottom:6px;font-size:10px}
+.upload-extract-bar{height:3px;background:rgba(0,0,0,0.04);border-radius:2px;overflow:hidden;margin-top:4px}
+.upload-extract-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--purple),var(--blue));transition:width .4s ease;width:0%}
+
+/* ── DOWNLOAD TEMPLATE BTN ── */
+.dl-tpl-btn{padding:4px 10px;border-radius:5px;border:1px solid rgba(22,163,74,0.25);background:var(--green-bg);color:var(--green);font-family:'DM Sans',sans-serif;font-size:10px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.dl-tpl-btn:hover{background:rgba(22,163,74,0.12);border-color:rgba(22,163,74,0.4)}
+.dl-tpl-btn svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── REVIEW ── */
+.rv-section{margin-bottom:14px}
+.rv-title{font-family:var(--font-display);font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.rv-check{width:13px;height:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rv-check.done{background:var(--green-bg);border:1px solid var(--green)}
+.rv-check.pending{background:var(--amber-bg);border:1px solid var(--amber)}
+.rv-check svg{width:7px;height:7px;stroke:currentColor;fill:none;stroke-width:3}
+
+.sub-section-title{font-size:11px;font-weight:500;color:var(--text-primary);margin:12px 0 6px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.06)}
+.sub-section-title:first-child{border-top:none;margin-top:0;padding-top:0}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes typingDot{0%,80%,100%{opacity:.3;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
+@keyframes staggerIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CELEBRATION CARD (inline in AI chat) ── */
+.ai-celebrate{border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;animation:fadeUp .4s ease both;background:linear-gradient(135deg,var(--green-bg) 0%,rgba(124,58,237,0.04) 100%);border:1px solid rgba(22,163,74,0.25)}
+.ai-celebrate-header{display:flex;align-items:center;gap:10px}
+.ai-celebrate-icon{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--green) 0%,#4ade80 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:celebrateIconPop .5s cubic-bezier(.17,.67,.24,1.2) both}
+.ai-celebrate-icon svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.ai-celebrate-title{font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--green)}
+.ai-celebrate-sub{font-size:9px;color:var(--text-secondary)}
+.ai-celebrate-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.ai-celebrate-confetti .c-dot{position:absolute;border-radius:50%;opacity:0;animation:cDotBurst .9s ease-out forwards}
+@keyframes celebrateIconPop{0%{transform:scale(0) rotate(-30deg);opacity:0}60%{transform:scale(1.15) rotate(5deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes cDotBurst{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0)}}
+
+@media(max-width:1024px){.ai-panel{display:none}}
+
+/* ═══════════════════════════════════════════════════ */
+/* FIELD-BY-FIELD POPUP SYSTEM                        */
+/* ═══════════════════════════════════════════════════ */
+.field-popup-overlay{position:fixed;inset:0;background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);z-index:11000;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .35s ease}
+.field-popup-overlay.fp-open{display:flex;opacity:1}
+.field-popup{width:100%;max-width:720px;display:flex;flex-direction:column;max-height:90vh;position:relative}
+.fp-header{display:flex;align-items:center;padding:18px 0;gap:12px;border-bottom:1px solid rgba(0,0,0,0.08);flex-shrink:0}
+.fp-header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.fp-header-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent) 0%,#E0CC70 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fp-header-icon svg{width:16px;height:16px;stroke:#ffffff;fill:none;stroke-width:2}
+.fp-header-title{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fp-header-counter{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);white-space:nowrap}
+.fp-close{width:34px;height:34px;border-radius:7px;border:1px solid rgba(0,0,0,0.08);background:transparent;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.fp-close:hover{background:var(--red-bg);border-color:rgba(220,38,38,0.3);color:var(--red)}
+.fp-close svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.fp-progress{height:3px;background:rgba(0,0,0,0.06);border-radius:2px;overflow:hidden;flex-shrink:0;margin:12px 0}
+.fp-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#E0CC70);border-radius:2px;transition:width .5s ease}
+.fp-body{flex:1;overflow-y:auto;padding:24px 0;display:flex;flex-direction:column;gap:18px;min-height:0}
+.fp-body::-webkit-scrollbar{width:3px}
+.fp-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.06);border-radius:2px}
+.fp-field-area{animation:fadeUp .35s ease both}
+.fp-field-label{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text-primary);line-height:1.35;margin-bottom:4px}
+.fp-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-left:8px;vertical-align:middle}
+.fp-badge.required{background:var(--red-bg);color:var(--red);border:1px solid rgba(220,38,38,0.25)}
+.fp-badge.recommended{background:rgba(201,168,76,0.08);color:var(--accent);border:1px solid rgba(201,168,76,0.2)}
+.fp-input,.fp-select,.fp-textarea{width:100%;padding:12px 16px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#ffffff;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s;margin-top:8px}
+.fp-input:focus,.fp-select:focus,.fp-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(201,168,76,0.1)}
+.fp-input::placeholder,.fp-textarea::placeholder{color:var(--text-muted)}
+.fp-select option{background:#ffffff;color:var(--text-primary)}
+.fp-textarea{resize:vertical;min-height:80px}
+.fp-checkbox-wrap{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#ffffff;cursor:pointer;margin-top:8px;transition:border-color .2s}
+.fp-checkbox-wrap:hover{border-color:var(--accent)}
+.fp-checkbox-wrap input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+.fp-checkbox-wrap span{font-size:14px;color:var(--text-primary)}
+.fp-ai-area{padding:14px 16px;border-radius:10px;background:linear-gradient(135deg,rgba(124,58,237,0.04) 0%,rgba(201,168,76,0.03) 100%);border:1px solid rgba(124,58,237,0.1)}
+.fp-ai-msg{font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:8px}
+.fp-ai-msg svg{width:12px;height:12px;stroke:var(--purple);fill:none;stroke-width:2;vertical-align:middle;margin-right:4px}
+.fp-ai-rule{font-size:10px;color:var(--text-muted);line-height:1.5;padding-top:6px;border-top:1px solid rgba(0,0,0,0.04)}
+.fp-ai-rule strong{color:var(--accent);font-weight:600}
+.fp-suggestion-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.fp-chip{padding:7px 14px;border-radius:7px;font-size:12px;color:var(--text-secondary);border:1px solid rgba(0,0,0,0.1);background:#ffffff;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.fp-chip:hover{border-color:var(--accent);color:var(--text-primary);background:rgba(201,168,76,0.06)}
+.fp-chip.fp-applied{border-color:rgba(22,163,74,0.3);color:var(--green);background:var(--green-bg);pointer-events:none;opacity:.7}
+.fp-chip svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+.fp-list-section{padding:16px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);background:var(--card);margin-top:4px}
+.fp-list-section-title{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.fp-list-mini-form{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fp-list-mini-form .fp-mini-group{display:flex;flex-direction:column;gap:2px}
+.fp-list-mini-form .fp-mini-label{font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
+.fp-list-mini-form .fp-mini-input,.fp-list-mini-form .fp-mini-select{width:100%;padding:6px 10px;border-radius:5px;border:1px solid rgba(0,0,0,0.1);background:#ffffff;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:11px;outline:none}
+.fp-list-mini-form .fp-mini-input:focus,.fp-list-mini-form .fp-mini-select:focus{border-color:var(--accent)}
+.fp-list-added{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.fp-footer{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-top:1px solid rgba(0,0,0,0.08);flex-shrink:0}
+.fp-back-btn{padding:8px 16px;border-radius:7px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .15s}
+.fp-back-btn:hover{color:var(--text-secondary);border-color:rgba(0,0,0,0.2)}
+.fp-next-btn{padding:10px 24px;border-radius:8px;border:none;background:var(--accent);color:#ffffff;font-family:var(--font-display);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;letter-spacing:.03em}
+.fp-next-btn:hover{opacity:.88}
+.fp-next-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5}
+
+/* ── Topbar extras ── */
+.tb-pill{padding:3px 10px;border-radius:100px;font-size:10px;border:1px solid;white-space:nowrap}
+.tb-pill.purple{border-color:rgba(124,58,237,.25);color:var(--purple)}
+.tb-pill.gold{border-color:rgba(201,168,76,.3);color:var(--accent)}
+.tb-btn{padding:6px 12px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:var(--text-secondary);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:background .15s,color .15s;text-decoration:none;white-space:nowrap}
+.tb-btn:hover{background:rgba(0,0,0,0.04);color:var(--text-primary)}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+  <div style="display:flex;align-items:center;gap:12px;padding:0 24px 0 0;flex-shrink:0">
+    <div style="flex:1"></div>
+    <select id="screenJump" onchange="if(this.value)goToStep(+this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:#ffffff;color:var(--text-secondary);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;outline:none;max-width:180px">
+      <option value="">Jump to screen...</option>
+      <option value="1">1 — Performance History</option>
+      <option value="2">2 — Learning & Training</option>
+      <option value="3">3 — Assessments & Evidence</option>
+      <option value="4">4 — Market & Regulatory</option>
+      <option value="5">5 — Competitor & Supply</option>
+      <option value="6">6 — Review & Lock</option>
+    </select>
+    <div class="tb-pill purple" id="levelPill">Module 4</div>
+    <button class="tb-btn" onclick="resetDemo()" style="color:var(--amber);border-color:rgba(217,119,6,0.3)">Reset</button>
+  </div>
+
+  <div class="main-body">
+    <div class="content-left">
+      <div class="progress-meter" id="progressMeter">
+        <div class="progress-ring-wrap">
+          <svg viewBox="0 0 56 56">
+            <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="4"/>
+            <circle id="progressRing" cx="28" cy="28" r="24" fill="none" stroke="url(#ringGrad)" stroke-width="4" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="150.8" transform="rotate(-90 28 28)" style="transition:stroke-dashoffset .8s ease"/>
+            <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7C3AED"/><stop offset="100%" stop-color="#16A34A"/></linearGradient></defs>
+          </svg>
+          <div class="progress-ring-label" id="progressPct">0%</div>
+        </div>
+        <div class="progress-info">
+          <div class="progress-title" id="progressTitle">Workforce Intelligence: 0 of 5 screens</div>
+          <div class="progress-sub">Module 4 of 4 — AI-guided workforce intelligence configuration.</div>
+        </div>
+      </div>
+      <div class="stepper-bar" id="stepper"></div>
+      <div class="success-banner" id="successBanner">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--green-bg);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg style="width:18px;height:18px;stroke:var(--green);fill:none;stroke-width:2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div><h3 style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--green);margin-bottom:3px">Onboarding Complete!</h3><p style="font-size:11px;color:var(--text-secondary)">All 4 modules configured. SkillForge AI pipeline is now fully calibrated.</p></div>
+        <a href="skillforge.html" class="btn btn-gold" style="margin-left:auto">SkillForge &rarr;</a>
+      </div>
+      <div id="stepContainer"></div>
+    </div>
+
+    <!-- RIGHT: AI PANEL -->
+    <div class="ai-panel" id="aiPanel">
+      <div class="ai-header">
+        <div class="ai-avatar-ring"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <div style="flex:1"><div class="ai-name">SIP Architect</div><div class="ai-status"><span class="ai-status-dot"></span> Guiding you</div></div>
+      </div>
+      <div class="ai-chat" id="aiChat"></div>
+      <div class="ai-footer">
+        <div class="ai-footer-step" id="aiFooterStep">Screen 1 of 6</div>
+        <div class="ai-footer-progress"><div class="ai-footer-bar" id="aiFooterBar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- FIELD-BY-FIELD POPUP -->
+<div class="field-popup-overlay" id="fieldPopup">
+  <div class="field-popup">
+    <div class="fp-header">
+      <div class="fp-header-left">
+        <div class="fp-header-icon"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <div class="fp-header-title" id="fpHeaderTitle">Screen 1</div>
+        <div class="fp-header-counter" id="fpHeaderCounter">1 / 5</div>
+      </div>
+      <button class="fp-close" onclick="closeFieldPopup()" title="Close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="fp-progress"><div class="fp-progress-fill" id="fpProgressFill" style="width:0%"></div></div>
+    <div class="fp-body" id="fpBody"></div>
+    <div class="fp-footer">
+      <button class="fp-back-btn" id="fpBackBtn" onclick="fpBack()">&larr; Back</button>
+      <button class="fp-next-btn" id="fpNextBtn" onclick="fpNext()">Next <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-msg" id="toast"></div>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal: 'admin',
+  activeNav: 'Workforce Intelligence',
+  breadcrumbs: ['Intelligence', 'Workforce Intelligence'],
+  topbarActions: []
+});
+</script>
+
+<script>
+// =============================================================
+// CONFIG & STATE
+// =============================================================
+var STEPS=[
+  {id:1,title:'Performance History',seg:'History'},
+  {id:2,title:'Learning & Training',seg:'Learning'},
+  {id:3,title:'Assessments',seg:'Evidence'},
+  {id:4,title:'Market Intel',seg:'Market Intel'},
+  {id:5,title:'Competitor & Supply',seg:'Benchmarks'},
+  {id:6,title:'Validation',seg:null}
+];
+var TOTAL=5;
+var state={current:1,completed:{},visited:{}};
+for(var i=1;i<=TOTAL;i++)state.completed[i]=false;
+var D={trainingPrograms:[],vendors:[],learningCalendar:[],triangulationConfig:[],marketDemand:[],benchmarks:[]};
+var appliedSuggestions={};
+
+// Load context from previous modules
+var companyData=null;
+var rolesData=null;
+try{companyData=JSON.parse(localStorage.getItem('sip_company'))}catch(e){}
+try{rolesData=JSON.parse(localStorage.getItem('sip_roles'))}catch(e){}
+
+function getCompanyField(key){
+  if(companyData&&companyData[key])return companyData[key];
+  return '';
+}
+
+// =============================================================
+// AI SUGGESTIONS DATA
+// =============================================================
+function getAiSuggestions(){
+  var sector=getCompanyField('sector')||'Infrastructure & Construction';
+  return {
+    2:{
+      items:[
+        {name:'BIM Fundamentals',cat:'Technical',mode:'Blended',status:'Active',duration_hours:'40',certification_awarded:'Yes',target_audience:'Engineers, BIM team',criticality:'High',cost_per_participant_USD:'1200',_list:'trainingPrograms',label:'Aligns to tech stack'},
+        {name:'ISO 45001 Safety Awareness',cat:'Compliance',mode:'E-Learning',status:'Active',duration_hours:'8',certification_awarded:'Yes',target_audience:'All Employees',criticality:'Critical',cost_per_participant_USD:'200',_list:'trainingPrograms',label:'Mandatory safety standard'},
+        {name:'Leadership Essentials',cat:'Leadership',mode:'Instructor-Led',status:'Active',duration_hours:'24',certification_awarded:'No',target_audience:'L4+ Managers',criticality:'High',cost_per_participant_USD:'2500',_list:'trainingPrograms',label:'Pipeline development'},
+        {name:'PMP Prep',cat:'Technical',mode:'Virtual',status:'Active',duration_hours:'35',certification_awarded:'Yes',target_audience:'Project Managers',criticality:'Medium',cost_per_participant_USD:'1800',_list:'trainingPrograms',label:'PM capability building'}
+      ],
+      vendors:[
+        {name:'Edstellar',spec:'Leadership, Digital, Safety',vendor_type:'External',country:'India',coverage:'Global',quality_rating:'4.5/5',preferred_vendor:'Yes',_list:'vendors',label:'Multi-domain L&D partner'},
+        {name:'Autodesk Learning',spec:'BIM, Revit',vendor_type:'Technology Platform',country:'United States',coverage:'Global',quality_rating:'4.3/5',preferred_vendor:'Yes',_list:'vendors',label:'BIM certification'}
+      ],
+      calendar_items:[
+        {event_name:'Annual L&D Strategy Review',event_type:'Governance Review',quarter:'Q1',governance_owner:'CLO',_list:'learningCalendar',label:'Strategic alignment'},
+        {event_name:'Training Nominations Window',event_type:'Nomination Window',quarter:'Q1',governance_owner:'HR Managers',_list:'learningCalendar',label:'Program intake'},
+        {event_name:'Mid-Year Learning Audit',event_type:'Audit',quarter:'Q3',governance_owner:'L&D Head',_list:'learningCalendar',label:'Quality check'}
+      ]
+    },
+    4:{
+      demand_items:[
+        {skill_name:'BIM & Digital Twin',demand_level:'Very High',demand_growth_YoY:'25',supply_scarcity:'High',strategic_relevance:'Critical',_list:'marketDemand',label:'Top demand in construction tech'},
+        {skill_name:'AI/ML Engineering',demand_level:'Very High',demand_growth_YoY:'35',supply_scarcity:'High',strategic_relevance:'High',_list:'marketDemand',label:'Cross-industry demand'},
+        {skill_name:'Sustainability & ESG',demand_level:'High',demand_growth_YoY:'20',supply_scarcity:'Medium',strategic_relevance:'High',_list:'marketDemand',label:'Regulatory-driven demand'},
+        {skill_name:'Cloud Architecture',demand_level:'High',demand_growth_YoY:'18',supply_scarcity:'Medium',strategic_relevance:'High',_list:'marketDemand',label:'Digital infrastructure'},
+        {skill_name:'Project Risk Management',demand_level:'Moderate',demand_growth_YoY:'8',supply_scarcity:'Low',strategic_relevance:'Medium',_list:'marketDemand',label:'Stable demand'}
+      ]
+    },
+    5:{
+      bench_items:[
+        {benchmark_category:'Workforce',parameter:'Attrition Rate %',industry_benchmark:'12%',company_value:'',_list:'benchmarks',label:'Key HR metric'},
+        {benchmark_category:'L&D',parameter:'Training Hours per Employee',industry_benchmark:'40 hrs',company_value:'',_list:'benchmarks',label:'Learning investment'},
+        {benchmark_category:'L&D',parameter:'L&D Spend as % of Revenue',industry_benchmark:'1.5%',company_value:'',_list:'benchmarks',label:'Budget benchmark'},
+        {benchmark_category:'Skills',parameter:'Digital Skills Coverage %',industry_benchmark:'45%',company_value:'',_list:'benchmarks',label:'Digital readiness'},
+        {benchmark_category:'Quality',parameter:'Defect Rate %',industry_benchmark:'2.5%',company_value:'',_list:'benchmarks',label:'Quality metric'},
+        {benchmark_category:'Operations',parameter:'On-Time Project Delivery %',industry_benchmark:'78%',company_value:'',_list:'benchmarks',label:'Delivery metric'}
+      ]
+    }
+  };
+}
+
+// =============================================================
+// AI MESSAGES
+// =============================================================
+var AI_MESSAGES={
+  1:{welcome:"Historical data turns the platform into a <strong>trend-analysis engine</strong>. More history = better forecasts.",follow:"Select which datasets are available. I've recommended the most impactful ones."},
+  2:{welcome:"Your training portfolio <strong>closes capability gaps</strong>. I've aligned suggestions to your strategic priorities and standards.",follow:"I've expanded with duration, certification tracking, vendor details, and a <em>Learning Governance Calendar</em>."},
+  3:{welcome:"Assessments are the <strong>evidence base</strong> for capability intelligence. Configure triangulation rules here.",follow:"Multiple sources combined give more accurate gap analysis. The new <em>Data Triangulation Config</em> lets you fine-tune weights."},
+  4:{welcome:"<strong>Market Intelligence</strong> connects your internal skill data to external demand signals and regulatory requirements.",follow:"I've suggested in-demand skills for "+(getCompanyField('sector')||'your sector')+". This powers proactive workforce planning."},
+  5:{welcome:"<strong>Competitor benchmarks</strong> and supply chain risk give you an external frame of reference for your capability maturity.",follow:"I've suggested key benchmark parameters for your industry. Fill in your company values to see the gap."},
+  6:{welcome:"Here's your <strong>Validation Dashboard</strong>. Review all 5 screens.",follow:"Green = complete. Amber = missing. Lock when ready."}
+};
+
+// =============================================================
+// CONGRATULATIONS + UNLOCK MESSAGES
+// =============================================================
+var CONGRATS={
+  1:{msg:"Historical data connected!",unlocks:["Multi-year trend analysis","Predictive attrition modeling","Promotion velocity tracking","Workforce planning forecasts"],icon:'trending'},
+  2:{msg:"Learning ecosystem set up!",unlocks:["Training ROI analytics","Skill-gap closure tracking","L&D budget optimization","Vendor performance comparison","Governance calendar automation"],icon:'book'},
+  3:{msg:"Assessment framework configured!",unlocks:["Multi-source skill validation","Confidence-scored capability profiles","Evidence-based gap analysis","Triangulated competency scores"],icon:'clipboard'},
+  4:{msg:"Market intelligence activated!",unlocks:["External skill demand signals","Supply-scarcity alerts","Proactive hiring recommendations","Regulatory skill compliance tracking","Strategic skill investment priorities"],icon:'signal'},
+  5:{msg:"Competitive benchmarking set!",unlocks:["Industry benchmark dashboards","Competitive gap analysis","Supply chain risk scoring","Performance gap heat maps"],icon:'target'}
+};
+
+// =============================================================
+// SKIP WARNINGS
+// =============================================================
+var SKIP_CHECKS={
+  2:[{check:function(){return D.trainingPrograms.length===0},label:'Training Programs',warn:'Without training programs, learning paths and training ROI can\'t be calculated.'}],
+  4:[{check:function(){return D.marketDemand.length===0},label:'Market Demand Data',warn:'Without market intelligence, proactive workforce planning won\'t have external signals.'}],
+  5:[{check:function(){return D.benchmarks.length===0},label:'Benchmarks',warn:'Without benchmarks, competitive gap analysis won\'t be available.'}]
+};
+
+// =============================================================
+// UTILITY
+// =============================================================
+function gv(id){var e=document.getElementById(id);return e?e.value.trim():''}
+function sv(id,v){var e=document.getElementById(id);if(e){e.value=v;e.classList.add('ai-filled')}}
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show')},2200)}
+function dlBtn(s){return '<button class="dl-tpl-btn" onclick="event.stopPropagation();showToast(\'Template download coming soon\')" title="Download CSV template"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Template</button>'}
+
+function uploadZone(step){
+  return '<div class="upload-zone" id="uploadZone'+step+'" ondragover="event.preventDefault();this.classList.add(\'drag-over\')" ondragleave="this.classList.remove(\'drag-over\')" ondrop="event.preventDefault();this.classList.remove(\'drag-over\');simulateStepUpload('+step+')">'
+    +'<input type="file" class="upload-input" onchange="simulateStepUpload('+step+')" accept=".pdf,.docx,.xlsx,.csv">'
+    +'<div class="upload-zone-inner"><div class="upload-icon-sm"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>'
+    +'<p>Upload a document or <span class="upload-link">browse files</span> to auto-fill this screen</p></div>'
+    +'<div class="upload-progress" id="uploadProg'+step+'"></div></div>';
+}
+
+function simulateStepUpload(step){
+  var z=document.getElementById('uploadZone'+step);
+  z.querySelector('.upload-zone-inner').style.display='none';z.querySelector('.upload-input').style.display='none';z.style.cursor='default';
+  var p=document.getElementById('uploadProg'+step);
+  p.innerHTML='<div class="upload-file-badge"><span style="color:var(--purple)">Extracting...</span></div><div class="upload-extract-bar"><div class="upload-extract-fill" id="uploadBar'+step+'"></div></div>';
+  p.classList.add('active');
+  var bar=document.getElementById('uploadBar'+step);
+  bar.style.width='30%';
+  setTimeout(function(){bar.style.width='70%'},500);
+  setTimeout(function(){bar.style.width='100%';p.querySelector('.upload-file-badge span').textContent='Extracted!';p.querySelector('.upload-file-badge span').style.color='var(--green)';applyAllSuggestions(step);addAiMsg("Document extracted! Fields have been populated for Screen "+step+". Review and adjust as needed.")},1200);
+}
+
+function navBtns(prev,next){
+  var stepToSave=next-1;
+  return '<div style="display:flex;justify-content:space-between;gap:10px;margin-top:14px">'
+    +(prev?'<button class="btn" onclick="goToStep('+prev+')">&larr; Back</button>':'<span></span>')
+    +'<button class="btn btn-gold" onclick="saveStep('+stepToSave+')">Save & Continue &rarr;</button></div>';
+}
+
+function hasSuggestions(step){return true}
+
+function aiAvatar(){return '<div class="ai-bubble-avatar"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 12l10 5 10-5"/></svg></div>'}
+function addAiMsg(t){var c=document.getElementById('aiChat'),b=document.createElement('div');b.className='ai-bubble';b.innerHTML=aiAvatar()+'<div class="ai-msg">'+t+'</div>';c.appendChild(b);c.scrollTop=c.scrollHeight}
+function addAiTyping(){var c=document.getElementById('aiChat'),e=document.createElement('div');e.className='ai-bubble';e.id='aiTypingEl';e.innerHTML=aiAvatar()+'<div class="ai-typing"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div></div>';c.appendChild(e);c.scrollTop=c.scrollHeight}
+function removeAiTyping(){var e=document.getElementById('aiTypingEl');if(e)e.remove()}
+function clearAiChat(){document.getElementById('aiChat').innerHTML=''}
+function addAiContextCard(d){var c=document.getElementById('aiChat'),e=document.createElement('div');e.className='ai-context-card';var h='<h5>Context Extracted</h5>';for(var k in d)h+='<div class="ai-context-row"><span class="ai-context-key">'+k+'</span><span class="ai-context-val">'+d[k]+'</span></div>';e.innerHTML=h;c.appendChild(e);c.scrollTop=c.scrollHeight}
+
+// =============================================================
+// AI SUGGESTION RENDERING
+// =============================================================
+function fieldSuggestion(fieldId,stepNum){
+  var sug=getAiSuggestions();
+  if(!sug[stepNum]||!sug[stepNum].fields||!sug[stepNum].fields[fieldId])return '';
+  var s=sug[stepNum].fields[fieldId];
+  var key=fieldId+'_'+stepNum;
+  if(appliedSuggestions[key])return '';
+  var truncVal=s.val.length>80?s.val.substring(0,80)+'...':s.val;
+  return '<div class="ai-suggestion-row"><span class="ai-chip-label"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>AI suggests</span>'
+    +'<span class="ai-chip" onclick="applyFieldSuggestion(\''+fieldId+'\','+stepNum+',this)" title="'+escH(s.val)+'"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'+escH(truncVal)+'</span></div>';
+}
+
+function applyFieldSuggestion(fieldId,step,chipEl){
+  var sug=getAiSuggestions();
+  var s=sug[step].fields[fieldId];
+  sv(fieldId,s.val);
+  chipEl.classList.add('applied');chipEl.innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Applied';
+  appliedSuggestions[fieldId+'_'+step]=true;
+  showToast('AI suggestion applied');
+}
+
+function listSuggestions(listKey,items,stepNum){
+  if(!items||!items.length)return '';
+  var h='<div class="ai-suggestions-header"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><span>AI Suggestions</span><button class="apply-all-btn" onclick="applyAllListSuggestions(\''+listKey+'\','+stepNum+')">Apply All</button></div>';
+  items.forEach(function(item,i){
+    var key=listKey+'_'+stepNum+'_'+i;
+    if(appliedSuggestions[key])return;
+    var title=item.name||item.title||item.skill_name||item.domain_name||item.event_name||item.evidence_source||item.parameter||'';
+    var detail=item.label||'';
+    h+='<div class="ai-list-suggestion" id="aiSug_'+key+'"><div class="ai-list-suggestion-icon"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div class="ai-list-suggestion-text"><div class="ai-list-suggestion-title">'+escH(title)+'</div><div class="ai-list-suggestion-detail">'+escH(detail)+'</div></div><button class="ai-list-suggestion-btn" onclick="applyListSuggestion(\''+listKey+'\','+stepNum+','+i+')">Add</button></div>';
+  });
+  return h;
+}
+
+function getListItems(listKey,step){
+  var sug=getAiSuggestions();
+  if(step===2&&listKey==='trainingPrograms')return sug[2]?sug[2].items:null;
+  if(step===2&&listKey==='vendors')return sug[2]?sug[2].vendors:null;
+  if(step===2&&listKey==='learningCalendar')return sug[2]?sug[2].calendar_items:null;
+  if(step===4&&listKey==='marketDemand')return sug[4]?sug[4].demand_items:null;
+  if(step===5&&listKey==='benchmarks')return sug[5]?sug[5].bench_items:null;
+  return null;
+}
+
+function applyListSuggestion(listKey,step,idx){
+  var items=getListItems(listKey,step);
+  if(!items||!items[idx])return;
+  var item=JSON.parse(JSON.stringify(items[idx]));
+  delete item.label;delete item._list;
+  D[listKey].push(item);
+  var key=listKey+'_'+step+'_'+idx;
+  appliedSuggestions[key]=true;
+  var el=document.getElementById('aiSug_'+key);
+  if(el){el.classList.add('applied');el.querySelector('.ai-list-suggestion-btn').outerHTML='<span class="applied-label">Added</span>'}
+  reRenderList(listKey);showToast((item.name||item.title||item.skill_name||item.event_name||item.parameter||'Item')+' added');
+}
+
+function applyAllListSuggestions(listKey,step){
+  var items=getListItems(listKey,step);
+  if(!items)return;
+  items.forEach(function(item,i){
+    var key=listKey+'_'+step+'_'+i;
+    if(appliedSuggestions[key])return;
+    var copy=JSON.parse(JSON.stringify(item));delete copy.label;delete copy._list;
+    D[listKey].push(copy);appliedSuggestions[key]=true;
+    var el=document.getElementById('aiSug_'+key);
+    if(el){el.classList.add('applied');var btn=el.querySelector('.ai-list-suggestion-btn');if(btn)btn.outerHTML='<span class="applied-label">Added</span>'}
+  });
+  reRenderList(listKey);showToast('All suggestions applied');
+}
+
+function applyAllSuggestions(step){
+  var sug=getAiSuggestions();if(!sug[step])return;
+  if(sug[step].fields){for(var fid in sug[step].fields){sv(fid,sug[step].fields[fid].val);appliedSuggestions[fid+'_'+step]=true}}
+  var allListKeys=['trainingPrograms','vendors','learningCalendar','triangulationConfig','marketDemand','benchmarks'];
+  allListKeys.forEach(function(lk){
+    var items=getListItems(lk,step);
+    if(items){
+      items.forEach(function(item,i){
+        var key=lk+'_'+step+'_'+i;
+        if(!appliedSuggestions[key]){var c=JSON.parse(JSON.stringify(item));delete c.label;delete c._list;D[lk].push(c);appliedSuggestions[key]=true}
+      });
+      reRenderList(lk);
+    }
+  });
+  renderSteps();goToStep(step);
+}
+
+// =============================================================
+// STEP HTML BUILDERS
+// =============================================================
+function buildStep1(){
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Screen 1 — Performance & Workforce History</div>'+dlBtn(1)+'</div><div class="panel-body">'
+  +uploadZone(1)
+  +'<div class="section-desc">Select which historical datasets are available for trend analysis.</div>'
+  +'<div class="check-list"><label class="check-item"><input type="checkbox" id="f-hist-perf" checked> Employee Yearly Performance</label><label class="check-item"><input type="checkbox" id="f-hist-promo"> Promotion History</label><label class="check-item"><input type="checkbox" id="f-hist-mobility"> Internal Mobility</label><label class="check-item"><input type="checkbox" id="f-hist-exit"> Employee Exit Data</label><label class="check-item"><input type="checkbox" id="f-hist-workforce"> Workforce Planning</label><label class="check-item"><input type="checkbox" id="f-hist-leadership"> Leadership Pipeline & Succession</label><label class="check-item"><input type="checkbox" id="f-hist-retention"> Retention Risk Data</label></div>'
+  +'<div class="form-row" style="margin-top:10px"><div class="form-group"><label class="form-label">Years Available</label><select class="form-select" id="f-hist-years"><option>1 year</option><option>2 years</option><option>3 years</option><option>5+ years</option></select></div><div class="form-group"><label class="form-label">Data Source</label><input class="form-input" id="f-hist-source" placeholder="e.g. Workday exports"></div></div>'
+  +'<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px"><button class="btn btn-gold" onclick="saveStep(1)">Save & Continue &rarr;</button></div>'
+  +'</div></div>';
+}
+
+function buildStep2(){
+  var sug=getAiSuggestions();
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Screen 2 — Learning & Training Setup</div>'+dlBtn(2)+'</div><div class="panel-body">'
+  +uploadZone(2)
+  +'<div class="sub-section-title" style="border-top:none;margin-top:0;padding-top:0">Training Programs</div><div id="trainingList"></div>'
+  +(hasSuggestions(2)?listSuggestions('trainingPrograms',sug[2]?sug[2].items:null,2):'')
+  +'<div class="dashed-box"><div class="dashed-title">Add Program</div><div class="form-row"><div class="form-group"><label class="form-label">Program Name *</label><input class="form-input" id="f-trn-name"></div><div class="form-group"><label class="form-label">Category</label><select class="form-select" id="f-trn-cat"><option>Technical</option><option>Leadership</option><option>Compliance</option><option>Digital</option><option>Safety</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Mode</label><select class="form-select" id="f-trn-mode"><option>Instructor-Led</option><option>Virtual</option><option>E-Learning</option><option>Blended</option><option>Self-Paced</option></select></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-trn-status"><option>Active</option><option>Planned</option><option>Retired</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Duration (hours)</label><input class="form-input" id="f-trn-hours" type="number"></div><div class="form-group"><label class="form-label">Certification Awarded?</label><select class="form-select" id="f-trn-cert"><option>No</option><option>Yes</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Target Audience</label><input class="form-input" id="f-trn-audience" placeholder="e.g. Engineers, L4+"></div><div class="form-group"><label class="form-label">Criticality</label><select class="form-select" id="f-trn-crit"><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></div></div>'
+  +'<div class="form-group"><label class="form-label">Cost per Participant (USD)</label><input class="form-input" id="f-trn-cost" type="number"></div>'
+  +'<button class="btn btn-blue btn-sm" onclick="addTraining()" style="margin-top:4px">+ Add</button></div>'
+  +'<div class="sub-section-title">Vendors</div><div id="vendorList"></div>'
+  +(hasSuggestions(2)?listSuggestions('vendors',sug[2]?sug[2].vendors:null,2):'')
+  +'<div class="dashed-box"><div class="dashed-title">Add Vendor</div><div class="form-row"><div class="form-group"><label class="form-label">Vendor Name *</label><input class="form-input" id="f-vendor-name"></div><div class="form-group"><label class="form-label">Specialization</label><input class="form-input" id="f-vendor-spec"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Vendor Type</label><select class="form-select" id="f-vendor-type"><option>External</option><option>Internal</option><option>University</option><option>Technology Platform</option></select></div><div class="form-group"><label class="form-label">Country</label><input class="form-input" id="f-vendor-country"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Coverage</label><select class="form-select" id="f-vendor-coverage"><option>Local</option><option>Regional</option><option>National</option><option>Global</option></select></div><div class="form-group"><label class="form-label">Quality Rating</label><input class="form-input" id="f-vendor-rating" placeholder="e.g. 4.5/5"></div></div>'
+  +'<div class="form-group"><label class="form-label">Preferred Vendor?</label><select class="form-select" id="f-vendor-pref"><option>No</option><option>Yes</option></select></div>'
+  +'<button class="btn btn-blue btn-sm" onclick="addVendor()" style="margin-top:4px">+ Add Vendor</button></div>'
+  +'<div class="sub-section-title">Learning Governance Calendar</div><div id="learningCalendarList"></div>'
+  +(hasSuggestions(2)?listSuggestions('learningCalendar',sug[2]?sug[2].calendar_items:null,2):'')
+  +'<div class="dashed-box"><div class="dashed-title">Add Calendar Event</div><div class="form-row"><div class="form-group"><label class="form-label">Event Name *</label><input class="form-input" id="f-lc-name"></div><div class="form-group"><label class="form-label">Event Type</label><select class="form-select" id="f-lc-type"><option>Governance Review</option><option>Program Launch</option><option>Audit</option><option>Nomination Window</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Quarter</label><select class="form-select" id="f-lc-quarter"><option>Q1</option><option>Q2</option><option>Q3</option><option>Q4</option></select></div><div class="form-group"><label class="form-label">Governance Owner</label><input class="form-input" id="f-lc-owner"></div></div>'
+  +'<button class="btn btn-blue btn-sm" onclick="addLearningCalendar()" style="margin-top:4px">+ Add Event</button></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:10px;margin-top:14px"><button class="btn" onclick="goToStep(1)">&larr; Back</button><button class="btn btn-gold" onclick="saveStep(2)">Save & Continue &rarr;</button></div>'
+  +'</div></div>';
+}
+
+function buildStep3(){
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Screen 3 — Assessments & Evidence</div>'+dlBtn(3)+'</div><div class="panel-body">'
+  +uploadZone(3)
+  +'<div class="check-list"><label class="check-item"><input type="checkbox" id="f-assess-skill" checked> Skill Self-Assessments</label><label class="check-item"><input type="checkbox" id="f-assess-mgr" checked> Manager Assessments</label><label class="check-item"><input type="checkbox" id="f-assess-comp"> Competency Assessments</label><label class="check-item"><input type="checkbox" id="f-assess-cert"> Certifications</label><label class="check-item"><input type="checkbox" id="f-assess-360"> 360-Degree Feedback</label><label class="check-item"><input type="checkbox" id="f-assess-knowledge"> Knowledge Tests</label><label class="check-item"><input type="checkbox" id="f-assess-psychometric"> Psychometric Assessments</label></div>'
+  +'<div class="form-row" style="margin-top:10px"><div class="form-group"><label class="form-label">Triangulation Method</label><select class="form-select" id="f-assess-tri"><option>Weighted Average</option><option>Manager Override</option><option>Evidence-First</option></select></div><div class="form-group"><label class="form-label">Assessment Frequency</label><select class="form-select" id="f-assess-freq"><option>Annual</option><option>Semi-Annual</option><option>Quarterly</option></select></div></div>'
+  +'<div class="sub-section-title">Data Triangulation Config</div><div id="triangulationConfigList"></div>'
+  +'<div class="dashed-box"><div class="dashed-title">Add Evidence Source</div><div class="form-row"><div class="form-group"><label class="form-label">Evidence Source *</label><input class="form-input" id="f-tri-source" placeholder="e.g. Manager Assessment"></div><div class="form-group"><label class="form-label">Weight %</label><input class="form-input" id="f-tri-weight" type="number" placeholder="e.g. 30"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Confidence Method</label><select class="form-select" id="f-tri-method"><option>Statistical</option><option>Rules-Based</option><option>AI-Driven</option></select></div><div class="form-group"><label class="form-label">Update Frequency</label><select class="form-select" id="f-tri-freq"><option>Real-time</option><option>Monthly</option><option>Quarterly</option><option>Annual</option></select></div></div>'
+  +'<button class="btn btn-blue btn-sm" onclick="addTriangulation()" style="margin-top:4px">+ Add Source</button></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:10px;margin-top:14px"><button class="btn" onclick="goToStep(2)">&larr; Back</button><button class="btn btn-gold" onclick="saveStep(3)">Save & Continue &rarr;</button></div>'
+  +'</div></div>';
+}
+
+function buildStep4(){
+  var sug=getAiSuggestions();
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Screen 4 — Market & Regulatory Intelligence</div>'+dlBtn(4)+'</div><div class="panel-body">'
+  +uploadZone(4)
+  +'<div class="sub-section-title" style="border-top:none;margin-top:0;padding-top:0">Market Skill Demand</div><div id="marketDemandList"></div>'
+  +(hasSuggestions(4)?listSuggestions('marketDemand',sug[4]?sug[4].demand_items:null,4):'')
+  +'<div class="dashed-box"><div class="dashed-title">Add Demand Entry</div><div class="form-row"><div class="form-group"><label class="form-label">Skill Name *</label><input class="form-input" id="f-md-skill"></div><div class="form-group"><label class="form-label">Demand Level</label><select class="form-select" id="f-md-level"><option>Low</option><option>Moderate</option><option>High</option><option>Very High</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Demand Growth YoY %</label><input class="form-input" id="f-md-growth" placeholder="e.g. 25"></div><div class="form-group"><label class="form-label">Supply Scarcity</label><select class="form-select" id="f-md-scarcity"><option>Low</option><option>Medium</option><option>High</option></select></div></div>'
+  +'<div class="form-group"><label class="form-label">Strategic Relevance</label><select class="form-select" id="f-md-relevance"><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></div>'
+  +'<button class="btn btn-blue btn-sm" onclick="addMarketDemand()" style="margin-top:4px">+ Add</button></div>'
+  +'<div class="sub-section-title">Regulatory Skill Demand</div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Regulatory Demand Level</label><select class="form-select" id="f-reg-level"><option value="">Select...</option><option>Low</option><option>Moderate</option><option>High</option></select></div><div class="form-group"><label class="form-label">Top Compliance Skills</label><input class="form-input" id="f-reg-skills" placeholder="e.g. ISO 45001, PDPA, BCA"></div></div>'
+  +'<div class="form-group"><label class="form-label">Compliance Training Hours (annual)</label><input class="form-input" id="f-reg-hours" type="number" placeholder="e.g. 24"></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:10px;margin-top:14px"><button class="btn" onclick="goToStep(3)">&larr; Back</button><button class="btn btn-gold" onclick="saveStep(4)">Save & Continue &rarr;</button></div>'
+  +'</div></div>';
+}
+
+function buildStep5(){
+  var sug=getAiSuggestions();
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Screen 5 — Competitor & Supply Chain</div>'+dlBtn(5)+'</div><div class="panel-body">'
+  +uploadZone(5)
+  +'<div class="sub-section-title" style="border-top:none;margin-top:0;padding-top:0">Competitor Benchmarks</div><div id="benchmarkList"></div>'
+  +(hasSuggestions(5)?listSuggestions('benchmarks',sug[5]?sug[5].bench_items:null,5):'')
+  +'<div class="dashed-box"><div class="dashed-title">Add Benchmark</div><div class="form-row"><div class="form-group"><label class="form-label">Category</label><select class="form-select" id="f-bm-cat"><option>Financial</option><option>Workforce</option><option>Skills</option><option>L&D</option><option>Operations</option><option>Quality</option><option>Customer</option><option>Digital</option><option>Compliance</option><option>ESG</option></select></div><div class="form-group"><label class="form-label">Parameter *</label><input class="form-input" id="f-bm-param" placeholder="e.g. Attrition Rate %"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Industry Benchmark</label><input class="form-input" id="f-bm-industry" placeholder="e.g. 12%"></div><div class="form-group"><label class="form-label">Company Value</label><input class="form-input" id="f-bm-company" placeholder="Your value"></div></div>'
+  +'<button class="btn btn-blue btn-sm" onclick="addBenchmark()" style="margin-top:4px">+ Add Benchmark</button></div>'
+  +'<div class="sub-section-title">Supply Chain Risk</div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Supply Chain Risk Level</label><select class="form-select" id="f-sc-risk"><option value="">Select...</option><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></div><div class="form-group"><label class="form-label">Critical Supplier Count</label><input class="form-input" id="f-sc-suppliers" type="number"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">On-Time Delivery %</label><input class="form-input" id="f-sc-otd" placeholder="e.g. 92"></div><div class="form-group"><label class="form-label">Dual-Source Coverage %</label><input class="form-input" id="f-sc-dual" placeholder="e.g. 65"></div></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:10px;margin-top:14px"><button class="btn" onclick="goToStep(4)">&larr; Back</button><button class="btn btn-gold" onclick="saveStep(5)">Save & Continue &rarr;</button></div>'
+  +'</div></div>';
+}
+
+function buildStep6(){
+  var h='<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Screen 6 — Review & Lock</div></div><div class="panel-body" id="reviewBody"></div></div>';
+  h+='<div style="display:flex;justify-content:space-between;gap:10px;margin-top:10px"><button class="btn" onclick="goToStep(5)">&larr; Back</button><button class="btn btn-gold" onclick="confirmSetup()"><svg style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Confirm & Lock</button></div>';
+  return h;
+}
+
+var stepBuilders=[buildStep1,buildStep2,buildStep3,buildStep4,buildStep5,buildStep6];
+
+// =============================================================
+// ADD FUNCTIONS
+// =============================================================
+function addTraining(){var n=gv('f-trn-name');if(!n)return;D.trainingPrograms.push({name:n,cat:gv('f-trn-cat'),mode:gv('f-trn-mode'),status:gv('f-trn-status'),duration_hours:gv('f-trn-hours'),certification_awarded:gv('f-trn-cert'),target_audience:gv('f-trn-audience'),criticality:gv('f-trn-crit'),cost_per_participant_USD:gv('f-trn-cost')});reRenderList('trainingPrograms');['f-trn-name','f-trn-hours','f-trn-audience','f-trn-cost'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});showToast(n+' added')}
+function addVendor(){var n=gv('f-vendor-name');if(!n)return;D.vendors.push({name:n,spec:gv('f-vendor-spec'),vendor_type:gv('f-vendor-type'),country:gv('f-vendor-country'),coverage:gv('f-vendor-coverage'),quality_rating:gv('f-vendor-rating'),preferred_vendor:gv('f-vendor-pref')});reRenderList('vendors');['f-vendor-name','f-vendor-spec','f-vendor-country','f-vendor-rating'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});showToast(n+' added')}
+function addLearningCalendar(){var n=gv('f-lc-name');if(!n)return;D.learningCalendar.push({event_name:n,event_type:gv('f-lc-type'),quarter:gv('f-lc-quarter'),governance_owner:gv('f-lc-owner')});reRenderList('learningCalendar');['f-lc-name','f-lc-owner'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});showToast(n+' added')}
+function addTriangulation(){var n=gv('f-tri-source');if(!n)return;D.triangulationConfig.push({evidence_source:n,weight:gv('f-tri-weight'),confidence_method:gv('f-tri-method'),update_frequency:gv('f-tri-freq')});reRenderList('triangulationConfig');['f-tri-source','f-tri-weight'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});showToast(n+' added')}
+function addMarketDemand(){var n=gv('f-md-skill');if(!n)return;D.marketDemand.push({skill_name:n,demand_level:gv('f-md-level'),demand_growth_YoY:gv('f-md-growth'),supply_scarcity:gv('f-md-scarcity'),strategic_relevance:gv('f-md-relevance')});reRenderList('marketDemand');['f-md-skill','f-md-growth'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});showToast(n+' added')}
+function addBenchmark(){var n=gv('f-bm-param');if(!n)return;D.benchmarks.push({benchmark_category:gv('f-bm-cat'),parameter:n,industry_benchmark:gv('f-bm-industry'),company_value:gv('f-bm-company')});reRenderList('benchmarks');['f-bm-param','f-bm-industry','f-bm-company'].forEach(function(id){var e=document.getElementById(id);if(e)e.value=''});showToast(n+' added')}
+
+// =============================================================
+// LIST RENDERING
+// =============================================================
+function renderList(elId,arr,fmt,key){
+  var h='';arr.forEach(function(item,i){h+='<div class="added-chip" style="animation:staggerIn .25s ease both;animation-delay:'+(i*40)+'ms">'+fmt(item)+'<span class="remove-chip" onclick="removeItem(\''+key+'\','+i+')">&times;</span></div>'});
+  var el=document.getElementById(elId);if(el)el.innerHTML=h?'<div class="added-items">'+h+'</div>':'';
+}
+function reRenderList(key){
+  var listMap={
+    trainingPrograms:'trainingList',vendors:'vendorList',learningCalendar:'learningCalendarList',
+    triangulationConfig:'triangulationConfigList',marketDemand:'marketDemandList',benchmarks:'benchmarkList'
+  };
+  var fmtMap={
+    trainingPrograms:function(t){return t.name+' · '+t.cat+(t.duration_hours?' · '+t.duration_hours+'h':'')},
+    vendors:function(v){return v.name+' · '+(v.spec||'')+(v.vendor_type?' · '+v.vendor_type:'')},
+    learningCalendar:function(e){return e.event_name+' · '+e.quarter+' · '+e.governance_owner},
+    triangulationConfig:function(t){return t.evidence_source+' · '+t.weight+'% · '+t.confidence_method},
+    marketDemand:function(m){return m.skill_name+' · '+m.demand_level+' · Scarcity: '+m.supply_scarcity},
+    benchmarks:function(b){return b.benchmark_category+': '+b.parameter+' — Industry: '+b.industry_benchmark}
+  };
+  if(listMap[key]&&fmtMap[key])renderList(listMap[key],D[key],fmtMap[key],key);
+}
+function removeItem(key,idx){D[key].splice(idx,1);reRenderList(key)}
+
+// =============================================================
+// RENDERING
+// =============================================================
+function renderStepper(){
+  var h='';STEPS.forEach(function(s,i){if(i>0)h+='<div class="step-conn'+(state.completed[i]?' done':'')+'"></div>';var cls=s.id===state.current?' active':'';if(state.completed[s.id])cls=' done';h+='<div class="step-item'+cls+'" onclick="goToStep('+s.id+')"><div class="step-num">'+(state.completed[s.id]?'<svg style="width:9px;height:9px;stroke:currentColor;fill:none;stroke-width:3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':s.id)+'</div><span class="step-label">'+s.title+'</span></div>'});
+  document.getElementById('stepper').innerHTML=h;
+}
+
+function renderSteps(){
+  var h='';STEPS.forEach(function(s,i){var vis=s.id===state.current?' visible':'';h+='<div class="step-panel'+vis+'" id="step'+s.id+'">'+stepBuilders[i]()+'</div>'});
+  document.getElementById('stepContainer').innerHTML=h;
+  var allLists=['trainingPrograms','vendors','learningCalendar','triangulationConfig','marketDemand','benchmarks'];
+  allLists.forEach(function(k){reRenderList(k)});
+}
+
+function goToStep(n){
+  state.current=n;renderStepper();
+  STEPS.forEach(function(s){var el=document.getElementById('step'+s.id);if(el){if(s.id===n)el.classList.add('visible');else el.classList.remove('visible')}});
+  if(n===6)buildReview();
+  document.querySelector('.content-left').scrollTop=0;
+  updateAiForStep(n);updateProgress();
+  var jmp=document.getElementById('screenJump');if(jmp)jmp.value=n;
+}
+
+function updateProgress(){
+  var done=0;for(var k in state.completed)if(state.completed[k])done++;
+  var pct=done/TOTAL;
+  var ring=document.getElementById('progressRing');if(ring)ring.setAttribute('stroke-dashoffset',150.8*(1-pct));
+  document.getElementById('progressPct').textContent=Math.round(pct*100)+'%';
+  document.getElementById('progressPct').style.color=pct<.4?'var(--amber)':pct<.7?'var(--purple)':'var(--green)';
+  document.getElementById('progressTitle').textContent='Workforce Intelligence: '+done+' of '+TOTAL+' screens';
+  document.getElementById('aiFooterBar').style.width=Math.round(pct*100)+'%';
+  document.getElementById('levelPill').textContent=done>=TOTAL?'Complete':'Module 4 ('+done+'/'+TOTAL+')';
+  document.getElementById('levelPill').className=done>=TOTAL?'tb-pill gold':'tb-pill purple';
+  renderStepper();
+}
+
+function updateAiForStep(n){
+  clearAiChat();
+  var m=AI_MESSAGES[n];if(!m)return;
+  document.getElementById('aiFooterStep').textContent='Screen '+n+' of 6';
+  if(state.visited[n]){addAiMsg(m.welcome);if(m.follow)addAiMsg(m.follow);return}
+  state.visited[n]=true;
+  addAiTyping();
+  setTimeout(function(){removeAiTyping();addAiMsg(m.welcome);if(m.follow)setTimeout(function(){addAiTyping();setTimeout(function(){removeAiTyping();addAiMsg(m.follow)},800)},600)},700);
+}
+
+// =============================================================
+// STEP COMPLETION %
+// =============================================================
+function getStepCompletionPct(n){
+  var filled=0,total=0;
+  function chk(id){total++;if(gv(id))filled++}
+  function chkList(key,min){total+=min||1;filled+=Math.min(D[key].length,min||1)}
+  function chkCb(id){total++;var e=document.getElementById(id);if(e&&e.checked)filled++}
+
+  if(n===1){chkCb('f-hist-perf');chkCb('f-hist-promo');chkCb('f-hist-mobility');chkCb('f-hist-exit');chkCb('f-hist-workforce');chkCb('f-hist-leadership');chkCb('f-hist-retention');chk('f-hist-years');chk('f-hist-source')}
+  if(n===2){chkList('trainingPrograms',1);chkList('vendors',1);chkList('learningCalendar',1)}
+  if(n===3){chkCb('f-assess-skill');chkCb('f-assess-mgr');chkCb('f-assess-comp');chkCb('f-assess-cert');chkCb('f-assess-360');chkCb('f-assess-knowledge');chkCb('f-assess-psychometric');chk('f-assess-tri');chk('f-assess-freq')}
+  if(n===4){chkList('marketDemand',1);chk('f-reg-level');chk('f-reg-skills');chk('f-reg-hours')}
+  if(n===5){chkList('benchmarks',1);chk('f-sc-risk');chk('f-sc-suppliers');chk('f-sc-otd');chk('f-sc-dual')}
+
+  return total===0?100:Math.round(filled/total*100);
+}
+
+// =============================================================
+// CELEBRATION
+// =============================================================
+function showCelebration(msg,sub){
+  var chat=document.getElementById('aiChat');
+  var card=document.createElement('div');
+  card.className='ai-celebrate';
+  var confettiHtml='<div class="ai-celebrate-confetti">';
+  var colors=['#7C3AED','#16A34A','#C9A84C','#2563EB','#D97706','#DC2626'];
+  for(var i=0;i<18;i++){
+    var dx=(Math.random()>0.5?1:-1)*(30+Math.random()*80)+'px';
+    var dy=(Math.random()>0.5?1:-1)*(20+Math.random()*50)+'px';
+    confettiHtml+='<span class="c-dot" style="width:'+(3+Math.random()*4)+'px;height:'+(3+Math.random()*4)+'px;background:'+colors[Math.floor(Math.random()*colors.length)]+';left:16px;top:22px;--dx:'+dx+';--dy:'+dy+';animation-delay:'+(Math.random()*0.3)+'s"></span>';
+  }
+  confettiHtml+='</div>';
+  card.innerHTML=confettiHtml+'<div class="ai-celebrate-header"><div class="ai-celebrate-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="ai-celebrate-title">'+msg+'</div>'+(sub?'<div class="ai-celebrate-sub">'+sub+'</div>':'')+'</div></div>';
+  chat.appendChild(card);chat.scrollTop=chat.scrollHeight;
+}
+
+// =============================================================
+// SAVE + NAVIGATION
+// =============================================================
+function saveStep(n){
+  var skipped=[];
+  var checks=SKIP_CHECKS[n];
+  if(checks){checks.forEach(function(c){if(c.field){if(!gv(c.field))skipped.push(c)}else if(c.check&&c.check())skipped.push(c)})}
+  var pct=getStepCompletionPct(n);
+  state.completed[n]=true;updateProgress();
+  goToStep(n<6?n+1:6);
+  var cg=CONGRATS[n];
+  if(cg){
+    var done=0;for(var dk in state.completed)if(state.completed[dk])done++;
+    var showCelebrate=pct>=90;
+    if(showCelebrate){
+      var sub='Screen '+n+' — '+pct+'% complete'+(done>=TOTAL?' — all done!':'');
+      setTimeout(function(){showCelebration(cg.msg,sub)},1800);
+      setTimeout(function(){
+        var unlockHtml='<em>This unlocks:</em><br>';
+        cg.unlocks.forEach(function(u){unlockHtml+='&bull; '+u+'<br>'});
+        if(pct===100)unlockHtml+='<br>All fields filled — <strong>maximum intelligence</strong> enabled.';
+        else unlockHtml+='<br>Nearly complete — a few optional fields left.';
+        addAiMsg(unlockHtml);
+      },2400);
+    } else {
+      setTimeout(function(){
+        var progHtml='<strong>Screen '+n+' saved</strong> — '+pct+'% of fields filled.<br><br><em>What you\'ve added unlocks:</em><br>';
+        cg.unlocks.slice(0,2).forEach(function(u){progHtml+='&bull; '+u+'<br>'});
+        if(cg.unlocks.length>2)progHtml+='&bull; ...and '+(cg.unlocks.length-2)+' more with additional data<br>';
+        progHtml+='<br>Fill more fields on Screen '+n+' to unlock <strong>full intelligence</strong>. <span style="color:var(--red)">Go back anytime to complete them.</span>';
+        addAiMsg(progHtml);
+      },1800);
+      if(skipped.length>0){
+        setTimeout(function(){
+          var skipHtml="Here's what you're missing on Screen "+n+":<br><br>";
+          skipped.forEach(function(s){skipHtml+='<strong>'+s.label+':</strong> '+s.warn+'<br><br>'});
+          skipHtml+='<em style="color:var(--red)">Go back anytime to fill these.</em>';
+          addAiMsg(skipHtml);
+        },2800);
+      }
+    }
+  } else {
+    showToast('Screen '+n+' saved');
+  }
+}
+
+// =============================================================
+// REVIEW + CONFIRM
+// =============================================================
+function buildReview(){
+  var h='';
+  var labels=[
+    'Performance History',
+    'Training ('+D.trainingPrograms.length+'), Vendors ('+D.vendors.length+') & Calendar ('+D.learningCalendar.length+')',
+    'Assessments & Triangulation ('+D.triangulationConfig.length+')',
+    'Market Demand ('+D.marketDemand.length+')',
+    'Benchmarks ('+D.benchmarks.length+')'
+  ];
+  for(var i=1;i<=5;i++){var done=state.completed[i];h+='<div class="rv-section" onclick="goToStep('+i+')" style="cursor:pointer"><div class="rv-title"><div class="rv-check '+(done?'done':'pending')+'"><svg viewBox="0 0 24 24">'+(done?'<polyline points="20 6 9 17 4 12"/>':'<line x1="5" y1="12" x2="19" y2="12"/>')+'</svg></div>Screen '+i+': '+labels[i-1]+'</div></div>'}
+  var done2=0;for(var j=1;j<=TOTAL;j++)if(state.completed[j])done2++;
+  var totalItems=0;for(var dk in D)totalItems+=D[dk].length;
+  h+='<div style="margin-top:14px;padding:12px 16px;background:linear-gradient(135deg,var(--card) 0%,rgba(124,58,237,0.04) 100%);border:1px solid rgba(124,58,237,0.15);border-radius:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div style="font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--text-primary)">Summary</div><div style="font-size:10px;color:var(--text-secondary)">'+done2+'/'+TOTAL+' screens</div><div style="font-size:10px;color:var(--text-secondary)">'+totalItems+' items</div><div style="font-size:10px;color:'+(done2>=TOTAL?'var(--green)':'var(--amber)')+'">Status: '+(done2>=TOTAL?'Ready':'Incomplete')+'</div></div>';
+  document.getElementById('reviewBody').innerHTML=h;
+}
+
+function confirmSetup(){
+  var done=0;for(var i=1;i<=TOTAL;i++)if(state.completed[i])done++;
+  if(done<TOTAL){showToast('Complete all 5 screens first');return}
+  // Save to localStorage
+  var saveData={
+    trainingPrograms:D.trainingPrograms,
+    vendors:D.vendors,
+    learningCalendar:D.learningCalendar,
+    triangulationConfig:D.triangulationConfig,
+    marketDemand:D.marketDemand,
+    benchmarks:D.benchmarks,
+    historyConfig:{
+      perf:document.getElementById('f-hist-perf')?document.getElementById('f-hist-perf').checked:false,
+      promo:document.getElementById('f-hist-promo')?document.getElementById('f-hist-promo').checked:false,
+      mobility:document.getElementById('f-hist-mobility')?document.getElementById('f-hist-mobility').checked:false,
+      exit:document.getElementById('f-hist-exit')?document.getElementById('f-hist-exit').checked:false,
+      workforce:document.getElementById('f-hist-workforce')?document.getElementById('f-hist-workforce').checked:false,
+      leadership:document.getElementById('f-hist-leadership')?document.getElementById('f-hist-leadership').checked:false,
+      retention:document.getElementById('f-hist-retention')?document.getElementById('f-hist-retention').checked:false,
+      years:gv('f-hist-years'),
+      source:gv('f-hist-source')
+    },
+    assessmentConfig:{
+      skill:document.getElementById('f-assess-skill')?document.getElementById('f-assess-skill').checked:false,
+      mgr:document.getElementById('f-assess-mgr')?document.getElementById('f-assess-mgr').checked:false,
+      comp:document.getElementById('f-assess-comp')?document.getElementById('f-assess-comp').checked:false,
+      cert:document.getElementById('f-assess-cert')?document.getElementById('f-assess-cert').checked:false,
+      '360':document.getElementById('f-assess-360')?document.getElementById('f-assess-360').checked:false,
+      knowledge:document.getElementById('f-assess-knowledge')?document.getElementById('f-assess-knowledge').checked:false,
+      psychometric:document.getElementById('f-assess-psychometric')?document.getElementById('f-assess-psychometric').checked:false,
+      triangulation:gv('f-assess-tri'),
+      frequency:gv('f-assess-freq')
+    },
+    regulatory:{
+      level:gv('f-reg-level'),
+      skills:gv('f-reg-skills'),
+      hours:gv('f-reg-hours')
+    },
+    supplyChain:{
+      risk:gv('f-sc-risk'),
+      suppliers:gv('f-sc-suppliers'),
+      otd:gv('f-sc-otd'),
+      dual:gv('f-sc-dual')
+    }
+  };
+  try{localStorage.setItem('sip_workforce',JSON.stringify(saveData))}catch(e){}
+  document.getElementById('successBanner').classList.add('show');
+  document.getElementById('stepper').style.display='none';
+  document.getElementById('progressMeter').style.display='none';
+  for(var j=1;j<=6;j++){var el=document.getElementById('step'+j);if(el)el.classList.remove('visible')}
+  updateProgress();
+  addAiMsg("Onboarding complete! All 4 modules configured. The SkillForge AI pipeline is now fully calibrated.");
+  showToast('Onboarding locked — SkillForge ready');
+}
+
+function resetDemo(){
+  state={current:1,completed:{},visited:{}};for(var i=1;i<=TOTAL;i++)state.completed[i]=false;
+  D={trainingPrograms:[],vendors:[],learningCalendar:[],triangulationConfig:[],marketDemand:[],benchmarks:[]};
+  appliedSuggestions={};
+  try{localStorage.removeItem('sip_workforce')}catch(e){}
+  document.getElementById('successBanner').classList.remove('show');
+  document.getElementById('stepper').style.display='flex';document.getElementById('progressMeter').style.display='flex';
+  renderSteps();updateProgress();goToStep(1);showToast('Demo reset');
+}
+
+// =============================================================
+// SCREEN_FIELDS — FIELD-BY-FIELD POPUP CONFIG
+// =============================================================
+var SCREEN_FIELDS = {
+  1:[
+    {id:'f-hist-perf',label:'Employee Yearly Performance',type:'checkbox',aiMsg:'Performance data enables trend analysis, promotion prediction, and skill-performance correlation.',aiRule:'Feeds multi-year performance trend analysis and predictive attrition modeling.'},
+    {id:'f-hist-promo',label:'Promotion History',type:'checkbox',aiMsg:'Promotion history reveals career velocity patterns and internal mobility effectiveness.',aiRule:'Powers promotion velocity tracking and succession pipeline health metrics.'},
+    {id:'f-hist-mobility',label:'Internal Mobility',type:'checkbox',aiMsg:'Mobility data shows how talent flows across roles and departments.',aiRule:'Enables internal talent marketplace analytics and cross-functional skill transfer tracking.'},
+    {id:'f-hist-exit',label:'Employee Exit Data',type:'checkbox',aiMsg:'Exit data identifies retention risks and skill-loss patterns from attrition.',aiRule:'Feeds predictive attrition modeling and skill-loss risk scoring in SIP.'},
+    {id:'f-hist-workforce',label:'Workforce Planning',type:'checkbox',aiMsg:'Historical workforce plans vs actuals improve future planning accuracy.',aiRule:'Calibrates workforce planning forecast models with historical accuracy data.'},
+    {id:'f-hist-leadership',label:'Leadership Pipeline & Succession',type:'checkbox',aiMsg:'Succession data identifies leadership bench strength and development priorities.',aiRule:'Powers succession risk scoring and leadership pipeline health dashboards.'},
+    {id:'f-hist-retention',label:'Retention Risk Data',type:'checkbox',aiMsg:'Retention risk scores help prioritize development investment for flight-risk talent.',aiRule:'Feeds retention risk overlay in SkillForge capability dashboards.'},
+    {id:'f-hist-years',label:'Years Available',type:'select',options:['1 year','2 years','3 years','5+ years'],aiMsg:'More history years enable better trend detection and forecasting accuracy.',aiRule:'Sets the lookback window for all SIP trend analysis algorithms.'},
+    {id:'f-hist-source',label:'Data Source',type:'input',placeholder:'e.g. Workday exports',aiMsg:'Source system identification helps configure automated data refresh pipelines.',aiRule:'Configures source connector and refresh schedule in the SIP data pipeline.'}
+  ],
+  2:{standalone:[],lists:[
+    {key:'trainingPrograms',label:'Training Program',addFn:'addTraining',fields:[
+      {id:'f-trn-name',label:'Program Name',type:'input',required:true},
+      {id:'f-trn-cat',label:'Category',type:'select',options:['Technical','Leadership','Compliance','Digital','Safety']},
+      {id:'f-trn-mode',label:'Mode',type:'select',options:['Instructor-Led','Virtual','E-Learning','Blended','Self-Paced']},
+      {id:'f-trn-status',label:'Status',type:'select',options:['Active','Planned','Retired']},
+      {id:'f-trn-hours',label:'Duration (hours)',type:'input',inputType:'number'},
+      {id:'f-trn-cert',label:'Certification Awarded?',type:'select',options:['No','Yes']},
+      {id:'f-trn-audience',label:'Target Audience',type:'input',placeholder:'e.g. Engineers, L4+'},
+      {id:'f-trn-crit',label:'Criticality',type:'select',options:['Low','Medium','High','Critical']},
+      {id:'f-trn-cost',label:'Cost per Participant (USD)',type:'input',inputType:'number'}
+    ],aiMsg:'Training programs are the primary mechanism for closing skill gaps — each maps to skills and competencies.',aiRule:'Feeds training ROI analytics, skill-gap closure tracking, and L&D budget optimization.'},
+    {key:'vendors',label:'Vendor',addFn:'addVendor',fields:[
+      {id:'f-vendor-name',label:'Vendor Name',type:'input',required:true},
+      {id:'f-vendor-spec',label:'Specialization',type:'input'},
+      {id:'f-vendor-type',label:'Vendor Type',type:'select',options:['External','Internal','University','Technology Platform']},
+      {id:'f-vendor-country',label:'Country',type:'input'},
+      {id:'f-vendor-coverage',label:'Coverage',type:'select',options:['Local','Regional','National','Global']},
+      {id:'f-vendor-rating',label:'Quality Rating',type:'input',placeholder:'e.g. 4.5/5'},
+      {id:'f-vendor-pref',label:'Preferred Vendor?',type:'select',options:['No','Yes']}
+    ],aiMsg:'Vendor data enables vendor performance comparison and preferred-vendor routing for training programs.',aiRule:'Powers vendor performance analytics and auto-routing of training nominations.'},
+    {key:'learningCalendar',label:'Calendar Event',addFn:'addLearningCalendar',fields:[
+      {id:'f-lc-name',label:'Event Name',type:'input',required:true},
+      {id:'f-lc-type',label:'Event Type',type:'select',options:['Governance Review','Program Launch','Audit','Nomination Window']},
+      {id:'f-lc-quarter',label:'Quarter',type:'select',options:['Q1','Q2','Q3','Q4']},
+      {id:'f-lc-owner',label:'Governance Owner',type:'input'}
+    ],aiMsg:'The learning governance calendar ensures L&D activities align with organizational planning cycles.',aiRule:'Automates governance reminders and aligns L&D activities to fiscal cycles in SIP.'}
+  ]},
+  3:{standalone:[
+    {id:'f-assess-skill',label:'Skill Self-Assessments',type:'checkbox',aiMsg:'Self-assessments provide the employee perspective in multi-source capability evaluation.',aiRule:'One vertex in the SIP triangulation model for confidence-scored capability profiles.'},
+    {id:'f-assess-mgr',label:'Manager Assessments',type:'checkbox',aiMsg:'Manager assessments add supervisory validation to self-reported skill levels.',aiRule:'Weighted evidence source in SkillForge triangulated competency scoring.'},
+    {id:'f-assess-comp',label:'Competency Assessments',type:'checkbox',aiMsg:'Competency assessments evaluate behavioral and functional capabilities beyond technical skills.',aiRule:'Feeds competency maturity tracking and behavioral assessment rubrics.'},
+    {id:'f-assess-cert',label:'Certifications',type:'checkbox',aiMsg:'Certifications provide objective, third-party validation of skill proficiency.',aiRule:'Highest-confidence evidence source in the SIP triangulation model.'},
+    {id:'f-assess-360',label:'360-Degree Feedback',type:'checkbox',aiMsg:'360 feedback captures peer, subordinate, and cross-functional perspectives on capability.',aiRule:'Multi-rater input for leadership competency scoring and development planning.'},
+    {id:'f-assess-knowledge',label:'Knowledge Tests',type:'checkbox',aiMsg:'Knowledge tests provide quantitative skill measurement through structured evaluation.',aiRule:'Objective scoring input for skill verification and gap quantification.'},
+    {id:'f-assess-psychometric',label:'Psychometric Assessments',type:'checkbox',aiMsg:'Psychometric assessments measure cognitive abilities and personality traits relevant to role fit.',aiRule:'Feeds role-fit scoring and team composition analytics in SkillForge.'},
+    {id:'f-assess-tri',label:'Triangulation Method',type:'select',options:['Weighted Average','Manager Override','Evidence-First'],aiMsg:'Triangulation method determines how multiple assessment sources are combined into a single capability score.',aiRule:'Core algorithm configuration for the SIP multi-source skill validation engine.'},
+    {id:'f-assess-freq',label:'Assessment Frequency',type:'select',options:['Annual','Semi-Annual','Quarterly'],aiMsg:'Assessment frequency determines how often capability data refreshes for decision-making.',aiRule:'Sets the data refresh cadence for all SkillForge capability dashboards.'}
+  ],lists:[{key:'triangulationConfig',label:'Evidence Source',addFn:'addTriangulation',fields:[
+    {id:'f-tri-source',label:'Evidence Source',type:'input',required:true,placeholder:'e.g. Manager Assessment'},
+    {id:'f-tri-weight',label:'Weight %',type:'input',inputType:'number',placeholder:'e.g. 30'},
+    {id:'f-tri-method',label:'Confidence Method',type:'select',options:['Statistical','Rules-Based','AI-Driven']},
+    {id:'f-tri-freq',label:'Update Frequency',type:'select',options:['Real-time','Monthly','Quarterly','Annual']}
+  ],aiMsg:'Evidence source configuration fine-tunes how the AI weighs different assessment data for capability scoring.',aiRule:'Direct parameter input for the SIP triangulation algorithm weighting matrix.'}]},
+  4:{standalone:[
+    {id:'f-reg-level',label:'Regulatory Demand Level',type:'select',options:['Low','Moderate','High'],aiMsg:'Regulatory demand level indicates how much compliance training your workforce needs.',aiRule:'Scales mandatory training allocation and compliance budget forecasting.'},
+    {id:'f-reg-skills',label:'Top Compliance Skills',type:'input',placeholder:'e.g. ISO 45001, PDPA, BCA',aiMsg:'Top compliance skills identify the most critical regulatory capabilities to track and develop.',aiRule:'Flags high-priority compliance skills for mandatory tracking in SkillForge.'},
+    {id:'f-reg-hours',label:'Compliance Training Hours (annual)',type:'input',inputType:'number',placeholder:'e.g. 24',aiMsg:'Annual compliance training hours set the baseline obligation for workforce planning.',aiRule:'Reserves training capacity hours in the SIP learning capacity model.'}
+  ],lists:[{key:'marketDemand',label:'Market Demand Entry',addFn:'addMarketDemand',fields:[
+    {id:'f-md-skill',label:'Skill Name',type:'input',required:true},
+    {id:'f-md-level',label:'Demand Level',type:'select',options:['Low','Moderate','High','Very High']},
+    {id:'f-md-growth',label:'Demand Growth YoY %',type:'input',placeholder:'e.g. 25'},
+    {id:'f-md-scarcity',label:'Supply Scarcity',type:'select',options:['Low','Medium','High']},
+    {id:'f-md-relevance',label:'Strategic Relevance',type:'select',options:['Low','Medium','High','Critical']}
+  ],aiMsg:'Market skill demand data connects internal capabilities to external market signals for proactive workforce planning.',aiRule:'Powers external demand signal overlay and supply-scarcity alerts in SkillForge dashboards.'}]},
+  5:{standalone:[
+    {id:'f-sc-risk',label:'Supply Chain Risk Level',type:'select',options:['Low','Medium','High','Critical'],aiMsg:'Supply chain risk level indicates operational vulnerability from supplier dependencies.',aiRule:'Feeds supply chain risk overlay in SIP operational dashboards.'},
+    {id:'f-sc-suppliers',label:'Critical Supplier Count',type:'input',inputType:'number',aiMsg:'Number of critical suppliers helps assess concentration risk and contingency needs.',aiRule:'Inputs to supplier dependency risk scoring and contingency planning.'},
+    {id:'f-sc-otd',label:'On-Time Delivery %',type:'input',placeholder:'e.g. 92',aiMsg:'On-time delivery rate is a key operational performance benchmark.',aiRule:'Benchmarked against industry peers for operational excellence scoring.'},
+    {id:'f-sc-dual',label:'Dual-Source Coverage %',type:'input',placeholder:'e.g. 65',aiMsg:'Dual-sourcing coverage indicates supply chain resilience and risk mitigation.',aiRule:'Feeds supply chain resilience scoring in the SIP risk module.'}
+  ],lists:[{key:'benchmarks',label:'Benchmark',addFn:'addBenchmark',fields:[
+    {id:'f-bm-cat',label:'Category',type:'select',options:['Financial','Workforce','Skills','L&D','Operations','Quality','Customer','Digital','Compliance','ESG']},
+    {id:'f-bm-param',label:'Parameter',type:'input',required:true,placeholder:'e.g. Attrition Rate %'},
+    {id:'f-bm-industry',label:'Industry Benchmark',type:'input',placeholder:'e.g. 12%'},
+    {id:'f-bm-company',label:'Company Value',type:'input',placeholder:'Your value'}
+  ],aiMsg:'Competitor benchmarks provide the external frame of reference for capability maturity assessment.',aiRule:'Powers industry benchmark dashboards and competitive gap analysis in SIP.'}]}
+};
+
+// =============================================================
+// FIELD POPUP STATE & LOGIC
+// =============================================================
+var fpState = {screen:1, fieldIdx:0, open:false};
+
+function fpGetFields(screenNum){
+  var cfg = SCREEN_FIELDS[screenNum];
+  if(!cfg) return [];
+  if(Array.isArray(cfg)) return cfg;
+  var fields = [];
+  if(cfg.standalone && cfg.standalone.length) fields = fields.concat(cfg.standalone);
+  if(cfg.lists && cfg.lists.length){
+    cfg.lists.forEach(function(lst){
+      fields.push({_isList:true, listConfig:lst});
+    });
+  }
+  return fields;
+}
+
+function openFieldPopup(screenNum){
+  var fields = fpGetFields(screenNum);
+  if(!fields || !fields.length) return;
+  fpState.screen = screenNum;
+  fpState.fieldIdx = 0;
+  fpState.open = true;
+  var overlay = document.getElementById('fieldPopup');
+  overlay.style.display='flex';
+  setTimeout(function(){overlay.classList.add('fp-open')},10);
+  renderFieldPopup();
+}
+
+function closeFieldPopup(){
+  fpState.open = false;
+  var overlay = document.getElementById('fieldPopup');
+  overlay.classList.remove('fp-open');
+  setTimeout(function(){overlay.style.display='none'},350);
+}
+
+function renderFieldPopup(){
+  var screenNum = fpState.screen;
+  var fields = fpGetFields(screenNum);
+  if(!fields || !fields.length){closeFieldPopup();return}
+  var idx = fpState.fieldIdx;
+  if(idx >= fields.length) idx = fields.length - 1;
+  if(idx < 0) idx = 0;
+  fpState.fieldIdx = idx;
+
+  var stepTitle = STEPS[screenNum-1] ? STEPS[screenNum-1].title : 'Screen '+screenNum;
+  document.getElementById('fpHeaderTitle').textContent = 'Screen '+screenNum+' — '+stepTitle;
+  document.getElementById('fpHeaderCounter').textContent = (idx+1)+' / '+fields.length;
+  document.getElementById('fpProgressFill').style.width = ((idx+1)/fields.length*100)+'%';
+  document.getElementById('fpBackBtn').style.display = idx>0?'inline-flex':'none';
+  document.getElementById('fpNextBtn').innerHTML = idx >= fields.length-1 ? 'Complete <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : 'Next <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>';
+
+  var f = fields[idx];
+  var body = document.getElementById('fpBody');
+  var h = '<div class="fp-field-area">';
+
+  if(f._isList){
+    var lst = f.listConfig;
+    h += '<div class="fp-field-label">'+lst.label+'s';
+    h += ' <span class="fp-badge recommended" style="font-size:8px">list</span></div>';
+    h += '<div class="fp-list-added" id="fpListItems_'+lst.key+'">';
+    D[lst.key].forEach(function(item,i){
+      var display = item.name||item.title||item.skill_name||item.event_name||item.evidence_source||item.parameter||'Item';
+      h += '<div class="added-chip">'+escH(display)+'</div>';
+    });
+    h += '</div>';
+    var sugItems = getListItems(lst.key, screenNum);
+    if(sugItems && sugItems.length){
+      h += '<div class="fp-suggestion-chips" style="margin-top:10px">';
+      h += '<span style="font-size:9px;color:var(--purple);width:100%;margin-bottom:2px"><svg style="width:10px;height:10px;stroke:var(--purple);fill:none;stroke-width:2;vertical-align:middle" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> AI Suggestions — click to add</span>';
+      sugItems.forEach(function(item,i){
+        var key = lst.key+'_'+screenNum+'_'+i;
+        var title = item.name||item.title||item.skill_name||item.event_name||item.parameter||'';
+        var applied = appliedSuggestions[key];
+        h += '<span class="fp-chip'+(applied?' fp-applied':'')+'" onclick="fpApplyListSuggestion(\''+lst.key+'\','+screenNum+','+i+',this)">';
+        h += '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> '+escH(title)+'</span>';
+      });
+      h += '</div>';
+    }
+    h += '<div class="fp-list-section" style="margin-top:12px"><div class="fp-list-section-title">Add '+lst.label+'</div>';
+    h += '<div class="fp-list-mini-form">';
+    lst.fields.forEach(function(ff){
+      h += '<div class="fp-mini-group">';
+      h += '<span class="fp-mini-label">'+ff.label+(ff.required?' *':'')+'</span>';
+      if(ff.type === 'select' && ff.options){
+        h += '<select class="fp-mini-select" id="'+ff.id+'">';
+        ff.options.forEach(function(o){h+='<option>'+o+'</option>'});
+        h += '</select>';
+      } else {
+        h += '<input class="fp-mini-input" id="'+ff.id+'" placeholder="'+(ff.placeholder||'')+'"'+(ff.inputType?' type="'+ff.inputType+'"':'')+'>';
+      }
+      h += '</div>';
+    });
+    h += '</div>';
+    h += '<button class="btn btn-blue btn-sm" onclick="fpAddListItem(\''+lst.addFn+'\',\''+lst.key+'\','+screenNum+')" style="margin-top:8px">+ Add '+lst.label+'</button>';
+    h += '</div>';
+    h += '<div class="fp-ai-area" style="margin-top:12px">';
+    h += '<div class="fp-ai-msg"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> '+lst.aiMsg+'</div>';
+    h += '<div class="fp-ai-rule"><strong>SIP Rule:</strong> '+lst.aiRule+'</div>';
+    h += '</div>';
+  } else {
+    h += '<div class="fp-field-label">'+f.label;
+    if(f.required) h += ' <span class="fp-badge required">required</span>';
+    else if(f.recommended) h += ' <span class="fp-badge recommended">recommended</span>';
+    h += '</div>';
+
+    var curVal = '';
+    var realEl = document.getElementById(f.id);
+    if(realEl){
+      if(f.type === 'checkbox') curVal = realEl.checked;
+      else curVal = realEl.value || '';
+    }
+
+    if(f.type === 'select'){
+      h += '<select class="fp-select" id="fp-field-input" onkeydown="if(event.key===\'Enter\')fpAutoAdvance()">';
+      h += '<option value="">Select...</option>';
+      (f.options||[]).forEach(function(opt){
+        h += '<option'+(curVal===opt?' selected':'')+'>'+opt+'</option>';
+      });
+      h += '</select>';
+    } else if(f.type === 'textarea'){
+      h += '<textarea class="fp-textarea" id="fp-field-input" placeholder="'+(f.placeholder||'')+'" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();fpAutoAdvance()}">'+escH(curVal)+'</textarea>';
+    } else if(f.type === 'checkbox'){
+      h += '<label class="fp-checkbox-wrap" onclick=""><input type="checkbox" id="fp-field-input"'+(curVal?' checked':'')+'><span>'+f.label+'</span></label>';
+    } else {
+      h += '<input class="fp-input" id="fp-field-input" placeholder="'+(f.placeholder||'')+'" value="'+escH(curVal)+'"'+(f.inputType?' type="'+f.inputType+'"':'')+' onkeydown="if(event.key===\'Enter\')fpAutoAdvance()">';
+    }
+
+    if(f.aiMsg){
+      h += '<div class="fp-ai-area" style="margin-top:16px">';
+      h += '<div class="fp-ai-msg"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> '+f.aiMsg+'</div>';
+      if(f.aiRule) h += '<div class="fp-ai-rule"><strong>SIP Rule:</strong> '+f.aiRule+'</div>';
+      h += '</div>';
+    }
+  }
+
+  h += '</div>';
+  body.innerHTML = h;
+
+  setTimeout(function(){
+    var inp = document.getElementById('fp-field-input');
+    if(inp && inp.focus) inp.focus();
+  },100);
+}
+
+function fpSaveCurrentField(){
+  var screenNum = fpState.screen;
+  var fields = fpGetFields(screenNum);
+  var f = fields[fpState.fieldIdx];
+  if(!f || f._isList) return;
+
+  var inp = document.getElementById('fp-field-input');
+  if(!inp) return;
+  var realEl = document.getElementById(f.id);
+  if(!realEl) return;
+
+  if(f.type === 'checkbox'){
+    realEl.checked = inp.checked;
+  } else {
+    realEl.value = inp.value;
+    if(inp.value) realEl.classList.add('ai-filled');
+  }
+}
+
+function fpNext(){
+  fpSaveCurrentField();
+  var fields = fpGetFields(fpState.screen);
+  if(fpState.fieldIdx >= fields.length - 1){
+    closeFieldPopup();
+    saveStep(fpState.screen);
+    return;
+  }
+  fpState.fieldIdx++;
+  renderFieldPopup();
+}
+
+function fpBack(){
+  fpSaveCurrentField();
+  if(fpState.fieldIdx > 0){
+    fpState.fieldIdx--;
+    renderFieldPopup();
+  }
+}
+
+function fpAutoAdvance(){
+  fpSaveCurrentField();
+  setTimeout(function(){fpNext()},200);
+}
+
+function fpApplyListSuggestion(listKey, step, idx, chipEl){
+  applyListSuggestion(listKey, step, idx);
+  if(chipEl){chipEl.classList.add('fp-applied');chipEl.innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Added'}
+  setTimeout(function(){renderFieldPopup()},100);
+}
+
+function fpAddListItem(addFnName, listKey, screenNum){
+  if(typeof window[addFnName] === 'function') window[addFnName]();
+  setTimeout(function(){renderFieldPopup()},100);
+}
+
+// ── Auto-open popup on step navigation ──
+var _origGoToStep = goToStep;
+goToStep = function(n){
+  _origGoToStep(n);
+  if(SCREEN_FIELDS[n] && n !== 6){
+    setTimeout(function(){openFieldPopup(n)},300);
+  }
+};
+
+// INIT
+renderSteps();renderStepper();updateProgress();updateAiForStep(1);
+</script>
+</body>
+</html>

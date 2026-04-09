@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ApprovalHub — Approval Workflow · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   APPROVALHUB — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── CONTENT ── */
+.content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
+
+/* ── CYCLE BANNER ── */
+.cycle-banner {
+  padding: 16px 28px;
+  background: var(--card);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  display: flex; align-items: center; gap: 20px;
+  animation: fadeUp .4s ease both;
+  flex-shrink: 0;
+}
+.cb-info { flex: 1; }
+.cb-title { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.cb-sub   { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.cb-stats { display: flex; gap: 24px; }
+.cb-stat  { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+.cb-stat-val { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--text-primary); }
+.cb-stat-key { font-size: 9.5px; color: var(--text-muted); letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
+
+/* ── THREE TIER LAYOUT ── */
+.tiers-wrap {
+  flex: 1; display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  min-height: 0;
+  padding: 20px 28px;
+  gap: 16px;
+  overflow-y: auto;
+  animation: fadeUp .5s ease .1s both;
+}
+
+/* ── TIER COLUMN ── */
+.tier-col {
+  display: flex; flex-direction: column; gap: 12px; min-width: 0;
+}
+
+/* Tier header */
+.tier-header {
+  border-radius: 12px; overflow: hidden;
+  border: 1px solid;
+}
+.th-top {
+  padding: 14px 16px 12px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.th-label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; font-weight: 500; }
+.th-title { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.th-reviewer { font-size: 11px; }
+.th-kpis { display: flex; gap: 0; border-top: 1px solid; }
+.th-kpi { flex: 1; padding: 10px 12px; border-right: 1px solid; display: flex; flex-direction: column; gap: 2px; }
+.th-kpi:last-child { border-right: none; }
+.th-kpi-val { font-family: var(--font-display); font-size: 16px; font-weight: 600; }
+.th-kpi-key { font-size: 9.5px; color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; }
+
+/* T1 — amber */
+.tier-col.t1 .tier-header { border-color: rgba(217,119,6,.25); }
+.tier-col.t1 .th-top { background: linear-gradient(135deg, rgba(217,119,6,.08) 0%, transparent 60%); }
+.tier-col.t1 .th-label { color: var(--amber); }
+.tier-col.t1 .th-reviewer { color: var(--amber); opacity: .8; }
+.tier-col.t1 .th-kpis { border-color: rgba(217,119,6,.15); }
+.tier-col.t1 .th-kpi { border-color: rgba(217,119,6,.1); }
+.tier-col.t1 .th-kpi-val { color: var(--amber); }
+.tier-col.t1 .status-done { border-color: rgba(22,163,74,.35); color: var(--green); background: var(--green-bg); }
+
+/* T2 — blue */
+.tier-col.t2 .tier-header { border-color: rgba(37,99,235,.25); }
+.tier-col.t2 .th-top { background: linear-gradient(135deg, rgba(37,99,235,.08) 0%, transparent 60%); }
+.tier-col.t2 .th-label { color: var(--blue); }
+.tier-col.t2 .th-reviewer { color: var(--blue); opacity: .8; }
+.tier-col.t2 .th-kpis { border-color: rgba(37,99,235,.15); }
+.tier-col.t2 .th-kpi { border-color: rgba(37,99,235,.1); }
+.tier-col.t2 .th-kpi-val { color: var(--blue); }
+.tier-col.t2 .status-done { border-color: rgba(22,163,74,.35); color: var(--green); background: var(--green-bg); }
+
+/* T3 — gold/accent */
+.tier-col.t3 .tier-header { border-color: var(--accent-bd); }
+.tier-col.t3 .th-top { background: linear-gradient(135deg, var(--accent-lt) 0%, transparent 60%); }
+.tier-col.t3 .th-label { color: var(--accent); }
+.tier-col.t3 .th-reviewer { color: var(--accent); opacity: .8; }
+.tier-col.t3 .th-kpis { border-color: rgba(201,168,76,.15); }
+.tier-col.t3 .th-kpi { border-color: rgba(201,168,76,.1); }
+.tier-col.t3 .th-kpi-val { color: var(--accent); }
+.tier-col.t3 .status-done { border-color: rgba(22,163,74,.35); color: var(--green); background: var(--green-bg); }
+
+.tier-status {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 100px; font-size: 10px;
+  border: 1px solid; letter-spacing: .06em; text-transform: uppercase;
+  width: fit-content; margin-top: 6px;
+}
+.status-done .ts-dot   { width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+.status-active .ts-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: blink 1.5s infinite; }
+.status-active { border-color: var(--accent-bd); color: var(--accent); background: var(--accent-lt); }
+.status-locked { border-color: rgba(0,0,0,.1); color: var(--text-muted); }
+.status-locked .ts-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-muted); }
+
+/* ── SKILL ITEM CARDS ── */
+.skill-item {
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 10px; overflow: hidden;
+  transition: border-color .2s;
+}
+.skill-item:hover { border-color: rgba(0,0,0,.14); }
+.skill-item.flagged { border-color: rgba(217,119,6,.3); }
+.skill-item.edited  { border-color: rgba(22,163,74,.25); }
+.skill-item.pending { border-color: rgba(201,168,76,.25); }
+
+.si-head { padding: 11px 14px; display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px solid rgba(0,0,0,.04); }
+.si-domain-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.si-info { flex: 1; min-width: 0; }
+.si-name { font-size: 12.5px; color: var(--text-primary); font-weight: 500; line-height: 1.3; }
+.si-domain { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.si-actions { display: flex; gap: 5px; flex-shrink: 0; }
+.si-btn {
+  width: 26px; height: 26px; border-radius: 5px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, border-color .15s;
+}
+.si-btn svg { width: 12px; height: 12px; stroke: var(--text-muted); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.si-btn:hover { background: rgba(0,0,0,.04); }
+.si-btn.approve { border-color: rgba(22,163,74,.3); }
+.si-btn.approve:hover { background: var(--green-bg); }
+.si-btn.approve:hover svg { stroke: var(--green); }
+.si-btn.flag { border-color: rgba(217,119,6,.3); }
+.si-btn.flag:hover { background: var(--amber-bg); }
+.si-btn.flag:hover svg { stroke: var(--amber); }
+.si-btn.edit:hover svg { stroke: var(--text-secondary); }
+
+.si-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 7px; }
+
+.si-prof { display: flex; align-items: center; gap: 6px; }
+.si-prof-label { font-size: 10px; color: var(--text-muted); width: 80px; flex-shrink: 0; }
+.prof-pips { display: flex; gap: 3px; }
+.pp { width: 18px; height: 18px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 8px; border: 1px solid rgba(0,0,0,.07); color: var(--text-muted); background: rgba(0,0,0,.03); }
+.pp.on { background: var(--blue-bg); color: var(--blue); border-color: rgba(37,99,235,.25); }
+.pp.target { background: var(--accent-lt); color: var(--accent); border-color: var(--accent-bd); }
+.pp.edited-val { background: var(--green-bg); color: var(--green); border-color: rgba(22,163,74,.3); }
+
+.si-desc { font-size: 11px; color: var(--text-muted); line-height: 1.55; font-family: var(--font-body); }
+.si-desc.edited-desc { color: var(--text-secondary); }
+
+.si-footer { padding: 8px 14px; background: rgba(0,0,0,.03); border-top: 1px solid rgba(0,0,0,.04); display: flex; align-items: center; gap: 8px; }
+.si-tag { padding: 2px 7px; border-radius: 100px; font-size: 9.5px; border: 1px solid; }
+.sit-approved { border-color: rgba(22,163,74,.35); color: var(--green); background: var(--green-bg); }
+.sit-flagged  { border-color: rgba(217,119,6,.35); color: var(--amber); background: var(--amber-bg); }
+.sit-edited   { border-color: rgba(37,99,235,.25); color: var(--blue); background: var(--blue-bg); }
+.sit-pending  { border-color: rgba(0,0,0,.1);  color: var(--text-muted); }
+.sit-locked   { border-color: rgba(0,0,0,.06); color: var(--text-muted); opacity: .5; }
+.si-auditor { font-size: 10px; color: var(--text-muted); margin-left: auto; }
+
+/* Edit inline note */
+.edit-note {
+  padding: 7px 10px;
+  background: var(--blue-bg);
+  border: 1px solid rgba(37,99,235,.15);
+  border-radius: 5px; font-size: 11px; color: var(--text-secondary); line-height: 1.5;
+}
+.edit-note strong { color: var(--blue); font-weight: 500; }
+
+/* Final approval card */
+.final-card {
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 10px; overflow: hidden;
+}
+.fc-head { padding: 14px 16px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+.fc-title { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.fc-sub   { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.fc-body  { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.fc-note  { font-size: 11.5px; color: var(--text-secondary); line-height: 1.6; background: var(--accent-lt); border: 1px solid rgba(201,168,76,.2); border-radius: 7px; padding: 10px 12px; }
+.fc-note strong { color: var(--accent); font-weight: 500; }
+
+.approve-btn {
+  width: 100%; padding: 12px;
+  background: var(--accent); border: none; border-radius: 8px;
+  font-family: var(--font-display); font-size: 13px; font-weight: 600;
+  letter-spacing: .05em; text-transform: uppercase; color: #0F1117;
+  cursor: pointer; transition: opacity .15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.approve-btn:hover { opacity: .88; }
+.approve-btn svg { width: 14px; height: 14px; stroke: #0F1117; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.approve-btn.done { background: var(--green); cursor: default; color: #ffffff; }
+.approve-btn.done:hover { opacity: 1; }
+.approve-btn.done svg { stroke: #ffffff; }
+
+.reject-btn {
+  width: 100%; padding: 10px;
+  background: transparent; border: 1px solid rgba(0,0,0,.1);
+  border-radius: 8px; font-family: var(--font-body); font-size: 12px;
+  color: var(--text-muted); cursor: pointer; transition: border-color .15s, color .15s;
+}
+.reject-btn:hover { border-color: rgba(220,38,38,.4); color: var(--red); }
+
+/* Audit trail */
+.audit-trail { display: flex; flex-direction: column; gap: 0; }
+.at-row { padding: 9px 14px; border-bottom: 1px solid rgba(0,0,0,.04); display: flex; align-items: flex-start; gap: 10px; }
+.at-row:last-child { border-bottom: none; }
+.at-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.at-text { font-size: 11px; color: var(--text-secondary); line-height: 1.5; flex: 1; }
+.at-text strong { color: var(--text-primary); font-weight: 500; }
+.at-time { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); flex-shrink: 0; margin-top: 1px; }
+
+/* Completion banner */
+.completion-banner {
+  display: none; margin: 0 28px 20px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, var(--green-bg) 0%, transparent 70%);
+  border: 1px solid rgba(22,163,74,.3);
+  border-radius: 12px;
+  align-items: center; gap: 14px;
+  animation: fadeUp .4s ease both;
+}
+.completion-banner.show { display: flex; }
+.cb-check { width: 36px; height: 36px; border-radius: 50%; background: var(--green-bg); border: 1px solid rgba(22,163,74,.35); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cb-check svg { width: 16px; height: 16px; stroke: var(--green); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.cb-body { flex: 1; }
+.cb-body-title { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.cb-body-sub   { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+.cb-next-btn { padding: 9px 18px; border-radius: 7px; background: var(--green); border: none; font-family: var(--font-display); font-size: 12px; font-weight: 600; color: #ffffff; cursor: pointer; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+
+/* Confidence statement */
+.confidence-statement {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 28px;
+  background: var(--accent-lt);
+  border-top: 1px solid rgba(201,168,76,.2);
+  flex-shrink: 0;
+}
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes blink  { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+  <div class="content">
+
+  <!-- CYCLE BANNER -->
+  <div class="cycle-banner">
+    <div class="cb-info">
+      <div class="cb-title">Skill Framework — Cycle 2 (FY2026 Update)</div>
+      <div class="cb-sub">SkillForge generated 14 Oct 2025 · 48 skills · 8 competencies · 32 role mappings · Tier 1 review in progress</div>
+    </div>
+    <div class="cb-stats">
+      <div class="cb-stat"><div class="cb-stat-val">48</div><div class="cb-stat-key">Skills</div></div>
+      <div class="cb-stat"><div class="cb-stat-val" style="color:var(--amber)">14</div><div class="cb-stat-key">Flagged</div></div>
+      <div class="cb-stat"><div class="cb-stat-val" style="color:var(--green)">31</div><div class="cb-stat-key">Approved</div></div>
+      <div class="cb-stat"><div class="cb-stat-val" style="color:var(--text-muted)">3</div><div class="cb-stat-key">Pending</div></div>
+    </div>
+  </div>
+
+  <!-- COMPLETION BANNER (hidden until T3 approved) -->
+  <div class="completion-banner" id="completionBanner">
+    <div class="cb-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="cb-body">
+      <div class="cb-body-title">Framework Bible Approved — All 3 Tiers Complete</div>
+      <div class="cb-body-sub">Approved 28 Oct 2025 · CHRO sign-off received · InsightBoard L1 now unlocked · L2 gate open</div>
+    </div>
+    <button class="cb-next-btn" onclick="window.location.href='../manager/chro-dashboard.html'">Go to InsightBoard →</button>
+  </div>
+
+  <!-- THREE TIERS -->
+  <div class="tiers-wrap">
+
+    <!-- ── TIER 1 ── -->
+    <div class="tier-col t1">
+      <div class="tier-header">
+        <div class="th-top">
+          <div class="th-label">Tier 1</div>
+          <div class="th-title">Admin Review</div>
+          <div class="th-reviewer">Kavitha Ramachandran · L&D Manager</div>
+          <div class="tier-status status-done"><div class="ts-dot"></div>Approved · 22 Oct 2025</div>
+        </div>
+        <div class="th-kpis">
+          <div class="th-kpi"><div class="th-kpi-val">14</div><div class="th-kpi-key">Edits made</div></div>
+          <div class="th-kpi"><div class="th-kpi-val">6</div><div class="th-kpi-key">Flagged →T2</div></div>
+          <div class="th-kpi"><div class="th-kpi-val">42</div><div class="th-kpi-key">Approved</div></div>
+        </div>
+      </div>
+
+      <!-- Approved item -->
+      <div class="skill-item edited">
+        <div class="si-head">
+          <div class="si-domain-dot" style="background:var(--accent)"></div>
+          <div class="si-info">
+            <div class="si-name">Building Information Modelling (BIM)</div>
+            <div class="si-domain">Engineering & Technical</div>
+          </div>
+          <div class="si-actions">
+            <button class="si-btn approve" title="Approved"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>
+          </div>
+        </div>
+        <div class="si-body">
+          <div class="si-prof">
+            <div class="si-prof-label">PM target</div>
+            <div class="prof-pips"><div class="pp on">1</div><div class="pp edited-val">2✓</div><div class="pp">3</div><div class="pp">4</div></div>
+            <div style="font-size:10px;color:var(--blue);margin-left:6px">edited L3→L2</div>
+          </div>
+          <div class="edit-note"><strong>T1 edit:</strong> Revised PM target from L3 to L2 for this cycle — L3 only required for BIM Manager roles. Reduces unrealistic targets for 114 Project Delivery staff.</div>
+        </div>
+        <div class="si-footer">
+          <div class="si-tag sit-edited">Edited</div>
+          <div class="si-tag sit-approved">T1 Approved</div>
+          <div class="si-auditor">22 Oct · 10:14</div>
+        </div>
+      </div>
+
+      <!-- Flagged item -->
+      <div class="skill-item flagged">
+        <div class="si-head">
+          <div class="si-domain-dot" style="background:var(--teal)"></div>
+          <div class="si-info">
+            <div class="si-name">AI & Machine Learning Literacy</div>
+            <div class="si-domain">Digital & Technology</div>
+          </div>
+          <div class="si-actions">
+            <button class="si-btn flag" title="Flagged"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></button>
+          </div>
+        </div>
+        <div class="si-body">
+          <div class="si-prof">
+            <div class="si-prof-label">All roles target</div>
+            <div class="prof-pips"><div class="pp on">1</div><div class="pp target">2★</div><div class="pp">3</div><div class="pp">4</div></div>
+          </div>
+          <div class="si-desc">AI generated L2 target for all 32 roles. T1 queried whether Engineering roles need L2 or if L1 Awareness is sufficient given current tooling. Flagged for Dept Head confirmation.</div>
+        </div>
+        <div class="si-footer">
+          <div class="si-tag sit-flagged">Flagged →T2</div>
+          <div class="si-auditor">22 Oct · 11:32</div>
+        </div>
+      </div>
+
+      <!-- Approved item -->
+      <div class="skill-item">
+        <div class="si-head">
+          <div class="si-domain-dot" style="background:var(--red)"></div>
+          <div class="si-info">
+            <div class="si-name">ISO 45001 — OHS Management</div>
+            <div class="si-domain">EHS & Sustainability</div>
+          </div>
+          <div class="si-actions">
+            <button class="si-btn approve"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>
+          </div>
+        </div>
+        <div class="si-body">
+          <div class="si-prof">
+            <div class="si-prof-label">EHS role target</div>
+            <div class="prof-pips"><div class="pp on">1</div><div class="pp on">2</div><div class="pp on">3</div><div class="pp target">4★</div></div>
+          </div>
+          <div class="si-desc">Expert level confirmed for EHS Auditor and Safety Officer roles. Aligned to ISO 45001 compliance requirement by Q3 2026.</div>
+        </div>
+        <div class="si-footer">
+          <div class="si-tag sit-approved">T1 Approved</div>
+          <div class="si-auditor">22 Oct · 09:48</div>
+        </div>
+      </div>
+
+      <!-- Audit trail -->
+      <div class="final-card">
+        <div class="fc-head"><div class="fc-title">Tier 1 Audit Trail</div><div class="fc-sub">14 actions recorded</div></div>
+        <div class="audit-trail">
+          <div class="at-row"><div class="at-dot" style="background:var(--green)"></div><div class="at-text"><strong>Approved</strong> 42 skills without changes</div><div class="at-time">22 Oct</div></div>
+          <div class="at-row"><div class="at-dot" style="background:var(--blue)"></div><div class="at-text"><strong>Edited</strong> BIM target L3→L2 for PM roles</div><div class="at-time">10:14</div></div>
+          <div class="at-row"><div class="at-dot" style="background:var(--amber)"></div><div class="at-text"><strong>Flagged</strong> AI Literacy target for T2 confirmation</div><div class="at-time">11:32</div></div>
+          <div class="at-row"><div class="at-dot" style="background:var(--amber)"></div><div class="at-text"><strong>Flagged</strong> 5 more items — Digital cluster review</div><div class="at-time">14:05</div></div>
+          <div class="at-row"><div class="at-dot" style="background:var(--green)"></div><div class="at-text"><strong>Submitted</strong> to Tier 2 reviewers</div><div class="at-time">16:22</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TIER 2 ── -->
+    <div class="tier-col t2">
+      <div class="tier-header">
+        <div class="th-top">
+          <div class="th-label">Tier 2</div>
+          <div class="th-title">Department Head Review</div>
+          <div class="th-reviewer">Rahul Kapoor (VP Eng) + Mei Lin Chua (CDO)</div>
+          <div class="tier-status status-done"><div class="ts-dot"></div>Approved · 25 Oct 2025</div>
+        </div>
+        <div class="th-kpis">
+          <div class="th-kpi"><div class="th-kpi-val">6</div><div class="th-kpi-key">Items reviewed</div></div>
+          <div class="th-kpi"><div class="th-kpi-val">3</div><div class="th-kpi-key">Edits made</div></div>
+          <div class="th-kpi"><div class="th-kpi-val">1</div><div class="th-kpi-key">Flagged →T3</div></div>
+        </div>
+      </div>
+
+      <!-- T2 resolved item -->
+      <div class="skill-item edited">
+        <div class="si-head">
+          <div class="si-domain-dot" style="background:var(--teal)"></div>
+          <div class="si-info">
+            <div class="si-name">AI & Machine Learning Literacy</div>
+            <div class="si-domain">Digital & Technology — T1 flagged</div>
+          </div>
+          <div class="si-actions">
+            <button class="si-btn approve"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>
+          </div>
+        </div>
+        <div class="si-body">
+          <div class="si-prof">
+            <div class="si-prof-label">Resolved target</div>
+            <div class="prof-pips"><div class="pp on">1</div><div class="pp edited-val">2✓</div><div class="pp">3</div><div class="pp">4</div></div>
+          </div>
+          <div class="edit-note"><strong>CDO decision:</strong> L2 confirmed for all Digital staff. L1 Awareness only for Structural Engineering roles — CDO confirmed field engineers don't require tool-level literacy this cycle.</div>
+        </div>
+        <div class="si-footer">
+          <div class="si-tag sit-edited">Resolved</div>
+          <div class="si-tag sit-approved">T2 Approved</div>
+          <div class="si-auditor">25 Oct · 09:22</div>
+        </div>
+      </div>
+
+      <!-- T2 new flag -->
+      <div class="skill-item flagged">
+        <div class="si-head">
+          <div class="si-domain-dot" style="background:var(--teal)"></div>
+          <div class="si-info">
+            <div class="si-name">Digital Project Delivery</div>
+            <div class="si-domain">Digital & Technology</div>
+          </div>
+          <div class="si-actions">
+            <button class="si-btn flag"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></button>
+          </div>
+        </div>
+        <div class="si-body">
+          <div class="si-prof">
+            <div class="si-prof-label">PM target</div>
+            <div class="prof-pips"><div class="pp on">1</div><div class="pp on">2</div><div class="pp target">3★</div><div class="pp">4</div></div>
+          </div>
+          <div class="si-desc">VP Engineering queried L3 target for Project Managers — suggesting L2 this cycle given training pipeline is not yet ready to support L3 delivery by year-end. Escalated to CHRO for final call.</div>
+        </div>
+        <div class="si-footer">
+          <div class="si-tag sit-flagged">Escalated →T3</div>
+          <div class="si-auditor">25 Oct · 11:48</div>
+        </div>
+      </div>
+
+      <!-- T2 approved item -->
+      <div class="skill-item">
+        <div class="si-head">
+          <div class="si-domain-dot" style="background:var(--accent)"></div>
+          <div class="si-info">
+            <div class="si-name">IoT & Smart Infrastructure</div>
+            <div class="si-domain">Digital & Technology</div>
+          </div>
+          <div class="si-actions">
+            <button class="si-btn approve"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>
+          </div>
+        </div>
+        <div class="si-body">
+          <div class="si-prof">
+            <div class="si-prof-label">BIM & IT target</div>
+            <div class="prof-pips"><div class="pp on">1</div><div class="pp on">2</div><div class="pp target">3★</div><div class="pp">4</div></div>
+          </div>
+          <div class="si-desc">CDO confirmed L3 target for BIM & Digital teams. Linked to Dubai Roads Authority smart infrastructure deliverables — non-negotiable. Approved without changes.</div>
+        </div>
+        <div class="si-footer">
+          <div class="si-tag sit-approved">T2 Approved</div>
+          <div class="si-auditor">25 Oct · 10:05</div>
+        </div>
+      </div>
+
+      <!-- Audit trail -->
+      <div class="final-card">
+        <div class="fc-head"><div class="fc-title">Tier 2 Audit Trail</div><div class="fc-sub">6 items reviewed · 2 reviewers</div></div>
+        <div class="audit-trail">
+          <div class="at-row"><div class="at-dot" style="background:var(--green)"></div><div class="at-text"><strong>Rahul Kapoor</strong> approved 4 Engineering items</div><div class="at-time">25 Oct</div></div>
+          <div class="at-row"><div class="at-dot" style="background:var(--blue)"></div><div class="at-text"><strong>Mei Lin Chua</strong> resolved AI Literacy flag</div><div class="at-time">09:22</div></div>
+          <div class="at-row"><div class="at-dot" style="background:var(--amber)"></div><div class="at-text"><strong>Rahul Kapoor</strong> escalated Digital Delivery to T3</div><div class="at-time">11:48</div></div>
+          <div class="at-row"><div class="at-dot" style="background:var(--green)"></div><div class="at-text"><strong>Submitted</strong> to Tier 3 CHRO review</div><div class="at-time">14:00</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TIER 3 ── -->
+    <div class="tier-col t3">
+      <div class="tier-header">
+        <div class="th-top">
+          <div class="th-label">Tier 3</div>
+          <div class="th-title">CHRO Final Approval</div>
+          <div class="th-reviewer">Sunita Nair · Chief Human Resources Officer</div>
+          <div class="tier-status status-active" id="t3Status"><div class="ts-dot"></div>Awaiting approval</div>
+        </div>
+        <div class="th-kpis">
+          <div class="th-kpi"><div class="th-kpi-val">1</div><div class="th-kpi-key">Item for review</div></div>
+          <div class="th-kpi"><div class="th-kpi-val">48</div><div class="th-kpi-key">Total skills</div></div>
+          <div class="th-kpi"><div class="th-kpi-val" id="t3ApprovedCount">—</div><div class="th-kpi-key">Final approved</div></div>
+        </div>
+      </div>
+
+      <!-- Final escalated item -->
+      <div class="skill-item pending" id="t3Item">
+        <div class="si-head">
+          <div class="si-domain-dot" style="background:var(--teal)"></div>
+          <div class="si-info">
+            <div class="si-name">Digital Project Delivery</div>
+            <div class="si-domain">Digital & Technology — Escalated from T2</div>
+          </div>
+          <div class="si-actions">
+            <button class="si-btn edit" id="t3EditBtn"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          </div>
+        </div>
+        <div class="si-body">
+          <div class="si-prof">
+            <div class="si-prof-label">Current proposal</div>
+            <div class="prof-pips" id="t3Pips">
+              <div class="pp on">1</div>
+              <div class="pp on">2</div>
+              <div class="pp target">3★</div>
+              <div class="pp">4</div>
+            </div>
+          </div>
+          <div class="si-desc" id="t3Desc">VP Engineering recommends reducing PM target from L3 to L2 this cycle — training pipeline not ready to support L3 by year-end. CHRO to make final call on strategic alignment.</div>
+          <div class="edit-note" id="t3EditNote" style="display:none"><strong>CHRO decision:</strong> Revised target to L2 for Project Managers this cycle — L3 remains the 2027 target. Aligns training pipeline capacity with realistic delivery window. 1 edit recorded.</div>
+        </div>
+        <div class="si-footer">
+          <div class="si-tag sit-pending" id="t3Tag">Awaiting CHRO</div>
+          <div class="si-auditor">Escalated 25 Oct · 14:00</div>
+        </div>
+      </div>
+
+      <!-- Final approval card -->
+      <div class="final-card">
+        <div class="fc-head">
+          <div class="fc-title">CHRO Sign-off</div>
+          <div class="fc-sub">Approves Framework Bible · Unlocks InsightBoard L1 + L2 gate</div>
+        </div>
+        <div class="fc-body">
+          <div class="fc-note" id="choNote">Review the escalated Digital Project Delivery item above. Your approval publishes the <strong>Framework Bible</strong> and unlocks the full InsightBoard for all 812 employees. This action is logged and immutable.</div>
+          <button class="approve-btn" id="approveBtn" onclick="approveTier3()">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Approve Framework Bible
+          </button>
+          <button class="reject-btn" id="rejectBtn">Request further revision</button>
+        </div>
+      </div>
+
+      <!-- Audit trail -->
+      <div class="final-card" id="t3AuditCard">
+        <div class="fc-head"><div class="fc-title">Tier 3 Audit Trail</div><div class="fc-sub" id="t3AuditSub">0 actions so far</div></div>
+        <div class="audit-trail" id="t3AuditTrail">
+          <div class="at-row"><div class="at-dot" style="background:var(--text-muted)"></div><div class="at-text">Awaiting CHRO review</div><div class="at-time">—</div></div>
+        </div>
+      </div>
+    </div>
+
+  <!-- confidence-statement -->
+  <div class="confidence-statement">
+    <svg style="width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <span style="font-size:11px;color:var(--accent);font-weight:500;letter-spacing:0.03em">AI draft &nbsp;·&nbsp; CHRO sign-off required before this becomes live</span>
+    <span style="margin-left:auto;font-size:10px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase">AI governance</span>
+  </div>
+  </div><!-- /tiers-wrap -->
+  </div><!-- /content -->
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'admin',
+    activeNav: 'Approval Workflow',
+    breadcrumbs: ['Framework', 'Approval Workflow'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+function approveTier3() {
+  const btn = document.getElementById('approveBtn');
+  if (btn.classList.contains('done')) return;
+
+  // Update T3 item
+  document.getElementById('t3EditNote').style.display = 'block';
+  document.getElementById('t3Desc').style.display = 'none';
+  document.getElementById('t3Tag').className = 'si-tag sit-approved';
+  document.getElementById('t3Tag').textContent = 'CHRO Approved \u2713';
+  document.getElementById('t3Item').className = 'skill-item edited';
+
+  // Update pips — show L2 as final
+  document.getElementById('t3Pips').innerHTML = `
+    <div class="pp on">1</div>
+    <div class="pp edited-val">2\u2713</div>
+    <div class="pp">3</div>
+    <div class="pp">4</div>
+  `;
+
+  // Update T3 header
+  document.getElementById('t3Status').className = 'tier-status status-done';
+  document.getElementById('t3Status').innerHTML = '<div class="ts-dot"></div>Approved \u00B7 28 Oct 2025';
+  document.getElementById('t3ApprovedCount').textContent = '48';
+
+  // Update approve button
+  btn.className = 'approve-btn done';
+  btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg> Framework Bible Published';
+  document.getElementById('rejectBtn').style.display = 'none';
+
+  // Update note
+  document.getElementById('choNote').innerHTML = 'Framework Bible approved and published. InsightBoard L1 is now <strong style="color:var(--green)">live</strong>. L2 assessment gate is <strong style="color:var(--green)">open</strong>. All 812 employee Skill Passports have been initialised.';
+
+  // Update audit trail
+  document.getElementById('t3AuditSub').textContent = '2 actions recorded';
+  document.getElementById('t3AuditTrail').innerHTML = `
+    <div class="at-row"><div class="at-dot" style="background:var(--blue)"></div><div class="at-text"><strong>Sunita Nair</strong> reviewed Digital Delivery escalation</div><div class="at-time">28 Oct</div></div>
+    <div class="at-row"><div class="at-dot" style="background:var(--blue)"></div><div class="at-text"><strong>Edited</strong> Digital Delivery PM target L3\u2192L2</div><div class="at-time">09:14</div></div>
+    <div class="at-row"><div class="at-dot" style="background:var(--green)"></div><div class="at-text"><strong>Approved</strong> Framework Bible \u2014 all 48 skills finalised</div><div class="at-time">09:28</div></div>
+    <div class="at-row"><div class="at-dot" style="background:var(--green)"></div><div class="at-text"><strong>Published</strong> \u2014 InsightBoard + L2 gate unlocked</div><div class="at-time">09:28</div></div>
+  `;
+
+  // Show completion banner
+  setTimeout(() => {
+    document.getElementById('completionBanner').classList.add('show');
+  }, 500);
+}
+</script>
+
+<script>
+(function(){
+  var toast = document.createElement("div");
+  toast.id = "sip-toast";
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:var(--font-body);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08);";
+  document.body.appendChild(toast);
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){
+      toast.style.opacity="0";
+      toast.style.transform="translateX(-50%) translateY(8px)";
+    }, 2400);
+  }
+  document.addEventListener("click", function(e){
+    var a = e.target.closest("a");
+    if(a && a.getAttribute("href") === "#"){
+      e.preventDefault();
+      var label = (a.textContent || "").trim().replace(/\s+/g," ").substring(0,36);
+      showToast(label + " \u2014 available in full platform");
+    }
+  });
+})();
+</script>
+</body>
+</html>

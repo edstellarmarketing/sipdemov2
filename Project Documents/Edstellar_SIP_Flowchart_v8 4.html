@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edstellar SIP — Skills Intelligence Platform v8</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:#f5f7fa; --white:#ffffff;
+  --blue:#1e6fff; --blue-bg:#eff5ff; --blue-bd:#bdd4ff;
+  --green:#16a34a; --green-bg:#f0fdf4; --green-bd:#86efac;
+  --purple:#7c3aed; --purple-bg:#f5f3ff; --purple-bd:#c4b5fd;
+  --cyan:#0891b2; --cyan-bg:#ecfeff; --cyan-bd:#a5f3fc;
+  --amber:#d97706; --amber-bg:#fffbeb; --amber-bd:#fcd34d;
+  --rose:#be123c; --rose-bg:#fff1f2; --rose-bd:#fda4af;
+  --txt:#1e293b; --txt-muted:#64748b; --border:#e2e8f0; --arrow:#94a3b8;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--txt);padding:32px 24px 60px;min-width:1000px;}
+
+/* ── HEADER ── */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;padding-bottom:20px;border-bottom:2px solid var(--border);flex-wrap:wrap;gap:16px;}
+.header-left h1{font-size:22px;font-weight:700;color:#0f172a;letter-spacing:-0.03em;}
+.header-left p{font-size:13px;color:var(--txt-muted);margin-top:4px;font-family:'JetBrains Mono',monospace;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--txt-muted);font-weight:500;}
+.leg-dot{width:10px;height:10px;border-radius:3px;}
+
+/* ── ALWAYS-ON INFRASTRUCTURE STRIP ── */
+.infra-strip{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:10px 16px;background:#0f172a;border-radius:10px;flex-wrap:wrap;}
+.infra-label{font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#64748b;white-space:nowrap;}
+.infra-chip{background:#1e293b;border:1px solid #334155;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:#94a3b8;display:flex;align-items:center;gap:5px;}
+.infra-chip span{font-size:12px;}
+
+/* ── PHASE ROW ── */
+.phase{display:flex;align-items:stretch;margin-bottom:4px;border-radius:12px;overflow:visible;}
+.phase-label{writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);width:36px;flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-right:12px;}
+.pl-blue{background:var(--blue-bg);color:var(--blue);border:1.5px solid var(--blue-bd);}
+.pl-green{background:var(--green-bg);color:var(--green);border:1.5px solid var(--green-bd);}
+.pl-purple{background:var(--purple-bg);color:var(--purple);border:1.5px solid var(--purple-bd);}
+.pl-cyan{background:var(--cyan-bg);color:var(--cyan);border:1.5px solid var(--cyan-bd);}
+.pl-amber{background:var(--amber-bg);color:var(--amber);border:1.5px solid var(--amber-bd);}
+.pl-rose{background:var(--rose-bg);color:var(--rose);border:1.5px solid var(--rose-bd);}
+.phase-body{flex:1;display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:14px 16px;border-radius:10px;}
+.pb-blue{background:var(--blue-bg);border:1px solid var(--blue-bd);}
+.pb-green{background:var(--green-bg);border:1px solid var(--green-bd);}
+.pb-purple{background:var(--purple-bg);border:1px solid var(--purple-bd);}
+.pb-cyan{background:var(--cyan-bg);border:1px solid var(--cyan-bd);}
+.pb-amber{background:var(--amber-bg);border:1px solid var(--amber-bd);}
+.pb-rose{background:var(--rose-bg);border:1px solid var(--rose-bd);}
+
+/* ── NODES ── */
+.node{border-radius:8px;padding:9px 14px;font-size:12px;font-weight:500;line-height:1.4;text-align:center;white-space:nowrap;position:relative;}
+.n-blue{background:var(--white);border:1.5px solid var(--blue-bd);color:#1e3a6e;box-shadow:0 1px 3px #1e6fff18;}
+.n-blue-strong{background:var(--blue);border:1.5px solid #1456cc;color:#fff;font-weight:600;box-shadow:0 2px 8px #1e6fff35;}
+.n-green{background:var(--white);border:2px solid var(--green-bd);color:#14532d;font-weight:600;}
+.n-green-strong{background:var(--green);border:2px solid #15803d;color:#fff;font-weight:700;box-shadow:0 2px 8px #16a34a35;white-space:normal;text-align:left;max-width:300px;padding:12px 16px;}
+.n-purple{background:var(--white);border:1.5px solid var(--purple-bd);color:#4c1d95;font-weight:500;}
+.n-purple-strong{background:var(--purple);border:2px solid #6d28d9;color:#fff;font-weight:700;box-shadow:0 2px 8px #7c3aed35;}
+.n-cyan{background:var(--white);border:1.5px solid var(--cyan-bd);color:#164e63;font-weight:500;}
+.n-cyan-strong{background:var(--cyan);border:2px solid #0e7490;color:#fff;font-weight:700;box-shadow:0 2px 8px #0891b235;}
+.n-amber{background:var(--white);border:1.5px solid var(--amber-bd);color:#78350f;font-weight:500;}
+.n-amber-strong{background:var(--amber);border:2px solid #b45309;color:#fff;font-weight:700;box-shadow:0 2px 8px #d9770635;}
+.n-rose{background:var(--white);border:1.5px solid var(--rose-bd);color:#881337;font-weight:500;}
+.n-rose-strong{background:var(--rose);border:2px solid #9f1239;color:#fff;font-weight:700;}
+.node small{display:block;font-size:10.5px;font-weight:400;opacity:0.8;margin-top:2px;white-space:normal;max-width:220px;}
+
+/* ── NEW BADGE ── */
+.new-badge{display:inline-block;font-size:9px;background:#dcfce7;color:#166534;border-radius:3px;padding:1px 5px;font-weight:700;margin-left:4px;font-family:'Sora',sans-serif;vertical-align:middle;}
+
+/* ── LEVEL BADGE ── */
+.level-badge{display:inline-flex;align-items:center;gap:8px;background:#0f172a;color:#f8fafc;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:5px 14px 5px 10px;border-radius:6px;margin-bottom:14px;}
+.level-badge .lbadge-num{background:#3d7fff;color:#fff;border-radius:4px;padding:2px 8px;font-size:13px;font-weight:700;}
+
+/* ── CONNECTOR ── */
+.connector{display:flex;align-items:center;justify-content:center;padding:2px 0;margin-left:48px;}
+.arrow-down{display:flex;flex-direction:column;align-items:center;gap:0;}
+.arrow-line{width:2px;height:18px;background:var(--arrow);}
+.arrow-head{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid var(--arrow);}
+
+/* ── FEEDBACK BAND ── */
+.feedback-band{margin:6px 0 6px 48px;background:#fff;border:1.5px dashed #94a3b8;border-radius:8px;padding:10px 16px;font-size:12px;color:var(--txt-muted);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.feedback-band strong{color:var(--txt);font-size:12px;}
+
+/* ── DUAL BRANCH ── */
+.dual-branch{display:flex;gap:16px;margin-left:48px;margin-bottom:4px;align-items:flex-start;}
+.branch-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:0;}
+.branch-label{font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;padding:3px 10px;border-radius:4px;margin-bottom:6px;}
+.bl-purple{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd);}
+.bl-cyan{background:var(--cyan-bg);color:var(--cyan);border:1px solid var(--cyan-bd);}
+.branch-divider{width:1px;background:var(--border);align-self:stretch;margin:0 4px;}
+
+/* ── LOOP CALLOUT ── */
+.loop-callout{display:flex;align-items:flex-start;gap:10px;background:#fff;border:1.5px dashed #f59e0b;border-radius:8px;padding:9px 14px;margin:6px 0 6px 48px;font-size:11.5px;color:#78350f;flex-wrap:wrap;}
+.loop-callout .lc-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.loop-callout strong{color:#92400e;font-size:12px;display:block;margin-bottom:2px;}
+.loop-callout .lc-items{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.lc-item{font-size:10.5px;font-weight:600;padding:2px 10px;border-radius:20px;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;}
+.lc-item.new-item{background:#dcfce7;color:#166534;border-color:#86efac;}
+
+/* ── RECUR TAG ── */
+.recur-tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;padding:3px 10px;border-radius:20px;background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d;white-space:nowrap;margin-left:6px;}
+.recur-tag::before{content:'🔄';font-size:10px;}
+
+/* ── MASTER LAYERS ── */
+.master-layer{border-radius:16px;overflow:visible;margin-bottom:8px;}
+.ml-blue{border:2.5px solid #3d7fff;box-shadow:0 4px 24px #1e6fff12;}
+.ml-green{border:2.5px solid #16a34a;box-shadow:0 4px 24px #16a34a12;}
+.ml-orange{border:2.5px solid #ea580c;box-shadow:0 4px 24px #ea580c12;}
+.ml-rose{border:2.5px solid #be123c;box-shadow:0 4px 24px #be123c12;}
+.master-layer-header{display:flex;align-items:center;gap:20px;padding:16px 24px;border-radius:13px 13px 0 0;flex-wrap:wrap;}
+.mlh-blue{background:linear-gradient(135deg,#1e3a6e 0%,#1e6fff 100%);}
+.mlh-green{background:linear-gradient(135deg,#052e16 0%,#16a34a 100%);}
+.mlh-orange{background:linear-gradient(135deg,#431407 0%,#ea580c 100%);}
+.mlh-rose{background:linear-gradient(135deg,#4c0519 0%,#be123c 100%);}
+.ml-step-num{width:48px;height:48px;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+.ml-header-text{flex:1;}
+.ml-title{font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.02em;}
+.ml-subtitle{font-size:12px;color:rgba(255,255,255,0.75);margin-top:3px;line-height:1.4;}
+.ml-checklist{display:flex;flex-wrap:wrap;gap:6px;}
+.ml-check{font-size:11px;font-weight:600;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.9);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:3px 10px;}
+.master-layer-body{padding:20px 20px 8px;background:#fff;border-radius:0 0 13px 13px;}
+
+/* ── SECTION LABELS ── */
+.ml-section-label{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;margin-bottom:12px;padding:6px 14px;border-radius:6px;}
+.msl-blue{background:#eff5ff;color:#1e40af;border-left:4px solid #3d7fff;}
+.msl-green{background:#f0fdf4;color:#166534;border-left:4px solid #16a34a;}
+.msl-orange{background:#fff7ed;color:#9a3412;border-left:4px solid #ea580c;}
+.msl-rose{background:#fff1f2;color:#881337;border-left:4px solid #be123c;}
+.msl-num{background:#3d7fff;color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:2px 10px;border-radius:4px;}
+
+/* ── OUTPUT CHECKPOINT ── */
+.ml-output-checkpoint{display:flex;align-items:center;gap:14px;margin:16px 20px 0;padding:14px 20px;border-radius:10px;margin-bottom:0;flex-wrap:wrap;position:relative;}
+.mloc-blue{background:#eff5ff;border:1.5px solid #3d7fff;}
+.mloc-green{background:#f0fdf4;border:1.5px solid #16a34a;}
+.mloc-orange{background:#fff7ed;border:1.5px solid #ea580c;}
+.mloc-rose{background:#fff1f2;border:1.5px solid #be123c;}
+.mloc-icon{font-size:22px;flex-shrink:0;}
+.mloc-text{flex:1;display:flex;flex-direction:column;gap:3px;}
+.mloc-text strong{font-size:13px;color:#0f172a;}
+.mloc-text span{font-size:11.5px;color:#64748b;line-height:1.4;}
+.mloc-arrow{font-size:20px;color:#94a3b8;flex-shrink:0;font-weight:300;}
+
+/* ── BETWEEN LAYERS ── */
+.between-layers-arrow{display:flex;flex-direction:column;align-items:center;gap:0;margin:0 auto;padding:8px 0;width:fit-content;}
+.bla-line{width:2px;height:20px;background:#94a3b8;}
+.bla-label{font-size:10.5px;font-family:'JetBrains Mono',monospace;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:20px;padding:3px 14px;white-space:nowrap;margin:2px 0;}
+.bla-head{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #94a3b8;}
+
+/* ── RECURRING BANNER ── */
+.recurring-banner{display:flex;align-items:stretch;gap:0;margin:8px 0 16px 0;border-radius:12px;overflow:hidden;border:2px solid #f59e0b;box-shadow:0 4px 20px #f59e0b25;}
+.rb-stripe{background:linear-gradient(180deg,#f59e0b 0%,#d97706 100%);width:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rb-stripe span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;color:#fff;}
+.rb-body{flex:1;background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%);padding:16px 20px;display:flex;flex-direction:column;gap:10px;}
+.rb-title{font-size:15px;font-weight:800;color:#92400e;display:flex;align-items:center;gap:10px;letter-spacing:-0.02em;}
+.rb-why{font-size:12px;color:#78350f;line-height:1.55;max-width:900px;}
+.rb-triggers{display:flex;flex-wrap:wrap;gap:8px;}
+.rb-trigger{font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;border:1.5px solid;display:flex;align-items:center;gap:5px;}
+.rbt-assess{background:#eff5ff;color:#1e40af;border-color:#3d7fff;}
+.rbt-train{background:#f0fdf4;color:#166534;border-color:#16a34a;}
+.rbt-predict{background:#f5f3ff;color:#5b21b6;border-color:#7c3aed;}
+.rbt-proact{background:#ecfeff;color:#0e7490;border-color:#0891b2;}
+.rbt-org{background:#fff7ed;color:#9a3412;border-color:#ea580c;}
+.rbt-perf{background:#fdf4ff;color:#7e22ce;border-color:#a855f7;}
+
+/* ── L1 GRID ── */
+.l1-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-left:48px;margin-bottom:4px;}
+.l1-track{background:#fff;border-radius:10px;border:1.5px solid #e2e8f0;overflow:hidden;display:flex;flex-direction:column;}
+.l1-track-header{padding:10px 14px 8px;font-size:12px;font-weight:700;letter-spacing:-0.01em;border-bottom:1.5px solid #e2e8f0;display:flex;align-items:center;gap:8px;}
+.l1t-skills{background:#eff5ff;color:#1e40af;border-bottom-color:#bdd4ff;}
+.l1t-comp{background:#f5f3ff;color:#5b21b6;border-bottom-color:#c4b5fd;}
+.l1t-role{background:#f0fdf4;color:#166534;border-bottom-color:#86efac;}
+.l1t-dash{background:#fffbeb;color:#92400e;border-bottom-color:#fcd34d;}
+.l1-track-body{padding:10px 12px;display:flex;flex-direction:column;gap:6px;flex:1;}
+.l1-step{display:flex;flex-direction:column;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:8px 11px;font-size:11.5px;font-weight:500;color:#334155;position:relative;}
+.l1-step .l1-sub{font-size:10.5px;color:#64748b;font-weight:400;margin-top:3px;line-height:1.45;}
+.l1-step-arrow{text-align:center;color:#94a3b8;font-size:12px;line-height:1;margin:1px 0;}
+.l1t-skills .l1-step{border-left:3px solid #3d7fff;}
+.l1t-comp   .l1-step{border-left:3px solid #7c3aed;}
+.l1t-role   .l1-step{border-left:3px solid #16a34a;}
+.l1t-dash   .l1-step{border-left:3px solid #d97706;}
+.l1-output{margin-top:6px;padding:7px 11px;border-radius:7px;font-size:11px;font-weight:600;text-align:center;border:1.5px dashed;}
+.l1o-skills{background:#eff5ff;color:#1e40af;border-color:#3d7fff;}
+.l1o-comp{background:#f5f3ff;color:#5b21b6;border-color:#7c3aed;}
+.l1o-role{background:#f0fdf4;color:#166534;border-color:#16a34a;}
+.l1o-dash{background:#fffbeb;color:#92400e;border-color:#d97706;}
+.l1-dash-item{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:500;color:#334155;padding:6px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;border-left:3px solid #d97706;}
+
+/* ── SETUP WRAPPER ── */
+.setup-wrapper{margin-left:48px;margin-bottom:4px;display:flex;flex-direction:column;gap:12px;}
+.setup-flow-row{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+.setup-node{background:#fff;border:1.5px solid var(--blue-bd);border-radius:9px;padding:10px 16px;font-size:12.5px;font-weight:600;color:#1e3a6e;display:flex;align-items:center;gap:8px;box-shadow:0 1px 4px #1e6fff12;}
+.setup-node.primary{background:var(--blue);color:#fff;border-color:#1456cc;box-shadow:0 2px 8px #1e6fff30;}
+.setup-arrow{color:#94a3b8;font-size:16px;font-weight:300;margin-top:12px;}
+
+/* ── TWO-LAYER CALLOUT ── */
+.two-layer-box{margin-left:48px;margin-bottom:10px;border:2px solid #3d7fff;border-radius:12px;overflow:hidden;}
+.two-layer-header{background:linear-gradient(135deg,#1e3a6e 0%,#1e6fff 100%);padding:10px 20px;font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;}
+.two-layer-body{display:grid;grid-template-columns:1fr 1fr;background:#fff;}
+.two-layer-col{padding:14px 18px;display:flex;flex-direction:column;gap:6px;}
+.two-layer-col:first-child{border-right:1.5px solid #e2e8f0;}
+.tlc-header{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;padding:4px 10px;border-radius:4px;margin-bottom:4px;}
+.tlc-blue{background:#eff5ff;color:#1e40af;border:1px solid #bdd4ff;}
+.tlc-green{background:#f0fdf4;color:#166534;border:1px solid #86efac;}
+.tlc-item{font-size:11px;padding:4px 8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;color:#334155;display:flex;align-items:center;gap:5px;}
+
+/* ── ORG DATA EXPANDABLE ── */
+.org-data-node{position:relative;display:inline-flex;flex-direction:column;align-items:flex-start;}
+.org-data-trigger{background:#fff;border:2px solid var(--blue-bd);border-radius:9px;padding:10px 16px;font-size:12.5px;font-weight:600;color:#1e3a6e;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;transition:all 0.2s;}
+.org-data-trigger:hover{background:var(--blue-bg);border-color:var(--blue);}
+.org-data-trigger.active{background:var(--blue);color:#fff;border-color:#1456cc;}
+.org-badge{font-size:10px;font-family:'JetBrains Mono',monospace;background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;border-radius:20px;padding:2px 8px;font-weight:600;}
+.org-data-trigger.active .org-badge{background:#1456cc;color:#bdd4ff;border-color:#2d5299;}
+.org-expand-icon{margin-left:4px;transition:transform 0.2s;font-style:normal;}
+.org-data-trigger.active .org-expand-icon{transform:rotate(180deg);}
+.org-panel{display:none;position:absolute;top:calc(100% + 8px);left:0;z-index:100;width:900px;background:#fff;border:1.5px solid #bdd4ff;border-radius:14px;box-shadow:0 12px 40px #0003,0 2px 8px #1e6fff18;overflow:hidden;}
+.org-panel.open{display:block;}
+.org-panel-header{background:linear-gradient(135deg,#1e3a6e 0%,#1e6fff 100%);padding:14px 20px;}
+.org-panel-header h3{font-size:13px;font-weight:700;color:#fff;}
+.org-panel-header p{font-size:11px;color:#93c5fd;margin-top:2px;}
+.org-panel-body{padding:16px;display:flex;flex-direction:column;gap:12px;max-height:70vh;overflow-y:auto;}
+.org-panel-body::-webkit-scrollbar{width:6px;}
+.org-panel-body::-webkit-scrollbar-track{background:#f1f5f9;}
+.org-panel-body::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:3px;}
+.org-group{border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;}
+.org-group-header{padding:8px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+.org-group-header h4{font-size:12px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.org-group-count{font-size:10px;font-family:'JetBrains Mono',monospace;padding:2px 8px;border-radius:20px;font-weight:600;}
+.og-1 .org-group-header{background:#eff5ff;} .og-1 h4{color:#1e40af;} .og-1 .org-group-count{background:#dbeafe;color:#1d4ed8;}
+.og-2 .org-group-header{background:#f5f3ff;} .og-2 h4{color:#5b21b6;} .og-2 .org-group-count{background:#ede9fe;color:#5b21b6;}
+.og-3 .org-group-header{background:#f0fdf4;} .og-3 h4{color:#166534;} .og-3 .org-group-count{background:#dcfce7;color:#166534;}
+.og-4 .org-group-header{background:#fffbeb;} .og-4 h4{color:#92400e;} .og-4 .org-group-count{background:#fef3c7;color:#92400e;}
+.og-5 .org-group-header{background:#fff1f2;} .og-5 h4{color:#be123c;} .og-5 .org-group-count{background:#ffe4e6;color:#be123c;}
+.og-6 .org-group-header{background:#ecfdf5;} .og-6 h4{color:#065f46;} .og-6 .org-group-count{background:#d1fae5;color:#065f46;}
+.og-7 .org-group-header{background:#fdf4ff;} .og-7 h4{color:#7e22ce;} .og-7 .org-group-count{background:#f3e8ff;color:#7e22ce;}
+.og-8 .org-group-header{background:#fff7ed;} .og-8 h4{color:#9a3412;} .og-8 .org-group-count{background:#ffedd5;color:#9a3412;}
+.og-9 .org-group-header{background:#ecfeff;} .og-9 h4{color:#0e7490;} .og-9 .org-group-count{background:#cffafe;color:#0e7490;}
+.og-new .org-group-header{background:#f0fdf4;} .og-new h4{color:#166534;} .og-new .org-group-count{background:#dcfce7;color:#166534;}
+.org-group-toggle{font-size:11px;color:#94a3b8;transition:transform 0.2s;}
+.org-group.expanded .org-group-toggle{transform:rotate(180deg);}
+.org-group-body{display:none;padding:10px 14px 12px;background:#fafbfc;border-top:1px solid #e2e8f0;}
+.org-group.expanded .org-group-body{display:block;}
+.org-fields-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;}
+.org-field{background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;display:flex;flex-direction:column;gap:2px;}
+.org-field .of-name{font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;color:#334155;}
+.org-field .of-type{font-size:10px;color:#94a3b8;font-weight:400;}
+.org-field.new-field{border-left:3px solid #22c55e;}
+.org-field.new-field .of-name{color:#166534;}
+
+/* ── L2 STYLES ── */
+.l2-wrapper{margin-left:48px;margin-bottom:4px;display:flex;flex-direction:column;gap:12px;}
+.l2-section-label{font-size:10.5px;font-family:'JetBrains Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:3px 10px;border-radius:4px;display:inline-flex;align-self:flex-start;margin-bottom:6px;}
+.l2sl-blue{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;}
+.l2sl-indigo{background:#e0e7ff;color:#4338ca;border:1px solid #a5b4fc;}
+.l2sl-teal{background:#ccfbf1;color:#0f766e;border:1px solid #5eead4;}
+.l2sl-green{background:#f0fdf4;color:#166534;border:1px solid #86efac;}
+.l2sl-rose{background:#fff1f2;color:#be123c;border:1px solid #fda4af;}
+.l2sl-amber{background:#fffbeb;color:#92400e;border:1px solid #fcd34d;}
+.l2-input-row{display:grid;grid-template-columns:2fr 1fr 1.5fr 1fr 1fr 1fr;gap:10px;}
+.l2-input-col{background:#fff;border-radius:10px;border:1.5px solid #e2e8f0;overflow:hidden;display:flex;flex-direction:column;}
+.l2-col-header{padding:8px 12px;font-size:11.5px;font-weight:700;border-bottom:1.5px solid #e2e8f0;display:flex;align-items:center;gap:6px;}
+.l2ch-assess{background:#eff5ff;color:#1e40af;border-bottom-color:#bdd4ff;}
+.l2ch-feedback{background:#f5f3ff;color:#5b21b6;border-bottom-color:#c4b5fd;}
+.l2ch-survey{background:#f0fdf4;color:#166534;border-bottom-color:#86efac;}
+.l2ch-oneon{background:#ecfeff;color:#0e7490;border-bottom-color:#a5f3fc;}
+.l2ch-focus{background:#fff7ed;color:#c2410c;border-bottom-color:#fed7aa;}
+.l2ch-wellbeing{background:#fff1f2;color:#be123c;border-bottom-color:#fda4af;}
+.l2-col-body{padding:8px 10px;display:flex;flex-direction:column;gap:5px;flex:1;}
+.l2-tag{font-size:11px;font-weight:500;color:#334155;padding:5px 9px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;display:flex;align-items:flex-start;gap:6px;}
+.l2-tag small{font-size:10px;color:#64748b;font-weight:400;display:block;margin-top:2px;}
+.l2ch-assess +.l2-col-body .l2-tag{border-left:3px solid #3d7fff;}
+.l2ch-feedback+.l2-col-body .l2-tag{border-left:3px solid #7c3aed;}
+.l2ch-survey +.l2-col-body .l2-tag{border-left:3px solid #16a34a;}
+.l2ch-oneon  +.l2-col-body .l2-tag{border-left:3px solid #0891b2;}
+.l2ch-focus  +.l2-col-body .l2-tag{border-left:3px solid #ea580c;}
+.l2ch-wellbeing+.l2-col-body .l2-tag{border-left:3px solid #be123c;}
+.l2-engine-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#1e3a6e;border-radius:10px;padding:12px 16px;border:1.5px solid #2d5299;}
+.l2-engine-bar .eng-label{font-size:11px;font-family:'JetBrains Mono',monospace;color:#93c5fd;font-weight:600;}
+.l2-engine-bar .eng-node{background:#3d7fff;color:#fff;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;white-space:nowrap;}
+.l2-engine-bar .eng-arrow{color:#60a5fa;font-size:14px;}
+.l2-matrix{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.l2-matrix-card{background:#fff;border-radius:10px;border:1.5px solid #e2e8f0;padding:14px 16px;display:flex;flex-direction:column;gap:6px;}
+.l2mc-title{font-size:13px;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:8px;}
+.l2mc-sub{font-size:11.5px;color:#64748b;line-height:1.5;}
+.l2mc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.l2mc-tag{font-size:10.5px;padding:3px 9px;border-radius:20px;font-weight:500;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;}
+.l2-gap-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.l2-gap-card{background:#fff;border:1.5px solid #e2e8f0;border-radius:9px;padding:10px 12px;font-size:11.5px;font-weight:600;color:#334155;display:flex;align-items:flex-start;gap:8px;border-top:3px solid #3d7fff;}
+.l2-gap-card small{font-weight:400;color:#64748b;font-size:10.5px;display:block;margin-top:2px;}
+.l2-lni-lna{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.l2-lni-card{border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;}
+.lni-card{background:#f0fdf4;border:2px solid #86efac;}
+.lna-card{background:#f0fdf4;border:2px solid #16a34a;}
+.l2-lni-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.lni-title-color{color:#166534;} .lna-title-color{color:#14532d;}
+.l2-lni-sub{font-size:11.5px;color:#4b7a59;line-height:1.5;}
+.l2-lni-outputs{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.l2-lni-out{font-size:10.5px;padding:3px 10px;border-radius:20px;font-weight:600;background:#dcfce7;color:#166534;border:1px solid #86efac;}
+.l2-profile-output{background:linear-gradient(135deg,#0f172a 0%,#1e3a6e 100%);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border:1.5px solid #2d5299;}
+.l2po-left{display:flex;flex-direction:column;gap:4px;}
+.l2po-title{font-size:14px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px;}
+.l2po-sub{font-size:11.5px;color:#93c5fd;}
+.l2po-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.l2po-tag{font-size:11px;padding:4px 12px;border-radius:20px;font-weight:600;background:#1e3a6e;color:#bdd4ff;border:1px solid #3d7fff;}
+
+/* ── LNA WEIGHTS BOX ── */
+.lna-weights{background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+.lna-weights-title{font-size:11.5px;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:6px;}
+.lna-weight-row{display:flex;flex-wrap:wrap;gap:6px;}
+.lna-w{font-size:10.5px;padding:4px 10px;border-radius:20px;font-weight:600;border:1px solid;}
+.lnaw-1{background:#eff5ff;color:#1e40af;border-color:#bdd4ff;}
+.lnaw-2{background:#f5f3ff;color:#5b21b6;border-color:#c4b5fd;}
+.lnaw-3{background:#fff7ed;color:#9a3412;border-color:#fed7aa;}
+.lnaw-4{background:#fdf4ff;color:#7e22ce;border-color:#e9d5ff;}
+.lnaw-5{background:#ecfeff;color:#0e7490;border-color:#a5f3fc;}
+.int-types{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.int-type{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600;background:#f8fafc;color:#475569;border:1px solid #e2e8f0;}
+
+/* ── L3 STYLES ── */
+.l3-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:4px;}
+.l3-group{background:#fff;border-radius:10px;border:1.5px solid #e2e8f0;overflow:hidden;display:flex;flex-direction:column;}
+.l3-group-header{padding:9px 13px 8px;font-size:12px;font-weight:700;border-bottom:1.5px solid #e2e8f0;display:flex;align-items:center;gap:7px;letter-spacing:-0.01em;}
+.l3gh-a{background:#fff7ed;color:#9a3412;border-bottom-color:#fed7aa;}
+.l3gh-b{background:#eff5ff;color:#1e40af;border-bottom-color:#bdd4ff;}
+.l3gh-c{background:#f0fdf4;color:#166534;border-bottom-color:#86efac;}
+.l3gh-d{background:#fdf4ff;color:#7e22ce;border-bottom-color:#e9d5ff;}
+.l3-group-body{padding:9px 11px;display:flex;flex-direction:column;gap:6px;flex:1;}
+.l3-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:7px 10px;font-size:11.5px;font-weight:500;color:#334155;display:flex;flex-direction:column;gap:2px;}
+.l3-item small{font-size:10.5px;color:#94a3b8;font-weight:400;line-height:1.4;}
+.l3gh-a+.l3-group-body .l3-item{border-left:3px solid #ea580c;}
+.l3gh-b+.l3-group-body .l3-item{border-left:3px solid #3d7fff;}
+.l3gh-c+.l3-group-body .l3-item{border-left:3px solid #16a34a;}
+.l3gh-d+.l3-group-body .l3-item{border-left:3px solid #a855f7;}
+.l3-output-row{display:flex;gap:10px;flex-wrap:wrap;padding:12px 0 4px;border-top:1.5px dashed #fed7aa;margin-top:6px;}
+.l3-out-chip{background:#fff7ed;border:1.5px solid #ea580c;border-radius:8px;padding:8px 14px;font-size:11.5px;font-weight:700;color:#9a3412;display:flex;align-items:center;gap:7px;}
+
+/* ── MARKETPLACE SECTION ── */
+.marketplace-wrapper{margin-left:48px;margin-bottom:4px;}
+.market-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:10px;}
+.market-card{background:#fff;border-radius:12px;border:1.5px solid #e2e8f0;overflow:hidden;display:flex;flex-direction:column;}
+.mc-header{padding:10px 14px;font-size:12.5px;font-weight:700;border-bottom:1.5px solid #e2e8f0;display:flex;align-items:center;gap:8px;}
+.mc-trainer{background:#f5f3ff;color:#5b21b6;border-bottom-color:#c4b5fd;}
+.mc-vendor{background:#ecfeff;color:#0e7490;border-bottom-color:#a5f3fc;}
+.mc-referral{background:#f0fdf4;color:#166534;border-bottom-color:#86efac;}
+.mc-body{padding:10px 14px;display:flex;flex-direction:column;gap:5px;flex:1;}
+.mc-item{font-size:11px;padding:4px 8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;color:#334155;}
+.revenue-chips{display:flex;flex-wrap:wrap;gap:8px;padding:10px 0 0;}
+.rev-chip{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid;}
+.rev-saas{background:#eff5ff;color:#1e40af;border-color:#3d7fff;}
+.rev-credit{background:#f5f3ff;color:#5b21b6;border-color:#7c3aed;}
+.rev-comm{background:#f0fdf4;color:#166534;border-color:#16a34a;}
+.rev-vendor{background:#ecfeff;color:#0e7490;border-color:#0891b2;}
+.rev-verify{background:#fffbeb;color:#92400e;border-color:#f59e0b;}
+.rev-bench{background:#fdf4ff;color:#7e22ce;border-color:#a855f7;}
+
+/* ── NOT-IN-FLOW FLAGS ── */
+.flag-section{margin-top:28px;border:2px dashed #f59e0b;border-radius:12px;overflow:hidden;}
+.flag-header{background:linear-gradient(135deg,#78350f 0%,#d97706 100%);padding:12px 20px;display:flex;align-items:center;gap:10px;}
+.flag-header h3{font-size:13px;font-weight:700;color:#fff;}
+.flag-header p{font-size:11px;color:#fcd34d;margin-top:2px;}
+.flag-body{background:#fffbeb;padding:16px 20px;display:flex;flex-direction:column;gap:8px;}
+.flag-item{display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid #fcd34d;border-radius:8px;padding:10px 14px;}
+.flag-name{font-size:12px;font-weight:700;color:#92400e;min-width:220px;display:flex;align-items:center;gap:6px;}
+.flag-reason{font-size:11.5px;color:#78350f;line-height:1.5;}
+.flag-cat{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Edstellar Skills Intelligence Platform (SIP)</h1>
+    <p>End-to-End Process Flow · v8 · Updated per Product Document v22 · Scope + Lifecycle + SaaS Platform Admin · Context Setting → Analysis → Action → Measure → Marketplace</p>
+  </div>
+  <div class="legend">
+    <div class="leg"><div class="leg-dot" style="background:#1e40af;"></div> L1 Context Setting</div>
+    <div class="leg"><div class="leg-dot" style="background:#16a34a;"></div> L2 Analysis</div>
+    <div class="leg"><div class="leg-dot ld-purple" style="background:#7c3aed;"></div> Predictive</div>
+    <div class="leg"><div class="leg-dot ld-cyan" style="background:#0891b2;"></div> Proactive</div>
+    <div class="leg"><div class="leg-dot ld-amber" style="background:#d97706;"></div> Strategic Output</div>
+    <div class="leg"><div class="leg-dot" style="background:#22c55e;"></div> 🆕 New in v18</div>
+  </div>
+</div>
+
+<!-- ALWAYS-ON INFRASTRUCTURE -->
+<div class="infra-strip">
+  <div class="infra-label">Always-On Infrastructure</div>
+  <div class="infra-chip"><span>🔔</span> NotifyEngine — 30+ triggers across all modules</div>
+  <div class="infra-chip"><span>🤖</span> AI Conversational Interface — on every dashboard widget <span class="new-badge" style="background:#064e3b;color:#6ee7b7;">NEW</span></div>
+  <div class="infra-chip"><span>📱</span> Mobile App — Employee Portal <span class="new-badge" style="background:#064e3b;color:#6ee7b7;">NEW</span></div>
+  <div class="infra-chip"><span>🔍</span> Audit Intelligence Layer — immutable event trail <span class="new-badge" style="background:#064e3b;color:#6ee7b7;">NEW</span></div>
+  <div class="infra-chip"><span>🎖️</span> Certificate Engine — auto-issuance + QR verify <span class="new-badge" style="background:#064e3b;color:#6ee7b7;">NEW</span></div>
+  <div class="infra-chip"><span>🎮</span> Gamification Layer — badges, streaks, recognition <span class="new-badge" style="background:#064e3b;color:#6ee7b7;">NEW</span></div>
+  <div class="infra-chip"><span>📋</span> ReportGen — 16 reports · persona-adaptive rendering · AI analysis · PDF + PPT export</div>
+  <div class="infra-chip"><span>🔍</span> Audit Intelligence — Evidence Package Builder (8 types) · Readiness Dashboard · Pre-Audit Mode</div>
+  <div class="infra-chip"><span>🔄</span> Lifecycle Event Engine — Notice · Exit · Leave · Transfer · Secondment · Contract End <span class="new-badge" style="background:#064e3b;color:#6ee7b7;">NEW</span></div>
+  <div class="infra-chip"><span>🏗</span> SaaS Platform Admin — Tenant provisioning · Subscription & billing · Platform health · Onboarding pipeline · Support tools <span class="new-badge" style="background:#1e1b4b;color:#a5b4fc;">NEW</span></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MASTER LAYER 1 — CONTEXT SETTING
+═══════════════════════════════════════════════════════════ -->
+<div class="master-layer ml-blue">
+  <div class="master-layer-header mlh-blue">
+    <div class="ml-step-num">L1</div>
+    <div class="ml-header-text">
+      <div class="ml-title">Context Setting</div>
+      <div class="ml-subtitle">Two-layer data architecture · OrgSetup strategic context + DataPort people & operations data · AI pipeline feeds from both layers simultaneously</div>
+    </div>
+    <div class="ml-checklist">
+      <span class="ml-check">✓ Org Context Captured</span>
+      <span class="ml-check">✓ Skills Framework Built</span>
+      <span class="ml-check">✓ Competency Framework Built</span>
+      <span class="ml-check">✓ Job Roles Defined</span>
+      <span class="ml-check">✓ Baseline Dashboard Live</span>
+      <span class="ml-check" style="background:#dcfce7;color:#166534;border-color:#86efac;">🆕 Skill Criticality Set</span>
+      <span class="ml-check" style="background:#dcfce7;color:#166534;border-color:#86efac;">🆕 Proficiency Levels Defined</span>
+      <span class="ml-check" style="background:#dcfce7;color:#166534;border-color:#86efac;">🆕 Scope Status Configured</span>
+    </div>
+  </div>
+  <div class="master-layer-body">
+
+    <div class="ml-section-label msl-blue"><span class="msl-num">Step 1</span> Two-Layer Data Architecture — OrgSetup Context + DataPort People Data</div>
+
+    <!-- TWO-LAYER ARCHITECTURE BOX -->
+    <div class="two-layer-box">
+      <div class="two-layer-header">🏗️ Input Architecture — Both Layers Are Required · OrgSetup = Strategic Context · DataPort = People & Operations Data</div>
+      <div class="two-layer-body">
+        <!-- LAYER 1: OrgSetup -->
+        <div class="two-layer-col">
+          <div class="tlc-header tlc-blue">Layer 1 — OrgSetup Context (UI-configured, maintained continuously)</div>
+          <div class="tlc-item">🏢 Org hierarchy · BUs · Departments · Teams · Cohorts</div>
+          <div class="tlc-item">🎯 Strategy & goals · OKRs · 3-year targets <span class="new-badge">NEW</span></div>
+          <div class="tlc-item">📦 Products & services · Roadmap upload <span class="new-badge">NEW</span></div>
+          <div class="tlc-item">🤝 Client registry · Industry tagging · Geographic presence <span class="new-badge">NEW</span></div>
+          <div class="tlc-item">⚖️ Governing standards · ISO · GDPR · Compliance frameworks <span class="new-badge">NEW</span></div>
+          <div class="tlc-item">🛠️ Tools & technologies · Lifecycle flags · Tech stack <span class="new-badge">NEW</span></div>
+          <div class="tlc-item">⚡ Skill criticality (C1 Critical → C4 Low) <span class="new-badge">NEW</span></div>
+          <div class="tlc-item">📏 Proficiency level definitions (L1–L4 behavioural descriptors) <span class="new-badge">NEW</span></div>
+          <div class="tlc-item">📖 Skills Dictionary · Competency Framework <span class="new-badge">NEW</span></div>
+          <div class="tlc-item">💼 Role profiles · KRAs · Career pathways · Role criticality <span class="new-badge">NEW</span></div>
+          <div class="tlc-item">🌡️ Transformation Dial settings (−5 to +5 per skill) <span class="new-badge">NEW</span></div>
+        </div>
+        <!-- LAYER 2: DataPort -->
+        <div class="two-layer-col">
+          <div class="tlc-header tlc-green">Layer 2 — DataPort People & Operations Data (Excel import · HRIS sync · Manual entry)</div>
+          <div class="tlc-item">👤 Employee master records · Employment type · Work arrangement · Classification <span class="new-badge">NEW</span><span style="font-size:10px;color:#64748b;display:block;margin-top:2px;">3 input methods: Excel import · HRIS sync · Manual entry form (add/edit individual records without file upload)</span></div>
+          <div class="tlc-item">📄 Resume & CV data → AI parsing engine <span class="new-badge">NEW</span>
+            <span style="font-size:10px;color:#64748b;display:block;margin-top:2px;">Extracts: work history · project experience · industry exposure · qualifications · competency signals</span>
+          </div>
+          <div class="tlc-item">👥 Teams · Employee cohorts</div>
+          <div class="tlc-item">🏅 Certification history · Expiry dates</div>
+          <div class="tlc-item">🎓 Training history · Completion records · Scores</div>
+          <div class="tlc-item">🗂️ Projects · Client industry · Skills required · Status</div>
+          <div class="tlc-item">📊 Industry benchmarks · External assessment results</div>
+          <div class="tlc-item">🔗 HRIS sync (Workday · BambooHR · SAP SuccessFactors)</div>
+          <div class="tlc-item" style="background:#f0fdf4;border-color:#86efac;margin-top:2px;">🔒 Scope Status per employee <span style="font-size:9px;background:#dcfce7;color:#166534;border-radius:3px;padding:1px 5px;font-weight:700;margin-left:4px;">NEW</span><span style="font-size:10px;color:#64748b;display:block;margin-top:2px;">Active Participant (full platform) · Excluded (org structure only, no analytics) · View Only (self-service only) · Rules by employment type or department</span></div>
+          <div class="tlc-item" style="background:#f0fdf4;border-color:#86efac;margin-top:4px;">✏️ Manual Entry &amp; Inline Edit <span style="font-size:9px;background:#dcfce7;color:#166534;border-radius:3px;padding:1px 5px;font-weight:700;margin-left:4px;">ADDED</span><span style="font-size:10px;color:#64748b;display:block;margin-top:2px;">Add single employee · Edit individual record · Add certification or training · Manage team membership — no file upload required · Same validation rules as Excel import</span></div>
+          <div class="tlc-item" style="margin-top:6px;background:#fff7ed;border-color:#fcd34d;">📈 Data Context Meter — Core (0–35%) · Enrichment (36–70%) · Advanced (71–100%) · Updates in real time regardless of input method</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div></div>
+
+    <!-- STEP 2: FOUNDATIONAL ARCHITECTURE -->
+    <div class="ml-section-label msl-blue"><span class="msl-num">Step 2</span> Foundational Data Architecture — 7-Prompt AI Pipeline → Skills · Competency · Job Role · Baseline Dashboard</div>
+
+    <div class="phase" style="margin-left:0;">
+      <div class="phase-label pl-blue">AI Pipeline</div>
+      <div class="phase-body pb-blue" style="flex-direction:column; align-items:stretch; gap:8px;">
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:600;color:#1e40af;">7-Prompt Claude AI Pipeline — reads OrgSetup context + DataPort people data simultaneously</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <div class="node n-blue" style="white-space:normal;text-align:left;font-size:11px;">1️⃣ Context Extraction<small>OrgSetup + DataPort → structured org intelligence profile</small></div>
+          <div class="node n-blue" style="white-space:normal;text-align:left;font-size:11px;">2️⃣ Deep Context Synthesis<small>Strategy · clients · standards · tools → skill implications</small></div>
+          <div class="node n-blue" style="white-space:normal;text-align:left;font-size:11px;">3️⃣ Role Architecture Analysis<small>KRAs · pathways · criticality · succession risk</small></div>
+          <div class="node n-blue-strong" style="white-space:normal;text-align:left;font-size:11px;">4️⃣ Skill Generation<small>Skills (org-appropriate quantity) · Domain → Knowledge Area → Skill Category → Skill taxonomy · definitions · proficiency indicators</small></div>
+          <div class="node n-blue-strong" style="white-space:normal;text-align:left;font-size:11px;">5️⃣ Competency Generation<small>Competencies (org-appropriate quantity) · Core / Behavioural / Leadership / Technical · anchored to org values</small></div>
+          <div class="node n-blue" style="white-space:normal;text-align:left;font-size:11px;">6️⃣ Role-Skill Mapping<small>Role × Skill matrix · required proficiency per role</small></div>
+          <div class="node n-blue" style="white-space:normal;text-align:left;font-size:11px;">7️⃣ Employee Baselines<small>Estimated proficiency per employee including resume signals</small></div>
+        </div>
+        <div style="font-size:10.5px;color:#64748b;font-style:italic;">All outputs are human-reviewable and editable · 3-tier ApprovalHub governs publication · is_modified flag protects human edits</div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div></div>
+
+<div class="l1-grid">
+
+  <!-- TRACK 1: SKILLS -->
+  <div class="l1-track">
+    <div class="l1-track-header l1t-skills">🧩 Skills</div>
+    <div class="l1-track-body">
+      <div class="l1-step"><strong>Full Taxonomy Hierarchy</strong><span class="l1-sub" style="font-family:'JetBrains Mono',monospace;font-size:10px;">Domain → Knowledge Area → Skill Category → Skill</span><span class="l1-sub">e.g. Technology → Cloud → Container Orchestration → Kubernetes · Quantity scales with org complexity</span></div>
+      <div class="l1-step-arrow">↓</div>
+      <div class="l1-step"><strong>Skill Categories (grouped)</strong><span class="l1-sub">Technical (e.g. Python, AWS) · Behavioural (e.g. Communication) · Functional · Leadership · Digital · Domain Knowledge · Tool-Specific · Each skill assigned to its category by AI</span></div>
+      <div class="l1-step-arrow">↓</div>
+      <div class="l1-step"><strong>Skill Criticality + Proficiency Definitions</strong> <span class="new-badge">NEW</span><span class="l1-sub">C1 Critical → C4 Low · L1–L4 behavioural descriptors per skill · AI-drafted, SME-approved</span></div>
+      <div class="l1-step-arrow">↓</div>
+      <div class="l1-step"><strong>Job Role Mapping</strong><span class="l1-sub">Each skill tagged to relevant roles · required proficiency level · mandatory vs developmental</span></div>
+      <div class="l1-output l1o-skills">📖 Skills Dictionary — Domain · Knowledge Area · Skill Category · Skill · Criticality · L1–L4 definitions · benchmarks</div>
+    </div>
+  </div>
+
+  <!-- TRACK 2: COMPETENCY -->
+  <div class="l1-track">
+    <div class="l1-track-header l1t-comp">🎯 Competency</div>
+    <div class="l1-track-body">
+      <div class="l1-step"><strong>Competency Types</strong> <span class="new-badge">NEW</span><span class="l1-sub">Core · Behavioural · Leadership · Technical · Values-linked</span></div>
+      <div class="l1-step-arrow">↓</div>
+      <div class="l1-step"><strong>Behavioural Indicators per Level</strong><span class="l1-sub">L1–L4 observable specific behaviours · not traits or personality descriptions</span></div>
+      <div class="l1-step-arrow">↓</div>
+      <div class="l1-step"><strong>Assessment Method Guidance</strong> <span class="new-badge">NEW</span><span class="l1-sub">How each competency is best assessed: manager rating · 360 · STAR · observation log</span></div>
+      <div class="l1-step-arrow">↓</div>
+      <div class="l1-step"><strong>Org Values Linkage</strong> <span class="new-badge">NEW</span><span class="l1-sub">Competencies linked to org values → feeds Transformation Meter & culture alignment reports</span></div>
+      <div class="l1-output l1o-comp">📄 Competency Framework — Org / BU / Dept / Team levels</div>
+    </div>
+  </div>
+
+  <!-- TRACK 3: JOB ROLE -->
+  <div class="l1-track">
+    <div class="l1-track-header l1t-role">💼 Job Role</div>
+    <div class="l1-track-body">
+      <div class="l1-step"><strong>Role Identity & KRAs</strong><span class="l1-sub">Role purpose · scope · reporting · Key Result Areas linked to dept goals</span></div>
+      <div class="l1-step-arrow">↓</div>
+      <div class="l1-step"><strong>Skills + Competencies + Tasks</strong> <span class="new-badge">NEW</span><span class="l1-sub">Mandatory vs developmental skills · Task criticality & frequency expectations</span></div>
+      <div class="l1-step-arrow">↓</div>
+      <div class="l1-step"><strong>Career Pathway & Succession</strong> <span class="new-badge">NEW</span><span class="l1-sub">Skills delta per career step · Succession criticality · Bench strength targets</span></div>
+      <div class="l1-step-arrow">↓</div>
+      <div class="l1-step"><strong>Min Qualifications & Role Criticality</strong> <span class="new-badge">NEW</span><span class="l1-sub">Required at hire vs within timeframe · Single-point-of-failure flag</span></div>
+      <div class="l1-output l1o-role">📋 Deep Job Role Card — Skills + Competencies + Tasks + KRAs + Career path</div>
+    </div>
+  </div>
+
+  <!-- TRACK 4: DASHBOARD -->
+  <div class="l1-track">
+    <div class="l1-track-header l1t-dash">📊 Baseline Dashboard</div>
+    <div class="l1-track-body">
+      <div class="l1-step"><strong>InsightBoard — 5 Persona Dashboards</strong> <span class="new-badge">NEW</span><span class="l1-sub">CHRO · CLO · HR Manager · L&D Manager · HRBP — each with AI analysis layer</span></div>
+      <div class="l1-step-arrow">↓</div>
+      <div class="l1-dash-item">👤 Employee Data · Count · Roles · Seniority</div>
+      <div class="l1-dash-item">🧩 Skills Availability · Coverage %</div>
+      <div class="l1-dash-item">🎯 Competency Coverage · Mapped vs unmapped</div>
+      <div class="l1-dash-item">💼 Job Role Completeness</div>
+      <div class="l1-dash-item">🤖 AI Conversational Layer on every widget <span class="new-badge">NEW</span></div>
+      <div class="l1-output l1o-dash">🖥️ L1 Readiness Score — % platform data completeness</div>
+    </div>
+  </div>
+
+</div><!-- /l1-grid -->
+
+  </div><!-- /master-layer-body -->
+
+  <div class="ml-output-checkpoint mloc-blue">
+    <div class="mloc-icon">✅</div>
+    <div class="mloc-text">
+      <strong>Context Setting Complete — Organisation Fully Onboarded · Two Input Layers Live · 7-Prompt AI Pipeline Complete</strong>
+      <span>OrgSetup context configured · DataPort people data imported · FrameworkBible published · Deep Job Role Cards built · AI Baselines generated · Platform ready for Analysis (L2)</span>
+    </div>
+    <div class="mloc-arrow">↓</div>
+  </div>
+
+</div><!-- /master-layer L1 -->
+
+<div class="between-layers-arrow">
+  <div class="bla-line"></div><div class="bla-label">Proceed to Analysis</div><div class="bla-line"></div><div class="bla-head"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MASTER LAYER 2 — ANALYSIS LAYER
+═══════════════════════════════════════════════════════════ -->
+<div class="master-layer ml-green">
+  <div class="master-layer-header mlh-green">
+    <div class="ml-step-num" style="background:#16a34a;">L2</div>
+    <div class="ml-header-text">
+      <div class="ml-title">Analysis Layer</div>
+      <div class="ml-subtitle">Assessment Distribution Engine · Multi-source assessments · AI Suggestion Engine · Skills Matrix · Gap Analysis · Weighted LNA/TNA · LNI/TNI · ReportGen · Talent Mobility · Wellbeing · Scope-filtered population</div>
+    </div>
+    <div class="ml-checklist">
+      <span class="ml-check" style="background:#dcfce7;color:#166534;border-color:#86efac;">✓ Assessments Completed</span>
+      <span class="ml-check" style="background:#dcfce7;color:#166534;border-color:#86efac;">✓ Skills Matrix Built</span>
+      <span class="ml-check" style="background:#dcfce7;color:#166534;border-color:#86efac;">✓ Gaps Identified</span>
+      <span class="ml-check" style="background:#dcfce7;color:#166534;border-color:#86efac;">✓ LNI Generated</span>
+      <span class="ml-check" style="background:#dcfce7;color:#166534;border-color:#86efac;">✓ TNA Generated</span>
+      <span class="ml-check" style="background:#dcfce7;color:#166534;border-color:#86efac;">🆕 Talent Mobility Profiled</span>
+      <span class="ml-check" style="background:#dcfce7;color:#166534;border-color:#86efac;">🆕 Wellbeing Signals Active</span>
+      <span class="ml-check" style="background:#dcfce7;color:#166534;border-color:#86efac;">✓ Reports Generated</span>
+    </div>
+  </div>
+  <div class="master-layer-body">
+    <div class="ml-section-label msl-green">
+      <span class="msl-num" style="background:#16a34a;">Step 3</span> Assessment Distribution · Assessments · Feedback · Surveys · Skills Matrix · Gap Analysis · LNA/TNA · LNI/TNI · ReportGen · Wellbeing
+      <span class="recur-tag" style="background:#dcfce7;color:#166534;border-color:#16a34a;">Recurring · Every assessment cycle · Also triggered by Predictive &amp; Proactive layers</span>
+    </div>
+
+<div class="level-badge" style="background:#0f2a1a;border:1px solid #166534;"><span class="lbadge-num" style="background:#16a34a;">L2</span> Assessment Distribution · Analysis · Skills &amp; Competency Matrix · Weighted LNA/TNA · LNI/TNI · Employee Profile · ReportGen · Wellbeing</div>
+
+<div class="l2-wrapper">
+
+  <!-- ASSESSMENT DISTRIBUTION ENGINE -->
+  <div style="background:#fff;border:1.5px solid #3d7fff;border-radius:10px;padding:12px 16px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div style="font-size:12px;font-weight:700;color:#1e40af;display:flex;align-items:center;gap:6px;">📡 Assessment &amp; Survey Distribution Engine <span style="font-size:9px;background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;border-radius:3px;padding:1px 6px;font-weight:700;">CROSS-CUTTING</span></div>
+      <div style="font-size:11px;color:#64748b;">Operational layer that takes every assessment from created → completed across a defined population</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
+      <span style="font-size:10.5px;padding:3px 9px;border-radius:20px;background:#eff5ff;color:#1e40af;border:1px solid #bdd4ff;font-weight:500;">👥 Population Targeting — hierarchy · role · classification filters</span>
+      <span style="font-size:10.5px;padding:3px 9px;border-radius:20px;background:#eff5ff;color:#1e40af;border:1px solid #bdd4ff;font-weight:500;">📤 Dispatch &amp; Delivery Tracking — 8 respondent statuses</span>
+      <span style="font-size:10.5px;padding:3px 9px;border-radius:20px;background:#eff5ff;color:#1e40af;border:1px solid #bdd4ff;font-weight:500;">🔔 Reminder &amp; Escalation Engine — 6-stage schedule to auto-close</span>
+      <span style="font-size:10.5px;padding:3px 9px;border-radius:20px;background:#eff5ff;color:#1e40af;border:1px solid #bdd4ff;font-weight:500;">💾 Partial Save — auto-save every 60s · resume where left off</span>
+      <span style="font-size:10.5px;padding:3px 9px;border-radius:20px;background:#eff5ff;color:#1e40af;border:1px solid #bdd4ff;font-weight:500;">🔁 360° Rater Workflow — rater assignment · external rater access · replacement prompting</span>
+      <span style="font-size:10.5px;padding:3px 9px;border-radius:20px;background:#eff5ff;color:#1e40af;border:1px solid #bdd4ff;font-weight:500;">🤖 AI Assessment Suggestion Engine — proactively suggests what to run, when, for whom</span>
+    </div>
+  </div>
+
+  <!-- SECTION A: DATA INPUTS -->
+  <div>
+    <div class="l2-section-label l2sl-blue">📥 Section A — Data Inputs (All Assessment Sources)</div>
+    <div class="l2-input-row">
+
+      <div class="l2-input-col">
+        <div class="l2-col-header l2ch-assess">📝 Assessments</div>
+        <div class="l2-col-body">
+          <div class="l2-tag">🧠 Psychometric Assessment<small>Cognitive ability · Reasoning · Aptitude</small></div>
+          <div class="l2-tag">🤝 Behavioural Assessment<small>Observable workplace behaviours</small></div>
+          <div class="l2-tag">🎯 Leadership Assessment<small>Leadership style · Maturity · Potential</small></div>
+          <div class="l2-tag">🪞 Personality Assessment<small>Big 5 · MBTI · DISC profiles</small></div>
+          <div class="l2-tag">🧩 Skills Assessment<small>Technical · Functional · Role-specific</small></div>
+          <div class="l2-tag">📝 Knowledge Tests<small>Pre-training &amp; Post-training</small></div>
+          <div class="l2-tag">✍️ Self Assessment<small>Employee self-rated proficiency</small></div>
+          <div class="l2-tag">👔 Manager Assessment<small>Manager-rated skills &amp; competencies</small></div>
+        </div>
+      </div>
+
+      <div class="l2-input-col">
+        <div class="l2-col-header l2ch-feedback">🔁 360° Feedback</div>
+        <div class="l2-col-body">
+          <div class="l2-tag">👆 Upward Feedback<small>From direct reports</small></div>
+          <div class="l2-tag">↔️ Peer Feedback<small>Cross-functional peers</small></div>
+          <div class="l2-tag">👇 Downward Feedback<small>From line manager</small></div>
+          <div class="l2-tag">🔄 Perception Gap<small>Self vs others analysis</small></div>
+        </div>
+      </div>
+
+      <div class="l2-input-col">
+        <div class="l2-col-header l2ch-survey">📊 Surveys</div>
+        <div class="l2-col-body">
+          <div class="l2-tag">💬 Engagement Survey<small>Motivation · Belonging</small></div>
+          <div class="l2-tag">🔄 Change Readiness<small>Org adaptability signals</small></div>
+          <div class="l2-tag">🌡️ Culture Pulse<small>Values alignment · Psych safety</small></div>
+          <div class="l2-tag">🎯 Strategy Alignment<small>Business goals awareness</small></div>
+        </div>
+      </div>
+
+      <div class="l2-input-col">
+        <div class="l2-col-header l2ch-oneon">🤝 1:1 & Focus Groups</div>
+        <div class="l2-col-body">
+          <div class="l2-tag">📋 Meeting Notes<small>Manager–employee discussions</small></div>
+          <div class="l2-tag">🎯 Goal Conversations<small>IDP &amp; career discussions</small></div>
+          <div class="l2-tag">👥 Team Discussion Notes<small>Cohort-level insights</small></div>
+          <div class="l2-tag">📌 AI Theme Extraction<small>AI-tagged patterns from sessions</small></div>
+        </div>
+      </div>
+
+      <div class="l2-input-col">
+        <div class="l2-col-header l2ch-wellbeing">❤️ Wellbeing Signals <span class="new-badge">NEW</span></div>
+        <div class="l2-col-body">
+          <div class="l2-tag">💓 Wellbeing Pulse Survey<small>3–5 Qs · weekly or fortnightly · anonymous</small></div>
+          <div class="l2-tag">📅 Meeting Load Signal<small>Calendar integration · hours/week proxy</small></div>
+          <div class="l2-tag">⚡ Project Overallocation<small>PM tool signal · capacity vs commitment</small></div>
+          <div class="l2-tag">🔥 Burnout Risk Score<small>AI composite · Low/Moderate/Elevated/High</small></div>
+          <div class="l2-tag">📉 Engagement Drop Signal<small>Assessment inactivity · learning path stall</small></div>
+        </div>
+      </div>
+
+      <div class="l2-input-col">
+        <div class="l2-col-header" style="background:#ecfdf5;color:#065f46;border-bottom-color:#6ee7b7;">🔗 External Signals <span class="new-badge">NEW</span></div>
+        <div class="l2-col-body">
+          <div class="l2-tag">📊 CRM Signal<small>Salesforce/HubSpot · pipeline & conversion gaps</small></div>
+          <div class="l2-tag">🗂️ PM Tool Signal<small>Jira/Asana · delivery quality · blocker patterns</small></div>
+          <div class="l2-tag">📈 Performance Data<small>KPI achievement · manager ratings</small></div>
+          <div class="l2-tag">📄 Resume Intelligence<small>Industry exposure · project type experience</small></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ENGINE BAR -->
+  <div class="l2-engine-bar">
+    <span class="eng-label">All inputs →</span>
+    <div class="eng-node">🔬 Skills Validation &amp; Normalisation Engine</div>
+    <span class="eng-arrow">→</span>
+    <div class="eng-node">🤖 AI Skill Extraction &amp; Inference</div>
+    <span class="eng-arrow">→</span>
+    <div class="eng-node">📊 InsightBoard — 5 Persona Dashboards + AI Conversational Layer</div>
+    <span class="eng-arrow">→</span>
+    <div class="eng-node" style="background:#16a34a;">📏 Wellbeing → Dev Capacity Adjustment <span class="new-badge" style="background:#064e3b;color:#6ee7b7;">NEW</span></div>
+    <span class="eng-arrow">→</span>
+    <div class="eng-node" style="background:#7c3aed;">📋 ReportGen — 16 reports · persona-adaptive · AI analysis on every section</div>
+  </div>
+
+  <!-- SECTION B: SKILLS & COMPETENCY MATRIX -->
+  <div>
+    <div class="l2-section-label l2sl-indigo">🟣 Section B — Skills &amp; Competency Matrix + Task Evaluation</div>
+    <div class="l2-matrix">
+      <div class="l2-matrix-card" style="border-top:3px solid #3d7fff;">
+        <div class="l2mc-title">🧩 Skills Matrix <span class="new-badge">ENHANCED</span></div>
+        <div class="l2mc-sub">Self-rating + manager rating simultaneously. Required vs current proficiency at employee, team, department & org level. Heat map view with gap severity colour coding.</div>
+        <div class="l2mc-tags">
+          <span class="l2mc-tag">Employee × Skill</span><span class="l2mc-tag">Self + Manager Rating</span><span class="l2mc-tag">Current vs Required</span><span class="l2mc-tag">Gap Score</span><span class="l2mc-tag">Heat Map</span><span class="l2mc-tag">Perception Gap Flag</span><span class="l2mc-tag">Concentration Risk</span>
+        </div>
+      </div>
+      <div class="l2-matrix-card" style="border-top:3px solid #7c3aed;">
+        <div class="l2mc-title">🎯 Competency Matrix</div>
+        <div class="l2mc-sub">Maps each employee against required competencies. Behavioural evidence vs expected indicators at each proficiency level.</div>
+        <div class="l2mc-tags">
+          <span class="l2mc-tag">Employee × Competency</span><span class="l2mc-tag">Behavioural Evidence</span><span class="l2mc-tag">Level vs Expected</span><span class="l2mc-tag">Leadership Readiness</span><span class="l2mc-tag">BU / Team View</span>
+        </div>
+      </div>
+      <div class="l2-matrix-card" style="border-top:3px solid #0891b2;">
+        <div class="l2mc-title">✅ Task Evaluation Layer <span class="new-badge">NEW</span></div>
+        <div class="l2mc-sub">Tasks from the Role Profile rated on frequency + confidence scale. Task-to-skill linkage creates bi-directional traceability between task gaps and underlying skill gaps.</div>
+        <div class="l2mc-tags">
+          <span class="l2mc-tag">Task × Employee</span><span class="l2mc-tag">Never / Guided / Independent / Coaches</span><span class="l2mc-tag">Task Criticality Flag</span><span class="l2mc-tag">PM Signal Cross-reference</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION C: GAP ANALYSIS -->
+  <div>
+    <div class="l2-section-label l2sl-teal">🔍 Section C — Skill, Competency &amp; Task Gap Analysis</div>
+    <div class="l2-gap-row">
+      <div class="l2-gap-card">👤 Individual Gap<small>Per employee skill & competency shortfall vs role requirements</small></div>
+      <div class="l2-gap-card">💼 Role-Based Gap<small>All employees in a role aggregated — common gaps by job title</small></div>
+      <div class="l2-gap-card">🏢 Department Gap<small>Dept-level shortfall heat map — critical skill coverage %</small></div>
+      <div class="l2-gap-card">🗺️ Org Skill Heat Map<small>Enterprise-wide view — strategic gap risk scoring</small></div>
+      <div class="l2-gap-card" style="border-top-color:#0891b2;">📱 Talent Mobility Signal <span class="new-badge">NEW</span><small>Surplus proficiency cells → mobility candidate flags · Project fitment potential</small></div>
+    </div>
+  </div>
+
+  <!-- SECTION D: WEIGHTED LNA/TNA + LNI/TNI -->
+  <div>
+    <div class="l2-section-label l2sl-green">🟢 Section D — Weighted LNA/TNA · LNI/TNI · Intervention Classification</div>
+
+    <!-- LNA WEIGHT ENGINE -->
+    <div class="lna-weights" style="margin-bottom:10px;">
+      <div class="lna-weights-title">⚖️ LNA Weighted Gap Score Engine <span class="new-badge">NEW</span> — Raw Gap × 5 Multipliers</div>
+      <div class="lna-weight-row">
+        <span class="lna-w lnaw-1">Skill Criticality Weight · C1=2.0x · C4=0.5x</span>
+        <span class="lna-w lnaw-2">Transformation Dial Weight · +5=2.0x · −5=0.1x</span>
+        <span class="lna-w lnaw-3">Project Timeline Urgency · &lt;4wks=2.0x · 6+mo=1.0x</span>
+        <span class="lna-w lnaw-4">Performance Correlation · Active underperformance=1.8x</span>
+        <span class="lna-w lnaw-5">Employee Discovery Input · High self-declared=1.3x</span>
+      </div>
+      <div class="lna-weights-title" style="margin-top:6px;">🔀 AI Intervention Type Classification <span class="new-badge">NEW</span></div>
+      <div class="int-types">
+        <span class="int-type">📚 Training — knowledge deficit</span>
+        <span class="int-type">🤝 Coaching — behavioural / leadership gap</span>
+        <span class="int-type">🔄 On-the-job — gap persists despite prior training</span>
+        <span class="int-type">🌍 Rotation/Secondment — never-performed experience gap</span>
+        <span class="int-type">👥 Group Training — team-wide same gap ≥60%</span>
+        <span class="int-type">🌱 Community of Practice — rapidly changing topic</span>
+        <span class="int-type">🏗️ OD Programme — culture or mindset gap</span>
+      </div>
+    </div>
+
+    <div class="l2-lni-lna">
+      <div class="l2-lni-card lni-card">
+        <div class="l2-lni-title lni-title-color">🔍 LNI — Learning Needs Identification <span class="new-badge">ENHANCED</span></div>
+        <div class="l2-lni-sub">8-component personalised individual learning brief. Employee-specific — two employees in the same role receive different LNIs based on their profile, aspirations, wellbeing capacity, and development velocity.</div>
+        <div class="l2-lni-outputs">
+          <span class="l2-lni-out">WHO needs learning</span>
+          <span class="l2-lni-out">WHAT type of intervention</span>
+          <span class="l2-lni-out">In what SEQUENCE</span>
+          <span class="l2-lni-out">Aspiration vs Role priorities</span>
+          <span class="l2-lni-out">Experience gaps from resume</span>
+          <span class="l2-lni-out">Dev timeline (capacity-adjusted)</span>
+        </div>
+      </div>
+      <div class="l2-lni-card lna-card">
+        <div class="l2-lni-title lna-title-color">📊 TNA — Training Needs Analysis <span class="new-badge">ENHANCED</span></div>
+        <div class="l2-lni-sub">Training-specific subset of LNA. Converts prioritised gaps into programme procurement brief. Matched to existing Edstellar catalogue — unmatched gaps trigger AI Content Outline Generation.</div>
+        <div class="l2-lni-outputs">
+          <span class="l2-lni-out">Programme matching</span>
+          <span class="l2-lni-out">Cohort sizing</span>
+          <span class="l2-lni-out">Sequencing & dependencies</span>
+          <span class="l2-lni-out">Budget by domain / dept / quarter</span>
+          <span class="l2-lni-out">Content commissioning flags</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION E: EMPLOYEE PROFILE -->
+  <div>
+    <div class="l2-section-label l2sl-rose">📤 Section E — Output: Employee Skills &amp; Competency Profile + Talent Mobility Profile</div>
+    <div class="l2-profile-output">
+      <div class="l2po-left">
+        <div class="l2po-title">👤 Employee Skills &amp; Competency Profile</div>
+        <div class="l2po-sub">Unified profile per employee — synthesizing all L2 data into a single actionable view</div>
+      </div>
+      <div class="l2po-tags">
+        <span class="l2po-tag">Current Skills + Levels</span>
+        <span class="l2po-tag">Competency Scores + Behavioural Evidence</span>
+        <span class="l2po-tag">360° Summary</span>
+        <span class="l2po-tag">Skill Gaps vs Role</span>
+        <span class="l2po-tag">Learning Needs (LNI)</span>
+        <span class="l2po-tag">Training Plan (TNI)</span>
+        <span class="l2po-tag">Personality + Psychometric Insights</span>
+        <span class="l2po-tag">IDP Readiness Score</span>
+        <span class="l2po-tag" style="background:#0f2a2a;color:#6ee7b7;border-color:#0891b2;">🆕 Talent Mobility Profile</span>
+        <span class="l2po-tag" style="background:#0f2a2a;color:#6ee7b7;border-color:#0891b2;">🆕 Wellbeing Capacity Indicator</span>
+        <span class="l2po-tag" style="background:#0f2a2a;color:#6ee7b7;border-color:#0891b2;">🆕 Resume Experience Profile</span>
+        <span class="l2po-tag" style="background:#0f2a2a;color:#6ee7b7;border-color:#0891b2;">🆕 Project Fitment Score</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /l2-wrapper -->
+
+  </div><!-- /master-layer-body -->
+
+  <div class="ml-output-checkpoint mloc-green">
+    <div class="mloc-icon">✅</div>
+    <div class="mloc-text">
+      <strong>Analysis Complete — Weighted LNA/TNA &amp; LNI/TNI Generated · Talent Mobility Profiles Built · Wellbeing Capacity Calibrated</strong>
+      <span>Skills &amp; Competency Profiles built · Learning needs identified, weighted, and intervention-typed · Talent mobility candidates surfaced · Platform proceeds to Action Layer</span>
+    </div>
+    <div class="mloc-arrow">↓</div>
+  </div>
+
+</div><!-- /master-layer L2 -->
+
+<div class="between-layers-arrow">
+  <div class="bla-line"></div><div class="bla-label">Proceed to Learning Planning</div><div class="bla-line"></div><div class="bla-head"></div>
+</div>
+
+<!-- RECURRING BANNER -->
+<div class="recurring-banner">
+  <div class="rb-stripe"><span>Recurring Model</span></div>
+  <div class="rb-body">
+    <div class="rb-title"><span class="rb-icon">🔁</span> Platform Shifts to Recurring Usage Model from This Point</div>
+    <div class="rb-why">Once the first LNA/TNA is generated, the platform has an employee baseline. Every action from here — a training completed, an assessment cycle run, a new hire joining, a promotion, a strategy change, a Transformation Dial shift, a tool added — creates a <strong>delta against that baseline</strong>. The platform's value is in tracking change over time. This is the heartbeat of continuous workforce intelligence.</div>
+    <div class="rb-triggers">
+      <span class="rb-trigger rbt-assess">📝 Assessment Cycles · 6 or 12 months</span>
+      <span class="rb-trigger rbt-train">🎓 Post-Training Reassessment · Per intervention</span>
+      <span class="rb-trigger rbt-predict">🔮 Predictive Engine · Continuous / rolling data</span>
+      <span class="rb-trigger rbt-proact">⚡ Proactive Triggers · Event-driven</span>
+      <span class="rb-trigger rbt-org">🏢 Org Data Updates · Monthly / Quarterly</span>
+      <span class="rb-trigger rbt-perf">📉 Performance Reviews · Quarterly / Annual</span>
+      <span class="rb-trigger" style="background:#fff1f2;color:#be123c;border-color:#be123c;">🌡️ Wellbeing Signals · Weekly pulse</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     EMPLOYEE SCOPE & LIFECYCLE EVENT ENGINE
+═══════════════════════════════════════ -->
+<div style="margin-left:48px;margin-bottom:8px;">
+  <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+    <div style="background:linear-gradient(135deg,#1e3a6e 0%,#0891b2 100%);padding:12px 20px;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:16px;">🔄</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#fff;">Employee Scope &amp; Lifecycle Event Engine <span style="font-size:9px;background:#dcfce7;color:#166534;border-radius:3px;padding:2px 6px;font-weight:700;margin-left:6px;">NEW</span></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;">Always-on · Fires immediately on any employment status or scope change · No batch cycle required</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;background:#fff;gap:0;">
+
+      <!-- Scope Status -->
+      <div style="padding:14px 18px;border-right:1px solid #e2e8f0;">
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#0891b2;margin-bottom:8px;">Scope Status — 3 States</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div style="font-size:11px;padding:5px 10px;background:#f0fdf4;border:1px solid #86efac;border-left:4px solid #16a34a;border-radius:5px;color:#166534;font-weight:600;">✅ Active Participant — full analytics, assessments, LNA, billing seat</div>
+          <div style="font-size:11px;padding:5px 10px;background:#fff1f2;border:1px solid #fda4af;border-left:4px solid #be123c;border-radius:5px;color:#881337;font-weight:600;">🚫 Excluded — in DataPort for org structure only · invisible to all analytical layers</div>
+          <div style="font-size:11px;padding:5px 10px;background:#fffbeb;border:1px solid #fcd34d;border-left:4px solid #d97706;border-radius:5px;color:#92400e;font-weight:600;">👁 View Only — self-service Skill Passport only · excluded from org analysis</div>
+        </div>
+        <div style="margin-top:8px;font-size:10.5px;color:#64748b;">Rules set by: employment type · department · individual override · all changes audit-trailed</div>
+      </div>
+
+      <!-- Lifecycle Events -->
+      <div style="padding:14px 18px;">
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#0891b2;margin-bottom:8px;">Lifecycle Events → Platform Responses</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div style="font-size:11px;padding:5px 10px;background:#fff1f2;border:1px solid #fda4af;border-left:4px solid #be123c;border-radius:5px;color:#374151;">🔴 <strong>Serving Notice</strong> — Notify manager + HR + L&amp;D · Succession risk recalc · Knowledge capture trigger · Passport export prompt · Assessment cycle decision prompt</div>
+          <div style="font-size:11px;padding:5px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #64748b;border-radius:5px;color:#374151;">⚫ <strong>Exit (Last Working Day)</strong> — Scope → Excluded · LNA recalc · Concentration risk check · Succession pipeline final update</div>
+          <div style="font-size:11px;padding:5px 10px;background:#fffbeb;border:1px solid #fcd34d;border-left:4px solid #d97706;border-radius:5px;color:#374151;">🟡 <strong>Long-Term Leave</strong> — Auto Excluded for leave · Auto reactivated on return date</div>
+          <div style="font-size:11px;padding:5px 10px;background:#f0fdf4;border:1px solid #86efac;border-left:4px solid #16a34a;border-radius:5px;color:#374151;">🟢 <strong>Internal Transfer</strong> — Role-skill mapping recalc · New manager notified · IDP revised</div>
+          <div style="font-size:11px;padding:5px 10px;background:#ecfeff;border:1px solid #a5f3fc;border-left:4px solid #0891b2;border-radius:5px;color:#374151;">🔵 <strong>Secondment</strong> — Home dept excludes · Host dept View Only · Auto-reinstated on return</div>
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SAAS PLATFORM ADMINISTRATION
+═══════════════════════════════════════ -->
+<div style="margin-left:48px;margin-bottom:8px;">
+  <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+    <div style="background:linear-gradient(135deg,#312e81 0%,#4f46e5 100%);padding:12px 20px;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:16px;">🏗</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#fff;">SaaS Platform Administration <span style="font-size:9px;background:#e0e7ff;color:#312e81;border-radius:3px;padding:2px 6px;font-weight:700;margin-left:6px;">NEW</span></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;">Edstellar engineering &amp; customer success · Governs the platform as a product · Above individual client orgs</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;background:#fff;gap:0;">
+
+      <!-- Tenant Management -->
+      <div style="padding:12px 16px;border-right:1px solid #e2e8f0;">
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#4f46e5;margin-bottom:7px;">Tenant management</div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <div style="font-size:11px;padding:4px 8px;background:#eef2ff;border-left:3px solid #4f46e5;border-radius:4px;color:#374151;">🆕 Provision new tenant — tier, CSM, data residency, contract dates</div>
+          <div style="font-size:11px;padding:4px 8px;background:#f8fafc;border-left:3px solid #94a3b8;border-radius:4px;color:#374151;">📋 All-tenant dashboard — level, tier, churn risk, last activity</div>
+          <div style="font-size:11px;padding:4px 8px;background:#f8fafc;border-left:3px solid #94a3b8;border-radius:4px;color:#374151;">👁 Support impersonation — read-only, logged, client notified</div>
+          <div style="font-size:11px;padding:4px 8px;background:#f8fafc;border-left:3px solid #94a3b8;border-radius:4px;color:#374151;">⏸ Suspend / deactivate tenant — data retained per policy</div>
+        </div>
+      </div>
+
+      <!-- Subscription & Billing -->
+      <div style="padding:12px 16px;border-right:1px solid #e2e8f0;">
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#4f46e5;margin-bottom:7px;">Subscription &amp; billing</div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <div style="font-size:11px;padding:4px 8px;background:#eef2ff;border-left:3px solid #4f46e5;border-radius:4px;color:#374151;">💳 Billing on Active Participant count · View Only at reduced rate · Excluded = zero</div>
+          <div style="font-size:11px;padding:4px 8px;background:#f8fafc;border-left:3px solid #94a3b8;border-radius:4px;color:#374151;">📄 Auto invoice — line items: seats, add-ons, credits, one-time charges</div>
+          <div style="font-size:11px;padding:4px 8px;background:#f8fafc;border-left:3px solid #94a3b8;border-radius:4px;color:#374151;">⚠️ 30-day overdue → auto suspend with CSM escalation</div>
+          <div style="font-size:11px;padding:4px 8px;background:#f8fafc;border-left:3px solid #94a3b8;border-radius:4px;color:#374151;">📊 MRR / ARR / churn / NRR revenue dashboard</div>
+        </div>
+      </div>
+
+      <!-- Platform Health & Onboarding -->
+      <div style="padding:12px 16px;">
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#4f46e5;margin-bottom:7px;">Health &amp; onboarding pipeline</div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <div style="font-size:11px;padding:4px 8px;background:#eef2ff;border-left:3px solid #4f46e5;border-radius:4px;color:#374151;">🔴 Uptime · AI pipeline p95 · Notify delivery rate · DB pool · Error rates</div>
+          <div style="font-size:11px;padding:4px 8px;background:#f8fafc;border-left:3px solid #94a3b8;border-radius:4px;color:#374151;">🧭 Onboarding stage tracker — 7 stages · stall flags · CSM alerts</div>
+          <div style="font-size:11px;padding:4px 8px;background:#f8fafc;border-left:3px solid #94a3b8;border-radius:4px;color:#374151;">⏱ Time-to-value: activation → FrameworkBible · activation → first cycle</div>
+          <div style="font-size:11px;padding:4px 8px;background:#f8fafc;border-left:3px solid #94a3b8;border-radius:4px;color:#374151;">🔧 Global feature flags · prompt versioning · maintenance mode</div>
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+  </div>
+</div>
+
+<div class="between-layers-arrow">
+  <div class="bla-line"></div><div class="bla-label">Proceed to Action Layer</div><div class="bla-line"></div><div class="bla-head"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MASTER LAYER 3 — ACTION LAYER
+═══════════════════════════════════════════════════════════ -->
+<div class="master-layer ml-orange">
+  <div class="master-layer-header mlh-orange">
+    <div class="ml-step-num" style="background:#ea580c;">L3</div>
+    <div class="ml-header-text">
+      <div class="ml-title">Action Layer</div>
+      <div class="ml-subtitle">All actions triggered by LNA/TNI outputs · IDPs · Programme design + AI Content Outlines · Org decisions + Transformation Dial · Delivery setup · Coaching & Mentoring</div>
+    </div>
+    <div class="ml-checklist">
+      <span class="ml-check">✓ IDPs Activated</span>
+      <span class="ml-check">✓ Programs Designed</span>
+      <span class="ml-check">✓ Org Decisions Made</span>
+      <span class="ml-check">✓ Budget Allocated</span>
+      <span class="ml-check">✓ Delivery Ready</span>
+      <span class="ml-check" style="background:#fff7ed;color:#9a3412;border-color:#ea580c;">🆕 Content Outlines Generated</span>
+      <span class="ml-check" style="background:#fff7ed;color:#9a3412;border-color:#ea580c;">🆕 Transformation Dial Active</span>
+    </div>
+  </div>
+  <div class="master-layer-body">
+
+    <div class="ml-section-label msl-orange">
+      <span class="msl-num" style="background:#ea580c;">Step 4</span>
+      Individual Actions · Programme Design · Organisational Actions · Delivery Setup
+      <span class="recur-tag" style="background:#fff7ed;color:#9a3412;border-color:#ea580c;">Recurring · Triggered per LNA cycle · Also by Predictive &amp; Proactive layers</span>
+    </div>
+
+    <div class="l3-grid">
+
+      <!-- GROUP A: Individual Actions -->
+      <div class="l3-group">
+        <div class="l3-group-header l3gh-a">👤 Group A — Individual-Level Actions</div>
+        <div class="l3-group-body">
+          <div class="l3-item">📋 Individual Development Plan (IDP)<small>Created per employee · Skills + Competency + Career goals · Aspiration vs role priorities separated</small></div>
+          <div class="l3-item">🗺️ Personalised Learning Path<small>Curated sequence · Wellbeing capacity-adjusted timeline · Fast / Standard / Minimum viable tracks</small></div>
+          <div class="l3-item">🤝 Coaching Programme Assignment <span class="new-badge">ENHANCED</span><small>AI matching to coach · GROW / Co-Active / Systemic methodology · ICF accreditation matched</small></div>
+          <div class="l3-item">🌱 Mentoring Programme Assignment <span class="new-badge">ENHANCED</span><small>AI mentor pairing · Structured programme · Mentee progress tracking</small></div>
+          <div class="l3-item">🏅 Certification Enrolment<small>Role-critical certs mapped · Certificate Engine auto-issues on completion</small></div>
+          <div class="l3-item">🧭 Career Pathing & Role Readiness<small>Skills delta to target role · Mobility match score · Gap-to-readiness timeline</small></div>
+          <div class="l3-item">🏗️ 30-60-90 Day Onboarding Plan <span class="new-badge">NEW</span><small>AI-generated for new joiners · Role requirements + team context + Transformation Dial</small></div>
+        </div>
+      </div>
+
+      <!-- GROUP B: Programme-Level Actions -->
+      <div class="l3-group">
+        <div class="l3-group-header l3gh-b">📚 Group B — Programme-Level Actions</div>
+        <div class="l3-group-body">
+          <div class="l3-item">🎯 Training Programme Design / Selection<small>Custom design or vendor programme mapped to TNA objectives</small></div>
+          <div class="l3-item">🤖 AI Content Outline Generation <span class="new-badge">NEW</span><small>AI drafts structured content brief per programme · Audience analysis · Learning outcomes · Module structure · Reinforcement plan · Measurement plan (Kirkpatrick L1–L4)</small></div>
+          <div class="l3-item">🖥️ Learning Modality Selection<small>ILT · e-Learning · Blended · On-the-job · Coaching · Community of Practice · OD Programme</small></div>
+          <div class="l3-item">👥 Cohort Grouping<small>Who attends what together · Based on role, level &amp; gap similarity</small></div>
+          <div class="l3-item">📅 L&D/OD Project Management Engine <span class="new-badge">NEW</span><small>8 project types · Milestones · Activities · Budget · AI project suggestions from TNA</small></div>
+          <div class="l3-item">🤝 Vendor / Trainer Selection<small>Linked to Trainer & Coach Platform · Skills match + effectiveness score + availability</small></div>
+          <div class="l3-item">🗺️ AI-Suggested Org-Wide Execution Plan<small>Sequences all interventions across the population · Dependencies · Budget allocation · Build vs buy vs train · Integrates with TMS/LMS for auto-enrolment</small></div>
+        </div>
+      </div>
+
+      <!-- GROUP C: Organisational Actions -->
+      <div class="l3-group">
+        <div class="l3-group-header l3gh-c">🏢 Group C — Organisational Actions</div>
+        <div class="l3-group-body">
+          <div class="l3-item">💰 Learning Budget Allocation<small>Per department · Per BU · Per programme · Tracked vs L&D investment target</small></div>
+          <div class="l3-item">🌡️ Transformation Dial Management <span class="new-badge">NEW</span><small>Strategic emphasis −5 to +5 per skill/competency · Change governance workflow · Impact preview before applying · Staged rollout option</small></div>
+          <div class="l3-item">🔀 Internal Mobility Decisions <span class="new-badge">ENHANCED</span><small>Job mobility (permanent) + Project fitment matching (temporary) · Pre-sales capability check for new business</small></div>
+          <div class="l3-item">🏆 Succession Planning Triggers <span class="new-badge">ENHANCED</span><small>Critical role pipeline · Readiness bands · AI risk alerts for attrition of incumbents and successors</small></div>
+          <div class="l3-item">⚖️ Build vs. Buy vs. Train Decision<small>Based on urgency, cost, and gap-to-readiness timeline</small></div>
+          <div class="l3-item">🗂️ Job Architecture Updates<small>Role redesign where skill gaps are structural · Updates L1 Job Role Cards</small></div>
+        </div>
+      </div>
+
+      <!-- GROUP D: Delivery Setup -->
+      <div class="l3-group">
+        <div class="l3-group-header l3gh-d">🚀 Group D — Delivery Setup</div>
+        <div class="l3-group-body">
+          <div class="l3-item">📲 LMS / TrainConnect Publishing & Enrolment<small>Courses published · Employees auto-enrolled per IDP · SCORM/xAPI integration</small></div>
+          <div class="l3-item">🔗 External Platform Integration<small>Coursera · LinkedIn Learning · Partner platforms activated</small></div>
+          <div class="l3-item">🏫 Trainer Briefing with AI Content Outline <span class="new-badge">NEW</span><small>Trainer receives AI-generated programme brief via Trainer Platform · Replaces manual scoping call</small></div>
+          <div class="l3-item">📢 Learner Communication & Nudges<small>Automated notifications to employees &amp; managers via NotifyEngine</small></div>
+          <div class="l3-item">📏 Pre-Training Baseline Measurement<small>Captures current skill level before intervention · Used for post-training delta</small></div>
+          <div class="l3-item">🎖️ Certificate Engine Ready <span class="new-badge">NEW</span><small>Certificate templates configured · Auto-issuance on completion · LinkedIn share enabled</small></div>
+        </div>
+      </div>
+
+    </div><!-- /l3-grid -->
+
+    <div class="l3-output-row">
+      <div class="l3-out-chip">📋 IDPs Activated per Employee</div>
+      <div class="l3-out-chip">📅 Training Calendar Live</div>
+      <div class="l3-out-chip">💰 Budgets Allocated by BU / Dept</div>
+      <div class="l3-out-chip">👥 Cohorts Formed &amp; Enrolled</div>
+      <div class="l3-out-chip">🔀 Internal Mobility &amp; Succession Actions Initiated</div>
+      <div class="l3-out-chip">🚀 Delivery Infrastructure Ready</div>
+      <div class="l3-out-chip" style="background:#f0fdf4;border-color:#16a34a;color:#166534;">🆕 AI Content Outlines Sent to Trainers</div>
+      <div class="l3-out-chip" style="background:#f0fdf4;border-color:#16a34a;color:#166534;">🆕 Transformation Dial Active across LNA/TNI</div>
+    </div>
+
+  </div><!-- /master-layer-body -->
+
+  <div class="ml-output-checkpoint mloc-orange">
+    <div class="mloc-icon">✅</div>
+    <div class="mloc-text">
+      <strong>Action Layer Complete — All Interventions Activated &amp; Ready to Execute</strong>
+      <span>Every employee has an IDP · Every programme has an AI Content Outline · Trainers briefed · Org-level decisions made · Delivery infrastructure live · Platform proceeds to Execution &amp; Measurement</span>
+    </div>
+    <div class="mloc-arrow">↓</div>
+  </div>
+
+</div><!-- /master-layer L3 -->
+
+<div class="between-layers-arrow">
+  <div class="bla-line"></div><div class="bla-label">Proceed to Measurement &amp; Strategic Output</div><div class="bla-line"></div><div class="bla-head"></div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PHASE 9 — MEASUREMENT
+═══════════════════════════════════════ -->
+<div style="margin-left:48px;margin-bottom:6px;"><span class="recur-tag">Post every training · Creates new input back into L2</span></div>
+<div class="phase">
+  <div class="phase-label pl-blue">Measure</div>
+  <div class="phase-body pb-blue">
+    <div class="node n-blue-strong">📏 Post Training Skill Measurement</div>
+    <span style="color:var(--arrow)">→</span>
+    <div class="node n-blue">🔁 Reassessment</div>
+    <div class="node n-blue">📉 Kirkpatrick L1–L4 <span class="new-badge">ENHANCED</span></div>
+    <div class="node n-blue">💬 Manager Feedback</div>
+    <div class="node n-blue">🤖 AI Model Feedback Loop <span class="new-badge">NEW</span><small>Outline acceptance rate · L3 score per trainer</small></div>
+    <span style="color:var(--arrow)">→</span>
+    <div class="node n-blue-strong">📊 Skill Progress Tracking Dashboard</div>
+    <div class="node n-blue">🎖️ Certificate Auto-Issued <span class="new-badge">NEW</span></div>
+  </div>
+</div>
+
+<div class="loop-callout">
+  <div class="lc-icon">🔁</div>
+  <div>
+    <strong>Measurement Feedback Loops — Each drives a new L2 cycle:</strong>
+    <div class="lc-items">
+      <span class="lc-item">🔁 Reassessment → LNI (re-identifies shifted needs)</span>
+      <span class="lc-item">📉 Performance Data → LNA (refines priorities with real outcomes)</span>
+      <span class="lc-item">💬 Manager Feedback + Performance Data → Predictive Engine (sharpens forecasts)</span>
+      <span class="lc-item">📊 Skill Progress Dashboard → updates Employee Profile baseline</span>
+      <span class="lc-item new-item">🤖 Content Outline Effectiveness → AI Model improves future outlines (Section 19)</span>
+      <span class="lc-item new-item">💓 Wellbeing trend → LNI dev capacity recalibrated next cycle</span>
+    </div>
+  </div>
+</div>
+
+<div class="connector"><div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div></div>
+
+<!-- ═══════════════════════════════════════
+     PHASE 10 — STRATEGIC OUTPUT
+═══════════════════════════════════════ -->
+<div style="margin-left:48px;margin-bottom:6px;"><span class="recur-tag" style="background:#fef3c7;color:#92400e;border-color:#f59e0b;">Refreshes as new assessment &amp; predictive cycles complete</span></div>
+<div class="phase">
+  <div class="phase-label pl-amber">Strategy</div>
+  <div class="phase-body pb-amber">
+    <div class="node n-amber-strong">🧠 Strategic Workforce Intelligence<small>Reactive + Predictive + Proactive signals</small></div>
+    <span style="color:var(--amber)">→</span>
+    <div class="node n-amber">🏆 Succession Planning <span class="new-badge">ENHANCED</span><small>AI risk engine · Readiness bands · What-if modelling</small></div>
+    <div class="node n-amber">🔀 Internal Mobility + Project Fitment <span class="new-badge">ENHANCED</span></div>
+    <div class="node n-amber">📡 Future Skill Forecasting</div>
+    <div class="node n-amber">🗂️ Workforce Planning</div>
+    <div class="node n-amber">🌡️ Transformation Meter <span class="new-badge">NEW</span><small>Progress vs year-1/2/3 targets</small></div>
+    <div class="node n-amber">🔍 Skill Passport Verification <span class="new-badge">NEW</span><small>Hiring companies · QR / API verify</small></div>
+    <span style="color:var(--amber)">→</span>
+    <div class="node n-amber-strong">🎯 Executive Insights Dashboard<small>5-persona · AI conversational layer</small></div>
+  </div>
+</div>
+
+<div class="connector"><div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div></div>
+
+<!-- PREDICTIVE + PROACTIVE -->
+<div style="margin-left:48px;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
+  <span style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--txt-muted);">↙ Parallel intelligence layers — fed by Skills Inventory + Performance Data + Wellbeing Signals</span>
+  <span class="recur-tag">Continuous · Refreshes with every new data signal</span>
+</div>
+
+<div class="dual-branch">
+  <div class="branch-col">
+    <div class="branch-label bl-purple">🔮 Predictive Layer</div>
+    <div class="phase" style="flex-direction:column;margin-bottom:0;">
+      <div class="phase-body pb-purple" style="flex-direction:column;align-items:stretch;gap:8px;width:100%;">
+        <div class="node n-purple-strong" style="text-align:center;white-space:normal;">🔮 Predictive Analytics Engine<small>ML on historical trends, performance patterns &amp; market signals</small></div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
+          <div class="node n-purple" style="white-space:normal;text-align:left;font-size:11.5px;">📈 Emerging Skill Gap Forecasting<br><small>3–12 month horizon</small></div>
+          <div class="node n-purple" style="white-space:normal;text-align:left;font-size:11.5px;">🏭 Industry Skill Trend Monitoring<br><small>Cross-org benchmark signals</small></div>
+          <div class="node n-purple" style="white-space:normal;text-align:left;font-size:11.5px;">👥 Talent Risk &amp; Attrition Prediction<br><small>Role-criticality + wellbeing signals</small></div>
+          <div class="node n-purple" style="white-space:normal;text-align:left;font-size:11.5px;">🗺️ Future Competency Demand Mapping<br><small>Role evolution model</small></div>
+          <div class="node n-purple" style="white-space:normal;text-align:left;font-size:11.5px;">🆕 Succession Risk Alerts<br><small>Incumbent + successor attrition · Pipeline gaps</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="branch-divider"></div>
+
+  <div class="branch-col">
+    <div class="branch-label bl-cyan">⚡ Proactive Layer</div>
+    <div class="phase" style="flex-direction:column;margin-bottom:0;">
+      <div class="phase-body pb-cyan" style="flex-direction:column;align-items:stretch;gap:8px;width:100%;">
+        <div class="node n-cyan-strong" style="text-align:center;white-space:normal;">⚡ Proactive Intervention Engine<small>Triggers pre-emptive actions before gaps become critical</small></div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
+          <div class="node n-cyan" style="white-space:normal;text-align:left;font-size:11.5px;">🔔 Early-Warning Alerts<br><small>To Managers &amp; HR</small></div>
+          <div class="node n-cyan" style="white-space:normal;text-align:left;font-size:11.5px;">📅 Auto-Scheduled Learning Nudges<br><small>Role-specific triggers</small></div>
+          <div class="node n-cyan" style="white-space:normal;text-align:left;font-size:11.5px;">🔄 Pre-emptive LNA Cycle Trigger<br><small>Feeds back into LNA</small></div>
+          <div class="node n-cyan" style="white-space:normal;text-align:left;font-size:11.5px;">🎯 Predictive IDP Updates<br><small>Feeds back into LNA</small></div>
+          <div class="node n-cyan" style="white-space:normal;text-align:left;font-size:11.5px;">🆕 Wellbeing Manager Prompt<br><small>Conversation starter — not raw score</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loop-callout">
+  <div class="lc-icon">🔁</div>
+  <div>
+    <strong>Recurring Triggers → Proactive Engine fires a new LNA cycle when:</strong>
+    <div class="lc-items">
+      <span class="lc-item">New critical skill gap detected</span>
+      <span class="lc-item">Attrition risk threshold crossed</span>
+      <span class="lc-item">New tool or technology added to org stack</span>
+      <span class="lc-item">Regulatory compliance change detected</span>
+      <span class="lc-item">Strategic initiative launched</span>
+      <span class="lc-item new-item">Transformation Dial shifted — all affected LNIs recalibrated</span>
+      <span class="lc-item new-item">Succession candidate exits — pipeline gap alert triggered</span>
+      <span class="lc-item new-item">New business won — pre-sales capability check requested</span>
+      <span class="lc-item new-item">Employee enters notice period — immediate succession + concentration risk check</span>
+      <span class="lc-item new-item">Employee returns from long-term leave — Scope Status reinstated, LNI reactivated</span>
+      <span class="lc-item new-item">Internal transfer — role-skill mapping recalculated, new manager notified with skills summary</span>
+    </div>
+  </div>
+</div>
+
+<div class="between-layers-arrow">
+  <div class="bla-line"></div><div class="bla-label">Proceed to Marketplace Ecosystem</div><div class="bla-line"></div><div class="bla-head"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MARKETPLACE ECOSYSTEM — NEW
+═══════════════════════════════════════════════════════════ -->
+<div class="master-layer ml-rose" style="margin-top:4px;">
+  <div class="master-layer-header mlh-rose">
+    <div class="ml-step-num" style="background:#be123c; font-size:12px;">MKT</div>
+    <div class="ml-header-text">
+      <div class="ml-title">Edstellar Marketplace Ecosystem <span class="new-badge" style="font-size:13px;padding:3px 10px;">NEW</span></div>
+      <div class="ml-subtitle">Skills Intelligence Platform drives demand · Trainer & Coach Platform + Training Vendor Platform fulfil it · Four revenue streams · Three-sided marketplace</div>
+    </div>
+    <div class="ml-checklist">
+      <span class="ml-check">🆕 Trainer &amp; Coach Platform</span>
+      <span class="ml-check">🆕 Training Vendor Platform</span>
+      <span class="ml-check">🆕 Referral Programme</span>
+      <span class="ml-check">🆕 Credit-Based Profile Access</span>
+      <span class="ml-check">🆕 Booking Commission Model</span>
+    </div>
+  </div>
+  <div class="master-layer-body">
+
+    <div class="ml-section-label msl-rose"><span class="msl-num" style="background:#be123c;">Flow</span> TNA Gap Brief → Marketplace → Fulfilled Engagement → Outcome Feeds Back to L2</div>
+
+    <div class="marketplace-wrapper">
+      <div class="market-grid">
+
+        <!-- TRAINER & COACH PLATFORM -->
+        <div class="market-card">
+          <div class="mc-header mc-trainer">👨‍🏫 Trainer &amp; Coach Platform</div>
+          <div class="mc-body">
+            <div class="mc-item">🔍 Skill-gap-matched trainer/coach discovery · Credit to unlock full profile</div>
+            <div class="mc-item">🏠 Internal trainer registry surfaced first before external</div>
+            <div class="mc-item">📋 Platform-mediated booking · Escrow payment · Dispute resolution</div>
+            <div class="mc-item">🎯 AI Content Outline sent to trainer as briefing document</div>
+            <div class="mc-item">⭐ Effectiveness ratings feed AI trainer matching model</div>
+            <div class="mc-item">🤝 Coach-specific: ICF/EMCC accreditation · Methodology matching</div>
+          </div>
+        </div>
+
+        <!-- TRAINING VENDOR PLATFORM -->
+        <div class="market-card">
+          <div class="mc-header mc-vendor">🏢 Training Vendor Platform</div>
+          <div class="mc-body">
+            <div class="mc-item">📄 Gap brief from TNA → structured RFP to matched vendors</div>
+            <div class="mc-item">⚖️ 3-proposal procurement compliance support · Audit trail</div>
+            <div class="mc-item">🤖 AI proposal comparison · Best match · Outcome commitment · Red flags</div>
+            <div class="mc-item">📊 Edstellar listed as vendor alongside all others — wins on proposal quality</div>
+            <div class="mc-item">🔗 Training companies use Trainer Platform to source delivery talent</div>
+          </div>
+        </div>
+
+        <!-- REFERRAL PROGRAMME -->
+        <div class="market-card">
+          <div class="mc-header mc-referral">🤝 Trainer &amp; Coach Referral Programme</div>
+          <div class="mc-body">
+            <div class="mc-item">4 referral types: Training requirement · SaaS Platform · New trainer · Training company</div>
+            <div class="mc-item">9-status pipeline: Submitted → Qualified → Proposal → Won/Lost</div>
+            <div class="mc-item">4 partner tiers: Partner → Silver → Gold → Platinum (+commission uplift)</div>
+            <div class="mc-item">Unique trackable referral URL for SaaS platform referrals</div>
+            <div class="mc-item">Commission: % of engagement revenue + % of Year 1 subscription for SaaS</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- REVENUE STREAMS -->
+      <div style="font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:700;color:#881337;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em;">Revenue Streams</div>
+      <div class="revenue-chips">
+        <div class="rev-chip rev-saas">💻 SaaS Subscription · Per org per level</div>
+        <div class="rev-chip rev-credit">🪙 Credits · Profile view unlock (clients + training companies)</div>
+        <div class="rev-chip rev-comm">💰 Booking Commission · % of every platform-mediated engagement</div>
+        <div class="rev-chip rev-vendor">📋 Vendor Listing + Brief Access Fees</div>
+        <div class="rev-chip rev-verify">🔖 Skill Passport Verification · Hiring companies pay per verify</div>
+        <div class="rev-chip rev-bench">📊 Benchmarking Intelligence · Enterprise premium / Standalone reports</div>
+      </div>
+    </div>
+
+  </div><!-- /master-layer-body -->
+
+  <div class="ml-output-checkpoint mloc-rose">
+    <div class="mloc-icon">🎯</div>
+    <div class="mloc-text">
+      <strong>Marketplace Completes the Flywheel — Intelligence Drives Demand · Marketplace Fulfils It · Outcomes Feed Back</strong>
+      <span>Every gap brief from TNA creates a commercial opportunity · Every fulfilled engagement produces Kirkpatrick data · Outcome data improves AI content outline quality · Flywheel self-reinforces</span>
+    </div>
+    <div class="mloc-arrow">↺</div>
+  </div>
+
+</div><!-- /master-layer Marketplace -->
+
+<!-- ═══════════════════════════════════════
+     MODULES FLAGGED AS NOT IN SIP FLOW
+═══════════════════════════════════════ -->
+<div class="flag-section" style="margin-top:36px;margin-left:0;">
+  <div class="flag-header">
+    <div>
+      <h3>⚠️ 6 Modules From Product Document v18 — Not Represented in the SIP Flow</h3>
+      <p>These modules are real product features but do not belong as steps in the skills intelligence process flow. Each has a reason.</p>
+    </div>
+  </div>
+  <div class="flag-body">
+
+    <div class="flag-item">
+      <div class="flag-name">📈 Section 22 — Freemium Conversion Engine <span class="flag-cat">GTM / Sales</span></div>
+      <div class="flag-reason">This is a <strong>commercial acquisition process</strong>, not a SIP workflow step. It describes how Edstellar converts free-tier users to paying customers — upgrade triggers, locked feature previews, ROI calculators. This belongs in a GTM or Sales Funnel flowchart, not in the skills intelligence process flow experienced by a client already on the platform.</div>
+    </div>
+
+    <div class="flag-item">
+      <div class="flag-name">🌍 Section 26 — Localisation Specification <span class="flag-cat">Engineering / Infrastructure</span></div>
+      <div class="flag-reason">This is an <strong>infrastructure and engineering configuration layer</strong> that sits beneath every step in the flow. RTL support, Works Council documentation, EEOC assessment review, and cultural calendar awareness are configuration concerns that affect how the platform is delivered in each market — not distinct steps that a user experiences in the workflow.</div>
+    </div>
+
+    <div class="flag-item">
+      <div class="flag-name">🛒 Section 24 — Assessment Content Marketplace <span class="flag-cat">Secondary Marketplace / Commercial Product</span></div>
+      <div class="flag-reason">This is a <strong>secondary marketplace product</strong> that sits on top of the assessment infrastructure. Organisations buying and selling assessment content between each other is a commercial feature — useful, but not a step in the skills intelligence workflow. It enriches the question bank available to a client but does not constitute a distinct phase in the LNA → LNI → Action flow.</div>
+    </div>
+
+    <div class="flag-item">
+      <div class="flag-name">📊 Section 25 — Cross-Org Benchmarking <span class="flag-cat">Analytics Output / Premium Feature</span></div>
+      <div class="flag-reason">This is an <strong>analytics output product</strong>, not a process step. Benchmarking data enhances the InsightBoard and strategic output layer (it informs the Predictive Layer's industry trend monitoring signal) but it does not constitute a distinct phase. It is a feature within Phase 10 Strategic Output, referenced there, rather than a separate step in the flow.</div>
+    </div>
+
+    <div class="flag-item">
+      <div class="flag-name">🔌 Section 21 — Public API & Developer Portal <span class="flag-cat">Technical Infrastructure</span></div>
+      <div class="flag-reason">This is <strong>platform infrastructure</strong>. The API allows external tools (BI platforms, ATS systems, HRIS vendors) to consume SIP data — it is the mechanism by which other systems integrate with the flow, not a step within it. API endpoints are the plumbing that enables integrations. They should appear in a technical architecture diagram, not a process flow diagram.</div>
+    </div>
+
+    <div class="flag-item">
+      <div class="flag-name">🎮 Section 18 — Gamification & Engagement Mechanics <span class="flag-cat">UX Overlay / Motivation Layer</span></div>
+      <div class="flag-reason">This is a <strong>motivation and engagement overlay</strong> that runs across all phases simultaneously — it is not a distinct step. Badges trigger when skills are validated (L2), streaks build as employees log learning (L3), team challenges run during assessment cycles (L2). Gamification is woven into the fabric of the flow rather than occupying its own position in it. It is represented in the Always-On Infrastructure strip at the top of the flowchart instead.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div style="margin-top:40px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt-muted);border-top:1px solid var(--border);padding-top:20px;">
+  Edstellar Skills Intelligence Platform &nbsp;·&nbsp; v7 · Updated per Product Document v18 · March 2026 &nbsp;·&nbsp; LNI = Learning Needs Identification &nbsp;·&nbsp; LNA = Learning Needs Analysis &nbsp;·&nbsp; TNA = Training Needs Analysis &nbsp;·&nbsp; TNI = Training Needs Identification &nbsp;·&nbsp; IDP = Individual Development Plan
+</div>
+
+<script>
+  function toggleOrg() {
+    const trigger = document.getElementById('orgTrigger');
+    const panel   = document.getElementById('orgPanel');
+    trigger.classList.toggle('active');
+    panel.classList.toggle('open');
+  }
+  document.addEventListener('click', function(e) {
+    const node = document.querySelector('.org-data-node');
+    if (node && !node.contains(e.target)) {
+      const t = document.getElementById('orgTrigger');
+      const p = document.getElementById('orgPanel');
+      if (t) t.classList.remove('active');
+      if (p) p.classList.remove('open');
+    }
+  });
+  function toggleGroup(header) {
+    const group = header.closest('.org-group');
+    const isExpanded = group.classList.contains('expanded');
+    document.querySelectorAll('.org-group').forEach(g => g.classList.remove('expanded'));
+    if (!isExpanded) group.classList.add('expanded');
+  }
+</script>
+</body>
+</html>

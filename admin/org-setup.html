@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrgSetup — Organisational Context · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<style>
+/* ── PAGE-SPECIFIC STYLES ── */
+
+/* STEPPER */
+.stepper-bar{display:flex;align-items:center;gap:0;padding:12px 0;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.step-item{display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:8px;transition:background .15s;flex-shrink:0}
+.step-item:hover{background:rgba(0,0,0,0.03)}
+.step-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;font-weight:500;border:2px solid rgba(0,0,0,0.08);color:var(--text-muted);background:transparent;transition:all .3s;flex-shrink:0}
+.step-label{font-size:10px;color:var(--text-muted);transition:color .3s;white-space:nowrap}
+.step-item.active .step-num{border-color:var(--accent);color:var(--accent);background:var(--accent-lt)}
+.step-item.active .step-label{color:var(--accent);font-weight:500}
+.step-item.done .step-num{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.step-item.done .step-label{color:var(--green)}
+.step-conn{width:16px;height:2px;background:rgba(0,0,0,0.08);flex-shrink:0}
+.step-conn.done{background:var(--green)}
+
+/* CONTEXT METER */
+.context-meter{background:linear-gradient(135deg,var(--card) 0%,var(--green-bg) 100%);border:1px solid #BBF7D0;border-radius:14px;padding:20px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.cm-gauge{position:relative;width:80px;height:80px;flex-shrink:0}
+.cm-gauge canvas{width:100%;height:100%}
+.cm-gauge-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cm-pct{font-family:var(--font-display);font-size:20px;font-weight:600;color:var(--green);line-height:1}
+.cm-pct-sub{font-size:8px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.cm-info{flex:1;min-width:200px}
+.cm-title{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.cm-sub{font-size:11px;color:var(--text-secondary);margin-bottom:8px}
+.cm-segs{display:flex;gap:14px;flex-wrap:wrap}
+.cm-seg{display:flex;align-items:center;gap:5px}
+.cm-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.cm-seg-label{font-size:10px;color:var(--text-muted)}
+.cm-seg-val{font-family:var(--font-mono);font-size:11px;font-weight:500}
+
+/* PANELS */
+.panel{background:var(--card);border:1px solid #E5E7EB;border-radius:12px;overflow:hidden}
+.panel-head{padding:14px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1;min-width:120px}
+.panel-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500}
+.panel-body{padding:18px 20px}
+
+/* FORMS */
+.form-group{margin-bottom:12px}
+.form-label{display:block;font-size:10px;color:var(--text-muted);letter-spacing:.04em;margin-bottom:4px;text-transform:uppercase}
+.form-input,.form-select,.form-textarea{width:100%;padding:8px 12px;border-radius:7px;border:1px solid #E5E7EB;background:#fff;color:var(--text-primary);font-family:var(--font-body);font-size:12px;outline:none;transition:border-color .2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--blue)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--text-muted)}
+.form-select option{background:#fff;color:var(--text-primary)}
+.form-textarea{resize:vertical;min-height:60px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+@media(max-width:800px){.form-row,.form-row-3,.form-row-4{grid-template-columns:1fr}}
+
+.btn{padding:8px 18px;border-radius:7px;border:1px solid #E5E7EB;background:transparent;color:var(--text-secondary);font-family:var(--font-body);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+.btn:hover{background:rgba(0,0,0,0.03);color:var(--text-primary)}
+.btn-gold{background:var(--accent);border-color:var(--accent);color:#0F1117;font-weight:600}
+.btn-gold:hover{opacity:.88;background:var(--accent);color:#0F1117}
+.btn-blue{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:500}
+.btn-blue:hover{opacity:.88;background:var(--blue);color:#fff}
+.btn-sm{padding:5px 12px;font-size:11px}
+
+.autofill-hint{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;background:var(--accent-lt);border:1px solid var(--accent-bd);margin-bottom:14px;font-size:11px;color:var(--accent)}
+.section-desc{font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:14px;padding:10px 14px;background:var(--blue-bg);border-radius:8px;border-left:3px solid var(--blue)}
+
+/* DYNAMIC LISTS */
+.added-items{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.added-chip{padding:5px 10px;border-radius:6px;font-size:11px;color:var(--text-primary);border:1px solid #E5E7EB;background:#fff;display:flex;align-items:center;gap:6px}
+.remove-chip{cursor:pointer;opacity:.4;transition:opacity .15s;font-size:13px}
+.remove-chip:hover{opacity:1;color:var(--red)}
+.add-row{display:flex;gap:8px;align-items:flex-end}
+.add-row .form-group{margin-bottom:0;flex:1}
+.dashed-box{border:1px dashed #D1D5DB;border-radius:10px;padding:14px 18px;margin-top:12px}
+.dashed-title{font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:8px}
+
+/* STEP PANELS */
+.step-panel{display:none}
+.step-panel.visible{display:block;animation:fadeUp .35s ease both}
+
+/* CRIT ROW */
+.crit-row{display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.crit-row:last-child{border-bottom:none}
+.crit-tag{padding:3px 10px;border-radius:5px;font-family:var(--font-mono);font-size:10px;font-weight:500;min-width:30px;text-align:center;flex-shrink:0}
+.crit-label{font-size:11px;font-weight:500;flex-shrink:0}
+.crit-desc{font-size:11px;color:var(--text-muted);margin-left:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct-c1{background:var(--red-bg);color:var(--red)}
+.ct-c2{background:var(--amber-bg);color:var(--amber)}
+.ct-c3{background:var(--blue-bg);color:var(--blue)}
+.ct-c4{background:rgba(0,0,0,0.04);color:var(--text-muted)}
+
+/* REVIEW */
+.rv-section{margin-bottom:16px}
+.rv-title{font-family:var(--font-display);font-size:11px;font-weight:600;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.rv-check{width:14px;height:14px;border-radius:50%;background:var(--green-bg);border:1px solid var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rv-check svg{width:8px;height:8px;stroke:var(--green);fill:none;stroke-width:3}
+.rv-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px}
+@media(max-width:800px){.rv-grid{grid-template-columns:1fr}}
+.rv-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.04);gap:8px}
+.rv-key{font-size:10px;color:var(--text-muted);flex-shrink:0}
+.rv-val{font-size:11px;color:var(--text-primary);font-weight:500;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.rv-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.rv-chip{padding:3px 8px;border-radius:5px;font-size:10px;border:1px solid #E5E7EB;color:var(--text-secondary)}
+
+/* SUCCESS */
+.success-banner{display:none;padding:18px 24px;background:linear-gradient(135deg,var(--green-bg) 0%,var(--blue-bg) 100%);border:1px solid #BBF7D0;border-radius:12px;align-items:center;gap:16px}
+.success-banner.show{display:flex;animation:fadeUp .5s ease both}
+
+/* TOAST */
+.toast-msg{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid #BBF7D0;color:var(--green);font-size:12px;font-family:var(--font-body);padding:10px 20px;border-radius:8px;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:9999;white-space:nowrap;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.1)}
+.toast-msg.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* AI GUIDED POPUP */
+.ai-popup-overlay{position:fixed;inset:0;background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);z-index:10000;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .35s ease}
+.ai-popup-overlay.open{display:flex;opacity:1}
+.ai-popup{width:100%;height:100%;display:flex;flex-direction:column;position:relative}
+.ai-popup-header{display:flex;align-items:center;padding:20px 32px;border-bottom:1px solid #E5E7EB;flex-shrink:0}
+.ai-popup-header-left{display:flex;align-items:center;gap:12px}
+.ai-popup-header-left .ai-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent) 0%,#E8C86E 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ai-popup-header-left .ai-icon svg{width:18px;height:18px;stroke:#0F1117;fill:none;stroke-width:2}
+.ai-popup-header-title{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-primary)}
+.ai-popup-header-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+.ai-popup-close{margin-left:auto;width:38px;height:38px;border-radius:8px;border:1px solid #E5E7EB;background:transparent;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ai-popup-close:hover{background:var(--red-bg);border-color:rgba(220,38,38,0.3);color:var(--red)}
+.ai-popup-close svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.ai-popup-progress{padding:0 32px;flex-shrink:0;display:flex;align-items:center;gap:14px;height:48px;border-bottom:1px solid rgba(0,0,0,0.04)}
+.ai-prog-bar{flex:1;height:4px;background:rgba(0,0,0,0.06);border-radius:2px;overflow:hidden}
+.ai-prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),#E8C86E);border-radius:2px;transition:width .5s ease}
+.ai-prog-text{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);white-space:nowrap}
+.ai-tab-bar{display:none;align-items:center;gap:6px;padding:8px 32px;border-bottom:1px solid #E5E7EB;overflow-x:auto;flex-shrink:0}
+.ai-tab-bar.visible{display:flex}
+.ai-tab-bar::-webkit-scrollbar{height:3px}
+.ai-tab-bar::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+.ai-tab{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;border:1px dashed #D1D5DB;font-size:11px;color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.ai-tab:hover{border-color:#9CA3AF;color:var(--text-secondary)}
+.ai-tab.active{border:1.5px solid var(--accent);color:var(--accent);background:var(--accent-lt);font-weight:500;border-style:solid}
+.ai-tab.done{border:1.5px solid var(--green);color:var(--green);background:var(--green-bg);border-style:solid}
+.ai-tab.deleted{opacity:.3;text-decoration:line-through;pointer-events:none}
+.ai-tab .tab-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;border:1.5px solid var(--text-muted);transition:all .2s}
+.ai-tab.active .tab-dot{border-color:var(--accent);background:var(--accent);box-shadow:0 0 6px rgba(201,168,76,0.4)}
+.ai-tab.done .tab-dot{border-color:var(--green);background:var(--green)}
+.ai-tab .tab-check{display:none;width:12px;height:12px;flex-shrink:0}
+.ai-tab.done .tab-check{display:block}
+.ai-tab.done .tab-dot{display:none}
+.ai-tab .tab-del{display:none;width:14px;height:14px;margin-left:2px;stroke:var(--text-muted);fill:none;stroke-width:2;cursor:pointer;opacity:.5;transition:opacity .15s;flex-shrink:0}
+.ai-tab:hover .tab-del{display:block}
+.ai-tab .tab-del:hover{opacity:1;stroke:var(--red)}
+.ai-tab.done .tab-del,.ai-tab.active .tab-del{display:none}
+.ai-popup-body{flex:1;display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:40px 32px}
+.ai-popup-body.mm-mode{padding:0;overflow:hidden}
+.ai-question-card{max-width:680px;width:100%;animation:fadeUp .4s ease both}
+.ai-question-card.mm-full{max-width:100%;height:100%}
+.ai-q-label{font-size:10px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.ai-q-label .q-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--accent-lt);font-family:var(--font-mono);font-size:10px;color:var(--accent);border:1px solid var(--accent-bd)}
+.ai-q-title{font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--text-primary);line-height:1.35;margin-bottom:6px}
+.ai-q-desc{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:28px}
+.ai-suggestion-label{font-size:10px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ai-suggestion-label svg{width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:1.7}
+.ai-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.ai-chip{padding:9px 18px;border-radius:8px;font-size:13px;color:var(--text-secondary);border:1px solid #E5E7EB;background:#fff;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px}
+.ai-chip:hover{border-color:var(--accent);color:var(--text-primary);background:var(--accent-lt)}
+.ai-chip.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-lt);font-weight:500}
+.ai-chip .chip-check{width:16px;height:16px;border-radius:50%;border:1.5px solid #E5E7EB;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.ai-chip.selected .chip-check{border-color:var(--accent);background:var(--accent)}
+.ai-chip.selected .chip-check svg{display:block}
+.ai-chip .chip-check svg{display:none;width:10px;height:10px;stroke:#0F1117;fill:none;stroke-width:3}
+.ai-or-divider{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.ai-or-divider::before,.ai-or-divider::after{content:'';flex:1;height:1px;background:#E5E7EB}
+.ai-or-divider span{font-size:10px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase}
+.ai-manual-input{width:100%;padding:12px 16px;border-radius:8px;border:1px solid #E5E7EB;background:#fff;color:var(--text-primary);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .2s}
+.ai-manual-input:focus{border-color:var(--accent)}
+.ai-manual-input::placeholder{color:var(--text-muted)}
+.ai-popup-footer{padding:16px 32px;border-top:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ai-footer-left{display:flex;align-items:center;gap:10px}
+.ai-footer-left .ai-skip{padding:8px 16px;border-radius:7px;border:1px solid #E5E7EB;background:transparent;color:var(--text-muted);font-family:var(--font-body);font-size:12px;cursor:pointer;transition:all .15s}
+.ai-footer-left .ai-skip:hover{color:var(--text-secondary);border-color:#9CA3AF}
+.ai-next-btn{padding:10px 28px;border-radius:8px;border:none;background:var(--accent);color:#0F1117;font-family:var(--font-display);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;letter-spacing:.03em}
+.ai-next-btn:hover{opacity:.88}
+.ai-next-btn:disabled{opacity:.35;cursor:not-allowed}
+.ai-next-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5}
+.ai-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:700px){.ai-summary-grid{grid-template-columns:1fr}}
+.ai-summary-item{padding:10px 14px;border-radius:8px;border:1px solid #E5E7EB;background:#fff}
+.ai-summary-item .s-label{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.ai-summary-item .s-value{font-size:12px;color:var(--text-primary);font-weight:500}
+.ai-count-stepper{display:flex;align-items:center;gap:0;margin:24px auto;width:fit-content}
+.ai-count-stepper button{width:44px;height:44px;border:1px solid #E5E7EB;background:#fff;color:var(--text-primary);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ai-count-stepper button:first-child{border-radius:8px 0 0 8px}
+.ai-count-stepper button:last-child{border-radius:0 8px 8px 0}
+.ai-count-stepper button:hover{background:var(--accent-lt);border-color:var(--accent);color:var(--accent)}
+.ai-count-stepper input{width:64px;height:44px;border:1px solid #E5E7EB;border-left:none;border-right:none;background:var(--card);color:var(--text-primary);font-family:var(--font-display);font-size:20px;font-weight:600;text-align:center;outline:none}
+.ai-title-chip{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;border:1px solid #E5E7EB;background:#fff;margin-bottom:6px;transition:all .2s;opacity:0;transform:translateX(-8px)}
+.ai-title-chip.visible{opacity:1;transform:translateX(0)}
+.ai-title-chip .tc-num{width:22px;height:22px;border-radius:50%;background:var(--accent-lt);border:1px solid var(--accent-bd);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;color:var(--accent);flex-shrink:0}
+.ai-title-chip input{flex:1;background:transparent;border:none;color:var(--text-primary);font-family:var(--font-body);font-size:13px;font-weight:500;outline:none}
+.ai-title-chip input::placeholder{color:var(--text-muted)}
+.ai-title-chip .tc-del{width:20px;height:20px;border-radius:4px;border:none;background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.ai-title-chip .tc-del:hover{background:var(--red-bg);color:var(--red)}
+.ai-title-chip .tc-del svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.ai-required{display:inline-block;color:var(--red);font-weight:700;margin-left:2px}
+.ai-validation-msg{display:none;align-items:center;gap:7px;padding:9px 14px;border-radius:8px;background:var(--red-bg);border:1px solid rgba(220,38,38,0.25);margin-top:12px;font-size:12px;color:var(--red);animation:fadeUp .25s ease both}
+.ai-validation-msg.show{display:flex}
+.ai-validation-msg svg{width:14px;height:14px;stroke:var(--red);fill:none;stroke-width:2;flex-shrink:0}
+.ai-manual-input.error{border-color:var(--red);box-shadow:0 0 0 2px rgba(220,38,38,0.15)}
+.ai-typing{display:inline-flex;align-items:center;gap:4px;padding:4px 0}
+.ai-typing span{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:typingDot 1.2s infinite}
+.ai-typing span:nth-child(2){animation-delay:.2s}
+.ai-typing span:nth-child(3){animation-delay:.4s}
+@keyframes typingDot{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.fade-up{animation:fadeUp .4s ease both}
+
+/* Page content area scrolling */
+#page-content{display:flex;flex-direction:column;gap:20px;overflow-y:auto;padding:28px}
+#page-content>*{flex-shrink:0}
+#page-content::-webkit-scrollbar{width:4px}
+#page-content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+
+/* Level banner */
+.level-banner{display:flex;align-items:center;gap:12px;padding:0 28px;height:36px;background:linear-gradient(90deg,var(--accent-lt) 0%,transparent 60%);border-bottom:1px solid var(--accent-bd);text-decoration:none;flex-shrink:0}
+
+/* Confidence footer */
+.confidence-footer{display:flex;align-items:center;gap:10px;padding:10px 28px;background:var(--accent-lt);border-top:1px solid var(--accent-bd);flex-shrink:0}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <!-- CONTEXT METER -->
+  <div class="context-meter fade-up">
+    <div class="cm-gauge"><canvas id="gaugeCanvas" width="160" height="160"></canvas>
+      <div class="cm-gauge-label"><div class="cm-pct" id="gaugePct">0%</div><div class="cm-pct-sub">Complete</div></div>
+    </div>
+    <div class="cm-info">
+      <div class="cm-title" id="gaugeTitle">Context Completeness: 0%</div>
+      <div class="cm-sub">Complete each section to build the organisational context. Higher completeness improves SkillForge AI accuracy.</div>
+      <div class="cm-segs" id="segContainer"></div>
+    </div>
+  </div>
+
+  <!-- STEPPER -->
+  <div class="stepper-bar" id="stepper"></div>
+
+  <!-- SUCCESS BANNER -->
+  <div class="success-banner" id="successBanner">
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--green-bg);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg style="width:20px;height:20px;stroke:var(--green);fill:none;stroke-width:2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div><h3 style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--green);margin-bottom:4px">OrgSetup Complete — Context Locked</h3><p style="font-size:12px;color:var(--text-secondary)">All 113 organisational context fields captured across 9 sections. SkillForge AI pipeline ready.</p></div>
+    <a href="skillforge.html" class="btn btn-gold" style="margin-left:auto;white-space:nowrap">Feed into SkillForge &rarr;</a>
+  </div>
+
+  <!-- ALL STEP PANELS RENDERED BY JS -->
+  <div id="stepContainer"></div>
+
+</main>
+
+<!-- AI GUIDED POPUP -->
+<div class="ai-popup-overlay" id="aiPopup">
+  <div class="ai-popup">
+    <div class="ai-popup-header">
+      <div class="ai-popup-header-left">
+        <div class="ai-icon"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <div>
+          <div class="ai-popup-header-title">AI-Guided Role Builder</div>
+          <div class="ai-popup-header-sub">SkillForge AI suggests options based on your organisation context</div>
+        </div>
+      </div>
+      <button class="ai-popup-close" onclick="closeAiPopup()" title="Close and return to Step 3">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="ai-popup-progress">
+      <div class="ai-prog-bar"><div class="ai-prog-fill" id="aiProgFill" style="width:10%"></div></div>
+      <div class="ai-prog-text" id="aiProgText">1 / 10</div>
+    </div>
+    <div class="ai-tab-bar" id="aiTabBar"></div>
+    <div class="ai-popup-body">
+      <div class="ai-question-card" id="aiQuestionCard"></div>
+    </div>
+    <div class="ai-popup-footer">
+      <div class="ai-footer-left">
+        <button class="ai-skip" id="aiBackBtn" onclick="aiBack()" style="display:none">&larr; Back</button>
+        <button class="ai-skip" id="aiSkipBtn" onclick="aiSkip()">Skip this question</button>
+      </div>
+      <button class="ai-next-btn" id="aiNextBtn" onclick="aiNext()">Next <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-msg" id="toast"></div>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal: 'admin',
+  activeNav: 'Organisation Setup',
+  breadcrumbs: ['Setup', 'Organisation Setup'],
+  topbarActions: [
+    { label: 'Reset Demo', icon: 'settings' }
+  ]
+});
+</script>
+<script>
+// ═════��═════════════════════════════════════════════
+// STEP DEFINITIONS — 9 data steps + 1 review
+// ══════════════��═══════════════════════���════════════
+var STEPS = [
+  { id:1, title:'Org Identity', seg:'Identity', segColor:'var(--green)', icon:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33"/>' },
+  { id:2, title:'Hierarchy & Teams', seg:'Structure', segColor:'var(--blue)', icon:'<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/>' },
+  { id:3, title:'Strategic Foundation', seg:'Roles', segColor:'var(--purple)', icon:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
+  { id:4, title:'Goals & OKRs', seg:'Strategy', segColor:'var(--accent)', icon:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>' },
+  { id:5, title:'Products & Clients', seg:'Market', segColor:'var(--amber)', icon:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>' },
+  { id:6, title:'Standards', seg:'Compliance', segColor:'var(--green)', icon:'<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622"/>' },
+  { id:7, title:'Tools & Tech', seg:'Ecosystem', segColor:'var(--blue)', icon:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>' },
+  { id:8, title:'Skills & Proficiency', seg:'Framework', segColor:'var(--purple)', icon:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' },
+  { id:9, title:'Competency & Culture', seg:'Culture', segColor:'var(--red)', icon:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' },
+  { id:10, title:'Review', seg:null, icon:'<path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>' }
+];
+
+var state = { current:1, completed:{}, data:{ identity:{}, skills:{}, orgmodel:'', hierlevels:'', teams:'', cohorts:'', transStmt:'' } };
+for (var i=1;i<=9;i++) state.completed[i]=false;
+
+// ═════���═════════════════════════════════════════════
+// STEP HTML BUILDERS
+// ════════════��════════════════��═════════════════════
+function buildStep1(){
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Step 1 — Org Identity</div><button class="btn btn-sm btn-gold" onclick="autofill(1)">Auto-fill Arcova</button></div><div class="panel-body">'
+  +'<div class="section-desc">Core company information that identifies your organisation. Includes branding, location, and system integrations. <strong>19 fields</strong> feed into SkillForge context extraction.</div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Company Name *</label><input class="form-input" id="f-company" placeholder="e.g. Arcova Infrastructure Pte. Ltd."></div><div class="form-group"><label class="form-label">Industry *</label><select class="form-select" id="f-industry"><option value="">Select...</option><option>Infrastructure & Construction</option><option>Technology & Software</option><option>Financial Services</option><option>Healthcare & Life Sciences</option><option>Manufacturing</option><option>Energy & Utilities</option><option>Retail & E-commerce</option><option>Professional Services</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Industry Sub-sectors</label><input class="form-input" id="f-subsectors" placeholder="e.g. Civil Engineering, Smart Infrastructure, BIM"></div><div class="form-group"><label class="form-label">Size Band</label><select class="form-select" id="f-sizeband"><option value="">Select...</option><option>SMB (1-200)</option><option>Mid-Market (201-1000)</option><option>Enterprise (1001-5000)</option><option>Large Enterprise (5000+)</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Founded Year</label><input class="form-input" id="f-founded" type="number" placeholder="e.g. 2009"></div><div class="form-group"><label class="form-label">Headquarters</label><input class="form-input" id="f-hq" placeholder="e.g. Singapore"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">HQ Country (ISO)</label><input class="form-input" id="f-hqcountry" placeholder="e.g. SG" maxlength="2" style="text-transform:uppercase"></div><div class="form-group"><label class="form-label">Total Employees *</label><input class="form-input" id="f-employees" type="number" placeholder="e.g. 812"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Offices / Locations</label><input class="form-input" id="f-offices" placeholder="e.g. Singapore, Mumbai, Dubai, Kuala Lumpur"></div><div class="form-group"><label class="form-label">Timezone</label><select class="form-select" id="f-timezone"><option value="">Select...</option><option>Asia/Singapore (SGT +8)</option><option>Asia/Kolkata (IST +5:30)</option><option>Asia/Dubai (GST +4)</option><option>Europe/London (GMT/BST)</option><option>America/New_York (EST/EDT)</option><option>America/Los_Angeles (PST/PDT)</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Operating Model</label><select class="form-select" id="f-model"><option value="">Select...</option><option>Services & Project Delivery</option><option>Product-Led</option><option>Platform & SaaS</option><option>Hybrid</option></select></div><div class="form-group"><label class="form-label">Organisation Stage</label><select class="form-select" id="f-stage"><option value="">Select...</option><option>Startup</option><option>Growth</option><option>Mature — Optimisation</option><option>Mature — Transformation</option><option>Enterprise</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Fiscal Year Start Month</label><select class="form-select" id="f-fiscal"><option value="">Select...</option><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select></div><div class="form-group"><label class="form-label">Data Residency Region</label><select class="form-select" id="f-residency"><option value="">Select...</option><option>Asia-Pacific (Singapore)</option><option>Europe (Frankfurt)</option><option>North America (Virginia)</option><option>Middle East (Bahrain)</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Logo URL</label><input class="form-input" id="f-logo" placeholder="https://cdn.example.com/logo.png"></div><div class="form-group"><label class="form-label">Primary Brand Colour</label><input class="form-input" id="f-brandcolor" type="color" value="#C8A84B" style="height:36px;padding:4px"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">HRIS System</label><input class="form-input" id="f-hris" placeholder="e.g. Workday"></div><div class="form-group"><label class="form-label">LMS System</label><input class="form-input" id="f-lms" placeholder="e.g. Cornerstone OnDemand"></div></div>'
+  +'<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px"><button class="btn btn-gold" onclick="saveStep(1)">Save & Continue &rarr;</button></div></div></div>';
+}
+
+function buildStep2(){
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Step 2 — Hierarchy & Teams</div><button class="btn btn-sm btn-gold" onclick="autofill(2)">Auto-fill Arcova</button></div><div class="panel-body">'
+  +'<div class="section-desc">Define your organisational structure. Supports 9 org models (Traditional, Matrix, Agile/Spotify, etc.). Add Business Units with codes, heads, cost centres, and departments. Also define teams and employee cohorts. <strong>18 fields</strong> per node.</div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Org Model</label><select class="form-select" id="f-orgmodel"><option value="">Select...</option><option>Traditional Hierarchy</option><option>Matrix Organisation</option><option>Agile / Spotify Model</option><option>Consulting / Professional Services</option><option>Manufacturing</option><option>Holding Company</option><option>Government / Public Sector</option><option>Flat Organisation</option><option>Geographic / Regional</option></select></div><div class="form-group"><label class="form-label">Hierarchy Levels</label><input class="form-input" id="f-hierlevels" placeholder="e.g. Organisation > BU > Sub-BU > Department > Team"></div></div>'
+  +'<div id="buList"></div>'
+  +'<div class="dashed-box"><div class="dashed-title">Add Business Unit</div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">BU Name</label><input class="form-input" id="f-bu-name" placeholder="e.g. Engineering & Delivery"></div><div class="form-group"><label class="form-label">BU Code</label><input class="form-input" id="f-bu-code" placeholder="e.g. ENG" style="text-transform:uppercase"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Headcount</label><input class="form-input" id="f-bu-count" type="number" placeholder="e.g. 324"></div><div class="form-group"><label class="form-label">BU Head</label><input class="form-input" id="f-bu-head" placeholder="e.g. Rahul Sharma"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Cost Centre Code</label><input class="form-input" id="f-bu-cc" placeholder="e.g. CC-ENG-001"></div><div class="form-group"><label class="form-label">Location</label><input class="form-input" id="f-bu-loc" placeholder="e.g. Singapore, Mumbai"></div></div>'
+  +'<div class="form-group"><label class="form-label">Departments (name:count, comma-separated)</label><input class="form-input" id="f-bu-depts" placeholder="e.g. Structural Engineering:112, Civil & Geotechnical:98, Project Delivery:114"></div>'
+  +'<button class="btn btn-blue btn-sm" onclick="addBU()" style="margin-top:6px">+ Add Business Unit</button></div>'
+  +'<div class="dashed-box" style="margin-top:12px"><div class="dashed-title">Teams & Cohorts</div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Teams (comma-separated)</label><input class="form-input" id="f-teams" placeholder="e.g. Marina Bay Project Team, Digital Transformation Squad, EHS Task Force"></div><div class="form-group"><label class="form-label">Employee Cohorts</label><input class="form-input" id="f-cohorts" placeholder="e.g. Graduate Intake 2025, Leadership Pipeline, BIM Champions"></div></div></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:10px;margin-top:16px"><button class="btn" onclick="goToStep(1)">&larr; Back</button><button class="btn btn-gold" onclick="saveStep(2)">Save & Continue &rarr;</button></div></div></div>';
+}
+
+function buildStep3(){
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Step 3 — Strategic Foundation</div><div style="display:flex;gap:8px;align-items:center"><button class="btn btn-sm" onclick="openAiPopup()" style="background:linear-gradient(135deg,var(--accent) 0%,#E8C86E 100%);border-color:var(--accent);color:#0F1117;font-weight:600;gap:6px"><svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>AI-Guided Builder</button><button class="btn btn-sm btn-gold" onclick="autofill(3)">Auto-fill Arcova</button></div></div><div class="panel-body">'
+  +'<div class="section-desc">Define job titles, KRAs, career pathways, and succession criticality. Role profiles feed directly into SkillForge Prompt 3 (Role Architecture Analysis) for role-to-skill mapping. <strong>12 fields</strong> per role. <span style="color:var(--accent);font-weight:500">Use the AI-Guided Builder for intelligent suggestions.</span></div>'
+  +'<div id="roleList"></div>'
+  +'<div class="dashed-box"><div class="dashed-title">Add Role Profile</div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Job Title *</label><input class="form-input" id="f-role-title" placeholder="e.g. Senior Structural Engineer"></div><div class="form-group"><label class="form-label">Role Family</label><select class="form-select" id="f-role-family"><option value="">Select...</option><option>Engineering</option><option>Technology</option><option>Operations</option><option>Corporate</option><option>Leadership</option><option>Support</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Department</label><input class="form-input" id="f-role-dept" placeholder="e.g. Structural Engineering"></div><div class="form-group"><label class="form-label">Seniority Band</label><select class="form-select" id="f-role-senior"><option value="">Select...</option><option>L1 — Entry</option><option>L2 — Associate</option><option>L3 — Mid-Level</option><option>L4 — Senior</option><option>L5 — Lead / Principal</option><option>L6 — Director</option><option>L7 — VP / C-Suite</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">KRAs (Key Result Areas)</label><input class="form-input" id="f-role-kra" placeholder="e.g. Design accuracy, code compliance, project delivery"></div><div class="form-group"><label class="form-label">Career Pathway</label><input class="form-input" id="f-role-career" placeholder="e.g. Engineer → Senior → Principal → Director"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Min Qualifications</label><input class="form-input" id="f-role-qual" placeholder="e.g. BE/BTech Civil, PE certification"></div><div class="form-group"><label class="form-label">Role Criticality</label><select class="form-select" id="f-role-crit"><option value="">Select...</option><option>C1 — Critical</option><option>C2 — High</option><option>C3 — Medium</option><option>C4 — Low</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Is People Manager?</label><select class="form-select" id="f-role-mgr"><option value="">Select...</option><option value="yes">Yes</option><option value="no">No</option></select></div><div class="form-group"><label class="form-label">Succession Criticality</label><select class="form-select" id="f-role-spof"><option value="">Select...</option><option>Single Point of Failure</option><option>Key Person Risk</option><option>Pipeline Available</option><option>Not Critical</option></select></div></div>'
+  +'<button class="btn btn-blue btn-sm" onclick="addRole()" style="margin-top:6px">+ Add Role Profile</button></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:10px;margin-top:16px"><button class="btn" onclick="goToStep(2)">&larr; Back</button><button class="btn btn-gold" onclick="saveStep(3)">Save & Continue &rarr;</button></div></div></div>';
+}
+
+function buildStep4(){
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Step 4 — Strategic Goals & OKRs</div><button class="btn btn-sm btn-gold" onclick="autofill(4)">Auto-fill Arcova</button></div><div class="panel-body">'
+  +'<div class="section-desc">Strategic goals drive SkillForge AI prioritisation. Define goal types (Strategic / OKR / Annual), assign ownership, priority weighting, and link to required skills. <strong>10 fields</strong> per goal.</div>'
+  +'<div id="goalList"></div>'
+  +'<div class="dashed-box"><div class="dashed-title">Add Goal</div>'
+  +'<div class="form-group"><label class="form-label">Goal Description *</label><input class="form-input" id="f-goal-text" placeholder="e.g. Expand digital delivery capability across all project sites"></div>'
+  +'<div class="form-row-4"><div class="form-group"><label class="form-label">Type</label><select class="form-select" id="f-goal-type"><option>Strategic Objective</option><option>OKR</option><option>Annual Target</option><option>Transformation Priority</option></select></div><div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="f-goal-priority"><option>High</option><option>Medium</option><option>Low</option></select></div><div class="form-group"><label class="form-label">Target Date</label><input class="form-input" id="f-goal-date" placeholder="Q4 2026"></div><div class="form-group"><label class="form-label">Progress %</label><input class="form-input" id="f-goal-pct" type="number" placeholder="42" min="0" max="100"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Goal Owner</label><input class="form-input" id="f-goal-owner" placeholder="e.g. CTO Office"></div><div class="form-group"><label class="form-label">Scope</label><select class="form-select" id="f-goal-scope"><option>Organisation-wide</option><option>Business Unit</option><option>Department</option></select></div></div>'
+  +'<div class="form-group"><label class="form-label">Linked Skills / Capabilities</label><input class="form-input" id="f-goal-skills" placeholder="e.g. BIM, Digital Delivery, AI Literacy"></div>'
+  +'<button class="btn btn-blue btn-sm" onclick="addGoal()" style="margin-top:6px">+ Add Goal</button></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:10px;margin-top:16px"><button class="btn" onclick="goToStep(3)">&larr; Back</button><button class="btn btn-gold" onclick="saveStep(4)">Save & Continue &rarr;</button></div></div></div>';
+}
+
+function buildStep5(){
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Step 5 — Products, Services & Clients</div><button class="btn btn-sm btn-gold" onclick="autofill(5)">Auto-fill Arcova</button></div><div class="panel-body">'
+  +'<div class="section-desc">What your company delivers and who it serves. Product/service lines with lifecycle stages, plus client context with industry tags and geographic presence. Client types generate skill signals for the AI. <strong>10 fields</strong>.</div>'
+  +'<div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:8px">Products & Services</div>'
+  +'<div id="productList"></div>'
+  +'<div class="add-row" style="margin-top:8px"><div class="form-group"><label class="form-label">Product / Service</label><input class="form-input" id="f-product" placeholder="e.g. Civil & Structural Engineering"></div><div class="form-group" style="max-width:140px"><label class="form-label">Category</label><select class="form-select" id="f-prod-cat"><option>Product</option><option>Service</option><option>Platform</option></select></div><div class="form-group" style="max-width:140px"><label class="form-label">Lifecycle</label><select class="form-select" id="f-prod-life"><option>Active</option><option>Growth</option><option>Mature</option><option>Sunset</option></select></div><button class="btn btn-blue btn-sm" onclick="addProduct()" style="margin-bottom:12px;flex-shrink:0">+ Add</button></div>'
+  +'<div style="font-size:12px;font-weight:500;color:var(--text-primary);margin:16px 0 8px;padding-top:14px;border-top:1px solid #E5E7EB">Client & Market Context</div>'
+  +'<div id="clientList"></div>'
+  +'<div class="add-row" style="margin-top:8px"><div class="form-group"><label class="form-label">Client Name</label><input class="form-input" id="f-client" placeholder="e.g. Marina Bay Sands"></div><div class="form-group"><label class="form-label">Industry Tags</label><input class="form-input" id="f-client-ind" placeholder="e.g. Hospitality, Real Estate"></div><div class="form-group" style="max-width:140px"><label class="form-label">Region</label><input class="form-input" id="f-client-geo" placeholder="e.g. APAC"></div><button class="btn btn-blue btn-sm" onclick="addClient()" style="margin-bottom:12px;flex-shrink:0">+ Add</button></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:10px;margin-top:16px"><button class="btn" onclick="goToStep(4)">&larr; Back</button><button class="btn btn-gold" onclick="saveStep(5)">Save & Continue &rarr;</button></div></div></div>';
+}
+
+function buildStep6(){
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Step 6 — Standards & Compliance</div><button class="btn btn-sm btn-gold" onclick="autofill(6)">Auto-fill Arcova</button></div><div class="panel-body">'
+  +'<div class="section-desc">Governing standards drive mandatory skill requirements and compliance training. Define category, applicable scope, deadlines, and mandatory training links. <strong>8 fields</strong> per standard.</div>'
+  +'<div id="standardList"></div>'
+  +'<div class="dashed-box"><div class="dashed-title">Add Standard</div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Standard Name *</label><input class="form-input" id="f-std-name" placeholder="e.g. ISO 45001"></div><div class="form-group"><label class="form-label">Category</label><select class="form-select" id="f-std-cat"><option>Quality Management</option><option>Information Security</option><option>Data Protection</option><option>Industry-Specific</option><option>Project & Delivery</option><option>Environmental & Safety</option><option>Custom Standard</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-std-status"><option>Active</option><option>Pending</option><option>Expired</option></select></div><div class="form-group"><label class="form-label">Compliance Deadline</label><input class="form-input" id="f-std-deadline" placeholder="e.g. Q3 2026"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Applicable Scope (roles/departments)</label><input class="form-input" id="f-std-scope" placeholder="e.g. All site-based roles, EHS dept"></div><div class="form-group"><label class="form-label">Mandatory Training Links</label><input class="form-input" id="f-std-training" placeholder="e.g. ISO 45001 Awareness, Safety Audit Procedures"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Renewal Period</label><input class="form-input" id="f-std-renewal" placeholder="e.g. Annual, Every 3 years"></div><div class="form-group"><label class="form-label">Jurisdiction</label><input class="form-input" id="f-std-juris" placeholder="e.g. Singapore, All regions"></div></div>'
+  +'<button class="btn btn-blue btn-sm" onclick="addStandard()" style="margin-top:6px">+ Add Standard</button></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:10px;margin-top:16px"><button class="btn" onclick="goToStep(5)">&larr; Back</button><button class="btn btn-gold" onclick="saveStep(6)">Save & Continue &rarr;</button></div></div></div>';
+}
+
+function buildStep7(){
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Step 7 — Tools & Technologies</div><button class="btn btn-sm btn-gold" onclick="autofill(7)">Auto-fill Arcova</button></div><div class="panel-body">'
+  +'<div class="section-desc">Map your technology landscape. Tools with sunset flags generate migration skill requirements. Department mapping shows who needs what skills. <strong>9 fields</strong> per tool.</div>'
+  +'<div id="toolList" style="margin-bottom:12px"></div>'
+  +'<div class="dashed-box"><div class="dashed-title">Add Tool</div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Tool Name *</label><input class="form-input" id="f-tool-name" placeholder="e.g. Autodesk Revit"></div><div class="form-group"><label class="form-label">Category</label><select class="form-select" id="f-tool-cat"><option>Core Business Apps</option><option>Dev & Engineering</option><option>Data & Analytics</option><option>Collaboration</option><option>Security</option><option>Customer-Facing</option><option>AI & Automation</option></select></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-tool-status"><option>Current</option><option>Evaluating</option><option>Sunset / Phase-out</option></select></div><div class="form-group"><label class="form-label">Version</label><input class="form-input" id="f-tool-ver" placeholder="e.g. 2025.1"></div></div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Departments Using</label><input class="form-input" id="f-tool-depts" placeholder="e.g. Structural Engineering, BIM, Project Delivery"></div><div class="form-group"><label class="form-label">Usage Depth</label><select class="form-select" id="f-tool-depth"><option>Core Workflow</option><option>Regular Use</option><option>Occasional</option><option>Admin Only</option></select></div></div>'
+  +'<div class="form-group"><label class="form-label">User Roles (who uses this tool)</label><input class="form-input" id="f-tool-roles" placeholder="e.g. Admin, Power User, Basic User"></div>'
+  +'<button class="btn btn-blue btn-sm" onclick="addTool()" style="margin-top:6px">+ Add Tool</button></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:10px;margin-top:16px"><button class="btn" onclick="goToStep(6)">&larr; Back</button><button class="btn btn-gold" onclick="saveStep(7)">Save & Continue &rarr;</button></div></div></div>';
+}
+
+function buildStep8(){
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Step 8 — Skills, Proficiency & Criticality</div><button class="btn btn-sm btn-gold" onclick="autofill(8)">Auto-fill Arcova</button></div><div class="panel-body">'
+  +'<div class="section-desc">Configure the skill criticality framework (4-tier with editable weights), proficiency level definitions (L1-L4 behavioural descriptors), and the skills dictionary taxonomy. <strong>15 fields</strong>.</div>'
+  +'<div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:10px">Skill Criticality Framework — Editable</div>'
+  +'<div class="form-row" style="margin-bottom:6px"><div class="form-group"><label class="form-label">C1 Label</label><input class="form-input" id="f-c1-label" value="Critical" style="color:var(--red)"></div><div class="form-group"><label class="form-label">C1 Weight</label><input class="form-input" id="f-c1-weight" value="2.0x" style="width:80px"></div><div class="form-group"><label class="form-label">C1 Description</label><input class="form-input" id="f-c1-desc" value="Platform-critical, zero tolerance for gap"></div></div>'
+  +'<div class="form-row" style="margin-bottom:6px"><div class="form-group"><label class="form-label">C2 Label</label><input class="form-input" id="f-c2-label" value="High" style="color:var(--amber)"></div><div class="form-group"><label class="form-label">C2 Weight</label><input class="form-input" id="f-c2-weight" value="1.5x" style="width:80px"></div><div class="form-group"><label class="form-label">C2 Description</label><input class="form-input" id="f-c2-desc" value="Strategically important, 6-month closure target"></div></div>'
+  +'<div class="form-row" style="margin-bottom:6px"><div class="form-group"><label class="form-label">C3 Label</label><input class="form-input" id="f-c3-label" value="Medium" style="color:var(--blue)"></div><div class="form-group"><label class="form-label">C3 Weight</label><input class="form-input" id="f-c3-weight" value="1.0x" style="width:80px"></div><div class="form-group"><label class="form-label">C3 Description</label><input class="form-input" id="f-c3-desc" value="Operationally relevant, 12-month plan"></div></div>'
+  +'<div class="form-row" style="margin-bottom:14px"><div class="form-group"><label class="form-label">C4 Label</label><input class="form-input" id="f-c4-label" value="Low" style="color:var(--text-muted)"></div><div class="form-group"><label class="form-label">C4 Weight</label><input class="form-input" id="f-c4-weight" value="0.5x" style="width:80px"></div><div class="form-group"><label class="form-label">C4 Description</label><input class="form-input" id="f-c4-desc" value="Nice to have, opportunistic development"></div></div>'
+  +'<div style="font-size:12px;font-weight:500;color:var(--text-primary);margin:16px 0 10px;padding-top:14px;border-top:1px solid #E5E7EB">Proficiency Level Definitions</div>'
+  +'<div class="form-row" style="margin-bottom:6px"><div class="form-group"><label class="form-label">L1 — Awareness</label><input class="form-input" id="f-prof-l1" placeholder="e.g. Has basic awareness, follows instructions with guidance"></div><div class="form-group"><label class="form-label">L2 — Working</label><input class="form-input" id="f-prof-l2" placeholder="e.g. Applies knowledge in routine situations with support"></div></div>'
+  +'<div class="form-row" style="margin-bottom:14px"><div class="form-group"><label class="form-label">L3 — Practitioner</label><input class="form-input" id="f-prof-l3" placeholder="e.g. Performs independently, handles complex situations"></div><div class="form-group"><label class="form-label">L4 — Expert</label><input class="form-input" id="f-prof-l4" placeholder="e.g. Leads, mentors, innovates, shapes org-wide standards"></div></div>'
+  +'<div style="font-size:12px;font-weight:500;color:var(--text-primary);margin:16px 0 10px;padding-top:14px;border-top:1px solid #E5E7EB">Skills Dictionary Configuration</div>'
+  +'<div class="form-row"><div class="form-group"><label class="form-label">Taxonomy Hierarchy</label><input class="form-input" id="f-taxonomy" placeholder="e.g. Domain > Knowledge Area > Skill Category > Skill"></div><div class="form-group"><label class="form-label">Skill Types</label><input class="form-input" id="f-skill-types" placeholder="e.g. Technical, Behavioural, Leadership, Functional"></div></div>'
+  +'<div class="form-group"><label class="form-label">Benchmark Linkages</label><input class="form-input" id="f-benchmarks" placeholder="e.g. SFIA v9, O*NET, European e-Competence Framework"></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:10px;margin-top:16px"><button class="btn" onclick="goToStep(7)">&larr; Back</button><button class="btn btn-gold" onclick="saveStep(8)">Save & Continue &rarr;</button></div></div></div>';
+}
+
+function buildStep9(){
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Step 9 — Competency Framework, Culture & Transformation</div><button class="btn btn-sm btn-gold" onclick="autofill(9)">Auto-fill Arcova</button></div><div class="panel-body">'
+  +'<div class="section-desc">Define competency types linked to org values, culture dimensions with current/target proficiency, and the Transformation Dial settings that shift skill requirements. <strong>12 fields</strong>.</div>'
+  +'<div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:10px">Competency Framework</div>'
+  +'<div id="compList"></div>'
+  +'<div class="add-row" style="margin-top:8px"><div class="form-group"><label class="form-label">Competency Name</label><input class="form-input" id="f-comp-name" placeholder="e.g. Innovation Mindset"></div><div class="form-group" style="max-width:160px"><label class="form-label">Type</label><select class="form-select" id="f-comp-type"><option>Core / Behavioural</option><option>Leadership</option><option>Technical</option><option>Functional</option></select></div><div class="form-group"><label class="form-label">Linked Org Value</label><input class="form-input" id="f-comp-value" placeholder="e.g. Excellence"></div><button class="btn btn-blue btn-sm" onclick="addComp()" style="margin-bottom:12px;flex-shrink:0">+ Add</button></div>'
+  +'<div style="font-size:12px;font-weight:500;color:var(--text-primary);margin:16px 0 10px;padding-top:14px;border-top:1px solid #E5E7EB">Culture Definition</div>'
+  +'<div id="cultureList"></div>'
+  +'<div class="add-row" style="margin-top:8px"><div class="form-group"><label class="form-label">Culture Dimension</label><input class="form-input" id="f-cult-dim" placeholder="e.g. Safety-First Mindset"></div><div class="form-group" style="max-width:80px"><label class="form-label">Current</label><input class="form-input" id="f-cult-curr" type="number" placeholder="3" min="1" max="5"></div><div class="form-group" style="max-width:80px"><label class="form-label">Target Y1</label><input class="form-input" id="f-cult-tgt" type="number" placeholder="4" min="1" max="5"></div><button class="btn btn-blue btn-sm" onclick="addCulture()" style="margin-bottom:12px;flex-shrink:0">+ Add</button></div>'
+  +'<div style="font-size:12px;font-weight:500;color:var(--text-primary);margin:16px 0 10px;padding-top:14px;border-top:1px solid #E5E7EB">Transformation Dial</div>'
+  +'<div class="section-desc" style="border-left-color:var(--amber)">The Transformation Dial shifts skill requirements on a -5 to +5 scale. A positive dial on "Digital Delivery" increases the target proficiency for all digital skills. Presets bundle multiple dial changes for common transformations.</div>'
+  +'<div id="dialList"></div>'
+  +'<div class="add-row" style="margin-top:8px"><div class="form-group"><label class="form-label">Skill / Capability</label><input class="form-input" id="f-dial-skill" placeholder="e.g. Digital Delivery"></div><div class="form-group" style="max-width:100px"><label class="form-label">Dial (-5 to +5)</label><input class="form-input" id="f-dial-val" type="number" placeholder="3" min="-5" max="5"></div><div class="form-group"><label class="form-label">Rationale</label><input class="form-input" id="f-dial-why" placeholder="e.g. Strategic push to reduce BIM dependency"></div><button class="btn btn-blue btn-sm" onclick="addDial()" style="margin-bottom:12px;flex-shrink:0">+ Add</button></div>'
+  +'<div class="form-group" style="margin-top:12px"><label class="form-label">Transformation Statement</label><textarea class="form-textarea" id="f-trans-stmt" placeholder="e.g. Arcova is transitioning from a traditional infrastructure firm to a digitally-enabled delivery organisation. Over the next 3 years, every project site will operate BIM-first, requiring 40% of the workforce to reach L3 digital proficiency."></textarea></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:10px;margin-top:16px"><button class="btn" onclick="goToStep(8)">&larr; Back</button><button class="btn btn-gold" onclick="saveStep(9)">Save & Continue &rarr;</button></div></div></div>';
+}
+
+function buildStep10(){
+  return '<div class="panel fade-up"><div class="panel-head"><div class="panel-title">Step 10 — Review & Confirm</div></div><div class="panel-body" id="reviewBody"><div style="text-align:center;padding:20px;color:var(--text-muted)">Complete all 9 steps to see the full review.</div></div></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:10px;margin-top:10px"><button class="btn" onclick="goToStep(9)">&larr; Back</button><button class="btn btn-gold" onclick="confirmSetup()" style="font-size:13px;padding:10px 28px"><svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirm & Lock OrgSetup</button></div>';
+}
+
+var stepBuilders = [buildStep1,buildStep2,buildStep3,buildStep4,buildStep5,buildStep6,buildStep7,buildStep8,buildStep9,buildStep10];
+
+// ════════════��══════════════════════════════════════
+// DYNAMIC LIST DATA
+// ═════════���════════════════════════���════════════════
+var D = { bus:[], roles:[], goals:[], products:[], clients:[], standards:[], tools:[], comps:[], cultures:[], dials:[] };
+
+// ═══════���═══════════════════════════���═══════════════
+// RENDERING
+// ═══════════════════════════════════════════════════
+function renderStepper(){
+  var h='';
+  STEPS.forEach(function(s,i){
+    if(i>0) h+='<div class="step-conn'+(state.completed[i]?' done':'')+'"></div>';
+    var cls = s.id===state.current?' active':'';
+    if(state.completed[s.id]) cls=' done';
+    h+='<div class="step-item'+cls+'" data-step="'+s.id+'" onclick="goToStep('+s.id+')">';
+    h+='<div class="step-num">'+(state.completed[s.id]?'<svg style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':s.id)+'</div>';
+    h+='<span class="step-label">'+s.title+'</span></div>';
+  });
+  document.getElementById('stepper').innerHTML=h;
+}
+
+function renderSegs(){
+  var h='';
+  STEPS.forEach(function(s){
+    if(!s.seg) return;
+    var done=state.completed[s.id];
+    var val=done?'100%':'0%';
+    var col=done?s.segColor:'var(--text-muted)';
+    h+='<div class="cm-seg"><div class="cm-dot" style="background:'+s.segColor+'"></div><span class="cm-seg-label">'+s.seg+':</span><span class="cm-seg-val" style="color:'+col+'">'+val+'</span></div>';
+  });
+  document.getElementById('segContainer').innerHTML=h;
+}
+
+function renderSteps(){
+  var h='';
+  STEPS.forEach(function(s,i){
+    var vis=s.id===state.current?' visible':'';
+    h+='<div class="step-panel'+vis+'" id="step'+s.id+'">'+stepBuilders[i]()+'</div>';
+  });
+  document.getElementById('stepContainer').innerHTML=h;
+}
+
+function goToStep(n){
+  state.current=n;
+  renderStepper();
+  STEPS.forEach(function(s){
+    var el=document.getElementById('step'+s.id);
+    if(el){if(s.id===n)el.classList.add('visible');else el.classList.remove('visible')}
+  });
+  if(n===10) buildReview();
+  document.getElementById('page-content').scrollTop=0;
+}
+
+function drawGauge(pct){
+  var c=document.getElementById('gaugeCanvas');if(!c)return;
+  var ctx=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,r=65;
+  ctx.clearRect(0,0,w,h);
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='rgba(0,0,0,0.06)';ctx.lineWidth=9;ctx.stroke();
+  if(pct>0){ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*pct);var g=ctx.createLinearGradient(0,0,w,h);if(pct<.5){g.addColorStop(0,'#D97706');g.addColorStop(1,'#F59E0B')}else if(pct<.8){g.addColorStop(0,'#2563EB');g.addColorStop(1,'#3B82F6')}else{g.addColorStop(0,'#16A34A');g.addColorStop(1,'#22C55E')}ctx.strokeStyle=g;ctx.lineWidth=9;ctx.lineCap='round';ctx.stroke()}
+  var p=Math.round(pct*100);
+  document.getElementById('gaugePct').textContent=p+'%';
+  document.getElementById('gaugePct').style.color=pct<.5?'var(--amber)':pct<.8?'var(--blue)':'var(--green)';
+  document.getElementById('gaugeTitle').textContent='Context Completeness: '+p+'%';
+}
+
+function updateProgress(){
+  var done=0;for(var k in state.completed)if(state.completed[k])done++;
+  drawGauge(done/9);renderSegs();renderStepper();
+}
+
+// ══════════���═══════════════════════════��════════════
+// SAVE / ADD FUNCTIONS
+// ══════════════��══════════���═════════════════════════
+function captureFormData(n){
+  if(n===1){
+    state.data.identity={};
+    ['f-company','f-industry','f-subsectors','f-sizeband','f-founded','f-hq','f-hqcountry','f-employees','f-offices','f-timezone','f-model','f-stage','f-fiscal','f-residency','f-logo','f-hris','f-lms'].forEach(function(id){
+      var el=document.getElementById(id);if(el)state.data.identity[id]=el.value;
+    });
+    var bc=document.getElementById('f-brandcolor');if(bc)state.data.identity['f-brandcolor']=bc.value;
+  }
+  if(n===8){
+    state.data.skills={};
+    ['f-c1-label','f-c1-weight','f-c1-desc','f-c2-label','f-c2-weight','f-c2-desc','f-c3-label','f-c3-weight','f-c3-desc','f-c4-label','f-c4-weight','f-c4-desc','f-prof-l1','f-prof-l2','f-prof-l3','f-prof-l4','f-taxonomy','f-skill-types','f-benchmarks'].forEach(function(id){
+      var el=document.getElementById(id);if(el)state.data.skills[id]=el.value;
+    });
+  }
+  if(n===9){
+    var stmt=document.getElementById('f-trans-stmt');
+    state.data.transStmt=stmt?stmt.value:'';
+  }
+  if(n===2){
+    state.data.orgmodel=document.getElementById('f-orgmodel')?document.getElementById('f-orgmodel').value:'';
+    state.data.hierlevels=document.getElementById('f-hierlevels')?document.getElementById('f-hierlevels').value:'';
+    state.data.teams=document.getElementById('f-teams')?document.getElementById('f-teams').value:'';
+    state.data.cohorts=document.getElementById('f-cohorts')?document.getElementById('f-cohorts').value:'';
+  }
+}
+
+function saveStep(n){
+  if(n===1&&!document.getElementById('f-company').value.trim()){showToast('Enter company name');return}
+  if(n===2&&D.bus.length===0){showToast('Add at least one BU');return}
+  if(n===3&&D.roles.length===0){showToast('Add at least one role');return}
+  if(n===4&&D.goals.length===0){showToast('Add at least one goal');return}
+  captureFormData(n);
+  state.completed[n]=true;updateProgress();
+  var next=n<10?n+1:10;
+  goToStep(next);
+  showToast('Step '+n+' saved');
+}
+
+function addBU(){
+  var name=document.getElementById('f-bu-name').value.trim();if(!name){showToast('Enter BU name');return}
+  var depts=[];var raw=document.getElementById('f-bu-depts').value.trim();
+  if(raw)raw.split(',').forEach(function(p){var m=p.trim().match(/^(.+?):(\d+)$/);depts.push(m?{name:m[1].trim(),count:+m[2]}:{name:p.trim(),count:0})});
+  D.bus.push({name:name,code:document.getElementById('f-bu-code').value.trim(),count:+document.getElementById('f-bu-count').value||0,head:document.getElementById('f-bu-head').value.trim(),cc:document.getElementById('f-bu-cc').value.trim(),loc:document.getElementById('f-bu-loc').value.trim(),depts:depts});
+  renderList('buList',D.bus,function(b){return b.name+' ('+b.code+') — '+b.count+' employees, '+b.depts.length+' depts'},'bus');
+  ['f-bu-name','f-bu-code','f-bu-count','f-bu-head','f-bu-cc','f-bu-loc','f-bu-depts'].forEach(function(id){document.getElementById(id).value=''});
+  showToast(name+' added');
+}
+
+function addRole(){
+  var t=document.getElementById('f-role-title').value.trim();if(!t){showToast('Enter job title');return}
+  D.roles.push({title:t,family:document.getElementById('f-role-family').value,dept:document.getElementById('f-role-dept').value.trim(),senior:document.getElementById('f-role-senior').value,kra:document.getElementById('f-role-kra').value.trim(),career:document.getElementById('f-role-career').value.trim(),qual:document.getElementById('f-role-qual').value.trim(),crit:document.getElementById('f-role-crit').value,mgr:document.getElementById('f-role-mgr').value,spof:document.getElementById('f-role-spof').value});
+  renderList('roleList',D.roles,function(r){return r.title+' — '+r.family+' · '+r.senior+(r.spof?' · '+r.spof:'')},'roles');
+  ['f-role-title','f-role-dept','f-role-kra','f-role-career','f-role-qual'].forEach(function(id){document.getElementById(id).value=''});
+  showToast(t+' added');
+}
+
+function addGoal(){
+  var t=document.getElementById('f-goal-text').value.trim();if(!t){showToast('Enter goal');return}
+  D.goals.push({text:t,type:document.getElementById('f-goal-type').value,priority:document.getElementById('f-goal-priority').value,date:document.getElementById('f-goal-date').value,pct:+document.getElementById('f-goal-pct').value||0,owner:document.getElementById('f-goal-owner').value.trim(),scope:document.getElementById('f-goal-scope').value,skills:document.getElementById('f-goal-skills').value.trim()});
+  renderList('goalList',D.goals,function(g){return g.type+': '+g.text.substring(0,60)+'... ('+g.pct+'%)'},'goals');
+  ['f-goal-text','f-goal-date','f-goal-pct','f-goal-owner','f-goal-skills'].forEach(function(id){document.getElementById(id).value=''});
+  showToast('Goal added');
+}
+
+function addProduct(){
+  var v=document.getElementById('f-product').value.trim();if(!v)return;
+  D.products.push({name:v,cat:document.getElementById('f-prod-cat').value,life:document.getElementById('f-prod-life').value});
+  renderList('productList',D.products,function(p){return p.name+' · '+p.cat+' · '+p.life},'products');
+  document.getElementById('f-product').value='';
+}
+
+function addClient(){
+  var v=document.getElementById('f-client').value.trim();if(!v)return;
+  D.clients.push({name:v,industry:document.getElementById('f-client-ind').value.trim(),geo:document.getElementById('f-client-geo').value.trim()});
+  renderList('clientList',D.clients,function(c){return c.name+' · '+c.industry+' · '+c.geo},'clients');
+  document.getElementById('f-client').value='';document.getElementById('f-client-ind').value='';document.getElementById('f-client-geo').value='';
+}
+
+function addStandard(){
+  var v=document.getElementById('f-std-name').value.trim();if(!v)return;
+  D.standards.push({name:v,cat:document.getElementById('f-std-cat').value,status:document.getElementById('f-std-status').value,deadline:document.getElementById('f-std-deadline').value.trim(),scope:document.getElementById('f-std-scope').value.trim(),training:document.getElementById('f-std-training').value.trim(),renewal:document.getElementById('f-std-renewal').value.trim(),juris:document.getElementById('f-std-juris').value.trim()});
+  renderList('standardList',D.standards,function(s){return s.name+' · '+s.cat+' · '+s.status},'standards');
+  ['f-std-name','f-std-deadline','f-std-scope','f-std-training','f-std-renewal','f-std-juris'].forEach(function(id){document.getElementById(id).value=''});
+  showToast(v+' added');
+}
+
+function addTool(){
+  var v=document.getElementById('f-tool-name').value.trim();if(!v)return;
+  D.tools.push({name:v,cat:document.getElementById('f-tool-cat').value,status:document.getElementById('f-tool-status').value,ver:document.getElementById('f-tool-ver').value.trim(),depts:document.getElementById('f-tool-depts').value.trim(),depth:document.getElementById('f-tool-depth').value,roles:document.getElementById('f-tool-roles').value.trim()});
+  renderList('toolList',D.tools,function(t){return t.name+' · '+t.cat+' · '+t.status+(t.status==='Sunset / Phase-out'?' ⚠':'');},'tools');
+  ['f-tool-name','f-tool-ver','f-tool-depts','f-tool-roles'].forEach(function(id){document.getElementById(id).value=''});
+  showToast(v+' added');
+}
+
+function addComp(){
+  var v=document.getElementById('f-comp-name').value.trim();if(!v)return;
+  D.comps.push({name:v,type:document.getElementById('f-comp-type').value,value:document.getElementById('f-comp-value').value.trim()});
+  renderList('compList',D.comps,function(c){return c.name+' · '+c.type+' · '+c.value},'comps');
+  document.getElementById('f-comp-name').value='';document.getElementById('f-comp-value').value='';
+}
+
+function addCulture(){
+  var v=document.getElementById('f-cult-dim').value.trim();if(!v)return;
+  D.cultures.push({dim:v,curr:+document.getElementById('f-cult-curr').value||0,tgt:+document.getElementById('f-cult-tgt').value||0});
+  renderList('cultureList',D.cultures,function(c){return c.dim+': Current '+c.curr+' → Target '+c.tgt},'cultures');
+  document.getElementById('f-cult-dim').value='';document.getElementById('f-cult-curr').value='';document.getElementById('f-cult-tgt').value='';
+}
+
+function addDial(){
+  var v=document.getElementById('f-dial-skill').value.trim();if(!v)return;
+  D.dials.push({skill:v,val:+document.getElementById('f-dial-val').value||0,why:document.getElementById('f-dial-why').value.trim()});
+  renderList('dialList',D.dials,function(d){return d.skill+': '+(d.val>0?'+':'')+d.val+' — '+d.why},'dials');
+  document.getElementById('f-dial-skill').value='';document.getElementById('f-dial-val').value='';document.getElementById('f-dial-why').value='';
+}
+
+function renderList(elId,arr,fmt,key){
+  var h='';arr.forEach(function(item,i){h+='<div class="added-chip">'+fmt(item)+'<span class="remove-chip" onclick="removeItem(\''+key+'\','+i+',\''+elId+'\')">&times;</span></div>'});
+  var el=document.getElementById(elId);if(el)el.innerHTML=h?'<div class="added-items">'+h+'</div>':'';
+}
+
+function removeItem(key,idx,elId){D[key].splice(idx,1);renderList(elId,D[key],arguments.callee,key);renderSteps();goToStep(state.current)}
+
+// ═══════���═══════════════════════════════════════════
+// AUTO-FILL
+// ══════════════���══════════════��═════════════════════
+function autofill(step){
+  if(step===1){
+    var m={'f-company':'Arcova Infrastructure Pte. Ltd.','f-industry':'Infrastructure & Construction','f-subsectors':'Civil Engineering, Smart Infrastructure, BIM, Sustainability Advisory','f-sizeband':'Mid-Market (201-1000)','f-founded':'2009','f-hq':'Singapore','f-hqcountry':'SG','f-employees':'812','f-offices':'Singapore, Mumbai, Dubai, Kuala Lumpur','f-timezone':'Asia/Singapore (SGT +8)','f-model':'Services & Project Delivery','f-stage':'Mature — Transformation','f-fiscal':'1','f-residency':'Asia-Pacific (Singapore)','f-logo':'https://cdn.arcova.sg/logo.svg','f-hris':'Workday','f-lms':'Cornerstone OnDemand'};
+    for(var k in m){var el=document.getElementById(k);if(el)el.value=m[k]}
+    document.getElementById('f-brandcolor').value='#C8A84B';
+  }
+  if(step===2){
+    document.getElementById('f-orgmodel').value='Traditional Hierarchy';
+    document.getElementById('f-hierlevels').value='Organisation > Business Unit > Department > Team';
+    document.getElementById('f-teams').value='Marina Bay Project Team, Digital Transformation Squad, EHS Task Force, Graduate Cohort 2025';
+    document.getElementById('f-cohorts').value='Graduate Intake 2025, Leadership Pipeline, BIM Champions, Safety Ambassadors';
+    D.bus=[
+      {name:'Engineering & Delivery',code:'ENG',count:324,head:'Rahul Sharma',cc:'CC-ENG-001',loc:'Singapore, Mumbai',depts:[{name:'Structural Engineering',count:112},{name:'Civil & Geotechnical',count:98},{name:'Project Delivery',count:114}]},
+      {name:'Digital & Technology',code:'DIG',count:118,head:'Vikram Patel',cc:'CC-DIG-001',loc:'Singapore',depts:[{name:'BIM & Digital Delivery',count:54},{name:'IT Infrastructure',count:64}]},
+      {name:'Corporate Functions',code:'CORP',count:198,head:'Kavitha Ramachandran',cc:'CC-CORP-001',loc:'Singapore, Dubai',depts:[{name:'Finance & Procurement',count:76},{name:'Human Resources',count:48},{name:'Legal & Compliance',count:74}]},
+      {name:'Sustainability & EHS',code:'SUS',count:172,head:'Meera Sundaram',cc:'CC-SUS-001',loc:'All regions',depts:[{name:'EHS & Risk',count:96},{name:'Sustainability Advisory',count:76}]}
+    ];
+    renderList('buList',D.bus,function(b){return b.name+' ('+b.code+') — '+b.count+' employees, '+b.depts.length+' depts'},'bus');
+  }
+  if(step===3){
+    D.roles=[
+      {title:'Senior Structural Engineer',family:'Engineering',dept:'Structural Engineering',senior:'L4 — Senior',kra:'Design accuracy, code compliance, project delivery',career:'Engineer → Senior → Principal → Director',qual:'BE/BTech Civil, PE certification',crit:'C1 — Critical',mgr:'no',spof:'Key Person Risk'},
+      {title:'BIM Coordinator',family:'Technology',dept:'BIM & Digital Delivery',senior:'L3 — Mid-Level',kra:'Model management, clash detection, BIM standards',career:'CAD Tech → BIM Coord → BIM Manager → Digital Director',qual:'Autodesk Revit Professional',crit:'C2 — High',mgr:'no',spof:'Pipeline Available'},
+      {title:'Project Manager',family:'Operations',dept:'Project Delivery',senior:'L4 — Senior',kra:'Schedule, budget, stakeholder mgmt, risk',career:'Site Eng → PM → Senior PM → Programme Director',qual:'PMP, BSc Engineering',crit:'C1 — Critical',mgr:'yes',spof:'Key Person Risk'},
+      {title:'Safety Manager',family:'Operations',dept:'EHS & Risk',senior:'L4 — Senior',kra:'Safety audits, incident investigation, compliance',career:'Safety Officer → Manager → Head of EHS ��� Director',qual:'NEBOSH, ISO 45001 Lead Auditor',crit:'C1 — Critical',mgr:'yes',spof:'Single Point of Failure'},
+      {title:'L&D Manager',family:'Corporate',dept:'Human Resources',senior:'L4 — Senior',kra:'Training strategy, programme design, vendor mgmt',career:'L&D Coord → Manager → Head of L&D → CLO',qual:'CIPD, MSc HRD preferred',crit:'C2 — High',mgr:'yes',spof:'Pipeline Available'},
+      {title:'Cloud Architect',family:'Technology',dept:'IT Infrastructure',senior:'L5 — Lead / Principal',kra:'Cloud strategy, security, migration, cost optimisation',career:'Dev → Senior Dev → Architect → CTO',qual:'AWS/Azure Solutions Architect',crit:'C2 — High',mgr:'no',spof:'Single Point of Failure'}
+    ];
+    renderList('roleList',D.roles,function(r){return r.title+' — '+r.family+' · '+r.senior+(r.spof?' · '+r.spof:'')},'roles');
+  }
+  if(step===4){
+    D.goals=[
+      {text:'Expand digital delivery capability across all project sites by Q4 2026',type:'Strategic Objective',priority:'High',date:'Q4 2026',pct:42,owner:'CTO Office',scope:'Organisation-wide',skills:'BIM, Digital Delivery, AI Literacy, Cloud'},
+      {text:'Achieve ISO 45001 & ISO 9001 compliance across all regional offices',type:'Annual Target',priority:'High',date:'Q3 2026',pct:68,owner:'Head of EHS',scope:'Organisation-wide',skills:'Safety Compliance, Audit, Risk Management'},
+      {text:'Build internal BIM and smart infrastructure competency to reduce third-party dependency by 40%',type:'Transformation Priority',priority:'High',date:'Q4 2026',pct:35,owner:'VP Engineering',scope:'Business Unit',skills:'BIM, Revit, Navisworks, Digital Twin'},
+      {text:'Develop a succession-ready leadership pipeline for 12 critical roles',type:'Strategic Objective',priority:'Medium',date:'FY2026',pct:54,owner:'CHRO',scope:'Organisation-wide',skills:'Leadership, Stakeholder Mgmt, Mentoring, Decision Making'}
+    ];
+    renderList('goalList',D.goals,function(g){return g.type+': '+g.text.substring(0,60)+'... ('+g.pct+'%)'},'goals');
+  }
+  if(step===5){
+    D.products=[{name:'Civil & Structural Engineering',cat:'Service',life:'Active'},{name:'Smart Building Solutions',cat:'Product',life:'Growth'},{name:'Infrastructure Asset Management',cat:'Service',life:'Active'},{name:'Environmental & Sustainability Consulting',cat:'Service',life:'Growth'}];
+    D.clients=[{name:'Marina Bay Sands',industry:'Hospitality, Real Estate',geo:'APAC'},{name:'Singapore Land Authority',industry:'Government',geo:'Singapore'},{name:'Tata Projects',industry:'Infrastructure',geo:'India'},{name:'Dubai Municipality',industry:'Government, Urban Development',geo:'Middle East'}];
+    renderList('productList',D.products,function(p){return p.name+' · '+p.cat+' · '+p.life},'products');
+    renderList('clientList',D.clients,function(c){return c.name+' · '+c.industry+' · '+c.geo},'clients');
+  }
+  if(step===6){
+    D.standards=[
+      {name:'ISO 45001',cat:'Environmental & Safety',status:'Active',deadline:'',scope:'All site-based roles',training:'ISO 45001 Awareness, Safety Audit Procedures',renewal:'Annual',juris:'All regions'},
+      {name:'ISO 9001',cat:'Quality Management',status:'Active',deadline:'',scope:'All departments',training:'QMS Fundamentals',renewal:'Every 3 years',juris:'All regions'},
+      {name:'GDPR',cat:'Data Protection',status:'Active',deadline:'',scope:'IT, HR, Legal',training:'Data Protection Awareness',renewal:'Annual',juris:'EU operations (Singapore PDPA equivalent)'},
+      {name:'SOX Compliance',cat:'Industry-Specific',status:'Pending',deadline:'Q3 2026',scope:'Finance, Procurement, Audit',training:'SOX Compliance Training',renewal:'Annual',juris:'US-listed operations'},
+      {name:'BCA Green Mark',cat:'Industry-Specific',status:'Active',deadline:'',scope:'Sustainability Advisory, Project Delivery',training:'Green Building Standards',renewal:'Per project',juris:'Singapore'}
+    ];
+    renderList('standardList',D.standards,function(s){return s.name+' · '+s.cat+' · '+s.status},'standards');
+  }
+  if(step===7){
+    D.tools=[
+      {name:'Workday',cat:'Core Business Apps',status:'Current',ver:'2025.R1',depts:'All departments',depth:'Core Workflow',roles:'Admin, All employees'},
+      {name:'Cornerstone OnDemand',cat:'Core Business Apps',status:'Current',ver:'',depts:'HR, All departments',depth:'Core Workflow',roles:'Admin, Learners'},
+      {name:'Autodesk Revit',cat:'Dev & Engineering',status:'Current',ver:'2025.1',depts:'Structural Engineering, BIM',depth:'Core Workflow',roles:'Power User'},
+      {name:'Navisworks',cat:'Dev & Engineering',status:'Current',ver:'2025',depts:'BIM, Project Delivery',depth:'Regular Use',roles:'Power User'},
+      {name:'AutoCAD',cat:'Dev & Engineering',status:'Current',ver:'2025',depts:'All engineering depts',depth:'Core Workflow',roles:'Power User, Basic User'},
+      {name:'Primavera P6',cat:'Dev & Engineering',status:'Current',ver:'22.12',depts:'Project Delivery',depth:'Core Workflow',roles:'Admin, Power User'},
+      {name:'Power BI',cat:'Data & Analytics',status:'Current',ver:'',depts:'All departments',depth:'Regular Use',roles:'Admin, Report Viewers'},
+      {name:'SAP',cat:'Core Business Apps',status:'Evaluating',ver:'S/4HANA',depts:'Finance, Procurement',depth:'Core Workflow',roles:'Admin, Power User'},
+      {name:'Jira',cat:'Collaboration',status:'Evaluating',ver:'Cloud',depts:'Digital & Technology',depth:'Regular Use',roles:'All team members'},
+      {name:'MS Project',cat:'Dev & Engineering',status:'Sunset / Phase-out',ver:'2021',depts:'Project Delivery',depth:'Occasional',roles:'Basic User'}
+    ];
+    renderList('toolList',D.tools,function(t){return t.name+' · '+t.cat+' · '+t.status+(t.status==='Sunset / Phase-out'?' ⚠':'')},'tools');
+  }
+  if(step===8){
+    var m={'f-c1-label':'Critical','f-c1-weight':'2.0x','f-c1-desc':'Platform-critical, zero tolerance for gap. Auto-escalation to CHRO.','f-c2-label':'High','f-c2-weight':'1.5x','f-c2-desc':'Strategically important, 6-month closure target.','f-c3-label':'Medium','f-c3-weight':'1.0x','f-c3-desc':'Operationally relevant, 12-month development plan.','f-c4-label':'Low','f-c4-weight':'0.5x','f-c4-desc':'Nice to have, opportunistic development only.','f-prof-l1':'Has basic awareness of the skill area. Can follow instructions and recognise key concepts with guidance.','f-prof-l2':'Applies knowledge in routine situations. Can perform standard tasks with occasional support.','f-prof-l3':'Performs independently in complex situations. Handles exceptions, coaches others, improves processes.','f-prof-l4':'Expert-level mastery. Leads, mentors, innovates, and shapes organisational standards in this area.','f-taxonomy':'Domain > Knowledge Area > Skill Category > Skill','f-skill-types':'Technical, Behavioural, Leadership, Functional, Digital','f-benchmarks':'SFIA v9, O*NET 28.1, European e-Competence Framework 4.0'};
+    for(var k in m){var el=document.getElementById(k);if(el)el.value=m[k]}
+  }
+  if(step===9){
+    D.comps=[{name:'Safety-First Mindset',type:'Core / Behavioural',value:'Safety'},{name:'Innovation & Continuous Improvement',type:'Core / Behavioural',value:'Excellence'},{name:'Client Partnership',type:'Core / Behavioural',value:'Integrity'},{name:'Digital Fluency',type:'Technical',value:'Innovation'},{name:'Strategic Leadership',type:'Leadership',value:'Leadership'},{name:'Cross-Cultural Collaboration',type:'Core / Behavioural',value:'Respect'}];
+    D.cultures=[{dim:'Safety-First Culture',curr:4,tgt:5},{dim:'Digital Readiness',curr:2,tgt:4},{dim:'Innovation Orientation',curr:2,tgt:4},{dim:'Learning Agility',curr:3,tgt:4},{dim:'Client Centricity',curr:3,tgt:5}];
+    D.dials=[{skill:'Digital Delivery',val:3,why:'Strategic push to reduce BIM dependency by 40%'},{skill:'AI & Automation',val:2,why:'Future-proofing workforce for AI-enabled project delivery'},{skill:'Traditional Drafting',val:-2,why:'Phasing out manual CAD in favour of BIM-first workflows'},{skill:'Sustainability & ESG',val:2,why:'Green Mark and ESG reporting requirements increasing'}];
+    renderList('compList',D.comps,function(c){return c.name+' · '+c.type+' · '+c.value},'comps');
+    renderList('cultureList',D.cultures,function(c){return c.dim+': Current '+c.curr+' → Target '+c.tgt},'cultures');
+    renderList('dialList',D.dials,function(d){return d.skill+': '+(d.val>0?'+':'')+d.val+' — '+d.why},'dials');
+    document.getElementById('f-trans-stmt').value='Arcova is transitioning from a traditional infrastructure firm to a digitally-enabled delivery organisation. Over the next 3 years, every project site will operate BIM-first, requiring 40% of the workforce to reach L3 digital proficiency. This transformation is driven by client demand for smart infrastructure and regulatory pressure for ESG compliance.';
+  }
+  showToast('Arcova demo data loaded for Step '+step);
+}
+
+// ══════════���════════════════════════════════════════
+// REVIEW
+// ═══════════════════════════════════════════════════
+function buildReview(){
+  var h='';
+  var ck='<div class="rv-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>';
+  var noCheck='<div class="rv-check" style="background:var(--amber-bg);border-color:var(--amber)"><svg viewBox="0 0 24 24" style="display:block;stroke:var(--amber)"><line x1="5" y1="12" x2="19" y2="12"/></svg></div>';
+  var id=state.data.identity||{};
+  var sk=state.data.skills||{};
+
+  // 1. Identity
+  var idFields=0;var idHtml='';
+  var labels={'f-company':'Company','f-industry':'Industry','f-subsectors':'Sub-sectors','f-sizeband':'Size Band','f-founded':'Founded','f-hq':'Headquarters','f-hqcountry':'Country','f-employees':'Employees','f-offices':'Offices','f-timezone':'Timezone','f-model':'Operating Model','f-stage':'Stage','f-fiscal':'Fiscal Year Start','f-residency':'Data Residency','f-hris':'HRIS','f-lms':'LMS','f-brandcolor':'Brand Colour'};
+  for(var k in labels){if(id[k]){idFields++;idHtml+='<div class="rv-row"><span class="rv-key">'+labels[k]+'</span><span class="rv-val">'+id[k]+'</span></div>'}}
+  h+='<div class="rv-section"><div class="rv-title">'+(state.completed[1]?ck:noCheck)+'Org Identity — '+idFields+' fields</div><div class="rv-grid">'+idHtml+'</div></div>';
+
+  // 2. Hierarchy
+  h+='<div class="rv-section"><div class="rv-title">'+(state.completed[2]?ck:noCheck)+'Hierarchy — '+D.bus.length+' BUs</div>';
+  if(state.data.orgmodel)h+='<div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">Model: '+state.data.orgmodel+(state.data.hierlevels?' · '+state.data.hierlevels:'')+'</div>';
+  if(state.data.teams)h+='<div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Teams: '+state.data.teams+'</div>';
+  if(state.data.cohorts)h+='<div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Cohorts: '+state.data.cohorts+'</div>';
+  h+='<div class="rv-chips">';
+  D.bus.forEach(function(b){h+='<span class="rv-chip">'+b.name+' ('+b.code+') · '+b.count+' · '+b.depts.length+' depts</span>'});
+  h+='</div></div>';
+
+  // 3. Strategic Foundation / Roles
+  h+='<div class="rv-section"><div class="rv-title">'+(state.completed[3]?ck:noCheck)+'Strategic Foundation — '+D.roles.length+' roles</div><div class="rv-chips">';
+  D.roles.forEach(function(r){
+    var spofStyle=r.spof==='Single Point of Failure'?'border-color:rgba(220,38,38,0.3);color:var(--red)':r.spof==='Key Person Risk'?'border-color:rgba(217,119,6,0.25);color:var(--amber)':'';
+    h+='<span class="rv-chip" style="'+spofStyle+'">'+r.title+' · '+r.senior+' · '+r.dept+(r.spof?' · '+r.spof:'')+'</span>';
+  });
+  h+='</div></div>';
+
+  // 4. Goals
+  h+='<div class="rv-section"><div class="rv-title">'+(state.completed[4]?ck:noCheck)+'Goals & OKRs — '+D.goals.length+'</div><div class="rv-chips">';
+  D.goals.forEach(function(g){
+    var pCol=g.priority==='High'?'border-color:rgba(220,38,38,0.25);color:var(--red)':g.priority==='Medium'?'border-color:rgba(217,119,6,0.25);color:var(--amber)':'';
+    h+='<span class="rv-chip" style="'+pCol+'">'+g.type+': '+g.text.substring(0,50)+'... · '+g.pct+'% · '+g.owner+'</span>';
+  });
+  h+='</div></div>';
+
+  // 5. Products + Clients
+  h+='<div class="rv-section"><div class="rv-title">'+(state.completed[5]?ck:noCheck)+'Products ('+D.products.length+') & Clients ('+D.clients.length+')</div><div class="rv-chips">';
+  D.products.forEach(function(p){h+='<span class="rv-chip" style="border-color:rgba(37,99,235,0.25);color:var(--blue)">'+p.name+' · '+p.cat+' · '+p.life+'</span>'});
+  D.clients.forEach(function(c){h+='<span class="rv-chip" style="border-color:rgba(201,168,76,0.25);color:var(--accent)">'+c.name+' · '+c.industry+' · '+c.geo+'</span>'});
+  h+='</div></div>';
+
+  // 6. Standards
+  h+='<div class="rv-section"><div class="rv-title">'+(state.completed[6]?ck:noCheck)+'Standards — '+D.standards.length+'</div><div class="rv-chips">';
+  D.standards.forEach(function(s){var c=s.status==='Active'?'border-color:rgba(22,163,74,0.3);color:var(--green)':'border-color:rgba(217,119,6,0.3);color:var(--amber)';h+='<span class="rv-chip" style="'+c+'">'+s.name+' · '+s.cat+' · '+s.status+(s.deadline?' · Due '+s.deadline:'')+'</span>'});
+  h+='</div></div>';
+
+  // 7. Tools
+  h+='<div class="rv-section"><div class="rv-title">'+(state.completed[7]?ck:noCheck)+'Tools — '+D.tools.length+'</div><div class="rv-chips">';
+  D.tools.forEach(function(t){var c=t.status==='Sunset / Phase-out'?'border-color:rgba(220,38,38,0.3);color:var(--red)':t.status==='Evaluating'?'border-color:rgba(124,58,237,0.3);color:var(--purple)':'border-color:rgba(22,163,74,0.2);color:var(--green)';h+='<span class="rv-chip" style="'+c+'">'+t.name+' · '+t.cat+' · '+t.status+(t.ver?' v'+t.ver:'')+'</span>'});
+  h+='</div></div>';
+
+  // 8. Skills config
+  h+='<div class="rv-section"><div class="rv-title">'+(state.completed[8]?ck:noCheck)+'Skills & Proficiency Config</div><div class="rv-grid">';
+  var skLabels={'f-c1-label':'C1 Label','f-c1-weight':'C1 Weight','f-c1-desc':'C1 Description','f-c2-label':'C2 Label','f-c2-weight':'C2 Weight','f-c2-desc':'C2 Description','f-c3-label':'C3 Label','f-c3-weight':'C3 Weight','f-c4-label':'C4 Label','f-c4-weight':'C4 Weight','f-prof-l1':'L1 Awareness','f-prof-l2':'L2 Working','f-prof-l3':'L3 Practitioner','f-prof-l4':'L4 Expert','f-taxonomy':'Taxonomy','f-skill-types':'Skill Types','f-benchmarks':'Benchmarks'};
+  for(var sk2 in skLabels){if(sk[sk2])h+='<div class="rv-row"><span class="rv-key">'+skLabels[sk2]+'</span><span class="rv-val">'+sk[sk2].substring(0,60)+'</span></div>'}
+  h+='</div></div>';
+
+  // 9. Competency + Culture + Dials
+  h+='<div class="rv-section"><div class="rv-title">'+(state.completed[9]?ck:noCheck)+'Competency ('+D.comps.length+'), Culture ('+D.cultures.length+'), Dials ('+D.dials.length+')</div><div class="rv-chips">';
+  D.comps.forEach(function(c){h+='<span class="rv-chip">'+c.name+' · '+c.type+' · linked to: '+c.value+'</span>'});
+  D.cultures.forEach(function(c){h+='<span class="rv-chip" style="border-color:rgba(220,38,38,0.25);color:var(--red)">'+c.dim+': '+c.curr+' → '+c.tgt+'</span>'});
+  D.dials.forEach(function(d){h+='<span class="rv-chip" style="border-color:rgba(217,119,6,0.25);color:var(--amber)">'+d.skill+': '+(d.val>0?'+':'')+d.val+' — '+d.why+'</span>'});
+  h+='</div>';
+  if(state.data.transStmt)h+='<div style="margin-top:8px;padding:10px 14px;background:var(--amber-bg);border-radius:8px;border-left:3px solid var(--amber);font-size:11px;color:var(--text-secondary);line-height:1.6"><strong style="color:var(--amber)">Transformation Statement:</strong> '+state.data.transStmt+'</div>';
+  h+='</div>';
+
+  // Summary bar
+  var doneCount=0;for(var i=1;i<=9;i++)if(state.completed[i])doneCount++;
+  var totalItems=D.bus.length+D.roles.length+D.goals.length+D.products.length+D.clients.length+D.standards.length+D.tools.length+D.comps.length+D.cultures.length+D.dials.length;
+  h+='<div style="margin-top:16px;padding:14px 18px;background:linear-gradient(135deg,var(--card) 0%,var(--accent-lt) 100%);border:1px solid var(--accent-bd);border-radius:10px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">';
+  h+='<div style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary)">Summary</div>';
+  h+='<div style="font-size:11px;color:var(--text-secondary)">'+doneCount+'/9 sections complete</div>';
+  h+='<div style="font-size:11px;color:var(--text-secondary)">'+totalItems+' items configured</div>';
+  h+='<div style="font-size:11px;color:'+(doneCount>=9?'var(--green)':'var(--amber)')+'">Status: '+(doneCount>=9?'Ready to lock':'Incomplete — complete all sections')+'</div>';
+  h+='</div>';
+
+  document.getElementById('reviewBody').innerHTML=h;
+}
+
+function confirmSetup(){
+  document.getElementById('successBanner').classList.add('show');
+  document.getElementById('stepper').style.display='none';
+  for(var i=1;i<=10;i++){var el=document.getElementById('step'+i);if(el)el.classList.remove('visible')}
+  drawGauge(0.96);
+  showToast('OrgSetup locked — 113 fields captured — ready for SkillForge');
+}
+
+function resetDemo(){
+  state={current:1,completed:{},data:{identity:{},skills:{},orgmodel:'',hierlevels:'',teams:'',cohorts:'',transStmt:''}};for(var i=1;i<=9;i++)state.completed[i]=false;
+  D={bus:[],roles:[],goals:[],products:[],clients:[],standards:[],tools:[],comps:[],cultures:[],dials:[]};
+  document.getElementById('successBanner').classList.remove('show');
+  document.getElementById('stepper').style.display='flex';
+  renderSteps();renderStepper();renderSegs();drawGauge(0);goToStep(1);
+  showToast('Demo reset');
+}
+
+// ══════���════════════════════════════════════════════
+// TOAST + INIT
+// ═════════���═════════════��═══════════════════════════
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show')},2400)}
+
+document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.getAttribute('href')==='#'){e.preventDefault();showToast((a.textContent||'').trim().substring(0,36)+' — available in full platform')}});
+
+// ═══════════════════════════════════════════════════
+// AI GUIDED POPUP — BATCH ROLE BUILDER
+// ════════���══════════════════════════════════════════
+var aiRoleCount = 0;
+var aiRoleTitles = [];      // [{title, status:'pending'|'active'|'done'|'deleted'}]
+var aiRoleData = [];         // [{title:'...', family:'...', ...}, ...]
+var aiActiveRole = 0;
+var aiCurrentQ = 0;
+var aiSessionPhase = 'count'; // 'count'|'titles'|'building'|'review'
+
+// Helper: get current role answers object
+function aiAnswers(){ return aiRoleData[aiActiveRole] || {}; }
+function setAiAnswer(key,val){ if(aiRoleData[aiActiveRole]) aiRoleData[aiActiveRole][key]=val; }
+
+var AI_QUESTIONS = [
+  {
+    id:'title', label:'Job Title', num:1,
+    title:'What role are you defining?',
+    desc:'Enter the job title for this role profile. AI will use this to suggest relevant attributes for the remaining fields.',
+    type:'input', placeholder:'e.g. Senior Structural Engineer',
+    suggestions:function(){
+      var industry = (state.data.identity && state.data.identity['f-industry']) || '';
+      if(industry.indexOf('Infrastructure')>-1||industry.indexOf('Construction')>-1) return ['Senior Structural Engineer','BIM Coordinator','Project Manager','Safety Manager','Geotechnical Engineer','Quantity Surveyor','Site Supervisor','Sustainability Consultant'];
+      if(industry.indexOf('Technology')>-1||industry.indexOf('Software')>-1) return ['Software Engineer','Product Manager','DevOps Engineer','Data Scientist','UX Designer','QA Lead','Cloud Architect','Engineering Manager'];
+      if(industry.indexOf('Financial')>-1) return ['Risk Analyst','Compliance Officer','Portfolio Manager','Financial Advisor','Credit Analyst','Treasury Manager','Audit Manager','Data Analyst'];
+      if(industry.indexOf('Healthcare')>-1) return ['Clinical Research Manager','Medical Affairs Lead','Quality Assurance Manager','Regulatory Affairs Specialist','Biostatistician','Pharmacovigilance Officer'];
+      return ['Project Manager','Business Analyst','Team Lead','Operations Manager','Data Analyst','HR Manager','Finance Controller','Marketing Manager'];
+    }
+  },
+  {
+    id:'family', label:'Role Family', num:2, required:true,
+    title:'Which role family does this belong to?',
+    desc:'Role families group similar positions together for career pathing and skill mapping. AI suggests based on the job title you selected.',
+    type:'select',
+    suggestions:function(){
+      var t=(aiAnswers().title||'').toLowerCase();
+      var all=['Engineering','Technology','Operations','Corporate','Leadership','Support'];
+      var top=[];
+      if(t.indexOf('engineer')>-1||t.indexOf('structural')>-1||t.indexOf('geotechnical')>-1||t.indexOf('civil')>-1) top=['Engineering','Technology'];
+      else if(t.indexOf('bim')>-1||t.indexOf('software')>-1||t.indexOf('cloud')>-1||t.indexOf('devops')>-1||t.indexOf('data sci')>-1) top=['Technology','Engineering'];
+      else if(t.indexOf('project')>-1||t.indexOf('safety')>-1||t.indexOf('operations')>-1||t.indexOf('site')>-1) top=['Operations','Engineering'];
+      else if(t.indexOf('manager')>-1&&(t.indexOf('hr')>-1||t.indexOf('l&d')>-1||t.indexOf('finance')>-1)) top=['Corporate','Leadership'];
+      else if(t.indexOf('director')>-1||t.indexOf('vp')>-1||t.indexOf('chief')>-1||t.indexOf('head')>-1) top=['Leadership','Corporate'];
+      else top=['Operations','Corporate'];
+      return top.concat(all.filter(function(a){return top.indexOf(a)===-1}));
+    }
+  },
+  {
+    id:'dept', label:'Department', num:3, required:true,
+    title:'Which department will this role sit in?',
+    desc:'Select or type the department. AI suggests departments based on your organisation structure and the role family.',
+    type:'input', placeholder:'e.g. Structural Engineering',
+    suggestions:function(){
+      var depts=[];
+      D.bus.forEach(function(bu){bu.depts.forEach(function(d){if(depts.indexOf(d.name)===-1) depts.push(d.name)})});
+      if(depts.length>0) return depts;
+      var fam=aiAnswers().family||'';
+      if(fam==='Engineering') return ['Structural Engineering','Civil & Geotechnical','Project Delivery','Mechanical Engineering','Electrical Engineering'];
+      if(fam==='Technology') return ['BIM & Digital Delivery','IT Infrastructure','Software Development','Data & Analytics','Cybersecurity'];
+      if(fam==='Operations') return ['Project Delivery','EHS & Risk','Facilities Management','Supply Chain','Quality Assurance'];
+      if(fam==='Corporate') return ['Human Resources','Finance & Procurement','Legal & Compliance','Marketing & Communications','Administration'];
+      if(fam==='Leadership') return ['Executive Office','Strategy & Planning','Business Development','Regional Management'];
+      return ['Operations','Engineering','Corporate Services','Technology','Human Resources'];
+    }
+  },
+  {
+    id:'senior', label:'Seniority Band', num:4, required:true,
+    title:'What seniority level is this role?',
+    desc:'Seniority bands determine career progression levels and map to proficiency expectations in the skill framework.',
+    type:'select',
+    suggestions:function(){
+      var t=(aiAnswers().title||'').toLowerCase();
+      var all=['L1 — Entry','L2 — Associate','L3 — Mid-Level','L4 — Senior','L5 — Lead / Principal','L6 — Director','L7 — VP / C-Suite'];
+      if(t.indexOf('senior')>-1||t.indexOf('manager')>-1) return ['L4 — Senior','L5 — Lead / Principal','L3 — Mid-Level','L6 — Director','L2 — Associate','L1 — Entry','L7 — VP / C-Suite'];
+      if(t.indexOf('lead')>-1||t.indexOf('principal')>-1||t.indexOf('architect')>-1) return ['L5 — Lead / Principal','L4 — Senior','L6 — Director','L3 — Mid-Level','L7 — VP / C-Suite','L2 — Associate','L1 — Entry'];
+      if(t.indexOf('director')>-1) return ['L6 — Director','L5 — Lead / Principal','L7 — VP / C-Suite','L4 — Senior','L3 — Mid-Level','L2 — Associate','L1 — Entry'];
+      if(t.indexOf('vp')>-1||t.indexOf('chief')>-1||t.indexOf('head of')>-1) return ['L7 — VP / C-Suite','L6 — Director','L5 ��� Lead / Principal','L4 — Senior','L3 — Mid-Level','L2 — Associate','L1 — Entry'];
+      if(t.indexOf('coordinator')>-1||t.indexOf('analyst')>-1) return ['L3 — Mid-Level','L2 — Associate','L4 — Senior','L1 — Entry','L5 — Lead / Principal','L6 — Director','L7 — VP / C-Suite'];
+      if(t.indexOf('junior')>-1||t.indexOf('intern')>-1||t.indexOf('trainee')>-1) return ['L1 — Entry','L2 — Associate','L3 — Mid-Level','L4 — Senior','L5 — Lead / Principal','L6 — Director','L7 — VP / C-Suite'];
+      return all;
+    }
+  },
+  {
+    id:'kra', label:'Key Result Areas', num:5, required:true,
+    title:'What are the Key Result Areas (KRAs)?',
+    desc:'KRAs define the primary outcomes this role is accountable for. These feed into SkillForge for skill-to-KRA mapping. Select multiple or type your own.',
+    type:'multi', placeholder:'e.g. Design accuracy, code compliance, project delivery',
+    suggestions:function(){
+      var t=(aiAnswers().title||'').toLowerCase(), fam=aiAnswers().family||'';
+      if(t.indexOf('structural')>-1||t.indexOf('civil')>-1) return ['Design accuracy & code compliance','Structural analysis & modelling','Project delivery on time & budget','Technical review & quality assurance','Client technical liaison','Safety standards adherence'];
+      if(t.indexOf('bim')>-1) return ['Model management & quality','Clash detection & resolution','BIM standards enforcement','Digital delivery coordination','Team training on BIM tools','Template & library management'];
+      if(t.indexOf('project manager')>-1) return ['Schedule & milestone delivery','Budget management & cost control','Stakeholder management','Risk identification & mitigation','Team leadership & coordination','Quality assurance oversight'];
+      if(t.indexOf('safety')>-1) return ['Safety audits & inspections','Incident investigation & reporting','Compliance with HSE regulations','Safety training programme delivery','Risk assessment & mitigation','Emergency response planning'];
+      if(t.indexOf('software')>-1||t.indexOf('developer')>-1) return ['Code quality & review','Feature delivery velocity','System reliability & uptime','Technical documentation','Cross-team collaboration','Performance optimization'];
+      if(fam==='Corporate') return ['Policy development & compliance','Operational efficiency','Stakeholder communication','Budget & resource management','Process improvement','Reporting & analytics'];
+      if(fam==='Leadership') return ['Strategic planning & execution','Team development & mentoring','P&L ownership','Stakeholder & board engagement','Organisational transformation','Talent pipeline development'];
+      return ['Delivery quality','Process efficiency','Stakeholder satisfaction','Team collaboration','Continuous improvement','Reporting & compliance'];
+    }
+  },
+  {
+    id:'career', label:'Career Pathway', num:6,
+    title:'What does the career progression look like?',
+    desc:'Define the typical career trajectory for this role. This helps SkillForge map development goals and succession planning.',
+    type:'input', placeholder:'e.g. Engineer → Senior → Principal → Director',
+    suggestions:function(){
+      var t=(aiAnswers().title||'').toLowerCase(), fam=aiAnswers().family||'';
+      if(t.indexOf('engineer')>-1&&fam==='Engineering') return ['Graduate Engineer → Engineer → Senior Engineer → Principal Engineer → Engineering Director','Engineer → Senior Engineer → Lead Engineer → Head of Engineering','Site Engineer → Project Engineer → Senior Engineer → Engineering Manager'];
+      if(t.indexOf('bim')>-1) return ['CAD Technician → BIM Coordinator → BIM Manager → Digital Delivery Director','BIM Modeller → BIM Coordinator → BIM Lead → Head of Digital Delivery'];
+      if(t.indexOf('project manager')>-1) return ['Site Engineer → Project Manager → Senior PM → Programme Director → VP Delivery','Assistant PM ��� Project Manager → Senior PM → Head of PMO → Programme Director'];
+      if(t.indexOf('safety')>-1) return ['Safety Officer → Safety Manager → Head of EHS → Director of Safety & Risk','HSE Coordinator → Safety Manager → Regional EHS Head → VP Safety & Compliance'];
+      if(t.indexOf('software')>-1||t.indexOf('developer')>-1) return ['Junior Dev → Developer → Senior Dev → Staff Engineer → Principal Engineer','Developer → Senior Dev → Tech Lead → Engineering Manager → VP Engineering'];
+      if(fam==='Corporate') return ['Coordinator → Specialist → Manager → Senior Manager → Director','Analyst → Senior Analyst → Manager → Head of Department → Director'];
+      if(fam==='Leadership') return ['Manager → Senior Manager → Director → VP → C-Suite','Department Head → Director → VP → SVP → Chief Officer'];
+      return ['Associate → Specialist → Senior → Lead → Manager → Director','Junior → Mid-Level → Senior → Principal → Director'];
+    }
+  },
+  {
+    id:'qual', label:'Min Qualifications', num:7,
+    title:'What qualifications are required?',
+    desc:'Minimum qualifications for this role. AI suggests based on the role title, family, and industry standards.',
+    type:'input', placeholder:'e.g. BE/BTech Civil, PE certification',
+    suggestions:function(){
+      var t=(aiAnswers().title||'').toLowerCase(), industry=(state.data.identity&&state.data.identity['f-industry'])||'';
+      if(t.indexOf('structural')>-1||t.indexOf('civil')>-1) return ['BE/BTech Civil Engineering, PE certification','MSc Structural Engineering, Chartered Engineer (CEng)','BSc Civil Engineering, Professional Engineer (PE)'];
+      if(t.indexOf('bim')>-1) return ['Autodesk Revit Professional certification','BSc Architecture/Engineering + BIM Specialist certification','Diploma in CAD/BIM, Autodesk Certified Professional'];
+      if(t.indexOf('project manager')>-1) return ['PMP certification, BSc Engineering','PRINCE2 Practitioner + BSc/BEng','MBA + PMP, 8+ years project delivery experience'];
+      if(t.indexOf('safety')>-1) return ['NEBOSH International Diploma, ISO 45001 Lead Auditor','BSc Occupational Health & Safety, NEBOSH certification','CSP (Certified Safety Professional), BSc Environmental Science'];
+      if(t.indexOf('software')>-1||t.indexOf('developer')>-1) return ['BSc Computer Science or equivalent','MSc Computer Science, relevant cloud certifications','BSc Engineering/CS, 3+ years production experience'];
+      if(t.indexOf('cloud')>-1||t.indexOf('architect')>-1) return ['AWS/Azure Solutions Architect certification','BSc CS + AWS Professional certification + 5yr cloud experience','MSc/BSc CS, multi-cloud certification (AWS + Azure)'];
+      if(t.indexOf('data')>-1) return ['MSc Data Science / Statistics','BSc Mathematics/CS, SQL/Python proficiency','PhD Statistics/ML or MSc + 3yr experience'];
+      return ['BSc/BA in relevant discipline','Professional certification in field','Graduate degree + 3-5 years experience'];
+    }
+  },
+  {
+    id:'crit', label:'Role Criticality', num:8, required:true,
+    title:'How critical is this role to the organisation?',
+    desc:'Role criticality determines priority weighting in SkillForge gap analysis. Critical roles trigger auto-escalation for skill gaps.',
+    type:'select',
+    suggestions:function(){
+      var t=(aiAnswers().title||'').toLowerCase(), sr=aiAnswers().senior||'';
+      if(sr.indexOf('L6')>-1||sr.indexOf('L7')>-1||t.indexOf('director')>-1||t.indexOf('vp')>-1||t.indexOf('chief')>-1) return ['C1 — Critical','C2 — High','C3 — Medium','C4 — Low'];
+      if(sr.indexOf('L5')>-1||t.indexOf('lead')>-1||t.indexOf('principal')>-1||t.indexOf('architect')>-1) return ['C2 — High','C1 — Critical','C3 — Medium','C4 — Low'];
+      if(sr.indexOf('L4')>-1||t.indexOf('senior')>-1||t.indexOf('manager')>-1) return ['C2 — High','C3 — Medium','C1 — Critical','C4 — Low'];
+      if(t.indexOf('safety')>-1||t.indexOf('compliance')>-1) return ['C1 — Critical','C2 — High','C3 — Medium','C4 — Low'];
+      return ['C3 — Medium','C2 — High','C4 — Low','C1 — Critical'];
+    }
+  },
+  {
+    id:'mgr', label:'People Manager', num:9, required:true,
+    title:'Is this a people management role?',
+    desc:'People managers have additional skill requirements for leadership, coaching, and performance management.',
+    type:'select',
+    suggestions:function(){
+      var t=(aiAnswers().title||'').toLowerCase(), sr=aiAnswers().senior||'';
+      if(t.indexOf('manager')>-1||t.indexOf('director')>-1||t.indexOf('head')>-1||t.indexOf('vp')>-1||t.indexOf('chief')>-1||sr.indexOf('L6')>-1||sr.indexOf('L7')>-1) return ['Yes','No'];
+      if(t.indexOf('lead')>-1||sr.indexOf('L5')>-1) return ['Yes','No'];
+      return ['No','Yes'];
+    }
+  },
+  {
+    id:'spof', label:'Succession Criticality', num:10, required:true,
+    title:'What is the succession risk for this role?',
+    desc:'Succession criticality identifies roles where talent gaps pose significant organisational risk. This feeds into SkillForge succession planning.',
+    type:'select',
+    suggestions:function(){
+      var crit=aiAnswers().crit||'', mgr=aiAnswers().mgr||'', sr=aiAnswers().senior||'';
+      if(crit.indexOf('C1')>-1) return ['Single Point of Failure','Key Person Risk','Pipeline Available','Not Critical'];
+      if(crit.indexOf('C2')>-1) return ['Key Person Risk','Single Point of Failure','Pipeline Available','Not Critical'];
+      if(sr.indexOf('L5')>-1||sr.indexOf('L6')>-1||sr.indexOf('L7')>-1) return ['Key Person Risk','Single Point of Failure','Pipeline Available','Not Critical'];
+      return ['Pipeline Available','Not Critical','Key Person Risk','Single Point of Failure'];
+    }
+  }
+];
+
+function openAiPopup(){
+  aiRoleCount=0;aiRoleTitles=[];aiRoleData=[];aiActiveRole=0;aiCurrentQ=0;
+  aiSessionPhase='count';
+  var popup=document.getElementById('aiPopup');
+  popup.style.display='flex';
+  setTimeout(function(){popup.classList.add('open')},10);
+  document.body.style.overflow='hidden';
+  document.getElementById('aiTabBar').classList.remove('visible');
+  renderAiCountScreen();
+}
+
+function closeAiPopup(){
+  var popup=document.getElementById('aiPopup');
+  popup.classList.remove('open');
+  setTimeout(function(){popup.style.display='none'},350);
+  document.body.style.overflow='';
+  document.getElementById('aiTabBar').classList.remove('visible');
+  // count how many were completed and already pushed
+  var count=0;
+  aiRoleTitles.forEach(function(r){if(r.status==='done')count++});
+  aiRoleCount=0;aiRoleTitles=[];aiRoleData=[];aiSessionPhase='count';
+  if(count>0){goToStep(3);showToast(count+' role'+(count>1?'s':'')+' added via AI Builder')}
+}
+
+// ── SCREEN 1: COUNT ──
+function renderAiCountScreen(){
+  aiSessionPhase='count';
+  document.getElementById('aiProgFill').style.width='0%';
+  document.getElementById('aiProgFill').style.background='';
+  document.getElementById('aiProgText').textContent='Step 1 of 3';
+  document.getElementById('aiTabBar').classList.remove('visible');
+  document.getElementById('aiBackBtn').style.display='none';
+  document.getElementById('aiSkipBtn').style.display='none';
+  document.getElementById('aiNextBtn').style.display='';
+  document.getElementById('aiNextBtn').disabled=false;
+  document.getElementById('aiNextBtn').innerHTML='Next <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5"><polyline points="9 18 15 12 9 6"/></svg>';
+  document.getElementById('aiNextBtn').onclick=function(){
+    var v=parseInt(document.getElementById('aiCountInput').value)||0;
+    if(v<1||v>30){showToast('Enter a number between 1 and 30');return}
+    aiRoleCount=v;
+    launchMindMap();
+  };
+
+  var id=state.data.identity||{};
+  var company=id['f-company']||'your organisation';
+  var industry=id['f-industry']||'';
+  var buCount=D.bus.length;
+  var deptCount=0;D.bus.forEach(function(b){deptCount+=b.depts.length});
+  var recommended=Math.max(3,Math.min(deptCount||6,15));
+
+  var card=document.getElementById('aiQuestionCard');
+  var h='<div class="ai-q-label"><span class="q-num">1</span>Setup</div>';
+  h+='<div class="ai-q-title">How many role profiles do you want to create?</div>';
+  h+='<div class="ai-q-desc">AI will suggest role titles based on '+(company!=='your organisation'?'<strong>'+company+'</strong>\'s':'your')+' organisational context'+(industry?' in <strong>'+industry+'</strong>':'')+'. You can edit, add, or remove titles in the next step.</div>';
+
+  if(buCount>0||deptCount>0){
+    h+='<div style="padding:10px 14px;border-radius:8px;background:var(--accent-lt);border:1px solid var(--accent-bd);margin-bottom:20px;font-size:12px;color:var(--accent);display:flex;align-items:center;gap:8px">';
+    h+='<svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;flex-shrink:0" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
+    h+='Based on '+buCount+' business unit'+(buCount>1?'s':'')+' and '+deptCount+' department'+(deptCount>1?'s':'')+', we recommend <strong style="margin:0 3px">'+recommended+'</strong> role profiles</div>';
+  }
+
+  // Quick picks
+  h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px">';
+  [3,5,10,15].forEach(function(n){
+    h+='<div class="ai-chip" onclick="document.getElementById(\'aiCountInput\').value='+n+'" style="padding:8px 18px;cursor:pointer">'+n+' roles</div>';
+  });
+  h+='</div>';
+
+  h+='<div class="ai-count-stepper">';
+  h+='<button onclick="var i=document.getElementById(\'aiCountInput\');i.value=Math.max(1,(parseInt(i.value)||0)-1)">&minus;</button>';
+  h+='<input type="number" id="aiCountInput" value="'+recommended+'" min="1" max="30">';
+  h+='<button onclick="var i=document.getElementById(\'aiCountInput\');i.value=Math.min(30,(parseInt(i.value)||0)+1)">+</button>';
+  h+='</div>';
+
+  card.innerHTML=h;
+  card.style.animation='none';card.offsetHeight;card.style.animation='fadeUp .4s ease both';
+}
+
+function generateBulkTitles(count){
+  var industry=(state.data.identity&&state.data.identity['f-industry'])||'';
+  var pools={
+    'Infrastructure & Construction':['Senior Structural Engineer','BIM Coordinator','Project Manager','Safety Manager','Geotechnical Engineer','Quantity Surveyor','Site Supervisor','Sustainability Consultant','Civil Engineer','L&D Manager','Cloud Architect','Quality Manager','Procurement Manager','Contract Manager','HSE Officer','Project Director','CAD Technician','Environmental Engineer','Construction Manager','Finance Controller','HR Business Partner','Legal Counsel','IT Manager','Data Analyst','Risk Manager','Business Development Manager','Regional Director','Operations Manager','Design Engineer','Chief Engineer'],
+    'Technology & Software':['Software Engineer','Product Manager','DevOps Engineer','Data Scientist','UX Designer','QA Lead','Cloud Architect','Engineering Manager','Frontend Developer','Backend Developer','Site Reliability Engineer','Security Engineer','Technical Writer','Scrum Master','VP Engineering','CTO','Data Engineer','ML Engineer','Platform Engineer','Solutions Architect','IT Support Lead','Program Manager','Business Analyst','Release Manager','UX Researcher','Mobile Developer','Database Administrator','Network Engineer','Chief Information Officer','Product Designer'],
+    'Financial Services':['Risk Analyst','Compliance Officer','Portfolio Manager','Financial Advisor','Credit Analyst','Treasury Manager','Audit Manager','Data Analyst','Relationship Manager','Fund Accountant','Wealth Manager','Operations Analyst','Regulatory Specialist','Investment Analyst','Chief Risk Officer','Finance Controller','Collections Manager','Loan Officer','Actuarial Analyst','Anti-Money Laundering Analyst','Branch Manager','Client Services Lead','Quantitative Analyst','Trade Support Analyst','Business Continuity Manager','Internal Auditor','Tax Specialist','Payment Operations Lead','Fraud Analyst','Financial Planner'],
+    'Healthcare & Life Sciences':['Clinical Research Manager','Medical Affairs Lead','Quality Assurance Manager','Regulatory Affairs Specialist','Biostatistician','Pharmacovigilance Officer','Clinical Trial Coordinator','Medical Writer','Health Informatics Analyst','Lab Director','Patient Safety Officer','Drug Safety Associate','Compliance Manager','Medical Science Liaison','Clinical Data Manager','Healthcare Administrator','Nursing Director','Pharmacy Manager','Research Scientist','Epidemiologist','Health Economist','Genetic Counselor','Radiologist','Clinical Operations Director','Supply Chain Manager','Quality Control Analyst','Bioinformatics Scientist','Medical Devices Engineer','Public Health Specialist','Ethics Committee Coordinator']
+  };
+  var pool=null;
+  for(var key in pools){if(industry.indexOf(key.split(' ')[0])>-1){pool=pools[key];break}}
+  if(!pool) pool=['Project Manager','Business Analyst','Team Lead','Operations Manager','Data Analyst','HR Manager','Finance Controller','Marketing Manager','Product Manager','Software Engineer','QA Lead','DevOps Engineer','UX Designer','Sales Manager','Customer Success Lead','Legal Counsel','Procurement Manager','L&D Manager','IT Manager','Risk Manager','Cloud Architect','Content Strategist','Chief of Staff','Regional Manager','Account Executive','Administrative Manager','Support Team Lead','Quality Manager','Compliance Officer','Facilities Manager'];
+  // shuffle and pick
+  var shuffled=pool.slice();
+  for(var i=shuffled.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=shuffled[i];shuffled[i]=shuffled[j];shuffled[j]=tmp}
+  return shuffled.slice(0,Math.min(count,shuffled.length));
+}
+
+function generateAllRoleData(){
+  aiRoleTitles=[];aiRoleData=[];
+  var titles=generateBulkTitles(aiRoleCount);
+  titles.forEach(function(t,i){
+    aiRoleTitles.push({title:t,status:'pending'});
+    var rd={title:t};
+    aiRoleData.push(rd);
+    aiActiveRole=i;
+    ['family','dept','senior','kra','career','qual','crit','mgr','spof'].forEach(function(fid){
+      var q=null;AI_QUESTIONS.forEach(function(qq){if(qq.id===fid)q=qq});
+      if(q){var s=q.suggestions();rd[fid]=s.length>0?s[0]:'';rd['_ai_'+fid]=true}
+    });
+  });
+  aiActiveRole=0;
+}
+
+// ── SCREEN 2: TITLE SUGGESTIONS ──
+var aiTitleResearchTimer=null;
+function launchMindMap(){renderAiTitlesScreen()}
+
+function renderAiTitlesScreen(){
+  aiSessionPhase='titles';
+  document.getElementById('aiProgFill').style.width='33%';
+  document.getElementById('aiProgFill').style.background='';
+  document.getElementById('aiProgText').textContent='Step 2 of 3 \u00b7 Define Roles';
+  document.getElementById('aiTabBar').classList.remove('visible');
+  document.getElementById('aiBackBtn').style.display='inline-flex';
+  document.getElementById('aiBackBtn').onclick=function(){renderAiCountScreen()};
+  document.getElementById('aiSkipBtn').style.display='none';
+  document.getElementById('aiNextBtn').style.display='';
+  document.getElementById('aiNextBtn').disabled=true;
+  document.getElementById('aiNextBtn').innerHTML='Start Building <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5"><polyline points="9 18 15 12 9 6"/></svg>';
+  document.getElementById('aiNextBtn').onclick=function(){startBuilding()};
+
+  var card=document.getElementById('aiQuestionCard');
+  card.className='ai-question-card';
+  document.querySelector('.ai-popup-body').classList.remove('mm-mode');
+  var id=state.data.identity||{};
+  var company=id['f-company']||'your organisation';
+  var industry=id['f-industry']||'';
+  var buCount=D.bus.length;
+  var buNames=D.bus.map(function(b){return b.name}).join(', ');
+
+  var researchLines=[];
+  if(company!=='your organisation') researchLines.push({text:'Analysing org profile for <strong>'+company+'</strong>'});
+  if(industry) researchLines.push({text:'Scanning <strong>'+industry+'</strong> role taxonomies and benchmarks'});
+  if(buCount>0) researchLines.push({text:'Reviewing <strong>'+buCount+' business units</strong>: '+buNames});
+  researchLines.push({text:'Generating <strong>'+aiRoleCount+'</strong> role titles with AI'});
+  researchLines.push({text:'Pre-filling 9 attributes per role from benchmarks'});
+  researchLines.push({text:'Preparing suggestions\u2026'});
+
+  var h='<div class="ai-q-label"><span class="q-num">2</span>Role Titles</div>';
+  h+='<div class="ai-q-title">AI-Suggested Role Titles</div>';
+  h+='<div class="ai-q-desc">Review and customise the '+aiRoleCount+' suggested roles. Click a title to edit, or use \u00d7 to remove. Add custom roles at the bottom.</div>';
+  h+='<div id="aiTitleResearchBox" style="background:linear-gradient(135deg,var(--card) 0%,var(--accent-lt) 100%);border:1px solid var(--accent-bd);border-radius:12px;padding:18px 22px;margin-bottom:20px">';
+  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><div class="ai-typing"><span></span><span></span><span></span></div><span style="font-size:11px;font-weight:600;color:var(--accent);letter-spacing:.04em">SkillForge AI is researching\u2026</span></div>';
+  h+='<div id="aiTitleResearchLines">';
+  researchLines.forEach(function(line){
+    h+='<div class="ai-research-line" style="opacity:0;transform:translateX(-8px);transition:opacity .4s ease,transform .4s ease;display:flex;align-items:center;gap:9px;padding:5px 0;font-size:12px;color:var(--text-secondary)">';
+    h+='<svg style="width:13px;height:13px;flex-shrink:0;stroke:var(--accent);fill:none;stroke-width:1.7" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
+    h+='<span>'+line.text+'</span>';
+    h+='<svg class="ai-line-check" style="width:14px;height:14px;stroke:var(--green);fill:none;stroke-width:2.5;margin-left:auto;opacity:0;transition:opacity .3s;flex-shrink:0" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+    h+='</div>';
+  });
+  h+='</div></div>';
+  h+='<div id="aiTitleChipsWrap" style="opacity:0;transition:opacity .5s"></div>';
+  card.innerHTML=h;
+  card.style.animation='none';card.offsetHeight;card.style.animation='fadeUp .4s ease both';
+
+  var lines=document.querySelectorAll('#aiTitleResearchLines .ai-research-line');
+  var lineDelay=500;
+  lines.forEach(function(line,i){
+    setTimeout(function(){
+      line.style.opacity='1';line.style.transform='translateX(0)';
+      if(i>0){var prev=lines[i-1].querySelector('.ai-line-check');if(prev)prev.style.opacity='1'}
+    },(i+1)*lineDelay);
+  });
+
+  if(aiTitleResearchTimer) clearTimeout(aiTitleResearchTimer);
+  aiTitleResearchTimer=setTimeout(function(){
+    generateAllRoleData();
+    if(lines.length>0){var last=lines[lines.length-1].querySelector('.ai-line-check');if(last)last.style.opacity='1'}
+    var box=document.getElementById('aiTitleResearchBox');
+    if(box){var hdr=box.querySelector('div:first-child');if(hdr) hdr.innerHTML='<svg style="width:15px;height:15px;stroke:var(--green);fill:none;stroke-width:2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622"/></svg><span style="font-size:11px;font-weight:600;color:var(--green)">Analysis complete \u2014 '+aiRoleCount+' roles generated</span>'}
+
+    var wrap=document.getElementById('aiTitleChipsWrap');
+    if(!wrap) return;
+    var ch='';
+    aiRoleTitles.forEach(function(r,i){
+      ch+='<div class="ai-title-chip" id="tcRow'+i+'"><span class="tc-num">'+(i+1)+'</span><input type="text" value="'+r.title+'" onchange="aiRoleTitles['+i+'].title=this.value;aiRoleData['+i+'].title=this.value" placeholder="Role title"><button class="tc-del" onclick="removeTitleChip('+i+')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+    });
+    ch+='<div style="margin-top:10px"><button class="ai-chip" onclick="addCustomTitleChip()" style="border-style:dashed;gap:5px"><svg style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add custom role</button></div>';
+    wrap.innerHTML=ch;
+    wrap.style.opacity='1';
+    var chips=wrap.querySelectorAll('.ai-title-chip');
+    chips.forEach(function(chip,ci){setTimeout(function(){chip.classList.add('visible')},ci*70)});
+    document.getElementById('aiNextBtn').disabled=false;
+  },(lines.length+1)*lineDelay+300);
+}
+
+function removeTitleChip(idx){
+  aiRoleTitles.splice(idx,1);aiRoleData.splice(idx,1);
+  refreshTitleChips();
+}
+function addCustomTitleChip(){
+  aiRoleTitles.push({title:'',status:'pending'});
+  aiRoleData.push({title:'',family:'',dept:'',senior:'',kra:'',career:'',qual:'',crit:'',mgr:'',spof:''});
+  refreshTitleChips();
+  var lastInput=document.querySelector('#tcRow'+(aiRoleTitles.length-1)+' input');
+  if(lastInput) lastInput.focus();
+}
+function refreshTitleChips(){
+  var wrap=document.getElementById('aiTitleChipsWrap');if(!wrap) return;
+  var ch='';
+  aiRoleTitles.forEach(function(r,i){
+    ch+='<div class="ai-title-chip visible" id="tcRow'+i+'"><span class="tc-num">'+(i+1)+'</span><input type="text" value="'+r.title+'" onchange="aiRoleTitles['+i+'].title=this.value;aiRoleData['+i+'].title=this.value" placeholder="Role title"><button class="tc-del" onclick="removeTitleChip('+i+')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+  });
+  ch+='<div style="margin-top:10px"><button class="ai-chip" onclick="addCustomTitleChip()" style="border-style:dashed;gap:5px"><svg style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add custom role</button></div>';
+  wrap.innerHTML=ch;
+  document.getElementById('aiNextBtn').disabled=aiRoleTitles.length===0;
+}
+
+// ── SCREEN 3: TAB BAR + Q&A ──
+function startBuilding(){
+  var filtered=[];var filteredData=[];
+  aiRoleTitles.forEach(function(r,i){if(r.title.trim()){filtered.push(r);filteredData.push(aiRoleData[i])}});
+  aiRoleTitles=filtered;aiRoleData=filteredData;
+  if(aiRoleTitles.length===0){showToast('Add at least one role title');return}
+  aiRoleCount=aiRoleTitles.length;
+  aiRoleTitles.forEach(function(r){r.status='pending'});
+  aiActiveRole=0;aiRoleTitles[0].status='active';aiCurrentQ=1;
+  aiSessionPhase='building';
+  document.getElementById('aiTabBar').classList.add('visible');
+  renderTabBar();renderAiQuestion();
+}
+
+function renderTabBar(){
+  var bar=document.getElementById('aiTabBar');var h='';
+  aiRoleTitles.forEach(function(r,i){
+    var cls='ai-tab';
+    if(r.status==='done') cls+=' done';
+    else if(i===aiActiveRole) cls+=' active';
+    h+='<div class="'+cls+'" onclick="switchToRole('+i+')">';
+    h+='<span class="tab-dot"></span>';
+    h+='<svg class="tab-check" viewBox="0 0 24 24" style="stroke:var(--green);fill:none;stroke-width:2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    h+='<span style="max-width:120px;overflow:hidden;text-overflow:ellipsis">'+(r.title||'Role '+(i+1))+'</span></div>';
+  });
+  bar.innerHTML=h;
+  var at=bar.querySelector('.ai-tab.active');
+  if(at) at.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+
+function switchToRole(index){
+  if(index===aiActiveRole&&aiSessionPhase==='building') return;
+  saveCurrentInput();
+  if(aiRoleTitles[aiActiveRole].status==='active') aiRoleTitles[aiActiveRole].status='pending';
+  aiActiveRole=index;
+  if(aiRoleTitles[index].status!=='done') aiRoleTitles[index].status='active';
+  aiSessionPhase='building';
+  var data=aiRoleData[index];var resumeQ=1;
+  for(var i=1;i<AI_QUESTIONS.length;i++){if(!data[AI_QUESTIONS[i].id])break;resumeQ=i+1}
+  aiCurrentQ=Math.min(resumeQ,AI_QUESTIONS.length-1);
+  if(aiRoleTitles[index].status==='done') aiCurrentQ=1;
+  renderTabBar();renderAiQuestion();
+}
+
+function saveCurrentInput(){
+  var inp=document.getElementById('aiManualInput');
+  if(inp&&inp.value&&aiCurrentQ<AI_QUESTIONS.length){setAiAnswer(AI_QUESTIONS[aiCurrentQ].id,inp.value)}
+}
+
+// ── Q&A PER ROLE ──
+function renderAiQuestion(){
+  var q=AI_QUESTIONS[aiCurrentQ];
+  if(!q) return completeCurrentRole();
+  var total=AI_QUESTIONS.length;var questionsLeft=total-1;var qIdx=aiCurrentQ;
+  var pct=Math.round((qIdx/questionsLeft)*100);
+  var roleTitle=aiRoleTitles[aiActiveRole]?aiRoleTitles[aiActiveRole].title:'Role '+(aiActiveRole+1);
+
+  document.getElementById('aiProgFill').style.width=pct+'%';
+  document.getElementById('aiProgFill').style.background='';
+  document.getElementById('aiProgText').textContent=roleTitle+' \u00b7 Q'+qIdx+' / '+questionsLeft;
+  document.getElementById('aiBackBtn').style.display=aiCurrentQ>1?'inline-flex':'none';
+  document.getElementById('aiBackBtn').onclick=function(){aiBack()};
+  document.getElementById('aiNextBtn').style.display='';
+  document.getElementById('aiSkipBtn').style.display='';
+  document.getElementById('aiNextBtn').onclick=function(){aiNext()};
+  document.getElementById('aiNextBtn').innerHTML='Next <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5"><polyline points="9 18 15 12 9 6"/></svg>';
+  if(aiCurrentQ===total-1) document.getElementById('aiNextBtn').innerHTML='Complete Role <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+  document.getElementById('aiNextBtn').disabled=true;
+  aiSessionPhase='building';
+
+  var card=document.getElementById('aiQuestionCard');
+  card.className='ai-question-card';
+  document.querySelector('.ai-popup-body').classList.remove('mm-mode');
+  var prevAnswer=(aiRoleData[aiActiveRole]&&aiRoleData[aiActiveRole][q.id])||'';
+
+  var suggestions=q.suggestions();
+  var h='<div class="ai-q-label"><span class="q-num">'+q.num+'</span>'+q.label+(q.required?'<span class="ai-required">*</span>':'')+'</div>';
+  h+='<div class="ai-q-title">'+q.title+(q.required?' <span class="ai-required">*</span>':'')+'</div>';
+  h+='<div class="ai-q-desc">'+q.desc+'</div>';
+  h+='<div class="ai-suggestion-label"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>AI-Suggested Options</div>';
+  h+='<div class="ai-suggestions" id="aiSuggestions">';
+  suggestions.forEach(function(s){
+    var sel=(q.type==='multi')?(prevAnswer.indexOf(s)>-1):(prevAnswer===s);
+    h+='<div class="ai-chip'+(sel?' selected':'')+'" data-val="'+s.replace(/"/g,'&quot;')+'" onclick="selectAiChip(this,'+(q.type==='multi'?'true':'false')+')">';
+    h+='<span class="chip-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>';
+    h+=s+'</div>';
+  });
+  h+='</div>';
+  h+='<div class="ai-or-divider"><span>or type your own</span></div>';
+  h+='<input class="ai-manual-input" id="aiManualInput" type="text" placeholder="'+(q.placeholder||'')+'" value="'+(prevAnswer||'').replace(/"/g,'&quot;')+'" onkeydown="if(event.key===\'Enter\')aiNext()" oninput="onAiManualType();clearValidation()">';
+  h+='<div class="ai-validation-msg" id="aiValidationMsg"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="aiValidationText">This field is required</span></div>';
+  card.innerHTML=h;
+  card.style.animation='none';card.offsetHeight;card.style.animation='fadeUp .4s ease both';
+  document.getElementById('aiNextBtn').disabled=false;
+}
+
+function selectAiChip(el,isMulti){
+  clearValidation();
+  if(isMulti){
+    el.classList.toggle('selected');
+    var vals=[];document.querySelectorAll('#aiSuggestions .ai-chip.selected').forEach(function(c){vals.push(c.getAttribute('data-val'))});
+    setAiAnswer(AI_QUESTIONS[aiCurrentQ].id,vals.join(', '));
+    document.getElementById('aiManualInput').value=aiRoleData[aiActiveRole][AI_QUESTIONS[aiCurrentQ].id];
+  } else {
+    document.querySelectorAll('#aiSuggestions .ai-chip').forEach(function(c){c.classList.remove('selected')});
+    el.classList.add('selected');
+    setAiAnswer(AI_QUESTIONS[aiCurrentQ].id,el.getAttribute('data-val'));
+    document.getElementById('aiManualInput').value=el.getAttribute('data-val');
+  }
+}
+function onAiManualType(){
+  var val=document.getElementById('aiManualInput').value;
+  setAiAnswer(AI_QUESTIONS[aiCurrentQ].id,val);
+  document.querySelectorAll('#aiSuggestions .ai-chip').forEach(function(c){
+    if(c.getAttribute('data-val')===val)c.classList.add('selected');else c.classList.remove('selected');
+  });
+}
+function validateCurrentQuestion(){
+  var q=AI_QUESTIONS[aiCurrentQ];if(!q||!q.required)return true;
+  saveCurrentInput();
+  var val=(aiRoleData[aiActiveRole]&&aiRoleData[aiActiveRole][q.id])||'';
+  if(!val.trim()){showValidation(q.label+' is required');return false}return true;
+}
+function showValidation(msg){
+  var el=document.getElementById('aiValidationMsg');var txt=document.getElementById('aiValidationText');var inp=document.getElementById('aiManualInput');
+  if(el)el.classList.add('show');if(txt)txt.textContent=msg;if(inp){inp.classList.add('error');inp.focus()}
+}
+function clearValidation(){
+  var el=document.getElementById('aiValidationMsg');var inp=document.getElementById('aiManualInput');
+  if(el)el.classList.remove('show');if(inp)inp.classList.remove('error');
+}
+function aiNext(){if(!validateCurrentQuestion())return;clearValidation();if(aiCurrentQ<AI_QUESTIONS.length-1){aiCurrentQ++;renderAiQuestion()}else{completeCurrentRole()}}
+function aiBack(){clearValidation();if(aiCurrentQ>1){aiCurrentQ--;renderAiQuestion()}}
+function aiSkip(){
+  var q=AI_QUESTIONS[aiCurrentQ];
+  if(q&&q.required){showValidation(q.label+' is required and cannot be skipped');return}
+  clearValidation();aiCurrentQ++;
+  if(aiCurrentQ>=AI_QUESTIONS.length)completeCurrentRole();else renderAiQuestion();
+}
+
+// ── COMPLETE ROLE & AUTO-ADVANCE ──
+function completeCurrentRole(){
+  saveCurrentInput();var d=aiRoleData[aiActiveRole];var missing=[];
+  AI_QUESTIONS.forEach(function(q){if(q.required&&!(d[q.id]&&d[q.id].trim()))missing.push(q.label)});
+  if(missing.length>0){
+    showToast('Required: '+missing.join(', '));
+    for(var mi=0;mi<AI_QUESTIONS.length;mi++){var mq=AI_QUESTIONS[mi];if(mq.required&&!(d[mq.id]&&d[mq.id].trim())){aiCurrentQ=mi;renderAiQuestion();return}}
+    return;
+  }
+  aiRoleTitles[aiActiveRole].status='done';renderTabBar();
+  var nextIdx=-1;
+  for(var i=0;i<aiRoleTitles.length;i++){if(aiRoleTitles[i].status==='pending'){nextIdx=i;break}}
+  if(nextIdx>=0){
+    aiActiveRole=nextIdx;aiRoleTitles[nextIdx].status='active';aiCurrentQ=1;
+    renderTabBar();showToast((d.title||'Role')+' completed \u2014 next role');renderAiQuestion();
+  } else {renderAiFinalReview()}
+}
+
+// ── SCREEN 4: FINAL REVIEW ──
+function renderAiFinalReview(){
+  aiSessionPhase='review';
+  var doneCount=0;aiRoleTitles.forEach(function(r){if(r.status==='done')doneCount++});
+  document.getElementById('aiProgFill').style.width='100%';
+  document.getElementById('aiProgFill').style.background='linear-gradient(90deg,var(--green),#22C55E)';
+  document.getElementById('aiProgText').textContent=doneCount+' / '+aiRoleTitles.length+' roles completed';
+  document.getElementById('aiBackBtn').style.display='inline-flex';
+  document.getElementById('aiBackBtn').onclick=function(){for(var i=aiRoleTitles.length-1;i>=0;i--){if(aiRoleTitles[i].status==='done'){switchToRole(i);return}}};
+  document.getElementById('aiSkipBtn').style.display='none';
+  document.getElementById('aiNextBtn').style.display='';document.getElementById('aiNextBtn').disabled=false;
+  document.getElementById('aiNextBtn').innerHTML='<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5"><polyline points="20 6 9 17 4 12"/></svg> Add All '+doneCount+' Roles';
+  document.getElementById('aiNextBtn').onclick=function(){confirmAllRoles()};
+
+  var card=document.getElementById('aiQuestionCard');
+  var h='<div class="ai-q-label"><span class="q-num" style="background:var(--green-bg);color:var(--green);border-color:rgba(22,163,74,0.3)"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:var(--green);fill:none;stroke-width:2.5"><polyline points="20 6 9 17 4 12"/></svg></span>Complete</div>';
+  h+='<div class="ai-q-title">All Role Profiles Built</div>';
+  h+='<div class="ai-q-desc">'+doneCount+' role'+(doneCount>1?'s have':' has')+' been built. Click any tab to review, or add all roles to your Strategic Foundation.</div>';
+  h+='<div style="margin-bottom:8px">';
+  aiRoleTitles.forEach(function(r,i){
+    var d=aiRoleData[i];var isDone=r.status==='done';
+    h+='<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;border:1px solid '+(isDone?'rgba(22,163,74,0.2)':'#E5E7EB')+';background:'+(isDone?'var(--green-bg)':'#fff')+';margin-bottom:6px;cursor:pointer" onclick="switchToRole('+i+')">';
+    if(isDone){h+='<div style="width:24px;height:24px;border-radius:50%;background:var(--green-bg);border:1.5px solid var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg style="width:12px;height:12px;stroke:var(--green);fill:none;stroke-width:2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>'}
+    else{h+='<div style="width:24px;height:24px;border-radius:50%;border:1.5px dashed var(--amber);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:var(--amber)">!</div>'}
+    h+='<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;color:var(--text-primary)">'+d.title+'</div>';
+    h+='<div style="font-size:11px;color:var(--text-muted);margin-top:1px">'+(d.family||'\u2014')+' \u00b7 '+(d.senior||'\u2014')+(d.dept?' \u00b7 '+d.dept:'')+'</div></div>';
+    if(!isDone) h+='<span style="font-size:10px;color:var(--amber)">Incomplete</span>';
+    h+='</div>';
+  });
+  h+='</div>';
+  card.innerHTML=h;card.style.animation='none';card.offsetHeight;card.style.animation='fadeUp .4s ease both';
+}
+
+function confirmAllRoles(){
+  var count=0;
+  aiRoleTitles.forEach(function(r,i){
+    if(r.status!=='done') return;var d=aiRoleData[i];
+    D.roles.push({title:d.title||'',family:d.family||'',dept:d.dept||'',senior:d.senior||'',kra:d.kra||'',career:d.career||'',qual:d.qual||'',crit:d.crit||'',mgr:d.mgr==='Yes'?'yes':d.mgr==='No'?'no':(d.mgr||'').toLowerCase(),spof:d.spof||''});
+    count++;
+  });
+  renderList('roleList',D.roles,function(r){return r.title+' \u2014 '+r.family+' \u00b7 '+r.senior+(r.spof?' \u00b7 '+r.spof:'')},'roles');
+  closeAiPopup();
+}
+
+// Wire up Reset Demo from topbar
+document.addEventListener('DOMContentLoaded', function(){
+  // The shell topbar actions may fire a custom event or we can hook into it
+  // For now, expose resetDemo globally — the shell's "Reset Demo" button calls it
+  var resetBtns = document.querySelectorAll('[data-action="Reset Demo"]');
+  resetBtns.forEach(function(b){ b.addEventListener('click', resetDemo); });
+});
+
+// INIT
+renderSteps();renderStepper();renderSegs();drawGauge(0);
+</script>
+</body>
+</html>

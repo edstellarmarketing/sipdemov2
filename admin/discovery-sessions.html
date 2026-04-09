@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discovery Sessions · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   DISCOVERY SESSIONS — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── CONTENT ── */
+.content { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; }
+.content > * { flex-shrink: 0; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
+
+/* ── KPI STRIP ── */
+.kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; animation: fadeUp .4s ease both; }
+.kpi-card { background: var(--card); border: 1px solid #E5E7EB; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.kpi-label { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; }
+.kpi-value { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--text-primary); line-height: 1; }
+.kpi-value.accent { color: var(--accent); }
+.kpi-value.green  { color: var(--green); }
+.kpi-value.red    { color: var(--red); }
+.kpi-value.teal   { color: var(--teal); }
+.kpi-value.purple { color: var(--purple); }
+.kpi-sub { font-size: 10px; display: flex; align-items: center; gap: 4px; color: var(--text-secondary); }
+.kpi-up   { color: var(--green); }
+
+/* ── PANELS ── */
+.panel { background: var(--card); border: 1px solid #E5E7EB; border-radius: 14px; display: flex; flex-direction: column; overflow: hidden; }
+.panel-head { padding: 14px 18px 12px; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.panel-title { font-family: var(--font-display); font-size: 13px; font-weight: 400; color: var(--text-primary); }
+.panel-sub { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+.panel-tag { padding: 3px 8px; border-radius: 100px; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid; }
+.panel-tag.teal   { border-color: rgba(8,145,178,.4); color: var(--teal); }
+.panel-tag.accent { border-color: rgba(201,168,76,.4); color: var(--accent); }
+.panel-tag.green  { border-color: rgba(22,163,74,.4); color: var(--green); }
+.panel-tag.blue   { border-color: rgba(37,99,235,.4); color: var(--blue); }
+.panel-tag.purple { border-color: rgba(124,58,237,.4); color: var(--purple); }
+.panel-body { flex: 1; padding: 14px 18px; }
+.panel-body.no-pad { padding: 0; }
+
+/* ── SESSION LOG TABLE ── */
+.session-table { width: 100%; border-collapse: collapse; }
+.session-table th {
+  font-size: 10px; color: var(--text-secondary); letter-spacing: .08em; text-transform: uppercase;
+  text-align: left; padding: 0 12px 10px; font-weight: 400;
+}
+.session-table th:nth-child(n+4) { text-align: center; }
+.session-table tr { border-bottom: 1px solid #E5E7EB; }
+.session-table tr:last-child { border-bottom: none; }
+.session-table td { padding: 10px 12px; font-size: 12px; color: var(--text-secondary); }
+.session-table td:first-child { color: var(--text-primary); font-weight: 500; }
+.session-table td:nth-child(n+4) { text-align: center; }
+
+.type-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 100px; font-size: 10px; font-weight: 500;
+}
+.type-badge.one-on-one  { background: var(--blue-bg); color: var(--blue); }
+.type-badge.focus-group { background: var(--purple-bg); color: var(--purple); }
+.type-badge.dept-review { background: var(--amber-bg); color: var(--amber); }
+
+/* ── THEME ITEMS ── */
+.theme-item {
+  display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px;
+  background: var(--bg); border: 1px solid #E5E7EB; border-radius: 10px;
+  transition: border-color .2s;
+}
+.theme-item:hover { border-color: rgba(0,0,0,.12); }
+.theme-freq {
+  width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 16px; font-weight: 400; flex-shrink: 0;
+}
+.theme-body { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.theme-name { font-size: 12.5px; color: var(--text-primary); font-weight: 500; }
+.theme-sessions { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+
+/* ── NEED ITEM ── */
+.need-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+  background: var(--bg); border: 1px solid #E5E7EB; border-radius: 8px;
+}
+.need-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.need-text { flex: 1; font-size: 12px; color: var(--text-secondary); }
+.need-meta { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); white-space: nowrap; }
+.need-mult { font-family: var(--font-display); font-size: 12px; font-weight: 400; white-space: nowrap; }
+
+/* ── FORM STYLES ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 10px; color: var(--text-secondary); letter-spacing: .08em; text-transform: uppercase; font-weight: 500; }
+.form-input, .form-select, .form-textarea {
+  background: var(--bg); border: 1px solid #E5E7EB; border-radius: 8px;
+  padding: 10px 14px; font-family: var(--font-body); font-size: 12.5px; color: var(--text-primary);
+  outline: none; transition: border-color .2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: rgba(8,145,178,.4); }
+.form-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236B7280' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.form-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+.form-toggle-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+.toggle-track {
+  width: 36px; height: 20px; border-radius: 10px; background: rgba(0,0,0,.1);
+  position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0;
+}
+.toggle-track.on { background: var(--teal); }
+.toggle-thumb {
+  width: 16px; height: 16px; border-radius: 50%; background: #ffffff;
+  position: absolute; top: 2px; left: 2px; transition: left .2s;
+}
+.toggle-track.on .toggle-thumb { left: 18px; }
+.toggle-label { font-size: 12px; color: var(--text-secondary); }
+
+/* ── TWO COLUMN LAYOUT ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+/* ── ACTION BUTTONS ── */
+.tb-btn { padding: 7px 14px; border-radius: 6px; border: 1px solid #E5E7EB; background: transparent; color: var(--text-secondary); font-family: var(--font-body); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: background .15s, color .15s; }
+.tb-btn:hover { background: rgba(0,0,0,0.04); color: var(--text-primary); }
+.tb-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.tb-btn.primary { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 600; }
+.tb-btn.primary:hover { opacity: .88; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.5; transform:scale(1.3); } }
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <!-- SCROLLABLE CONTENT -->
+  <div class="content">
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip">
+      <div class="kpi-card" style="animation: fadeUp .4s ease .05s both">
+        <div class="kpi-label">Total Sessions</div>
+        <div class="kpi-value teal">14</div>
+        <div class="kpi-sub kpi-up">6 this month</div>
+      </div>
+      <div class="kpi-card" style="animation: fadeUp .4s ease .10s both">
+        <div class="kpi-label">Employees Covered</div>
+        <div class="kpi-value">86</div>
+        <div class="kpi-sub kpi-up">&uarr; 10.6% of headcount</div>
+      </div>
+      <div class="kpi-card" style="animation: fadeUp .4s ease .15s both">
+        <div class="kpi-label">Themes Extracted</div>
+        <div class="kpi-value accent">23</div>
+        <div class="kpi-sub">AI-identified across sessions</div>
+      </div>
+      <div class="kpi-card" style="animation: fadeUp .4s ease .20s both">
+        <div class="kpi-label">Employee-Declared Needs</div>
+        <div class="kpi-value purple">34</div>
+        <div class="kpi-sub">Feeds LNA multiplier</div>
+      </div>
+    </div>
+
+    <!-- SESSION LOG TABLE -->
+    <div class="panel" style="animation: fadeUp .5s ease .15s both">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Session Log</div>
+          <div class="panel-sub">Completed discovery sessions &middot; 1:1 interviews, focus groups, department reviews</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <div class="panel-tag teal">6 Recent</div>
+          <div class="panel-tag green">All Complete</div>
+        </div>
+      </div>
+      <div class="panel-body no-pad" style="overflow-x:auto">
+        <table class="session-table">
+          <thead>
+            <tr>
+              <th>Session</th>
+              <th>Type</th>
+              <th>Participant(s)</th>
+              <th>Date</th>
+              <th>Duration</th>
+              <th>Themes</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1:1 with Rahul Sharma</td>
+              <td><span class="type-badge one-on-one">1:1</span></td>
+              <td>Project Manager</td>
+              <td style="font-family:var(--font-mono);font-size:11px">12 Mar 2026</td>
+              <td style="font-family:var(--font-mono);font-size:11px">45 min</td>
+              <td><span style="font-family:var(--font-display);font-weight:400;color:var(--teal)">4</span></td>
+              <td><span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:500;background:var(--green-bg);color:var(--green)"><span style="width:5px;height:5px;border-radius:50%;background:var(--green)"></span>Complete</span></td>
+            </tr>
+            <tr>
+              <td>1:1 with Meera Sundaram</td>
+              <td><span class="type-badge one-on-one">1:1</span></td>
+              <td>Safety Manager</td>
+              <td style="font-family:var(--font-mono);font-size:11px">11 Mar 2026</td>
+              <td style="font-family:var(--font-mono);font-size:11px">30 min</td>
+              <td><span style="font-family:var(--font-display);font-weight:400;color:var(--teal)">3</span></td>
+              <td><span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:500;background:var(--green-bg);color:var(--green)"><span style="width:5px;height:5px;border-radius:50%;background:var(--green)"></span>Complete</span></td>
+            </tr>
+            <tr>
+              <td>Focus Group: BIM Team</td>
+              <td><span class="type-badge focus-group">Focus Group</span></td>
+              <td>8 participants</td>
+              <td style="font-family:var(--font-mono);font-size:11px">8 Mar 2026</td>
+              <td style="font-family:var(--font-mono);font-size:11px">90 min</td>
+              <td><span style="font-family:var(--font-display);font-weight:400;color:var(--teal)">6</span></td>
+              <td><span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:500;background:var(--green-bg);color:var(--green)"><span style="width:5px;height:5px;border-radius:50%;background:var(--green)"></span>Complete</span></td>
+            </tr>
+            <tr>
+              <td>Focus Group: Graduate Cohort 2025</td>
+              <td><span class="type-badge focus-group">Focus Group</span></td>
+              <td>12 participants</td>
+              <td style="font-family:var(--font-mono);font-size:11px">5 Mar 2026</td>
+              <td style="font-family:var(--font-mono);font-size:11px">60 min</td>
+              <td><span style="font-family:var(--font-display);font-weight:400;color:var(--teal)">5</span></td>
+              <td><span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:500;background:var(--green-bg);color:var(--green)"><span style="width:5px;height:5px;border-radius:50%;background:var(--green)"></span>Complete</span></td>
+            </tr>
+            <tr>
+              <td>1:1 with Vikram Patel</td>
+              <td><span class="type-badge one-on-one">1:1</span></td>
+              <td>Cloud Architect</td>
+              <td style="font-family:var(--font-mono);font-size:11px">3 Mar 2026</td>
+              <td style="font-family:var(--font-mono);font-size:11px">35 min</td>
+              <td><span style="font-family:var(--font-display);font-weight:400;color:var(--teal)">3</span></td>
+              <td><span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:500;background:var(--green-bg);color:var(--green)"><span style="width:5px;height:5px;border-radius:50%;background:var(--green)"></span>Complete</span></td>
+            </tr>
+            <tr>
+              <td>Department Review: EHS &amp; Risk</td>
+              <td><span class="type-badge dept-review">Dept Review</span></td>
+              <td>6 participants</td>
+              <td style="font-family:var(--font-mono);font-size:11px">28 Feb 2026</td>
+              <td style="font-family:var(--font-mono);font-size:11px">75 min</td>
+              <td><span style="font-family:var(--font-display);font-weight:400;color:var(--teal)">4</span></td>
+              <td><span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:500;background:var(--green-bg);color:var(--green)"><span style="width:5px;height:5px;border-radius:50%;background:var(--green)"></span>Complete</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AI THEME EXTRACTION + EMPLOYEE-DECLARED NEEDS -->
+    <div class="two-col">
+
+      <!-- AI Theme Extraction -->
+      <div class="panel" style="animation: fadeUp .5s ease .2s both">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">AI Theme Extraction</div>
+            <div class="panel-sub">Top themes identified across all discovery sessions</div>
+          </div>
+          <div class="panel-tag teal">AI Engine</div>
+        </div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:10px">
+
+          <div class="theme-item">
+            <div class="theme-freq" style="background:var(--teal-bg);color:var(--teal);border:1px solid rgba(8,145,178,.25)">5</div>
+            <div class="theme-body">
+              <div class="theme-name">Need for AI literacy across all levels</div>
+              <div class="theme-sessions">Mentioned in: BIM Team FG, Graduate Cohort FG, Rahul 1:1, Vikram 1:1, EHS Dept Review</div>
+            </div>
+          </div>
+
+          <div class="theme-item">
+            <div class="theme-freq" style="background:var(--blue-bg);color:var(--blue);border:1px solid rgba(37,99,235,.25)">4</div>
+            <div class="theme-body">
+              <div class="theme-name">BIM skills gap affecting project timelines</div>
+              <div class="theme-sessions">Mentioned in: BIM Team FG, Rahul 1:1, Graduate Cohort FG, EHS Dept Review</div>
+            </div>
+          </div>
+
+          <div class="theme-item">
+            <div class="theme-freq" style="background:var(--purple-bg);color:var(--purple);border:1px solid rgba(124,58,237,.25)">3</div>
+            <div class="theme-body">
+              <div class="theme-name">Data analytics for project reporting</div>
+              <div class="theme-sessions">Mentioned in: Rahul 1:1, Vikram 1:1, BIM Team FG</div>
+            </div>
+          </div>
+
+          <div class="theme-item">
+            <div class="theme-freq" style="background:var(--amber-bg);color:var(--amber);border:1px solid rgba(217,119,6,.25)">3</div>
+            <div class="theme-body">
+              <div class="theme-name">Safety compliance knowledge refresh</div>
+              <div class="theme-sessions">Mentioned in: Meera 1:1, EHS Dept Review, Graduate Cohort FG</div>
+            </div>
+          </div>
+
+          <div class="theme-item">
+            <div class="theme-freq" style="background:var(--accent-lt);color:var(--accent);border:1px solid var(--accent-bd)">2</div>
+            <div class="theme-body">
+              <div class="theme-name">Leadership pipeline concerns</div>
+              <div class="theme-sessions">Mentioned in: Graduate Cohort FG, EHS Dept Review</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Employee-Declared Learning Needs -->
+      <div class="panel" style="animation: fadeUp .5s ease .25s both">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Employee-Declared Learning Needs</div>
+            <div class="panel-sub">Self-declared needs feeding the LNA weighted gap multiplier</div>
+          </div>
+          <div class="panel-tag accent">LNA Feed</div>
+        </div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:8px">
+
+          <div class="need-item">
+            <div class="need-dot" style="background:var(--teal)"></div>
+            <div class="need-text">Advanced Revit &amp; Navisworks coordination workflows</div>
+            <div class="need-meta">8 employees</div>
+            <div class="need-mult" style="color:var(--teal)">+1.3x</div>
+          </div>
+          <div class="need-item">
+            <div class="need-dot" style="background:var(--blue)"></div>
+            <div class="need-text">Python for engineering data automation</div>
+            <div class="need-meta">6 employees</div>
+            <div class="need-mult" style="color:var(--blue)">+1.2x</div>
+          </div>
+          <div class="need-item">
+            <div class="need-dot" style="background:var(--purple)"></div>
+            <div class="need-text">AI tools for project management (Copilot, ChatGPT)</div>
+            <div class="need-meta">12 employees</div>
+            <div class="need-mult" style="color:var(--purple)">+1.4x</div>
+          </div>
+          <div class="need-item">
+            <div class="need-dot" style="background:var(--amber)"></div>
+            <div class="need-text">ISO 45001 refresher &amp; internal audit skills</div>
+            <div class="need-meta">5 employees</div>
+            <div class="need-mult" style="color:var(--amber)">+1.1x</div>
+          </div>
+          <div class="need-item">
+            <div class="need-dot" style="background:var(--green)"></div>
+            <div class="need-text">People management &amp; coaching for new team leads</div>
+            <div class="need-meta">4 employees</div>
+            <div class="need-mult" style="color:var(--green)">+1.2x</div>
+          </div>
+          <div class="need-item">
+            <div class="need-dot" style="background:var(--red)"></div>
+            <div class="need-text">Power BI dashboards for site reporting</div>
+            <div class="need-meta">7 employees</div>
+            <div class="need-mult" style="color:var(--red)">+1.3x</div>
+          </div>
+
+          <div style="margin-top:6px;padding:10px 14px;border-radius:10px;background:var(--accent-lt);border:1px solid var(--accent-bd);font-size:11px;color:var(--text-secondary);line-height:1.6">
+            <strong style="color:var(--accent)">LNA Multiplier logic:</strong> Employee-declared needs boost the weighted gap score by +1.1x to +1.4x depending on volume and alignment with strategic themes. These signals are Category F inputs into the gap engine.
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NEW SESSION FORM -->
+    <div class="panel" id="newSessionSection" style="animation: fadeUp .5s ease .3s both">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">New Discovery Session</div>
+          <div class="panel-sub">Capture a 1:1 interview, focus group, or department review &middot; AI theme extraction available</div>
+        </div>
+        <div class="panel-tag teal">Category F</div>
+      </div>
+      <div class="panel-body">
+        <div class="form-grid">
+
+          <div class="form-group">
+            <div class="form-label">Session Type</div>
+            <select class="form-select">
+              <option>1:1 Interview</option>
+              <option>Focus Group</option>
+              <option>Department Review</option>
+              <option>Skip-Level Meeting</option>
+              <option>Exit Interview</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">Date</div>
+            <input class="form-input" type="date" value="2026-03-28">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">Participant(s)</div>
+            <input class="form-input" type="text" placeholder="e.g. Priya Nair (Structural Engineer) or BIM Team (8)">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">Duration (minutes)</div>
+            <input class="form-input" type="number" placeholder="45" value="45">
+          </div>
+
+          <div class="form-group full">
+            <div class="form-label">Structured Notes Template</div>
+            <textarea class="form-textarea" placeholder="Use the structured template below or type freeform notes...
+
+1. CURRENT ROLE CHALLENGES
+   What skills gaps are affecting your day-to-day work?
+
+2. FUTURE SKILL NEEDS
+   What capabilities do you think you'll need in the next 12-18 months?
+
+3. LEARNING PREFERENCES
+   How do you prefer to learn? (classroom, online, coaching, on-the-job)
+
+4. BARRIERS TO LEARNING
+   What prevents you from developing new skills?
+
+5. SELF-DECLARED NEEDS
+   If you could pick any training, what would it be and why?"></textarea>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">AI Theme Extraction</div>
+            <div class="form-toggle-row">
+              <div class="toggle-track on" id="aiToggle" onclick="this.classList.toggle('on')">
+                <div class="toggle-thumb"></div>
+              </div>
+              <div class="toggle-label">Auto-extract themes from session notes using AI</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">Feed to LNA</div>
+            <div class="form-toggle-row">
+              <div class="toggle-track on" id="lnaToggle" onclick="this.classList.toggle('on')">
+                <div class="toggle-thumb"></div>
+              </div>
+              <div class="toggle-label">Auto-feed declared needs into weighted gap engine</div>
+            </div>
+          </div>
+
+          <div class="form-group full" style="flex-direction:row;gap:10px;margin-top:4px">
+            <button class="tb-btn primary" style="padding:10px 22px;font-size:13px">
+              <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save Session
+            </button>
+            <button class="tb-btn">
+              <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+              AI Extract Themes Now
+            </button>
+            <button class="tb-btn">Export Notes</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- Shell Component -->
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'admin',
+    activeNav: 'Discovery Sessions',
+    breadcrumbs: ['Assess', 'Discovery Sessions'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+// Toast for placeholder links
+(function(){
+  var toast = document.createElement("div");
+  toast.id = "sip-toast";
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid #E5E7EB;color:var(--text-secondary);font-size:12px;font-family:var(--font-body);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08)";
+  document.body.appendChild(toast);
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){
+      toast.style.opacity="0";
+      toast.style.transform="translateX(-50%) translateY(8px)";
+    }, 2400);
+  }
+  document.querySelectorAll('a[href*="placeholder"],button').forEach(function(el){
+    el.addEventListener('click', function(e){
+      if(el.tagName === 'A') e.preventDefault();
+      showToast('Demo — ' + (el.textContent.trim() || 'Action'));
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

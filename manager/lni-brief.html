@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LNI Brief · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   LNI BRIEF — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.content>*{flex-shrink:0}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+.panel{background:var(--card);border:1px solid rgba(0,0,0,0.07);border-radius:12px;overflow:hidden}
+.panel-head{padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1;min-width:120px}
+.panel-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500}
+.panel-body{padding:18px 20px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:960px){.two-col{grid-template-columns:1fr}}
+
+/* EMPLOYEE SELECTOR */
+.emp-select{display:flex;align-items:center;gap:14px;padding:18px 22px;background:linear-gradient(135deg,var(--card) 0%,rgba(37,99,235,0.06) 100%);border:1px solid rgba(37,99,235,0.15);border-radius:12px;flex-wrap:wrap}
+.emp-av-lg{width:52px;height:52px;border-radius:50%;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;font-weight:600;color:#fff;background:var(--blue);flex-shrink:0}
+.emp-detail{flex:1;min-width:180px}
+.emp-nm{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-primary)}
+.emp-rl{font-size:12px;color:var(--text-secondary);margin-top:2px}
+.emp-meta-row{display:flex;gap:16px;margin-top:6px;flex-wrap:wrap}
+.emp-meta{font-size:10px;color:var(--text-muted)}
+.emp-meta strong{color:var(--text-secondary)}
+
+/* BRIEF COMPONENT */
+.brief-comp{border:1px solid rgba(0,0,0,0.07);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.brief-comp:last-child{margin-bottom:0}
+.bc-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bc-num{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;font-weight:500;flex-shrink:0}
+.bc-title{font-family:var(--font-display);font-size:12px;font-weight:600;color:var(--text-primary)}
+.bc-val{margin-left:auto;font-family:var(--font-mono);font-size:13px;font-weight:500;flex-shrink:0}
+.bc-body{font-size:12px;color:var(--text-secondary);line-height:1.6}
+.bc-bar{width:100%;height:6px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden;margin-top:8px}
+.bc-fill{height:100%;border-radius:3px}
+
+/* INTERVENTION TABLE */
+.int-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.int-row:last-child{border-bottom:none}
+.int-type{padding:3px 10px;border-radius:5px;font-size:10px;font-weight:500;flex-shrink:0;min-width:80px;text-align:center}
+.int-name{font-size:12px;color:var(--text-primary);flex:1;min-width:0}
+.int-dur{font-size:10px;color:var(--text-muted);flex-shrink:0}
+.int-cost{font-family:var(--font-mono);font-size:11px;flex-shrink:0}
+
+/* TIMELINE */
+.tl-row{display:flex;align-items:center;gap:10px;padding:6px 0}
+.tl-month{font-family:var(--font-mono);font-size:10px;color:var(--text-muted);width:50px;flex-shrink:0}
+.tl-bar{flex:1;height:20px;background:rgba(0,0,0,0.04);border-radius:5px;position:relative;overflow:hidden}
+.tl-block{position:absolute;height:100%;border-radius:5px;display:flex;align-items:center;padding:0 8px;font-size:9px;font-weight:500;white-space:nowrap;overflow:hidden}
+
+/* BUDGET CARDS */
+.budget-card{padding:10px 14px;background:rgba(0,0,0,0.02);border-radius:8px;flex:1;min-width:120px}
+.budget-card .label{font-size:10px;color:var(--text-muted)}
+.budget-card .value{font-family:var(--font-display);font-size:18px;font-weight:600}
+
+/* OUTCOME CARDS */
+.outcome-card{padding:10px 14px;background:rgba(0,0,0,0.02);border-radius:8px;flex:1;min-width:140px}
+.outcome-card .label{font-size:10px;color:var(--text-muted)}
+.outcome-card .value{font-family:var(--font-display);font-size:16px;font-weight:600}
+
+/* FOOTER BAR */
+.page-footer{display:flex;align-items:center;gap:10px;padding:10px 28px;background:var(--accent-lt);border-top:1px solid var(--accent-bd);flex-shrink:0}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.fade-up{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <div class="content">
+
+    <!-- EMPLOYEE SELECTOR -->
+    <div class="emp-select fade-up">
+      <div class="emp-av-lg">PM</div>
+      <div class="emp-detail">
+        <div class="emp-nm">Priya Menon</div>
+        <div class="emp-rl">Senior Structural Engineer · Structural Engineering · Engineering & Delivery</div>
+        <div class="emp-meta-row">
+          <div class="emp-meta">Employee ID: <strong>EMP-001</strong></div>
+          <div class="emp-meta">Manager: <strong>Arun Krishnan</strong></div>
+          <div class="emp-meta">Tenure: <strong>2.4 years</strong></div>
+          <div class="emp-meta">Assessment: <strong>Q1 2026</strong></div>
+        </div>
+      </div>
+      <select onchange="switchEmployee(this.value)" style="padding:6px 12px;border-radius:7px;border:1px solid rgba(0,0,0,0.1);background:var(--card);color:var(--text-secondary);font-size:11px;font-family:var(--font-body);cursor:pointer">
+        <option selected>Priya Menon</option>
+        <option>Karthik Subramanian</option>
+        <option>Rahul Sharma</option>
+        <option>Meera Sundaram</option>
+        <option>Suresh Iyer</option>
+      </select>
+    </div>
+
+    <!-- 8-COMPONENT BRIEF -->
+    <div class="panel fade-up" style="animation-delay:.06s">
+      <div class="panel-head">
+        <svg style="width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+        <div class="panel-title">8-Component Learning Needs Brief</div>
+        <div class="panel-badge" style="background:var(--accent-lt);color:var(--accent)">AI-Generated</div>
+      </div>
+      <div class="panel-body">
+        <!-- C1: Weighted Gap Analysis -->
+        <div class="brief-comp">
+          <div class="bc-head"><div class="bc-num" style="background:var(--red-bg);color:var(--red)">1</div><div class="bc-title">Weighted Gap Analysis</div><div class="bc-val" style="color:var(--amber)">2 gaps identified</div></div>
+          <div class="bc-body">
+            <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.04)">
+              <span style="flex:1">BIM Coordination</span>
+              <span style="font-size:10px;color:var(--text-muted)">Current: 2.5 · Target: 4.0</span>
+              <span style="font-family:var(--font-mono);font-size:12px;color:var(--amber)">Gap: 1.5</span>
+              <span style="padding:2px 8px;border-radius:100px;font-size:9px;background:var(--amber-bg);color:var(--amber)">C2 × 1.5x</span>
+              <span style="font-family:var(--font-mono);font-size:11px;color:var(--red)">Weighted: 2.25</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+              <span style="flex:1">Data Analytics</span>
+              <span style="font-size:10px;color:var(--text-muted)">Current: 2.0 · Target: 3.5</span>
+              <span style="font-family:var(--font-mono);font-size:12px;color:var(--red)">Gap: 2.1</span>
+              <span style="padding:2px 8px;border-radius:100px;font-size:9px;background:var(--red-bg);color:var(--red)">C1 × 2.0x</span>
+              <span style="font-family:var(--font-mono);font-size:11px;color:var(--red)">Weighted: 4.20</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- C2: Intervention Types -->
+        <div class="brief-comp">
+          <div class="bc-head"><div class="bc-num" style="background:var(--blue-bg);color:var(--blue)">2</div><div class="bc-title">Recommended Interventions</div><div class="bc-val" style="color:var(--blue)">4 interventions</div></div>
+          <div class="bc-body">
+            <div class="int-row"><div class="int-type" style="background:var(--blue-bg);color:var(--blue)">Training</div><div class="int-name">BIM Coordination — Intermediate to Advanced (Autodesk ATC)</div><div class="int-dur">40 hrs</div><div class="int-cost" style="color:var(--text-primary)">SGD 2,400</div></div>
+            <div class="int-row"><div class="int-type" style="background:var(--purple-bg);color:var(--purple)">Course</div><div class="int-name">Power BI — Advanced Analytics & DAX (Microsoft Learn)</div><div class="int-dur">24 hrs</div><div class="int-cost" style="color:var(--text-primary)">SGD 800</div></div>
+            <div class="int-row"><div class="int-type" style="background:var(--green-bg);color:var(--green)">Shadowing</div><div class="int-name">Shadow BIM team on Marina Bay project (2 weeks)</div><div class="int-dur">80 hrs</div><div class="int-cost" style="color:var(--text-muted)">Internal</div></div>
+            <div class="int-row"><div class="int-type" style="background:var(--amber-bg);color:var(--amber)">Certification</div><div class="int-name">Autodesk Revit Professional Certification Exam</div><div class="int-dur">4 hrs</div><div class="int-cost" style="color:var(--text-primary)">SGD 350</div></div>
+          </div>
+        </div>
+
+        <!-- C3: Timeline -->
+        <div class="brief-comp">
+          <div class="bc-head"><div class="bc-num" style="background:var(--green-bg);color:var(--green)">3</div><div class="bc-title">Recommended Timeline</div><div class="bc-val" style="color:var(--green)">6 months</div></div>
+          <div class="bc-body">
+            <div class="tl-row"><div class="tl-month">Apr</div><div class="tl-bar"><div class="tl-block" style="left:0;width:100%;background:var(--blue-bg);color:var(--blue)">BIM Intermediate (wk 1-4)</div></div></div>
+            <div class="tl-row"><div class="tl-month">May</div><div class="tl-bar"><div class="tl-block" style="left:0;width:60%;background:var(--blue-bg);color:var(--blue)">BIM Advanced</div><div class="tl-block" style="left:65%;width:35%;background:var(--green-bg);color:var(--green)">Shadow</div></div></div>
+            <div class="tl-row"><div class="tl-month">Jun</div><div class="tl-bar"><div class="tl-block" style="left:0;width:50%;background:var(--green-bg);color:var(--green)">Shadow</div><div class="tl-block" style="left:55%;width:45%;background:var(--purple-bg);color:var(--purple)">Power BI</div></div></div>
+            <div class="tl-row"><div class="tl-month">Jul</div><div class="tl-bar"><div class="tl-block" style="left:0;width:70%;background:var(--purple-bg);color:var(--purple)">Power BI</div></div></div>
+            <div class="tl-row"><div class="tl-month">Aug</div><div class="tl-bar"><div class="tl-block" style="left:0;width:40%;background:var(--amber-bg);color:var(--amber)">Cert Prep</div><div class="tl-block" style="left:45%;width:25%;background:var(--accent-lt);color:var(--accent)">Exam</div></div></div>
+            <div class="tl-row"><div class="tl-month">Sep</div><div class="tl-bar"><div class="tl-block" style="left:0;width:100%;background:var(--green-bg);color:var(--green)">Re-assessment — validate gap closure</div></div></div>
+          </div>
+        </div>
+
+        <!-- C4: Budget -->
+        <div class="brief-comp">
+          <div class="bc-head"><div class="bc-num" style="background:var(--accent-lt);color:var(--accent)">4</div><div class="bc-title">Total Budget Estimate</div><div class="bc-val" style="color:var(--accent)">SGD 3,550</div></div>
+          <div class="bc-body">
+            <div style="display:flex;gap:14px;flex-wrap:wrap">
+              <div class="budget-card"><div class="label">External Training</div><div class="value" style="color:var(--blue)">SGD 3,200</div></div>
+              <div class="budget-card"><div class="label">Certification</div><div class="value" style="color:var(--amber)">SGD 350</div></div>
+              <div class="budget-card"><div class="label">Internal (Shadow)</div><div class="value" style="color:var(--green)">SGD 0</div></div>
+              <div class="budget-card"><div class="label">Opportunity Cost</div><div class="value" style="color:var(--text-muted)">~148 hrs</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- C5: Gap Source & Priority -->
+        <div class="brief-comp">
+          <div class="bc-head"><div class="bc-num" style="background:var(--purple-bg);color:var(--purple)">5</div><div class="bc-title">Gap Source & Priority Ranking</div></div>
+          <div class="bc-body">
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.04)"><span style="font-family:var(--font-mono);font-size:10px;color:var(--accent);padding:2px 6px;background:var(--accent-lt);border-radius:4px">#1</span><span style="flex:1">Data Analytics</span><span style="font-size:10px;color:var(--text-muted)">Source: Q1 2026 Assessment · Strategic Goal G1</span><span style="padding:2px 8px;border-radius:100px;font-size:9px;background:var(--red-bg);color:var(--red)">Priority 1</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="font-family:var(--font-mono);font-size:10px;color:var(--accent);padding:2px 6px;background:var(--accent-lt);border-radius:4px">#2</span><span style="flex:1">BIM Coordination</span><span style="font-size:10px;color:var(--text-muted)">Source: Q1 2026 Assessment · Strategic Goal G3</span><span style="padding:2px 8px;border-radius:100px;font-size:9px;background:var(--amber-bg);color:var(--amber)">Priority 2</span></div>
+          </div>
+        </div>
+
+        <!-- C6: Wellbeing Adjustment -->
+        <div class="brief-comp">
+          <div class="bc-head"><div class="bc-num" style="background:var(--green-bg);color:var(--green)">6</div><div class="bc-title">Wellbeing Adjustment</div><div class="bc-val" style="color:var(--green)">No adjustment needed</div></div>
+          <div class="bc-body">Priya's latest wellbeing pulse check-in shows no burnout risk indicators. Current workload capacity is rated at 72% — sufficient headroom for the 148-hour learning programme spread across 6 months (~25 hrs/month). No timeline extension recommended.</div>
+        </div>
+
+        <!-- C7: Manager Notes -->
+        <div class="brief-comp">
+          <div class="bc-head"><div class="bc-num" style="background:var(--blue-bg);color:var(--blue)">7</div><div class="bc-title">Manager Notes (Arun Krishnan)</div></div>
+          <div class="bc-body" style="font-style:italic">"Priya is highly motivated to close the BIM gap. She's already shadowing the Marina Bay team informally. Formalising this into her IDP will accelerate progress. I recommend front-loading the BIM training before the Power BI course, as we have an upcoming project that needs BIM coordination in June."</div>
+        </div>
+
+        <!-- C8: Expected Outcome -->
+        <div class="brief-comp">
+          <div class="bc-head"><div class="bc-num" style="background:var(--accent-lt);color:var(--accent)">8</div><div class="bc-title">Expected Outcome & ROI</div></div>
+          <div class="bc-body">
+            <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px">
+              <div class="outcome-card"><div class="label">BIM Score (Current → Target)</div><div class="value"><span style="color:var(--amber)">2.5</span> <span style="color:var(--text-muted)">→</span> <span style="color:var(--green)">4.0</span></div></div>
+              <div class="outcome-card"><div class="label">Data Analytics (Current → Target)</div><div class="value"><span style="color:var(--red)">2.0</span> <span style="color:var(--text-muted)">→</span> <span style="color:var(--blue)">3.5</span></div></div>
+              <div class="outcome-card"><div class="label">Succession Readiness</div><div class="value" style="color:var(--green)">+22%</div><div style="font-size:10px;color:var(--text-muted)">For Principal Eng role</div></div>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">Upon completion, Priya will be qualified to independently lead BIM coordination on projects, reducing external BIM consultant dependency. Her Data Analytics proficiency will enable self-service project reporting via Power BI, eliminating ~4 hrs/week of manual reporting overhead. Combined ROI estimated at <strong style="color:var(--accent)">SGD 28,000/year</strong> in reduced consultant and productivity costs.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="page-footer">
+    <svg style="width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <span style="font-size:11px;color:var(--accent);font-weight:500;letter-spacing:.03em">AI-generated brief from assessment + gap data &middot; Weighted by criticality &middot; Feeds into IDP &amp; execution planning</span>
+    <span style="margin-left:auto;font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase">L2 Intelligence</span>
+  </div>
+
+</main>
+
+<!-- Shell Component -->
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'manager',
+    activeNav: 'LNI Brief',
+    breadcrumbs: ['Analysis', 'LNI Brief'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+function switchEmployee(name){showToast('Loading brief for '+name+'...')}
+function showToast(msg){var t=document.getElementById('sip-toast');if(!t){t=document.createElement('div');t.id='sip-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:var(--font-body);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.1)';document.body.appendChild(t)}t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)'},2400)}
+document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.getAttribute('href')==='#'){e.preventDefault();showToast((a.textContent||'').trim().substring(0,36)+' — available in full platform')}});
+</script>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login · Edstellar SIP</title>
+<link rel="stylesheet" href="styles/design-system.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Override design-system body grid for standalone login page */
+html,body{height:100%;overflow:hidden}
+body{display:block;background:var(--bg);color:var(--text-primary);font-family:var(--font-body)}
+
+.app{display:flex;height:100vh}
+
+/* LEFT PANEL — BRANDING */
+.brand-panel{width:45%;background:linear-gradient(135deg,#0F1117 0%,rgba(37,99,235,0.15) 50%,rgba(201,168,76,0.08) 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px;position:relative;overflow:hidden}
+@media(max-width:900px){.brand-panel{display:none}}
+.brand-panel::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+.brand-panel::after{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.08) 0%,transparent 70%);bottom:-200px;right:-100px;pointer-events:none}
+
+.bp-hex{width:64px;height:64px;background:var(--accent);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);margin-bottom:24px;position:relative;z-index:1}
+.bp-title{font-family:var(--font-display);font-size:32px;font-weight:800;color:#ffffff;text-align:center;line-height:1.2;margin-bottom:12px;position:relative;z-index:1}
+.bp-title span{color:var(--accent)}
+.bp-sub{font-size:14px;color:rgba(255,255,255,0.6);text-align:center;max-width:340px;line-height:1.6;margin-bottom:32px;position:relative;z-index:1}
+
+.bp-stats{display:flex;gap:24px;position:relative;z-index:1}
+.bp-stat{text-align:center}
+.bp-stat-val{font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--accent);line-height:1}
+.bp-stat-label{font-size:10px;color:rgba(255,255,255,0.45);margin-top:4px;letter-spacing:.06em;text-transform:uppercase}
+
+.bp-trust{display:flex;gap:16px;margin-top:40px;position:relative;z-index:1}
+.bp-trust-item{display:flex;align-items:center;gap:6px;font-size:10px;color:rgba(255,255,255,0.45)}
+.bp-trust-icon{width:16px;height:16px;stroke:var(--green);fill:none;stroke-width:2;stroke-linecap:round}
+
+/* RIGHT PANEL — LOGIN */
+.login-panel{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;overflow-y:auto;background:var(--bg)}
+
+.login-card{width:100%;max-width:420px}
+.lc-header{text-align:center;margin-bottom:32px}
+.lc-hex-sm{width:36px;height:36px;background:var(--accent);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);margin:0 auto 16px}
+.lc-title{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--text-primary);margin-bottom:6px}
+.lc-sub{font-size:13px;color:var(--text-secondary)}
+
+/* DEMO ROLE PICKER */
+.role-picker{margin-bottom:28px}
+.rp-label{font-size:10px;color:var(--text-secondary);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;text-align:center}
+.rp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.rp-card{padding:16px 12px;border-radius:10px;border:2px solid rgba(0,0,0,0.07);background:var(--card);cursor:pointer;text-align:center;transition:all .2s}
+.rp-card:hover{border-color:rgba(0,0,0,0.15);background:var(--card-hover)}
+.rp-card.selected{border-color:var(--accent);background:var(--accent-lt)}
+.rp-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-family:var(--font-display);font-size:12px;font-weight:700}
+.rp-name{font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--text-primary);margin-bottom:2px}
+.rp-role{font-size:10px;color:var(--text-secondary)}
+
+/* FORM */
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:11px;color:var(--text-secondary);letter-spacing:.04em;margin-bottom:6px}
+.form-input{width:100%;padding:11px 14px;border-radius:8px;border:1px solid rgba(0,0,0,0.07);background:var(--card);color:var(--text-primary);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--accent)}
+.form-input::placeholder{color:var(--text-muted)}
+
+.form-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.form-check{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);cursor:pointer}
+.form-check input{accent-color:var(--accent)}
+.form-forgot{font-size:11px;color:var(--blue);text-decoration:none}
+.form-forgot:hover{text-decoration:underline}
+
+.btn-login{width:100%;padding:12px;border-radius:8px;border:none;background:var(--accent);color:#ffffff;font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:opacity .15s;margin-bottom:16px}
+.btn-login:hover{opacity:.88}
+.btn-login:disabled{opacity:.4;cursor:not-allowed}
+
+.divider{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.divider-line{flex:1;height:1px;background:rgba(0,0,0,0.07)}
+.divider-text{font-size:10px;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase}
+
+.btn-sso{width:100%;padding:11px;border-radius:8px;border:1px solid rgba(0,0,0,0.07);background:transparent;color:var(--text-secondary);font-family:var(--font-body);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;margin-bottom:10px}
+.btn-sso:hover{border-color:rgba(0,0,0,0.15);background:var(--card-hover);color:var(--text-primary)}
+.btn-sso svg{width:16px;height:16px}
+
+.lc-footer{text-align:center;margin-top:20px;font-size:11px;color:var(--text-secondary)}
+.lc-footer a{color:var(--blue);text-decoration:none}
+.lc-footer a:hover{text-decoration:underline}
+
+/* MFA STEP */
+.mfa-step{display:none}
+.mfa-step.visible{display:block;animation:fadeUp .35s ease both}
+.mfa-code{display:flex;gap:8px;justify-content:center;margin:20px 0}
+.mfa-digit{width:48px;height:56px;border-radius:8px;border:2px solid rgba(0,0,0,0.07);background:var(--card);color:var(--accent);font-family:var(--font-mono);font-size:24px;font-weight:500;text-align:center;outline:none;transition:border-color .2s}
+.mfa-digit:focus{border-color:var(--accent)}
+
+/* DISPATCH */
+.dispatch-step{display:none}
+.dispatch-step.visible{display:block;animation:fadeUp .35s ease both}
+.dispatch-msg{text-align:center;margin:24px 0}
+.dispatch-spinner{width:48px;height:48px;border:3px solid rgba(0,0,0,0.07);border-top-color:var(--accent);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.dispatch-text{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:6px}
+.dispatch-sub{font-size:12px;color:var(--text-secondary)}
+.dispatch-portal{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:100px;font-size:11px;font-weight:600;margin-top:12px}
+
+/* TOAST */
+.toast-msg{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(22,163,74,0.3);color:var(--green);font-size:12px;font-family:var(--font-body);padding:10px 20px;border-radius:8px;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.toast-msg.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* TENANT BADGE */
+.tenant-bar{position:fixed;top:0;left:0;right:0;height:32px;background:var(--nav-bg);border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;gap:12px;z-index:100;padding:0 20px}
+.tenant-bar span{font-size:10px;color:rgba(255,255,255,0.45);letter-spacing:.06em}
+.tenant-name{font-size:10px;color:var(--accent);font-weight:600;letter-spacing:.06em}
+.tenant-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- TENANT BAR -->
+<div class="tenant-bar">
+  <div class="tenant-dot"></div>
+  <span class="tenant-name">EDSTELLAR SIP DEMO</span>
+  <span>·</span>
+  <span>Tenant ID: ARC-SG-001</span>
+  <span>·</span>
+  <span>Region: Asia-Pacific</span>
+  <span>·</span>
+  <span>Tier: Enterprise</span>
+</div>
+
+<div class="app" style="padding-top:32px">
+
+<!-- LEFT: BRANDING -->
+<div class="brand-panel">
+  <div class="bp-hex"></div>
+  <div class="bp-title">Skills Intelligence<br><span>Platform</span></div>
+  <div class="bp-sub">From workforce opacity to workforce intelligence. AI-powered skill mapping, assessment, and development for the modern enterprise.</div>
+  <div class="bp-stats">
+    <div class="bp-stat"><div class="bp-stat-val">812</div><div class="bp-stat-label">Employees</div></div>
+    <div class="bp-stat"><div class="bp-stat-val">48</div><div class="bp-stat-label">Skills Mapped</div></div>
+    <div class="bp-stat"><div class="bp-stat-val">5</div><div class="bp-stat-label">Levels</div></div>
+    <div class="bp-stat"><div class="bp-stat-val">L2</div><div class="bp-stat-label">Active</div></div>
+  </div>
+  <div class="bp-trust">
+    <div class="bp-trust-item"><svg class="bp-trust-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>SOC 2 Type II</div>
+    <div class="bp-trust-item"><svg class="bp-trust-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>GDPR Compliant</div>
+    <div class="bp-trust-item"><svg class="bp-trust-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>ISO 27001</div>
+  </div>
+</div>
+
+<!-- RIGHT: LOGIN -->
+<div class="login-panel">
+  <div class="login-card">
+
+    <!-- STEP 1: LOGIN FORM -->
+    <div id="stepLogin">
+      <div class="lc-header">
+        <div class="lc-hex-sm" style="display:none"></div>
+        <div class="lc-title">Sign in to Edstellar SIP</div>
+        <div class="lc-sub">Choose a demo role or enter credentials</div>
+      </div>
+
+      <!-- DEMO ROLE PICKER -->
+      <div class="role-picker">
+        <div class="rp-label">Quick Demo — Select a Role</div>
+        <div class="rp-grid">
+          <div class="rp-card" onclick="selectRole('admin')" id="role-admin">
+            <div class="rp-icon" style="background:var(--blue-bg);color:var(--blue)">KR</div>
+            <div class="rp-name">Kavitha R.</div>
+            <div class="rp-role">L&D Manager</div>
+          </div>
+          <div class="rp-card" onclick="selectRole('manager')" id="role-manager">
+            <div class="rp-icon" style="background:var(--accent-lt);color:var(--accent)">RK</div>
+            <div class="rp-name">Rajiv Kumar</div>
+            <div class="rp-role">CLO</div>
+          </div>
+          <div class="rp-card" onclick="selectRole('employee')" id="role-employee">
+            <div class="rp-icon" style="background:var(--green-bg);color:var(--green)">PM</div>
+            <div class="rp-name">Priya Menon</div>
+            <div class="rp-role">Sr. Struct. Engineer</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">or sign in with credentials</div><div class="divider-line"></div></div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="f-email" type="email" placeholder="kavitha.r@arcova.sg">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="f-password" type="password" placeholder="Enter password">
+      </div>
+      <div class="form-row">
+        <label class="form-check"><input type="checkbox" checked> Remember me</label>
+        <a class="form-forgot" href="#" onclick="event.preventDefault();showToast('Password reset email sent')">Forgot password?</a>
+      </div>
+      <button class="btn-login" id="btnLogin" onclick="startLogin()">Sign In</button>
+
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">enterprise SSO</div><div class="divider-line"></div></div>
+
+      <button class="btn-sso" onclick="startSSO()">
+        <svg viewBox="0 0 24 24" style="stroke:var(--blue);fill:none;stroke-width:1.5;stroke-linecap:round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Sign in with Workday SSO
+      </button>
+      <button class="btn-sso" onclick="startSSO()">
+        <svg viewBox="0 0 24 24" style="stroke:var(--purple);fill:none;stroke-width:1.5;stroke-linecap:round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Sign in with Microsoft Entra ID
+      </button>
+
+      <div class="lc-footer">
+        <a href="demo-walkthrough.html">View Guided Demo</a> · <a href="index.html">Skip to Portal</a>
+      </div>
+    </div>
+
+    <!-- STEP 2: MFA VERIFICATION -->
+    <div id="stepMFA" class="mfa-step">
+      <div class="lc-header">
+        <div class="lc-title">Verify Your Identity</div>
+        <div class="lc-sub">Enter the 6-digit code sent to your authenticator app</div>
+      </div>
+      <div class="mfa-code">
+        <input class="mfa-digit" id="mfa1" maxlength="1" oninput="mfaInput(this,2)">
+        <input class="mfa-digit" id="mfa2" maxlength="1" oninput="mfaInput(this,3)">
+        <input class="mfa-digit" id="mfa3" maxlength="1" oninput="mfaInput(this,4)">
+        <input class="mfa-digit" id="mfa4" maxlength="1" oninput="mfaInput(this,5)">
+        <input class="mfa-digit" id="mfa5" maxlength="1" oninput="mfaInput(this,6)">
+        <input class="mfa-digit" id="mfa6" maxlength="1" oninput="mfaInput(this,0)">
+      </div>
+      <button class="btn-login" id="btnMFA" onclick="verifyMFA()">Verify & Continue</button>
+      <div style="text-align:center;margin-top:12px">
+        <span style="font-size:11px;color:var(--text-secondary)">Didn't receive a code? </span>
+        <a href="#" onclick="event.preventDefault();showToast('New code sent to authenticator')" style="font-size:11px;color:var(--blue);text-decoration:none">Resend</a>
+      </div>
+      <div style="text-align:center;margin-top:20px">
+        <button class="btn-sso" onclick="autoFillMFA()" style="max-width:200px;margin:0 auto">
+          <svg viewBox="0 0 24 24" style="stroke:var(--accent);fill:none;stroke-width:1.5;stroke-linecap:round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Auto-fill Demo Code
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3: PORTAL DISPATCH -->
+    <div id="stepDispatch" class="dispatch-step">
+      <div class="dispatch-msg">
+        <div class="dispatch-spinner"></div>
+        <div class="dispatch-text" id="dispatchText">Authenticating...</div>
+        <div class="dispatch-sub" id="dispatchSub">Verifying role-based access permissions</div>
+        <div class="dispatch-portal" id="dispatchPortal" style="display:none"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<div class="toast-msg" id="toast"></div>
+
+<script>
+var selectedRole = null;
+var roleMap = {
+  admin: {name:'Kavitha Ramachandran',role:'L&D Manager',portal:'Admin Portal',href:'admin/org-setup-v2.html',color:'var(--blue)',bg:'var(--blue-bg)',email:'kavitha.r@arcova.sg'},
+  manager: {name:'Rajiv Kumar',role:'Chief Learning Officer',portal:'Manager Portal',href:'manager/chro-dashboard.html',color:'var(--accent)',bg:'var(--accent-lt)',email:'rajiv.k@arcova.sg'},
+  employee: {name:'Priya Menon',role:'Sr. Structural Engineer',portal:'Employee Portal',href:'employee/skill-passport.html',color:'var(--green)',bg:'var(--green-bg)',email:'priya.m@arcova.sg'}
+};
+
+function selectRole(role){
+  selectedRole = role;
+  document.querySelectorAll('.rp-card').forEach(function(c){c.classList.remove('selected')});
+  document.getElementById('role-'+role).classList.add('selected');
+  var r = roleMap[role];
+  document.getElementById('f-email').value = r.email;
+  document.getElementById('f-password').value = 'demo-password';
+  showToast('Selected: '+r.name+' ('+r.role+')');
+}
+
+function startLogin(){
+  var email = document.getElementById('f-email').value.trim();
+  if(!email){showToast('Enter an email address');return}
+  if(!selectedRole){
+    // Detect role from email
+    if(email.indexOf('kavitha')>-1) selectedRole='admin';
+    else if(email.indexOf('rajiv')>-1) selectedRole='manager';
+    else if(email.indexOf('priya')>-1) selectedRole='employee';
+    else selectedRole='admin';
+  }
+  document.getElementById('stepLogin').style.display='none';
+  document.getElementById('stepMFA').classList.add('visible');
+  document.getElementById('mfa1').focus();
+  showToast('Credentials verified — MFA required');
+}
+
+function startSSO(){
+  if(!selectedRole) selectedRole='admin';
+  document.getElementById('stepLogin').style.display='none';
+  document.getElementById('stepMFA').classList.add('visible');
+  showToast('SSO authenticated — MFA verification required');
+  document.getElementById('mfa1').focus();
+}
+
+function mfaInput(el,next){
+  if(el.value.length===1 && next>0 && next<=6){
+    document.getElementById('mfa'+next).focus();
+  }
+  // Check if all filled
+  var filled=true;
+  for(var i=1;i<=6;i++){if(!document.getElementById('mfa'+i).value)filled=false}
+  if(filled) verifyMFA();
+}
+
+function autoFillMFA(){
+  var code='847291';
+  for(var i=0;i<6;i++){document.getElementById('mfa'+(i+1)).value=code[i]}
+  showToast('Demo MFA code entered');
+}
+
+function verifyMFA(){
+  document.getElementById('stepMFA').style.display='none';
+  document.getElementById('stepDispatch').classList.add('visible');
+  var r=roleMap[selectedRole];
+
+  // Animate dispatch
+  var steps=[
+    {text:'MFA verified',sub:'Multi-factor authentication successful',delay:600},
+    {text:'Loading tenant: Edstellar SIP',sub:'Tenant ARC-SG-001 · Enterprise tier',delay:1200},
+    {text:'Resolving role: '+r.role,sub:'Checking role-based access control policies',delay:1800},
+    {text:'Dispatching to '+r.portal,sub:'Routing to '+r.name+'\'s dashboard',delay:2400}
+  ];
+
+  steps.forEach(function(s){
+    setTimeout(function(){
+      document.getElementById('dispatchText').textContent=s.text;
+      document.getElementById('dispatchSub').textContent=s.sub;
+    },s.delay);
+  });
+
+  setTimeout(function(){
+    document.getElementById('dispatchPortal').style.display='inline-flex';
+    document.getElementById('dispatchPortal').style.background=r.bg;
+    document.getElementById('dispatchPortal').style.color=r.color;
+    document.getElementById('dispatchPortal').style.border='1px solid '+r.color;
+    document.getElementById('dispatchPortal').textContent=r.portal+' →';
+    document.querySelector('.dispatch-spinner').style.display='none';
+    document.getElementById('dispatchText').textContent='Welcome, '+r.name;
+    document.getElementById('dispatchSub').textContent='Redirecting to '+r.portal+'...';
+  },2800);
+
+  setTimeout(function(){
+    window.location.href=r.href;
+  },4000);
+}
+
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show')},2400);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skills Matrix · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  /* ── KPI STRIP ── */
+  .kpi-strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .kpi-card {
+    background: var(--card); border: 1px solid rgba(0,0,0,0.07); border-radius: 10px;
+    padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 6px;
+    animation: fadeUp 0.5s ease both;
+  }
+  .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+  .kpi-card:nth-child(2) { animation-delay: 0.10s; }
+  .kpi-card:nth-child(3) { animation-delay: 0.15s; }
+  .kpi-card:nth-child(4) { animation-delay: 0.20s; }
+  .kpi-card:nth-child(5) { animation-delay: 0.25s; }
+  .kpi-card:nth-child(6) { animation-delay: 0.30s; }
+  .kpi-label { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; }
+  .kpi-value { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+  .kpi-value.gold  { color: var(--accent); }
+  .kpi-value.green { color: #16A34A; }
+  .kpi-value.red   { color: var(--red); }
+  .kpi-sub { font-size: 10px; display: flex; align-items: center; gap: 4px; }
+  .kpi-up   { color: #16A34A; }
+  .kpi-down { color: var(--red); }
+  .kpi-neu  { color: var(--text-secondary); }
+
+  /* ── PANELS ── */
+  .panel {
+    background: var(--card); border: 1px solid rgba(0,0,0,0.07); border-radius: 14px;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .panel-head {
+    padding: 14px 18px 12px; border-bottom: 1px solid rgba(0,0,0,0.07);
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .panel-title { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .panel-sub   { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+  .panel-tag { padding: 3px 8px; border-radius: 100px; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid; }
+  .panel-tag.gold   { border-color: var(--accent-bd); color: var(--accent); }
+  .panel-tag.red    { border-color: rgba(220,38,38,0.4);  color: var(--red); }
+  .panel-tag.green  { border-color: rgba(22,163,74,0.4);  color: #16A34A; }
+  .panel-tag.blue   { border-color: rgba(37,99,235,0.4);  color: var(--blue); }
+  .panel-body { flex: 1; padding: 14px 18px; min-height: 0; }
+  .panel-body.no-pad { padding: 0; }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    animation: fadeUp 0.5s ease 0.1s both;
+  }
+  .filter-bar label { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; }
+  .filter-select {
+    background: var(--card); border: 1px solid rgba(0,0,0,0.07); border-radius: 6px;
+    color: var(--text-secondary); font-family: var(--font-body); font-size: 12px;
+    padding: 6px 10px; cursor: pointer; outline: none;
+    transition: border-color 0.15s;
+  }
+  .filter-select:hover { border-color: rgba(0,0,0,0.15); }
+  .filter-select:focus { border-color: var(--accent); }
+  .filter-select option { background: var(--card); color: var(--text-primary); }
+
+  .view-toggle { display: flex; gap: 0; margin-left: auto; }
+  .view-btn {
+    padding: 6px 14px; font-size: 11px; font-family: var(--font-body);
+    border: 1px solid rgba(0,0,0,0.07); background: transparent; color: var(--text-secondary);
+    cursor: pointer; transition: all 0.15s; font-weight: 500;
+  }
+  .view-btn:first-child { border-radius: 6px 0 0 6px; }
+  .view-btn:last-child  { border-radius: 0 6px 6px 0; border-left: none; }
+  .view-btn.active { background: var(--blue-bg); color: var(--blue); border-color: rgba(37,99,235,0.4); }
+
+  /* ── HEATMAP MATRIX ── */
+  .matrix-wrap {
+    overflow-x: auto; overflow-y: auto;
+    animation: fadeUp 0.5s ease 0.2s both;
+  }
+  .matrix-table { border-collapse: separate; border-spacing: 3px; width: 100%; min-width: 900px; }
+  .matrix-table th {
+    font-size: 10px; color: var(--text-secondary); letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 6px 8px; text-align: center; font-weight: 500; white-space: nowrap;
+    position: sticky; top: 0; background: var(--card); z-index: 2;
+  }
+  .matrix-table th:first-child { text-align: left; min-width: 200px; z-index: 3; left: 0; }
+
+  .matrix-domain-row td {
+    padding: 8px 10px; font-family: var(--font-display); font-size: 11px; font-weight: 700;
+    color: var(--accent); letter-spacing: 0.04em; background: var(--accent-lt);
+    border-radius: 4px;
+  }
+  .matrix-skill-label {
+    font-size: 11.5px; color: var(--text-secondary); padding: 6px 10px; white-space: nowrap;
+    position: sticky; left: 0; background: var(--card); z-index: 1;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .crit-badge {
+    padding: 1px 6px; border-radius: 100px; font-size: 9px; font-weight: 600; letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .crit-badge.critical { background: var(--red-bg); color: var(--red); }
+  .crit-badge.high     { background: var(--amber-bg); color: var(--amber); }
+  .crit-badge.medium   { background: rgba(0,0,0,0.05); color: var(--text-secondary); }
+
+  .hm-cell {
+    border-radius: 4px; height: 34px; min-width: 62px;
+    text-align: center; font-size: 11px; font-weight: 500;
+    cursor: pointer; transition: transform 0.15s, filter 0.15s; position: relative;
+  }
+  .hm-cell:hover { transform: scale(1.06); filter: brightness(1.2); z-index: 2; }
+
+  /* Perception gap indicator */
+  .gap-indicator {
+    position: absolute; top: 2px; right: 3px;
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+
+  /* ── DETAIL DRAWER ── */
+  .detail-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    animation: fadeUp 0.5s ease 0.3s both;
+  }
+
+  /* AI insight box */
+  .ai-insight {
+    padding: 12px 14px; border-radius: 10px;
+    background: var(--blue-bg); border: 1px solid rgba(37,99,235,0.25);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .ai-icon {
+    width: 20px; height: 20px; border-radius: 50%; background: var(--blue);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+  }
+  .ai-icon svg { width: 10px; height: 10px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; }
+  .ai-text { font-size: 11.5px; color: var(--text-secondary); line-height: 1.6; }
+  .ai-text strong { color: var(--text-primary); font-weight: 500; }
+
+  /* ── LEGEND ── */
+  .legend-bar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 10px 18px; border-top: 1px solid rgba(0,0,0,0.07);
+  }
+  .legend-label { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; }
+  .legend-scale { display: flex; align-items: center; gap: 3px; }
+  .legend-swatch { width: 20px; height: 10px; border-radius: 2px; }
+  .legend-text { font-size: 10px; color: var(--text-secondary); }
+  .legend-divider { width: 1px; height: 14px; background: rgba(0,0,0,0.07); }
+
+  /* ── SKILL TABLE (detail view) ── */
+  .skill-detail-table { width: 100%; border-collapse: collapse; }
+  .skill-detail-table th {
+    font-size: 10px; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase;
+    text-align: left; padding: 0 10px 8px; font-weight: 400;
+  }
+  .skill-detail-table th:not(:first-child) { text-align: center; }
+  .skill-detail-table tr { border-bottom: 1px solid rgba(0,0,0,0.07); }
+  .skill-detail-table tr:last-child { border-bottom: none; }
+  .skill-detail-table td { padding: 8px 10px; font-size: 12px; color: var(--text-secondary); }
+  .skill-detail-table td:first-child { color: var(--text-primary); }
+  .skill-detail-table td:not(:first-child) { text-align: center; }
+
+  .prof-bar-wrap { display: flex; align-items: center; gap: 6px; justify-content: center; }
+  .prof-bar-track { width: 50px; height: 5px; background: rgba(0,0,0,0.08); border-radius: 3px; overflow: hidden; }
+  .prof-bar-fill  { height: 100%; border-radius: 3px; }
+  .prof-label { font-size: 10px; width: 24px; text-align: right; }
+
+  .perception-chip {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 7px; border-radius: 100px; font-size: 10px; font-weight: 500;
+  }
+  .perception-chip.over  { background: rgba(22,163,74,0.12);  color: #16A34A; }
+  .perception-chip.match { background: rgba(0,0,0,0.05); color: var(--text-secondary); }
+  .perception-chip.under { background: rgba(220,38,38,0.12);   color: var(--red); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0);    }
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+
+  /* ── CONTENT AREA ── */
+  .content { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; }
+
+  /* Scrollbar */
+  .content::-webkit-scrollbar { width: 4px; }
+  .content::-webkit-scrollbar-track { background: transparent; }
+  .content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
+  .matrix-wrap::-webkit-scrollbar { height: 4px; }
+  .matrix-wrap::-webkit-scrollbar-track { background: transparent; }
+  .matrix-wrap::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+    <!-- SCROLLABLE CONTENT -->
+    <div class="content">
+
+      <!-- KPI STRIP -->
+      <div class="kpi-strip">
+        <div class="kpi-card">
+          <div class="kpi-label">Skills Assessed</div>
+          <div class="kpi-value">48</div>
+          <div class="kpi-sub kpi-neu">Across 6 domains</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Employees Rated</div>
+          <div class="kpi-value">681</div>
+          <div class="kpi-sub kpi-neu">84% of workforce</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Critical Gaps</div>
+          <div class="kpi-value red">14</div>
+          <div class="kpi-sub kpi-down">&#8595; from 19 at L1</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Avg Proficiency</div>
+          <div class="kpi-value">2.3<span style="font-size:13px;color:var(--text-secondary)">/4.0</span></div>
+          <div class="kpi-sub kpi-up">&#8593; 0.4 this cycle</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Perception Gap</div>
+          <div class="kpi-value gold">0.6</div>
+          <div class="kpi-sub kpi-neu">Self vs Manager avg</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Skills On-Target</div>
+          <div class="kpi-value green">38%</div>
+          <div class="kpi-sub kpi-up">&#8593; 11pts since L2</div>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <label>Domain</label>
+        <select class="filter-select" id="filterDomain">
+          <option value="all">All 6 Domains</option>
+          <option value="Engineering & Technical">Engineering & Technical</option>
+          <option value="Project & Programme Management">Project & Programme Mgmt</option>
+          <option value="Digital & Technology">Digital & Technology</option>
+          <option value="EHS & Sustainability">EHS & Sustainability</option>
+          <option value="Finance & Commercial">Finance & Commercial</option>
+          <option value="Leadership & People">Leadership & People</option>
+        </select>
+        <label>Criticality</label>
+        <select class="filter-select" id="filterCrit">
+          <option value="all">All Levels</option>
+          <option value="Critical">Critical Only</option>
+          <option value="High">High & Critical</option>
+        </select>
+        <label>Show</label>
+        <select class="filter-select" id="filterMetric">
+          <option value="gap">Gap Score</option>
+          <option value="current">Current Proficiency</option>
+          <option value="target">Target Proficiency</option>
+          <option value="perception">Perception Gap</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" id="viewHeatmap">Heatmap</button>
+          <button class="view-btn" id="viewTable">Table</button>
+        </div>
+      </div>
+
+      <!-- MAIN HEATMAP PANEL -->
+      <div class="panel" style="animation: fadeUp 0.5s ease 0.2s both">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Org-Wide Skills &times; Departments Matrix</div>
+            <div class="panel-sub">48 skills &middot; 10 departments &middot; Self + Manager assessed &middot; L2 validated data</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div class="panel-tag red">14 Critical Gaps</div>
+            <div class="panel-tag gold">L2 Data</div>
+          </div>
+        </div>
+        <div class="panel-body no-pad">
+          <div class="matrix-wrap" id="matrixWrap">
+            <!-- rendered by JS -->
+          </div>
+        </div>
+        <div class="legend-bar">
+          <div class="legend-label">Gap Score</div>
+          <div class="legend-scale">
+            <div class="legend-swatch" style="background:rgba(22,163,74,0.3)"></div>
+            <div class="legend-text">0.0</div>
+            <div class="legend-swatch" style="background:rgba(217,119,6,0.3)"></div>
+            <div class="legend-text">1.0</div>
+            <div class="legend-swatch" style="background:rgba(220,38,38,0.3)"></div>
+            <div class="legend-text">2.0+</div>
+          </div>
+          <div class="legend-divider"></div>
+          <div class="legend-label">Perception gap</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--red)"></div>
+            <div class="legend-text">Self &gt; Manager (over-rated)</div>
+            <div style="width:6px;height:6px;border-radius:50%;background:#16A34A;margin-left:6px"></div>
+            <div class="legend-text">Manager &gt; Self</div>
+          </div>
+          <div class="legend-divider"></div>
+          <div class="legend-text" style="font-style:italic">Click any cell to drill down</div>
+        </div>
+      </div>
+
+      <!-- DETAIL ROW: Selected Skill Detail + Perception Analysis -->
+      <div class="detail-row" id="detailRow" style="display:none">
+
+        <!-- Skill Drill-Down -->
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title" id="drillTitle">Select a cell to drill down</div>
+              <div class="panel-sub" id="drillSub">Click any heatmap cell above</div>
+            </div>
+            <div class="panel-tag blue" id="drillTag">&mdash;</div>
+          </div>
+          <div class="panel-body no-pad" style="overflow-y:auto;max-height:280px">
+            <table class="skill-detail-table" id="drillTable">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Self Rating</th>
+                  <th>Manager Rating</th>
+                  <th>Validated</th>
+                  <th>Target</th>
+                  <th>Gap</th>
+                  <th>Perception</th>
+                </tr>
+              </thead>
+              <tbody id="drillBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Perception Gap Chart -->
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Perception Gap Analysis</div>
+              <div class="panel-sub" id="perceptionSub">Self-rating vs Manager-rating comparison</div>
+            </div>
+            <div class="panel-tag gold">Self vs Manager</div>
+          </div>
+          <div class="panel-body">
+            <div style="height:220px;position:relative">
+              <canvas id="perceptionChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- AI INSIGHTS -->
+      <div class="panel" style="animation: fadeUp 0.5s ease 0.35s both">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">AI Matrix Intelligence</div>
+            <div class="panel-sub">Auto-generated insights from Skills Matrix data</div>
+          </div>
+          <div class="panel-tag blue">AI Analysis</div>
+        </div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:10px">
+          <div class="ai-insight">
+            <div class="ai-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div>
+            <div class="ai-text"><strong>Critical concentration risk:</strong> AI &amp; ML Literacy has a gap score above 1.0 in <strong>all 10 departments</strong> &mdash; the only skill with universal deficit. This is the single highest-leverage intervention point. Recommend escalating the current AI &amp; Data Literacy programme from optional to mandatory for all assessed employees.</div>
+          </div>
+          <div class="ai-insight">
+            <div class="ai-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div>
+            <div class="ai-text"><strong>Perception gap alert:</strong> BIM &amp; Digital Delivery shows the widest self-vs-manager perception gap at <strong>0.9 points</strong>. Self-ratings average 2.4 vs manager ratings of 1.5. This suggests over-confidence &mdash; recommend a targeted calibration assessment before the next L3 training cycle to avoid mis-matched interventions.</div>
+          </div>
+          <div class="ai-insight">
+            <div class="ai-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div>
+            <div class="ai-text"><strong>Bright spot:</strong> EHS &amp; Risk department has closed 4 of 6 gaps since L2 assessment &mdash; readiness improved from 52% to 72%. ISO 45001 Lead Implementer programme drove the largest gain. Consider replicating this programme-to-gap model for the Digital &amp; Technology BU.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'manager',
+    activeNav: 'Skills Matrix',
+    breadcrumbs: ['Analysis', 'Skills Matrix'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// SKILLS MATRIX DATA — 48 skills × 10 departments
+// ══════════════════════════════════════════════════════════════
+
+const DOMAINS = [
+  {
+    name: "Engineering & Technical",
+    skills: [
+      { name: "Structural Analysis & Design",  crit: "Critical", deptGap: [0.3, 0.5, 0.2, 0.1, 0.4, 0.2, 0.1, 0.1, 0.1, 0.2], selfAvg: [2.9, 2.6, 3.4, 1.4, 1.8, 1.2, 1.1, 2.8, 1.0, 1.3], mgrAvg: [2.8, 2.4, 3.2, 1.2, 1.6, 1.0, 1.0, 2.6, 1.0, 1.2] },
+      { name: "Civil Engineering Fundamentals", crit: "Critical", deptGap: [0.4, 0.6, 0.3, 0.2, 0.3, 0.3, 0.2, 0.2, 0.1, 0.3], selfAvg: [2.7, 2.5, 3.2, 1.5, 1.9, 1.3, 1.2, 2.6, 1.1, 1.4], mgrAvg: [2.6, 2.4, 3.1, 1.4, 1.8, 1.2, 1.1, 2.5, 1.0, 1.3] },
+      { name: "Geotechnical Engineering",       crit: "High",     deptGap: [0.3, 0.4, 0.2, 0.1, 0.3, 0.2, 0.1, 0.1, 0.1, 0.1], selfAvg: [2.4, 2.2, 3.0, 1.2, 1.6, 1.1, 1.0, 2.3, 1.0, 1.1], mgrAvg: [2.3, 2.1, 2.9, 1.1, 1.5, 1.0, 1.0, 2.2, 1.0, 1.0] },
+      { name: "Building Information Modelling",  crit: "Critical", deptGap: [1.8, 1.4, 0.6, 0.4, 1.1, 0.5, 0.3, 0.3, 0.2, 0.4], selfAvg: [2.4, 2.0, 2.2, 1.8, 1.9, 1.3, 1.2, 1.1, 1.0, 1.6], mgrAvg: [1.5, 1.7, 2.1, 1.6, 1.5, 1.2, 1.0, 1.0, 1.0, 1.4] },
+      { name: "Construction Materials Science",  crit: "High",     deptGap: [0.2, 0.3, 0.2, 0.1, 0.2, 0.2, 0.1, 0.1, 0.1, 0.1], selfAvg: [2.2, 2.1, 3.1, 1.3, 1.5, 1.1, 1.0, 2.4, 1.0, 1.2], mgrAvg: [2.1, 2.0, 3.0, 1.2, 1.4, 1.0, 1.0, 2.3, 1.0, 1.1] },
+      { name: "MEP Coordination",                crit: "Medium",   deptGap: [0.4, 0.3, 0.2, 0.1, 0.3, 0.2, 0.1, 0.1, 0.1, 0.2], selfAvg: [2.0, 1.8, 2.4, 1.2, 1.4, 1.1, 1.0, 1.8, 1.0, 1.2], mgrAvg: [1.9, 1.7, 2.3, 1.1, 1.3, 1.0, 1.0, 1.7, 1.0, 1.1] },
+      { name: "Value Engineering",               crit: "High",     deptGap: [0.5, 0.6, 0.3, 0.2, 0.4, 0.4, 0.3, 0.2, 0.2, 0.3], selfAvg: [2.2, 2.0, 2.8, 1.4, 1.6, 1.8, 1.6, 2.0, 1.4, 1.5], mgrAvg: [2.0, 1.8, 2.7, 1.3, 1.4, 1.7, 1.5, 1.9, 1.3, 1.4] },
+      { name: "Infrastructure Asset Management", crit: "High",     deptGap: [0.6, 0.5, 0.3, 0.2, 0.5, 0.3, 0.2, 0.2, 0.1, 0.6], selfAvg: [2.1, 1.9, 2.3, 1.3, 1.5, 1.4, 1.2, 1.8, 1.1, 2.0], mgrAvg: [1.9, 1.8, 2.2, 1.2, 1.3, 1.3, 1.1, 1.7, 1.0, 1.9] }
+    ]
+  },
+  {
+    name: "Project & Programme Management",
+    skills: [
+      { name: "Project Planning & Scheduling",  crit: "Critical", deptGap: [0.7, 0.9, 0.4, 0.3, 0.5, 0.6, 0.3, 0.3, 0.2, 0.4], selfAvg: [2.6, 2.8, 2.4, 1.6, 1.8, 2.0, 1.5, 2.2, 1.3, 1.6], mgrAvg: [2.3, 2.5, 2.3, 1.4, 1.6, 1.8, 1.4, 2.0, 1.2, 1.5] },
+      { name: "Risk Management",                crit: "Critical", deptGap: [0.9, 1.1, 0.7, 1.2, 0.6, 0.5, 0.4, 0.3, 0.8, 0.4], selfAvg: [2.3, 2.5, 2.2, 2.4, 1.9, 2.0, 1.6, 1.8, 2.2, 1.5], mgrAvg: [2.0, 2.2, 2.0, 2.2, 1.7, 1.8, 1.4, 1.6, 2.0, 1.3] },
+      { name: "Contract & Claims Management",   crit: "High",     deptGap: [0.4, 0.5, 0.3, 0.2, 0.3, 0.7, 0.2, 0.2, 0.6, 0.2], selfAvg: [1.8, 2.0, 1.6, 1.3, 1.4, 2.2, 1.3, 1.4, 2.4, 1.3], mgrAvg: [1.7, 1.9, 1.5, 1.2, 1.3, 2.1, 1.2, 1.3, 2.3, 1.2] },
+      { name: "Budget Control & Cost Management",crit: "Critical", deptGap: [0.5, 0.7, 0.3, 0.2, 0.4, 0.8, 0.2, 0.2, 0.3, 0.3], selfAvg: [2.0, 2.4, 1.8, 1.4, 1.6, 2.6, 1.4, 1.6, 1.8, 1.5], mgrAvg: [1.8, 2.2, 1.7, 1.3, 1.4, 2.5, 1.3, 1.5, 1.7, 1.4] },
+      { name: "Stakeholder Management",         crit: "High",     deptGap: [0.6, 0.7, 0.4, 0.3, 0.4, 0.5, 0.3, 0.3, 0.5, 0.4], selfAvg: [2.4, 2.6, 2.0, 1.6, 1.7, 2.0, 1.5, 1.8, 2.0, 1.6], mgrAvg: [2.2, 2.4, 1.9, 1.4, 1.5, 1.8, 1.4, 1.6, 1.8, 1.4] },
+      { name: "Resource Planning",              crit: "High",     deptGap: [0.4, 0.5, 0.3, 0.2, 0.3, 0.4, 0.2, 0.4, 0.2, 0.3], selfAvg: [2.0, 2.2, 1.8, 1.4, 1.5, 1.8, 1.4, 2.0, 1.3, 1.5], mgrAvg: [1.9, 2.1, 1.7, 1.3, 1.4, 1.7, 1.3, 1.9, 1.2, 1.4] },
+      { name: "Programme Governance",           crit: "Medium",   deptGap: [0.3, 0.4, 0.2, 0.2, 0.3, 0.3, 0.2, 0.3, 0.3, 0.2], selfAvg: [1.8, 2.0, 1.6, 1.3, 1.4, 1.6, 1.3, 1.8, 1.6, 1.3], mgrAvg: [1.7, 1.9, 1.5, 1.2, 1.3, 1.5, 1.2, 1.7, 1.5, 1.2] }
+    ]
+  },
+  {
+    name: "Digital & Technology",
+    skills: [
+      { name: "Digital Project Delivery",       crit: "Critical", deptGap: [1.6, 1.3, 0.8, 0.3, 1.4, 0.6, 0.4, 0.3, 0.3, 0.5], selfAvg: [2.6, 2.2, 1.8, 1.5, 2.4, 1.4, 1.2, 1.1, 1.1, 1.6], mgrAvg: [1.8, 1.9, 1.6, 1.4, 2.0, 1.3, 1.1, 1.0, 1.0, 1.4] },
+      { name: "Data Analytics & Visualisation", crit: "High",     deptGap: [1.7, 1.2, 0.9, 0.8, 1.3, 0.6, 0.4, 0.5, 0.3, 0.7], selfAvg: [2.2, 1.8, 1.6, 1.6, 2.2, 1.4, 1.2, 1.6, 1.1, 1.8], mgrAvg: [1.6, 1.6, 1.4, 1.4, 2.0, 1.3, 1.1, 1.4, 1.0, 1.6] },
+      { name: "Cybersecurity Fundamentals",     crit: "High",     deptGap: [0.6, 0.4, 0.3, 0.4, 0.9, 0.3, 0.2, 0.2, 0.4, 0.3], selfAvg: [1.6, 1.4, 1.3, 1.5, 2.2, 1.2, 1.1, 1.2, 1.4, 1.3], mgrAvg: [1.4, 1.3, 1.2, 1.4, 2.0, 1.1, 1.0, 1.1, 1.3, 1.2] },
+      { name: "Cloud Infrastructure",           crit: "Medium",   deptGap: [0.5, 0.3, 0.2, 0.2, 0.7, 0.2, 0.1, 0.2, 0.1, 0.2], selfAvg: [1.6, 1.3, 1.2, 1.3, 2.2, 1.2, 1.1, 1.2, 1.1, 1.3], mgrAvg: [1.4, 1.2, 1.1, 1.2, 2.0, 1.1, 1.0, 1.1, 1.0, 1.2] },
+      { name: "AI & Machine Learning Literacy", crit: "High",     deptGap: [2.1, 1.8, 1.4, 1.0, 1.6, 1.1, 1.0, 1.0, 0.8, 1.2], selfAvg: [2.0, 1.6, 1.4, 1.4, 2.0, 1.3, 1.2, 1.1, 1.1, 1.4], mgrAvg: [1.2, 1.2, 1.1, 1.2, 1.6, 1.1, 1.0, 1.0, 1.0, 1.2] },
+      { name: "ERP & Enterprise Systems",       crit: "Medium",   deptGap: [0.3, 0.2, 0.2, 0.1, 0.5, 0.4, 0.2, 0.2, 0.2, 0.2], selfAvg: [1.3, 1.2, 1.2, 1.1, 1.8, 1.8, 1.5, 1.3, 1.2, 1.2], mgrAvg: [1.2, 1.1, 1.1, 1.0, 1.7, 1.7, 1.4, 1.2, 1.1, 1.1] },
+      { name: "IoT & Smart Infrastructure",     crit: "High",     deptGap: [1.4, 0.8, 0.5, 0.3, 1.0, 0.3, 0.2, 0.2, 0.2, 0.8], selfAvg: [1.8, 1.5, 1.3, 1.3, 1.8, 1.2, 1.1, 1.1, 1.0, 1.6], mgrAvg: [1.2, 1.3, 1.2, 1.2, 1.5, 1.1, 1.0, 1.0, 1.0, 1.4] }
+    ]
+  },
+  {
+    name: "EHS & Sustainability",
+    skills: [
+      { name: "ISO 45001 — OHS Management",    crit: "Critical", deptGap: [0.4, 0.6, 0.3, 0.2, 0.5, 0.2, 0.1, 0.2, 0.2, 0.3], selfAvg: [1.4, 1.6, 1.3, 3.4, 1.3, 1.1, 1.0, 1.2, 1.2, 2.6], mgrAvg: [1.3, 1.4, 1.2, 3.2, 1.2, 1.0, 1.0, 1.1, 1.1, 2.5] },
+      { name: "Site Safety Management",         crit: "Critical", deptGap: [0.3, 0.5, 0.2, 0.1, 0.3, 0.1, 0.1, 0.1, 0.1, 0.2], selfAvg: [1.5, 1.8, 1.4, 3.6, 1.2, 1.0, 1.0, 1.1, 1.1, 2.4], mgrAvg: [1.4, 1.6, 1.3, 3.5, 1.1, 1.0, 1.0, 1.0, 1.0, 2.3] },
+      { name: "Environmental Impact Assessment",crit: "High",     deptGap: [0.3, 0.3, 0.2, 0.2, 0.3, 0.2, 0.1, 0.1, 0.2, 0.4], selfAvg: [1.3, 1.4, 1.2, 2.8, 1.2, 1.1, 1.0, 1.1, 1.2, 2.4], mgrAvg: [1.2, 1.3, 1.1, 2.7, 1.1, 1.0, 1.0, 1.0, 1.1, 2.3] },
+      { name: "ESG Reporting & Compliance",     crit: "High",     deptGap: [0.4, 0.3, 0.2, 0.8, 0.3, 0.5, 0.2, 0.2, 0.6, 0.9], selfAvg: [1.3, 1.3, 1.2, 2.4, 1.2, 1.4, 1.2, 1.2, 1.8, 2.4], mgrAvg: [1.2, 1.2, 1.1, 2.2, 1.1, 1.3, 1.1, 1.1, 1.7, 2.2] },
+      { name: "Carbon Footprint & Net Zero",    crit: "High",     deptGap: [0.3, 0.3, 0.2, 0.7, 0.3, 0.3, 0.2, 0.2, 0.4, 0.9], selfAvg: [1.2, 1.3, 1.1, 2.2, 1.2, 1.2, 1.1, 1.1, 1.4, 2.3], mgrAvg: [1.1, 1.2, 1.0, 2.1, 1.1, 1.1, 1.0, 1.0, 1.3, 2.2] },
+      { name: "Regulatory & Legal Compliance",  crit: "Critical", deptGap: [0.3, 0.3, 0.2, 0.3, 0.3, 0.4, 0.2, 0.2, 0.7, 0.3], selfAvg: [1.3, 1.4, 1.2, 2.6, 1.3, 1.4, 1.2, 1.3, 2.8, 1.8], mgrAvg: [1.2, 1.3, 1.1, 2.5, 1.2, 1.3, 1.1, 1.2, 2.7, 1.7] }
+    ]
+  },
+  {
+    name: "Finance & Commercial",
+    skills: [
+      { name: "Financial Modelling & Analysis", crit: "High",     deptGap: [0.3, 0.3, 0.2, 0.2, 0.3, 0.5, 0.2, 0.3, 0.3, 0.2], selfAvg: [1.2, 1.3, 1.2, 1.2, 1.3, 2.6, 1.3, 1.5, 1.6, 1.3], mgrAvg: [1.1, 1.2, 1.1, 1.1, 1.2, 2.5, 1.2, 1.4, 1.5, 1.2] },
+      { name: "Procurement & Tendering",        crit: "High",     deptGap: [0.3, 0.4, 0.2, 0.2, 0.3, 0.6, 0.2, 0.2, 0.3, 0.2], selfAvg: [1.3, 1.5, 1.3, 1.2, 1.3, 2.4, 1.2, 1.3, 1.5, 1.3], mgrAvg: [1.2, 1.4, 1.2, 1.1, 1.2, 2.3, 1.1, 1.2, 1.4, 1.2] },
+      { name: "Contract Law & Dispute Res.",    crit: "High",     deptGap: [0.2, 0.3, 0.2, 0.2, 0.2, 0.4, 0.2, 0.2, 0.6, 0.2], selfAvg: [1.2, 1.3, 1.2, 1.2, 1.2, 1.8, 1.2, 1.3, 2.6, 1.3], mgrAvg: [1.1, 1.2, 1.1, 1.1, 1.1, 1.7, 1.1, 1.2, 2.5, 1.2] },
+      { name: "Commercial Risk Assessment",     crit: "High",     deptGap: [0.3, 0.4, 0.2, 0.3, 0.3, 0.5, 0.2, 0.2, 0.5, 0.3], selfAvg: [1.3, 1.5, 1.3, 1.4, 1.3, 2.2, 1.3, 1.4, 2.0, 1.4], mgrAvg: [1.2, 1.4, 1.2, 1.3, 1.2, 2.1, 1.2, 1.3, 1.9, 1.3] },
+      { name: "Internal Audit & Controls",      crit: "Medium",   deptGap: [0.2, 0.2, 0.1, 0.2, 0.2, 0.4, 0.3, 0.2, 0.4, 0.2], selfAvg: [1.1, 1.2, 1.1, 1.2, 1.2, 2.0, 1.6, 1.3, 2.0, 1.2], mgrAvg: [1.0, 1.1, 1.0, 1.1, 1.1, 1.9, 1.5, 1.2, 1.9, 1.1] }
+    ]
+  },
+  {
+    name: "Leadership & People",
+    skills: [
+      { name: "Strategic Leadership",          crit: "Critical", deptGap: [0.6, 0.7, 0.4, 0.4, 0.5, 0.5, 0.3, 0.4, 0.4, 0.5], selfAvg: [2.2, 2.4, 2.0, 2.0, 1.8, 2.0, 2.4, 2.6, 1.8, 2.0], mgrAvg: [2.0, 2.2, 1.8, 1.8, 1.6, 1.8, 2.2, 2.4, 1.6, 1.8] },
+      { name: "Team Leadership & Development", crit: "High",     deptGap: [0.5, 0.6, 0.3, 0.3, 0.4, 0.4, 0.3, 0.3, 0.3, 0.4], selfAvg: [2.4, 2.6, 2.2, 2.2, 2.0, 2.0, 2.6, 2.6, 1.8, 2.2], mgrAvg: [2.2, 2.4, 2.0, 2.0, 1.8, 1.8, 2.4, 2.4, 1.6, 2.0] },
+      { name: "Cross-Cultural Communication",  crit: "High",     deptGap: [0.5, 0.5, 0.3, 0.3, 0.4, 0.3, 0.3, 0.4, 0.3, 0.4], selfAvg: [2.2, 2.4, 2.0, 2.0, 1.8, 1.8, 2.4, 2.4, 1.8, 2.0], mgrAvg: [2.0, 2.2, 1.8, 1.8, 1.6, 1.6, 2.2, 2.2, 1.6, 1.8] },
+      { name: "Change Management",             crit: "High",     deptGap: [0.6, 0.6, 0.4, 0.4, 0.5, 0.5, 0.4, 0.5, 0.4, 0.5], selfAvg: [2.0, 2.2, 1.8, 2.0, 1.8, 1.8, 2.6, 2.4, 1.8, 2.0], mgrAvg: [1.8, 2.0, 1.6, 1.8, 1.6, 1.6, 2.4, 2.2, 1.6, 1.8] },
+      { name: "Coaching & Mentoring",          crit: "Medium",   deptGap: [0.3, 0.4, 0.2, 0.3, 0.3, 0.3, 0.2, 0.3, 0.2, 0.3], selfAvg: [1.8, 2.0, 1.6, 1.8, 1.6, 1.6, 2.4, 2.2, 1.6, 1.8], mgrAvg: [1.7, 1.9, 1.5, 1.7, 1.5, 1.5, 2.3, 2.1, 1.5, 1.7] },
+      { name: "Conflict Resolution",           crit: "Medium",   deptGap: [0.3, 0.3, 0.2, 0.2, 0.3, 0.3, 0.2, 0.3, 0.3, 0.3], selfAvg: [1.8, 2.0, 1.6, 1.8, 1.6, 1.6, 2.2, 2.2, 1.8, 1.8], mgrAvg: [1.7, 1.9, 1.5, 1.7, 1.5, 1.5, 2.1, 2.1, 1.7, 1.7] }
+    ]
+  }
+];
+
+const DEPTS = [
+  "BIM & Digital",
+  "Project Delivery",
+  "Structural Eng",
+  "EHS & Risk",
+  "IT Infra",
+  "Finance & Procurement",
+  "Human Resources",
+  "Legal & Compliance",
+  "Sustainability",
+  "Civil & Geo"
+];
+
+// ══════════════════════════════════════════════════════════════
+// RENDER HEATMAP MATRIX
+// ══════════════════════════════════════════════════════════════
+
+let currentMetric = "gap";
+let currentDomain = "all";
+let currentCrit = "all";
+let perceptionChart = null;
+
+function gapColor(val) {
+  const ratio = Math.min(val / 2.2, 1);
+  const r = Math.round(58 + 174 * ratio);
+  const g = Math.round(184 - 110 * ratio);
+  const b = Math.round(122 - 50 * ratio);
+  return { r, g, b };
+}
+
+function profColor(val) {
+  const ratio = Math.min(val / 4, 1);
+  const r = Math.round(232 - 174 * ratio);
+  const g = Math.round(112 + 72 * ratio);
+  const b = Math.round(96 - 20 * ratio);
+  return { r, g, b };
+}
+
+function renderMatrix() {
+  const wrap = document.getElementById("matrixWrap");
+  const metric = currentMetric;
+
+  let html = '<table class="matrix-table"><thead><tr><th>Skill</th>';
+  DEPTS.forEach(d => { html += '<th>' + d + '</th>'; });
+  html += '</tr></thead><tbody>';
+
+  DOMAINS.forEach(domain => {
+    if (currentDomain !== "all" && domain.name !== currentDomain) return;
+
+    html += '<tr class="matrix-domain-row"><td colspan="' + (DEPTS.length + 1) + '">' + domain.name + ' (' + domain.skills.length + ' skills)</td></tr>';
+
+    domain.skills.forEach(skill => {
+      if (currentCrit === "Critical" && skill.crit !== "Critical") return;
+      if (currentCrit === "High" && skill.crit !== "Critical" && skill.crit !== "High") return;
+
+      const critClass = skill.crit.toLowerCase();
+      html += '<tr><td class="matrix-skill-label">' + skill.name + ' <span class="crit-badge ' + critClass + '">' + skill.crit + '</span></td>';
+
+      for (let di = 0; di < DEPTS.length; di++) {
+        let val, color;
+        if (metric === "gap") {
+          val = skill.deptGap[di];
+          color = gapColor(val);
+        } else if (metric === "current") {
+          val = skill.mgrAvg[di];
+          color = profColor(val);
+        } else if (metric === "target") {
+          val = skill.mgrAvg[di] + skill.deptGap[di];
+          color = profColor(val);
+        } else {
+          val = +(skill.selfAvg[di] - skill.mgrAvg[di]).toFixed(1);
+          if (val > 0) color = { r: 232, g: 112, b: 96 };
+          else if (val < 0) color = { r: 58, g: 184, b: 122 };
+          else color = { r: 92, g: 122, b: 150 };
+        }
+
+        const displayVal = metric === "perception" ? (val > 0 ? "+" : "") + val.toFixed(1) : val.toFixed(1);
+        const perceptionDot = (metric === "gap" && Math.abs(skill.selfAvg[di] - skill.mgrAvg[di]) >= 0.5)
+          ? '<div class="gap-indicator" style="background:' + (skill.selfAvg[di] > skill.mgrAvg[di] ? 'var(--red)' : '#16A34A') + '"></div>'
+          : '';
+
+        html += '<td class="hm-cell" style="background:rgba(' + color.r + ',' + color.g + ',' + color.b + ',0.25);color:rgb(' + color.r + ',' + color.g + ',' + color.b + ');border:1px solid rgba(' + color.r + ',' + color.g + ',' + color.b + ',0.35)" '
+          + 'data-skill="' + skill.name + '" data-dept="' + di + '" data-domain="' + domain.name + '" '
+          + 'onclick="drillDown(\'' + skill.name.replace(/'/g, "\\'") + '\',' + di + ',\'' + domain.name.replace(/'/g, "\\'") + '\')"'
+          + '>' + displayVal + perceptionDot + '</td>';
+      }
+      html += '</tr>';
+    });
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════
+// DRILL DOWN — Show employee-level detail for a cell
+// ══════════════════════════════════════════════════════════════
+
+const SAMPLE_EMPLOYEES = [
+  { name: "Tariq Al-Rashidi",      role: "BIM Manager" },
+  { name: "Priya Menon",           role: "Sr Project Manager" },
+  { name: "Darren Loh",            role: "Data Analyst" },
+  { name: "Ananya Krishnaswamy",   role: "EHS Auditor" },
+  { name: "Amir Hassan",           role: "Sr Structural Eng" },
+  { name: "Wei Chen",              role: "Site Engineer" },
+  { name: "Fatimah Zahra",         role: "BIM Coordinator" },
+  { name: "Rajesh Kumar",          role: "Project Manager" },
+];
+
+function drillDown(skillName, deptIdx, domainName) {
+  document.getElementById("detailRow").style.display = "grid";
+
+  document.getElementById("drillTitle").textContent = skillName;
+  document.getElementById("drillSub").textContent = DEPTS[deptIdx] + " department \u00B7 " + domainName;
+
+  let skill = null;
+  for (const d of DOMAINS) {
+    for (const s of d.skills) {
+      if (s.name === skillName) { skill = s; break; }
+    }
+    if (skill) break;
+  }
+
+  const critClass = skill.crit.toLowerCase();
+  document.getElementById("drillTag").textContent = skill.crit;
+  document.getElementById("drillTag").className = "panel-tag " + (critClass === "critical" ? "red" : critClass === "high" ? "gold" : "blue");
+
+  // Generate mock employee rows
+  const tbody = document.getElementById("drillBody");
+  tbody.innerHTML = "";
+
+  const baseSelf = skill.selfAvg[deptIdx];
+  const baseMgr  = skill.mgrAvg[deptIdx];
+  const baseGap  = skill.deptGap[deptIdx];
+  const target   = baseMgr + baseGap;
+
+  SAMPLE_EMPLOYEES.forEach((emp, i) => {
+    const selfR  = Math.max(1, Math.min(4, +(baseSelf + (Math.random() - 0.5) * 0.8).toFixed(1)));
+    const mgrR   = Math.max(1, Math.min(4, +(baseMgr + (Math.random() - 0.5) * 0.6).toFixed(1)));
+    const validated = Math.max(1, Math.min(4, +((selfR * 0.3 + mgrR * 0.7).toFixed(1))));
+    const empTarget = Math.min(4, +(target + (Math.random() - 0.3) * 0.4).toFixed(1));
+    const gap = Math.max(0, +(empTarget - validated).toFixed(1));
+    const percGap = +(selfR - mgrR).toFixed(1);
+    const percClass = percGap > 0.3 ? "under" : percGap < -0.3 ? "over" : "match";
+    const percLabel = percGap > 0.3 ? "Over +" + percGap : percGap < -0.3 ? "Under " + percGap : "Match";
+    const gapColor = gap >= 1.2 ? "var(--red)" : gap >= 0.6 ? "var(--amber)" : "#16A34A";
+    const valColor = validated >= 3 ? "#16A34A" : validated >= 2 ? "var(--amber)" : "var(--red)";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><div style="font-weight:500">${emp.name}</div><div style="font-size:10px;color:var(--text-secondary)">${emp.role}</div></td>
+      <td><div class="prof-bar-wrap"><div class="prof-bar-track"><div class="prof-bar-fill" style="width:${selfR/4*100}%;background:var(--blue)"></div></div><span class="prof-label" style="color:var(--blue)">${selfR}</span></div></td>
+      <td><div class="prof-bar-wrap"><div class="prof-bar-track"><div class="prof-bar-fill" style="width:${mgrR/4*100}%;background:var(--accent)"></div></div><span class="prof-label" style="color:var(--accent)">${mgrR}</span></div></td>
+      <td><div class="prof-bar-wrap"><div class="prof-bar-track"><div class="prof-bar-fill" style="width:${validated/4*100}%;background:${valColor}"></div></div><span class="prof-label" style="color:${valColor}">${validated}</span></div></td>
+      <td style="color:var(--text-primary);font-weight:500">${empTarget}</td>
+      <td style="color:${gapColor};font-weight:600">${gap > 0 ? gap : '\u2014'}</td>
+      <td><span class="perception-chip ${percClass}">${percLabel}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Perception chart
+  updatePerceptionChart(skillName, skill);
+
+  document.getElementById("detailRow").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function updatePerceptionChart(skillName, skill) {
+  const ctx = document.getElementById("perceptionChart").getContext("2d");
+
+  if (perceptionChart) perceptionChart.destroy();
+
+  const selfData = skill.selfAvg.map(v => +v.toFixed(1));
+  const mgrData  = skill.mgrAvg.map(v => +v.toFixed(1));
+
+  document.getElementById("perceptionSub").textContent = skillName + " \u2014 Self vs Manager by department";
+
+  perceptionChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: DEPTS,
+      datasets: [
+        {
+          label: "Self Rating",
+          data: selfData,
+          backgroundColor: "rgba(37,99,235,0.5)",
+          borderColor: "var(--blue)",
+          borderWidth: 1,
+          borderRadius: 3
+        },
+        {
+          label: "Manager Rating",
+          data: mgrData,
+          backgroundColor: "rgba(201,168,76,0.5)",
+          borderColor: "var(--accent)",
+          borderWidth: 1,
+          borderRadius: 3
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "top", align: "end",
+          labels: { boxWidth: 10, padding: 12, font: { size: 10 } }
+        },
+        tooltip: {
+          backgroundColor: "#ffffff",
+          titleColor: "#0F1117",
+          bodyColor: "#6B7280",
+          borderColor: "rgba(0,0,0,0.1)",
+          borderWidth: 1
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 9 }, maxRotation: 45 } },
+        y: { min: 0, max: 4, grid: { color: "rgba(0,0,0,0.04)" }, border: { display: false },
+             ticks: { stepSize: 1, callback: v => "L" + v } }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// FILTER HANDLERS
+// ══════════════════════════════════════════════════════════════
+
+document.getElementById("filterDomain").addEventListener("change", function() {
+  currentDomain = this.value;
+  renderMatrix();
+});
+
+document.getElementById("filterCrit").addEventListener("change", function() {
+  currentCrit = this.value;
+  renderMatrix();
+});
+
+document.getElementById("filterMetric").addEventListener("change", function() {
+  currentMetric = this.value;
+  renderMatrix();
+});
+
+document.getElementById("viewHeatmap").addEventListener("click", function() {
+  this.classList.add("active");
+  document.getElementById("viewTable").classList.remove("active");
+  renderMatrix();
+});
+
+document.getElementById("viewTable").addEventListener("click", function() {
+  this.classList.add("active");
+  document.getElementById("viewHeatmap").classList.remove("active");
+  renderMatrix();
+});
+
+// Chart defaults
+Chart.defaults.color = "#6B7280";
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size = 11;
+
+// Initial render
+renderMatrix();
+
+// ══════════════════════════════════════════════════════════════
+// TOAST FOR PLACEHOLDER LINKS
+// ══════════════════════════════════════════════════════════════
+(function(){
+  var toast = document.createElement("div");
+  toast.id = "sip-toast";
+  toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#ffffff;border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:'DM Sans',sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08);";
+  document.body.appendChild(toast);
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){
+      toast.style.opacity="0";
+      toast.style.transform="translateX(-50%) translateY(8px)";
+    }, 2400);
+  }
+  document.addEventListener("click", function(e){
+    var a = e.target.closest("a");
+    if(a && a.getAttribute("href") === "#"){
+      e.preventDefault();
+      var label = (a.textContent || "").trim().replace(/\s+/g," ").substring(0,36);
+      showToast(label + " \u2014 available in full platform");
+    }
+  });
+})();
+</script>
+</body>
+</html>

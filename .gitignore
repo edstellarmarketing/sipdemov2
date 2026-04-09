@@ -1,0 +1,22 @@
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node
+node_modules/
+package-lock.json
+package.json
+
+# Claude
+.claude/
+
+# Large data files
+*.xlsx
+*.xls

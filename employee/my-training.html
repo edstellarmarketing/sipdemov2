@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Training · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   MY TRAINING — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── LAYOUT ── */
+.content-area{padding:28px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;flex:1}
+.content-area::-webkit-scrollbar{width:4px}
+.content-area::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+
+/* ── PANELS ── */
+.panel{background:var(--card);border:1px solid #E5E7EB;border-radius:12px;overflow:hidden}
+.panel-head{padding:14px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1;min-width:120px}
+.panel-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500}
+.panel-body{padding:18px 20px}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:960px){.two-col{grid-template-columns:1fr}}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:960px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--card);border:1px solid #E5E7EB;border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:4px}
+.stat-label{font-size:11px;color:var(--text-muted)}
+.stat-val{font-family:var(--font-display);font-size:24px;font-weight:600;line-height:1}
+.stat-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+/* ── TABS ── */
+.tab-bar{display:flex;gap:2px;padding:4px;background:var(--card);border:1px solid #E5E7EB;border-radius:10px;align-self:flex-start}
+.tab-btn{padding:7px 16px;border-radius:7px;border:none;background:transparent;font-family:var(--font-body);font-size:12px;color:var(--text-secondary);cursor:pointer;transition:background .15s,color .15s;white-space:nowrap}
+.tab-btn.active{background:#F3F4F6;color:var(--text-primary);font-weight:500}
+.tab-btn:hover:not(.active){color:var(--text-primary)}
+
+/* ── PROGRAMME CARD ── */
+.prog-card{background:var(--card);border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;margin-bottom:16px;transition:border-color .2s}
+.prog-card:hover{border-color:#D1D5DB}
+.pc-header{padding:16px 20px;display:flex;align-items:center;gap:14px}
+.pc-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pc-icon svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round}
+.pc-info{flex:1;min-width:0}
+.pc-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary)}
+.pc-provider{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.pc-status{padding:4px 12px;border-radius:100px;font-size:10px;font-weight:500;flex-shrink:0}
+.pc-body{padding:0 20px 16px;display:flex;flex-direction:column;gap:12px}
+.pc-meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:700px){.pc-meta-grid{grid-template-columns:1fr}}
+.pc-meta{padding:10px 12px;background:#F9FAFB;border-radius:7px}
+.pc-meta-key{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+.pc-meta-val{font-size:12px;color:var(--text-primary);font-weight:500;margin-top:2px}
+.pc-progress{width:100%;height:6px;background:#F3F4F6;border-radius:3px;overflow:hidden}
+.pc-progress-fill{height:100%;border-radius:3px;transition:width .6s ease}
+
+/* ── SESSIONS ── */
+.session{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid #F3F4F6}
+.session:last-child{border-bottom:none}
+.sess-date{width:70px;flex-shrink:0;text-align:center}
+.sess-day{font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--text-primary);line-height:1}
+.sess-month{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+.sess-info{flex:1;min-width:0}
+.sess-title{font-size:12px;color:var(--text-primary);font-weight:500}
+.sess-sub{font-size:10px;color:var(--text-secondary);margin-top:2px}
+.sess-time{font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);flex-shrink:0}
+.sess-status{padding:3px 10px;border-radius:100px;font-size:10px;font-weight:500;flex-shrink:0}
+
+/* ── CALENDAR ── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-header{font-size:9px;color:var(--text-muted);text-align:center;text-transform:uppercase;letter-spacing:.08em;padding:4px 0}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:11px;color:var(--text-secondary);cursor:default;position:relative;transition:background .15s}
+.cal-day.empty{color:transparent}
+.cal-day.today{background:var(--blue-bg);color:var(--blue);font-weight:600}
+.cal-day.has-session{background:var(--amber-bg);color:var(--amber);font-weight:600;cursor:pointer}
+.cal-day.has-session:hover{background:#FEF3C7}
+.cal-day.past{opacity:.4}
+.cal-dot{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent)}
+
+/* ── PRE-WORK ── */
+.prework{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F3F4F6}
+.prework:last-child{border-bottom:none}
+.pw-check{width:18px;height:18px;border-radius:4px;border:1.5px solid #D1D5DB;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0}
+.pw-check:hover{border-color:var(--green)}
+.pw-check.done{background:var(--green-bg);border-color:var(--green)}
+.pw-check.done svg{display:block}
+.pw-check svg{display:none;width:10px;height:10px;stroke:var(--green);fill:none;stroke-width:3}
+.pw-text{font-size:12px;color:var(--text-secondary);flex:1}
+.pw-text.done{text-decoration:line-through;opacity:.5}
+
+/* ── ACTION BUTTONS ── */
+.act-btn{padding:6px 14px;border-radius:6px;border:1px solid #E5E7EB;background:var(--card);color:var(--text-secondary);font-family:var(--font-body);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s,color .15s,border-color .15s;text-decoration:none;white-space:nowrap}
+.act-btn:hover{background:#F9FAFB;color:var(--text-primary);border-color:#D1D5DB}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.fade-up{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+  <div class="content-area">
+
+    <!-- STATS -->
+    <div class="stats-row fade-up">
+      <div class="stat-card">
+        <div class="stat-label">Enrolled Programmes</div>
+        <div class="stat-val" style="color:var(--text-primary)">3</div>
+        <div class="stat-sub">2 active, 1 completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Hours Completed</div>
+        <div class="stat-val" style="color:var(--blue)">42</div>
+        <div class="stat-sub">of 86 total hours</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Upcoming Sessions</div>
+        <div class="stat-val" style="color:var(--amber)">4</div>
+        <div class="stat-sub">Next: 2 April 2026</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Completion Rate</div>
+        <div class="stat-val" style="color:var(--green)">49%</div>
+        <div class="stat-sub">Across all programmes</div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tab-bar fade-up" style="animation-delay:.06s">
+      <button class="tab-btn active" onclick="showTab('enrolled')">Enrolled (3)</button>
+      <button class="tab-btn" onclick="showTab('calendar')">Calendar View</button>
+      <button class="tab-btn" onclick="showTab('prework')">Pre-work & Materials</button>
+    </div>
+
+    <!-- TAB: ENROLLED -->
+    <div id="tabEnrolled">
+      <!-- Programme 1: BIM -->
+      <div class="prog-card fade-up" style="animation-delay:.12s">
+        <div class="pc-header">
+          <div class="pc-icon" style="background:var(--blue-bg);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+          <div class="pc-info">
+            <div class="pc-title">BIM Coordination — Intermediate to Advanced</div>
+            <div class="pc-provider">Autodesk Authorised Training Centre &middot; Instructor-led (Virtual)</div>
+          </div>
+          <div class="pc-status" style="background:var(--blue-bg);color:var(--blue)">In Progress</div>
+        </div>
+        <div class="pc-body">
+          <div class="pc-meta-grid">
+            <div class="pc-meta"><div class="pc-meta-key">Duration</div><div class="pc-meta-val">40 hours (8 weeks)</div></div>
+            <div class="pc-meta"><div class="pc-meta-key">Schedule</div><div class="pc-meta-val">Tue & Thu, 10:00-12:30</div></div>
+            <div class="pc-meta"><div class="pc-meta-key">Start Date</div><div class="pc-meta-val">4 Feb 2026</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="pc-progress" style="flex:1"><div class="pc-progress-fill" style="width:60%;background:var(--blue)"></div></div>
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--blue)">60%</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary)">IDP Link: DG1 — Close BIM Coordination Gap</div>
+
+          <div style="border-top:1px solid #F3F4F6;padding-top:12px;margin-top:4px">
+            <div style="font-size:11px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Upcoming Sessions</div>
+            <div class="session">
+              <div class="sess-date"><div class="sess-day">02</div><div class="sess-month">Apr</div></div>
+              <div class="sess-info"><div class="sess-title">Module 5: Clash Detection & Resolution</div><div class="sess-sub">Navisworks integration with Revit models</div></div>
+              <div class="sess-time">10:00 - 12:30</div>
+              <div class="sess-status" style="background:var(--amber-bg);color:var(--amber)">Next</div>
+            </div>
+            <div class="session">
+              <div class="sess-date"><div class="sess-day">04</div><div class="sess-month">Apr</div></div>
+              <div class="sess-info"><div class="sess-title">Module 5: Workshop — Live Clash Exercise</div><div class="sess-sub">Hands-on with Marina Bay project model</div></div>
+              <div class="sess-time">10:00 - 12:30</div>
+              <div class="sess-status" style="background:#F3F4F6;color:var(--text-muted)">Scheduled</div>
+            </div>
+            <div class="session">
+              <div class="sess-date"><div class="sess-day">09</div><div class="sess-month">Apr</div></div>
+              <div class="sess-info"><div class="sess-title">Module 6: Model Management & Standards</div><div class="sess-sub">BIM execution plans and quality gates</div></div>
+              <div class="sess-time">10:00 - 12:30</div>
+              <div class="sess-status" style="background:#F3F4F6;color:var(--text-muted)">Scheduled</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Programme 2: Power BI -->
+      <div class="prog-card fade-up" style="animation-delay:.18s">
+        <div class="pc-header">
+          <div class="pc-icon" style="background:var(--purple-bg);color:var(--purple)"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+          <div class="pc-info">
+            <div class="pc-title">Power BI — Advanced Analytics & DAX</div>
+            <div class="pc-provider">Microsoft Learn &middot; Self-paced + Monthly Cohort Sessions</div>
+          </div>
+          <div class="pc-status" style="background:var(--blue-bg);color:var(--blue)">In Progress</div>
+        </div>
+        <div class="pc-body">
+          <div class="pc-meta-grid">
+            <div class="pc-meta"><div class="pc-meta-key">Duration</div><div class="pc-meta-val">24 hours (6 weeks)</div></div>
+            <div class="pc-meta"><div class="pc-meta-key">Schedule</div><div class="pc-meta-val">Self-paced + Monthly sync</div></div>
+            <div class="pc-meta"><div class="pc-meta-key">Start Date</div><div class="pc-meta-val">1 Mar 2026</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="pc-progress" style="flex:1"><div class="pc-progress-fill" style="width:35%;background:var(--purple)"></div></div>
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--purple)">35%</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary)">IDP Link: DG2 — Build Data Analytics Capability</div>
+
+          <div style="border-top:1px solid #F3F4F6;padding-top:12px;margin-top:4px">
+            <div style="font-size:11px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Next Session</div>
+            <div class="session">
+              <div class="sess-date"><div class="sess-day">15</div><div class="sess-month">Apr</div></div>
+              <div class="sess-info"><div class="sess-title">Cohort Session: DAX Patterns for Project KPIs</div><div class="sess-sub">Monthly live session with instructor</div></div>
+              <div class="sess-time">14:00 - 16:00</div>
+              <div class="sess-status" style="background:var(--amber-bg);color:var(--amber)">Next</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Programme 3: Leadership (Completed) -->
+      <div class="prog-card fade-up" style="animation-delay:.24s">
+        <div class="pc-header">
+          <div class="pc-icon" style="background:var(--green-bg);color:var(--green)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+          <div class="pc-info">
+            <div class="pc-title">Leading Engineering Teams</div>
+            <div class="pc-provider">Edstellar &middot; Instructor-led Workshop (In-person, Singapore)</div>
+          </div>
+          <div class="pc-status" style="background:var(--green-bg);color:var(--green)">Completed</div>
+        </div>
+        <div class="pc-body">
+          <div class="pc-meta-grid">
+            <div class="pc-meta"><div class="pc-meta-key">Duration</div><div class="pc-meta-val">22 hours (3 days)</div></div>
+            <div class="pc-meta"><div class="pc-meta-key">Completed</div><div class="pc-meta-val">14 Mar 2026</div></div>
+            <div class="pc-meta"><div class="pc-meta-key">Score</div><div class="pc-meta-val" style="color:var(--green)">88% — Distinction</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="pc-progress" style="flex:1"><div class="pc-progress-fill" style="width:100%;background:var(--green)"></div></div>
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--green)">100%</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary)">IDP Link: DG3 — Strengthen Leadership for Senior Role Readiness</div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="act-btn" style="font-size:11px;padding:5px 11px" onclick="showToast('Certificate downloaded')">
+              <svg style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download Certificate
+            </button>
+            <button class="act-btn" style="font-size:11px;padding:5px 11px" onclick="showToast('Feedback submitted — thank you!')">Leave Feedback</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CALENDAR -->
+    <div id="tabCalendar" style="display:none">
+      <div class="two-col">
+        <div class="panel fade-up">
+          <div class="panel-head">
+            <svg style="width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <div class="panel-title">April 2026</div>
+          </div>
+          <div class="panel-body">
+            <div class="cal-grid">
+              <div class="cal-header">Mon</div><div class="cal-header">Tue</div><div class="cal-header">Wed</div><div class="cal-header">Thu</div><div class="cal-header">Fri</div><div class="cal-header">Sat</div><div class="cal-header">Sun</div>
+              <div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day">1</div>
+              <div class="cal-day has-session" onclick="showToast('BIM Module 5: Clash Detection')">2<div class="cal-dot"></div></div>
+              <div class="cal-day">3</div>
+              <div class="cal-day has-session" onclick="showToast('BIM Workshop: Live Clash Exercise')">4<div class="cal-dot"></div></div>
+              <div class="cal-day">5</div>
+              <div class="cal-day">6</div><div class="cal-day">7</div><div class="cal-day">8</div>
+              <div class="cal-day has-session" onclick="showToast('BIM Module 6: Model Management')">9<div class="cal-dot"></div></div>
+              <div class="cal-day">10</div><div class="cal-day">11</div><div class="cal-day">12</div>
+              <div class="cal-day">13</div><div class="cal-day">14</div>
+              <div class="cal-day has-session" onclick="showToast('Power BI Cohort: DAX Patterns')">15<div class="cal-dot"></div></div>
+              <div class="cal-day">16</div><div class="cal-day">17</div><div class="cal-day">18</div><div class="cal-day">19</div>
+              <div class="cal-day">20</div><div class="cal-day">21</div><div class="cal-day">22</div><div class="cal-day">23</div><div class="cal-day">24</div><div class="cal-day">25</div><div class="cal-day">26</div>
+              <div class="cal-day">27</div><div class="cal-day">28</div><div class="cal-day">29</div><div class="cal-day">30</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel fade-up" style="animation-delay:.06s">
+          <div class="panel-head">
+            <div class="panel-title">April Sessions</div>
+            <div class="panel-badge" style="background:var(--amber-bg);color:var(--amber)">4 sessions</div>
+          </div>
+          <div class="panel-body">
+            <div class="session">
+              <div class="sess-date"><div class="sess-day">02</div><div class="sess-month">Apr</div></div>
+              <div class="sess-info"><div class="sess-title">BIM: Clash Detection & Resolution</div><div class="sess-sub">Autodesk ATC</div></div>
+              <div class="sess-time">10:00</div>
+            </div>
+            <div class="session">
+              <div class="sess-date"><div class="sess-day">04</div><div class="sess-month">Apr</div></div>
+              <div class="sess-info"><div class="sess-title">BIM: Workshop — Live Clash Exercise</div><div class="sess-sub">Autodesk ATC</div></div>
+              <div class="sess-time">10:00</div>
+            </div>
+            <div class="session">
+              <div class="sess-date"><div class="sess-day">09</div><div class="sess-month">Apr</div></div>
+              <div class="sess-info"><div class="sess-title">BIM: Model Management & Standards</div><div class="sess-sub">Autodesk ATC</div></div>
+              <div class="sess-time">10:00</div>
+            </div>
+            <div class="session">
+              <div class="sess-date"><div class="sess-day">15</div><div class="sess-month">Apr</div></div>
+              <div class="sess-info"><div class="sess-title">Power BI: DAX Patterns for KPIs</div><div class="sess-sub">Microsoft Learn</div></div>
+              <div class="sess-time">14:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: PRE-WORK -->
+    <div id="tabPrework" style="display:none">
+      <div class="two-col">
+        <div class="panel fade-up">
+          <div class="panel-head">
+            <svg style="width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <div class="panel-title">BIM Course — Pre-work</div>
+          </div>
+          <div class="panel-body" id="bimPrework"></div>
+        </div>
+        <div class="panel fade-up" style="animation-delay:.06s">
+          <div class="panel-head">
+            <svg style="width:14px;height:14px;stroke:var(--purple);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <div class="panel-title">Power BI Course — Pre-work</div>
+          </div>
+          <div class="panel-body" id="pbiPrework"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'employee',
+    activeNav: 'My Training',
+    breadcrumbs: ['Development', 'My Training'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+// TAB SWITCHING
+function showTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  event.target.classList.add('active');
+  document.getElementById('tabEnrolled').style.display = tab === 'enrolled' ? 'block' : 'none';
+  document.getElementById('tabCalendar').style.display = tab === 'calendar' ? 'block' : 'none';
+  document.getElementById('tabPrework').style.display = tab === 'prework' ? 'block' : 'none';
+}
+
+// PRE-WORK ITEMS
+var bimPrework = [
+  {text:'Download Navisworks trial and install', done:true},
+  {text:'Read: BIM Execution Plan Template (PDF)', done:true},
+  {text:'Complete Module 4 quiz (score 70%+)', done:true},
+  {text:'Review Marina Bay project model files', done:false},
+  {text:'Prepare 3 clash examples from current project', done:false}
+];
+
+var pbiPrework = [
+  {text:'Install Power BI Desktop (latest version)', done:true},
+  {text:'Complete DAX Fundamentals module', done:true},
+  {text:'Export project data from Primavera P6', done:false},
+  {text:'Read: DAX Patterns for Time Intelligence', done:false}
+];
+
+function renderPrework(items, containerId) {
+  var html = '';
+  items.forEach(function(item, idx) {
+    var checkClass = item.done ? 'pw-check done' : 'pw-check';
+    var textClass = item.done ? 'pw-text done' : 'pw-text';
+    html += '<div class="prework">';
+    html += '<div class="' + checkClass + '" onclick="togglePrework(\'' + containerId + '\',' + idx + ')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>';
+    html += '<div class="' + textClass + '">' + item.text + '</div>';
+    html += '</div>';
+  });
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function togglePrework(containerId, idx) {
+  var items = containerId === 'bimPrework' ? bimPrework : pbiPrework;
+  items[idx].done = !items[idx].done;
+  renderPrework(items, containerId);
+  showToast(items[idx].done ? 'Pre-work completed' : 'Pre-work unchecked');
+}
+
+renderPrework(bimPrework, 'bimPrework');
+renderPrework(pbiPrework, 'pbiPrework');
+
+// TOAST
+function showToast(msg) {
+  var t = document.getElementById('sip-toast');
+  if (!t) { t=document.createElement('div');t.id='sip-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#ffffff;border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:var(--font-body),sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08)';document.body.appendChild(t); }
+  t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)'},2400);
+}
+
+document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.getAttribute('href')==='#'){e.preventDefault();showToast((a.textContent||'').trim().substring(0,36)+' \u2014 available in full platform')}});
+</script>
+</body>
+</html>

@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Projects · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<style>
+.content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+.page-body{max-width:1200px;margin:0 auto;padding:28px 32px 60px;width:100%}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.page-head h1{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text-primary);margin:0 0 4px}
+.page-head p{font-size:13px;color:var(--text-secondary);margin:0}
+
+.stats-strip{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.stat-card{flex:1;min-width:110px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stat-val{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text-primary)}
+.stat-label{font-size:11px;color:var(--text-muted);margin-top:2px}
+.stat-val.green{color:var(--green)}.stat-val.amber{color:var(--amber)}.stat-val.red{color:var(--red)}.stat-val.accent{color:var(--accent)}
+
+.filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filter-bar select,.filter-bar input{padding:7px 12px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:12px;color:var(--text-primary);background:var(--card)}
+.filter-bar input{flex:1;min-width:160px}
+
+.proj-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:8px;transition:all .15s}
+.proj-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06);border-color:var(--text-muted)}
+.proj-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.proj-id{font-family:var(--font-mono,monospace);font-size:10px;color:var(--text-muted)}
+.proj-name{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text-primary);flex:1}
+.proj-pill{font-size:9.5px;padding:3px 10px;border-radius:100px;font-weight:500;white-space:nowrap}
+.proj-pill.planned{background:rgba(59,130,246,0.08);color:#3B82F6}
+.proj-pill.active{background:var(--green-bg);color:var(--green)}
+.proj-pill.hold{background:var(--amber-bg);color:var(--amber)}
+.proj-pill.completed{background:rgba(0,0,0,0.04);color:var(--text-muted)}
+.proj-pill.critical{background:var(--red-bg);color:var(--red)}
+.proj-pill.high{background:var(--amber-bg);color:var(--amber)}
+.proj-pill.medium{background:rgba(59,130,246,0.08);color:#3B82F6}
+.proj-pill.low{background:rgba(0,0,0,0.04);color:var(--text-muted)}
+.proj-meta{font-size:11px;color:var(--text-muted);margin-bottom:6px}
+.proj-desc{font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px}
+.proj-tags{display:flex;flex-wrap:wrap;gap:4px}
+.proj-tag{font-size:9.5px;padding:2px 8px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted)}
+.proj-tag.skill{background:rgba(59,130,246,0.05);border-color:rgba(59,130,246,0.15);color:#3B82F6}
+.proj-tag.dept{background:rgba(201,168,76,0.05);border-color:rgba(201,168,76,0.2);color:var(--accent)}
+.proj-actions{display:flex;gap:6px;margin-top:10px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);background:var(--card);color:var(--text-primary);transition:all .15s}
+.btn:hover{border-color:var(--text-muted)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#B8983F}
+.btn-sm{padding:6px 12px;font-size:11px}
+.btn-danger{color:var(--red);border-color:var(--red)}
+.btn-danger:hover{background:var(--red-bg)}
+
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px;text-align:center}
+.empty-icon{width:64px;height:64px;border-radius:16px;background:var(--accent-lt);display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:28px}
+.empty-title{font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--text-primary);margin-bottom:8px}
+.empty-desc{font-size:13px;color:var(--text-secondary);max-width:420px;line-height:1.6;margin-bottom:16px}
+
+/* Detail full page */
+.dp-back{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);cursor:pointer;margin-bottom:16px;padding:6px 0;font-family:var(--font-body);border:none;background:none;transition:color .15s}
+.dp-back:hover{color:var(--accent)}
+.dp-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.dp-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.dp-header h1{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text-primary);margin:0 0 6px}
+.dp-grid{display:grid;grid-template-columns:1fr 360px;gap:20px}
+@media(max-width:900px){.dp-grid{grid-template-columns:1fr}}
+.dp-main{min-width:0}
+.dp-sidebar{min-width:0}
+.dp-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.dp-section{margin-bottom:18px}
+.dp-section-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.dp-row{display:flex;gap:12px;margin-bottom:10px}
+.dp-row .form-group{flex:1;min-width:0}
+.dp-label{font-size:10.5px;font-weight:600;color:var(--text-muted);margin-bottom:3px;display:block}
+.dp-val{font-size:12.5px;color:var(--text-primary);line-height:1.5}
+.dp-input,.dp-select,.dp-textarea{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:12px;color:var(--text-primary);background:var(--card);box-sizing:border-box}
+.dp-input:focus,.dp-select:focus,.dp-textarea:focus{outline:none;border-color:var(--accent)}
+.dp-textarea{min-height:60px;resize:vertical}
+/* Sub-project items */
+.sub-item{padding:12px 14px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;transition:all .15s}
+.sub-item:hover{border-color:var(--text-muted)}
+.sub-head{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.sub-type-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.sub-name{font-size:12px;font-weight:600;color:var(--text-primary);flex:1}
+.sub-meta{font-size:10.5px;color:var(--text-muted);display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+.sub-assign{font-size:10px;padding:2px 8px;border-radius:100px;background:rgba(139,92,246,0.06);color:#8B5CF6;border:1px solid rgba(139,92,246,0.15)}
+
+.dp-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--card)}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a1a;color:#fff;padding:10px 22px;border-radius:10px;font-size:12.5px;font-family:var(--font-body);z-index:9999;transition:transform .3s ease;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+<div class="content">
+<div class="page-body" id="mainBody"></div>
+</div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({portal:'admin',activeNav:'All Projects',breadcrumbs:['Talent Projects','All Projects'],topbarActions:[]});
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
+
+function loadProjects(){
+  var raw=null;
+  try{raw=sessionStorage.getItem('sip_talent_projects')||localStorage.getItem('sip_talent_projects')}catch(e){}
+  if(raw){try{return JSON.parse(raw)}catch(e){}}
+  return[];
+}
+function saveProjects(projects){
+  var json=JSON.stringify(projects);
+  try{sessionStorage.setItem('sip_talent_projects',json)}catch(e){}
+  try{localStorage.setItem('sip_talent_projects',json)}catch(e){}
+}
+
+var filterSearch='';var filterCat='';var filterStatus='';
+
+function render(){
+  var projects=loadProjects();
+  var body=document.getElementById('mainBody');
+
+  if(!projects.length){
+    body.innerHTML='<div class="page-head"><div><h1>All Projects</h1><p>Manage all talent projects</p></div><a href="talent-projects-add.html" class="btn btn-primary btn-sm">+ Add Project</a></div>'+
+      '<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">No Projects Yet</div>'+
+      '<div class="empty-desc">Create your first talent project from AI suggestions or from scratch.</div>'+
+      '<a href="talent-projects-add.html" class="btn btn-primary">+ Add Project</a></div>';
+    return;
+  }
+
+  var html='';
+
+  // Header
+  html+='<div class="page-head"><div><h1>All Projects</h1><p>'+projects.length+' talent project'+(projects.length>1?'s':'')+' created</p></div>';
+  html+='<div style="display:flex;gap:8px"><a href="talent-projects-add.html" class="btn btn-primary btn-sm">+ Add Project</a>';
+  html+='<button class="btn btn-danger btn-sm" onclick="clearProjects()">Clear All</button></div></div>';
+
+  // Stats
+  var planned=0,active=0,hold=0,completed=0;
+  projects.forEach(function(p){
+    var s=(p.Project_Status||'').toLowerCase();
+    if(s==='planned')planned++;else if(s==='active')active++;else if(s==='on hold')hold++;else if(s==='completed')completed++;else planned++;
+  });
+  html+='<div class="stats-strip">';
+  html+='<div class="stat-card"><div class="stat-val">'+projects.length+'</div><div class="stat-label">Total Projects</div></div>';
+  html+='<div class="stat-card"><div class="stat-val accent">'+active+'</div><div class="stat-label">Active</div></div>';
+  html+='<div class="stat-card"><div class="stat-val green">'+planned+'</div><div class="stat-label">Planned</div></div>';
+  html+='<div class="stat-card"><div class="stat-val amber">'+hold+'</div><div class="stat-label">On Hold</div></div>';
+  html+='<div class="stat-card"><div class="stat-val">'+completed+'</div><div class="stat-label">Completed</div></div>';
+  html+='</div>';
+
+  // Filters
+  var types={},statuses={};
+  projects.forEach(function(p){if(p.Project_Type)types[p.Project_Type]=1;if(p.Project_Status)statuses[p.Project_Status]=1});
+  html+='<div class="filter-bar">';
+  html+='<input type="text" placeholder="Search projects..." value="'+esc(filterSearch)+'" oninput="filterSearch=this.value;render()">';
+  html+='<select onchange="filterCat=this.value;render()"><option value="">All Types</option>';
+  Object.keys(types).sort().forEach(function(c){html+='<option'+(filterCat===c?' selected':'')+'>'+esc(c)+'</option>'});
+  html+='</select>';
+  html+='<select onchange="filterStatus=this.value;render()"><option value="">All Statuses</option>';
+  Object.keys(statuses).sort().forEach(function(s){html+='<option'+(filterStatus===s?' selected':'')+'>'+esc(s)+'</option>'});
+  html+='</select></div>';
+
+  // Filter
+  var filtered=projects;
+  if(filterSearch){var q=filterSearch.toLowerCase();filtered=filtered.filter(function(p){return(p.Project_Name||'').toLowerCase().indexOf(q)>=0||(p.Description||'').toLowerCase().indexOf(q)>=0||(p.Project_ID||'').toLowerCase().indexOf(q)>=0})}
+  if(filterCat)filtered=filtered.filter(function(p){return p.Project_Type===filterCat});
+  if(filterStatus)filtered=filtered.filter(function(p){return p.Project_Status===filterStatus});
+
+  if(!filtered.length){
+    html+='<div style="padding:40px;text-align:center;color:var(--text-muted);font-size:13px">No projects match your filters.</div>';
+  }
+
+  // Project cards
+  filtered.forEach(function(p,i){
+    var stCls=(p.Project_Status||'').toLowerCase().replace(/\s+/g,'');
+    if(stCls==='onhold')stCls='hold';
+    var priCls=(p.Priority||'medium').toLowerCase();
+
+    var realIdx=projects.indexOf(p);
+    html+='<div class="proj-card" style="cursor:pointer" onclick="openDetail('+realIdx+')">';
+    html+='<div class="proj-head">';
+    html+='<span class="proj-id" style="font-weight:600;color:#3B82F6;background:rgba(59,130,246,0.06);padding:3px 8px;border-radius:4px">'+esc(p.Project_ID)+'</span>';
+    html+='<span class="proj-name">'+esc(p.Project_Name)+'</span>';
+    if(p.Project_Type) html+='<span class="proj-pill" style="background:rgba(0,0,0,0.04);color:var(--text-muted)">'+esc(p.Project_Type)+'</span>';
+    if(p.Project_Status) html+='<span class="proj-pill '+stCls+'">'+esc(p.Project_Status)+'</span>';
+    if(p.Priority) html+='<span class="proj-pill '+priCls+'">'+esc(p.Priority)+'</span>';
+
+    // Days remaining counter
+    var endDate=p.Target_End_Date||(p.typeConfig&&(p.typeConfig.endDate||p.typeConfig.completionDeadline||p.typeConfig.deadline||p.typeConfig.closeDate))||'';
+    if(endDate){
+      var diff=Math.ceil((new Date(endDate).getTime()-Date.now())/(1000*60*60*24));
+      var dueColor=diff<0?'var(--red)':diff<=7?'var(--red)':diff<=30?'var(--amber)':'var(--green)';
+      var dueLabel=diff<0?Math.abs(diff)+' days overdue':diff===0?'Due today':diff===1?'1 day remaining':diff+' days remaining';
+      html+='<span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:100px;background:'+dueColor+'10;color:'+dueColor+';border:1px solid '+dueColor+'25;white-space:nowrap;display:inline-flex;align-items:center;gap:4px">';
+      html+='<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+      html+=esc(dueLabel)+'</span>';
+    }
+
+    html+='</div>';
+
+    // Owner & Observers row
+    if(p.Project_Owner){
+      html+='<div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">';
+      html+='<span style="font-weight:600;color:var(--text-muted)">Owner:</span> '+esc(p.Project_Owner);
+      if((p.Observers||[]).length) html+=' <span style="color:var(--border)">|</span> <span style="font-weight:600;color:var(--text-muted)">Observers:</span> '+p.Observers.map(function(o){return esc(o.split(' — ')[0]||o)}).join(', ');
+      html+='</div>';
+    }
+
+    // BU details
+    var audience=p.typeConfig&&p.typeConfig.audience;
+    if(audience&&(audience.businessUnits||[]).length){
+      html+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">';
+      (audience.businessUnits||[]).forEach(function(bu){html+='<span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(139,92,246,0.06);color:#7C3AED;border:1px solid rgba(139,92,246,0.12);font-family:var(--font-mono,monospace)">'+esc(bu)+'</span>'});
+      html+='</div>';
+    }
+
+    var meta=[];
+    if(p.Priority) meta.push(p.Priority+' priority');
+    if(p.Start_Date) meta.push('Start: '+p.Start_Date);
+    if(p.Target_End_Date) meta.push('End: '+p.Target_End_Date);
+    if(p.Created_At) meta.push('Created: '+p.Created_At.substring(0,10));
+    if(meta.length) html+='<div class="proj-meta">'+meta.join(' · ')+'</div>';
+
+    if(p.Description) html+='<div class="proj-desc">'+esc(p.Description.substring(0,200))+(p.Description.length>200?'...':'')+'</div>';
+
+    // Audience tags (depts/roles)
+    html+='<div class="proj-tags">';
+    if(audience){
+      (audience.departments||[]).forEach(function(d){html+='<span class="proj-tag dept">'+esc(d)+'</span>'});
+      (audience.roles||[]).slice(0,5).forEach(function(r){html+='<span class="proj-tag skill">'+esc(r)+'</span>'});
+    }
+    html+='</div>';
+
+    var subCount=(p.subProjects||[]).length;
+    if(subCount){
+      html+='<div style="margin-top:6px;font-size:10.5px;color:var(--text-muted);display:flex;align-items:center;gap:6px">';
+      html+='<svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
+      html+=subCount+' activit'+(subCount>1?'ies':'y');
+      var subDone=(p.subProjects||[]).filter(function(s){return s.status==='Completed'}).length;
+      if(subDone) html+=' <span style="color:var(--green)">('+subDone+' done)</span>';
+      html+='</div>';
+    }
+    html+='<div class="proj-actions">';
+    html+='<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();openDetail('+realIdx+')"><svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> View</button>';
+    html+='<button class="btn btn-sm" onclick="event.stopPropagation();openEditDirect('+realIdx+')"><svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>';
+    html+='<button class="btn btn-sm" onclick="event.stopPropagation();cloneProject('+realIdx+')"><svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Clone</button>';
+    html+='<button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteProject('+realIdx+')"><svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>';
+    html+='</div>';
+    html+='</div>';
+  });
+
+  body.innerHTML=html;
+}
+
+function deleteProject(idx){
+  var projects=loadProjects();
+  var name=projects[idx]?projects[idx].Project_Name:'';
+  if(!confirm('Delete project "'+name+'"?'))return;
+  projects.splice(idx,1);
+  saveProjects(projects);
+  showToast('Project deleted');
+  render();
+}
+
+function clearProjects(){
+  if(!confirm('Delete all projects?'))return;
+  try{sessionStorage.removeItem('sip_talent_projects')}catch(e){}
+  try{localStorage.removeItem('sip_talent_projects')}catch(e){}
+  showToast('All projects cleared');
+  render();
+}
+
+// ═══════════════════════════════════════════════════════
+// DETAIL / EDIT PANEL
+// ═══════════════════════════════════════════════════════
+var detailIdx=-1;var editMode=false;
+var PROJECT_TYPES=['Assessments','Skills Matrix','Surveys','Training Programs','Coaching','Mentoring','eLearning Assignment','Webinars','Talent Development Programs'];
+var PROJECT_STATUSES=['Planned','Active','On Hold','Completed','Cancelled'];
+var PRIORITIES=['Critical','High','Medium','Low'];
+var RECURRENCE_OPTIONS=['One-time','Recurring — Monthly','Recurring — Quarterly','Recurring — Semi-Annual','Recurring — Annual'];
+
+function getOwnerOptions(){
+  var opts=[];
+  try{
+    var raw=sessionStorage.getItem('sip_dataport_import')||localStorage.getItem('sip_dataport_import');
+    if(raw){var data=JSON.parse(raw);(data.employees||[]).forEach(function(e){
+      if(e.department==='HR & Talent'||e.role==='L&D Manager'||e.role==='L&D Coordinator'||e.role==='HR Business Partner'||e.role==='Senior HRBP'||e.role==='CHRO'||(e.department||'').indexOf('HR')>=0||(e.role||'').indexOf('L&D')>=0){
+        opts.push(e.fullName+' \u2014 '+e.role+' ('+e.id+')');
+      }
+    })}
+  }catch(ex){}
+  if(!opts.length) opts=['CHRO \u2014 Sarah Lim','L&D Manager','HR Business Partner','Senior HRBP'];
+  return opts;
+}
+function renderOwnerSelect(id,cur){
+  var opts=getOwnerOptions();
+  var h='<select class="dp-select" id="'+id+'"><option value="">Select owner...</option>';
+  opts.forEach(function(o){h+='<option value="'+esc(o)+'"'+(o===cur?' selected':'')+'>'+esc(o)+'</option>'});
+  h+='<option value="__custom">Other (type manually)</option></select>';
+  return h;
+}
+var SUB_TYPES=['Survey','Skill Assessment','Competency Assessment','Training Session','Workshop','Certification Exam','Coaching Session','Review Meeting','Feedback Collection','Knowledge Test','Discovery Session','OD Intervention'];
+var SUB_STATUSES=['Not Started','In Progress','Completed','Cancelled'];
+var ASSIGN_OPTIONS=['All Employees','Engineering','Project Delivery','Digital Delivery','Corporate Services','EHS & Risk','HR & Talent','Managers Only','Senior Leaders','Custom List'];
+
+function openDetail(idx){
+  detailIdx=idx;editMode=false;
+  renderDetail();
+}
+function closeDetail(){
+  detailIdx=-1;editMode=false;
+  render();
+}
+function toggleEdit(){
+  editMode=!editMode;
+  renderDetail();
+}
+
+function renderDetail(){
+  var projects=loadProjects();
+  var p=projects[detailIdx];
+  if(!p){closeDetail();return}
+
+  var body=document.getElementById('mainBody');
+  var h='';
+
+  // Back button
+  h+='<button class="dp-back" onclick="closeDetail()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back to All Projects</button>';
+
+  // Header
+  var stCls=(p.Project_Status||'').toLowerCase().replace(/\s+/g,'');if(stCls==='onhold')stCls='hold';
+  var priCls=(p.Priority||'').toLowerCase();
+  h+='<div class="dp-header"><div>';
+  h+='<h1>'+esc(p.Project_Name)+'</h1>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">';
+  if(p.Project_ID) h+='<span style="font-family:var(--font-mono,monospace);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;background:rgba(59,130,246,0.06);color:#3B82F6">'+esc(p.Project_ID)+'</span>';
+  if(p.Project_Type) h+='<span class="proj-pill" style="background:rgba(0,0,0,0.04);color:var(--text-muted)">'+esc(p.Project_Type)+'</span>';
+  if(p.Project_Status) h+='<span class="proj-pill '+stCls+'">'+esc(p.Project_Status)+'</span>';
+  if(p.Priority) h+='<span class="proj-pill '+priCls+'">'+esc(p.Priority)+'</span>';
+  // Days remaining in detail header
+  var detEndDate=p.Target_End_Date||((p.typeConfig)&&(p.typeConfig.endDate||p.typeConfig.completionDeadline||p.typeConfig.deadline||p.typeConfig.closeDate))||'';
+  if(detEndDate){
+    var detDiff=Math.ceil((new Date(detEndDate).getTime()-Date.now())/(1000*60*60*24));
+    var detColor=detDiff<0?'var(--red)':detDiff<=7?'var(--red)':detDiff<=30?'var(--amber)':'var(--green)';
+    var detLabel=detDiff<0?Math.abs(detDiff)+' days overdue':detDiff===0?'Due today':detDiff+' day'+(detDiff>1?'s':'')+' remaining';
+    h+='<span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:100px;background:'+detColor+'10;color:'+detColor+';border:1px solid '+detColor+'25;display:inline-flex;align-items:center;gap:4px">';
+    h+='<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+esc(detLabel)+'</span>';
+  }
+  h+='</div></div>';
+
+  // CRUD Action Bar
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap">';
+  h+='<button class="btn btn-sm" onclick="toggleEdit()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> '+(editMode?'Cancel Edit':'Edit Project')+'</button>';
+  h+='<button class="btn btn-sm" onclick="cloneProject('+detailIdx+')"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Clone Project</button>';
+  // Quick status change
+  h+='<select class="dp-select" style="padding:5px 10px;font-size:11px;width:auto" onchange="quickStatusChange(this.value)">';
+  h+='<option value="">Change Status...</option>';
+  PROJECT_STATUSES.forEach(function(s){if(s!==p.Project_Status) h+='<option value="'+esc(s)+'">'+esc(s)+'</option>'});
+  h+='</select>';
+  h+='<button class="btn btn-sm btn-danger" onclick="deleteFromDetail()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>';
+  h+='</div></div>';
+
+  if(editMode){
+    h+=renderEditForm(p);
+    h+='<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" onclick="saveEdit()">Save Changes</button><button class="btn" onclick="toggleEdit()">Cancel</button></div>';
+  } else {
+    var tc=p.typeConfig||{};
+    var audience=tc.audience||{};
+    h+='<div class="dp-grid"><div class="dp-main">';
+
+    // Description & Goals
+    h+='<div class="dp-card"><div class="dp-section-title">Description</div>';
+    h+='<div class="dp-val" style="white-space:pre-wrap;line-height:1.6">'+esc(p.Description||'No description provided.')+'</div></div>';
+
+    if(p.Goals_Objectives){
+      h+='<div class="dp-card"><div class="dp-section-title">Goals & Objectives</div>';
+      h+='<div class="dp-val" style="white-space:pre-wrap;line-height:1.6">'+esc(p.Goals_Objectives)+'</div></div>';
+    }
+
+    if(p.Projected_Outcomes){
+      h+='<div class="dp-card"><div class="dp-section-title">Projected Outcomes</div>';
+      h+='<div class="dp-val" style="white-space:pre-wrap;line-height:1.6">'+esc(p.Projected_Outcomes)+'</div></div>';
+    }
+
+    // Audience section
+    if((audience.businessUnits||[]).length||(audience.departments||[]).length||(audience.employees||[]).length){
+      h+='<div class="dp-card"><div class="dp-section-title">Audience</div>';
+      if((audience.businessUnits||[]).length){
+        h+='<div class="form-group"><div class="dp-label">Business Units</div><div class="proj-tags">';
+        audience.businessUnits.forEach(function(b){h+='<span style="font-size:10px;padding:3px 10px;border-radius:4px;background:rgba(139,92,246,0.06);color:#7C3AED;border:1px solid rgba(139,92,246,0.12);font-family:var(--font-mono,monospace)">'+esc(b)+'</span>'});
+        h+='</div></div>';
+      }
+      if((audience.departments||[]).length){
+        h+='<div class="form-group"><div class="dp-label">Departments</div><div class="proj-tags">';
+        audience.departments.forEach(function(d){h+='<span class="proj-tag dept">'+esc(d)+'</span>'});
+        h+='</div></div>';
+      }
+      if((audience.levels||[]).length){
+        h+='<div class="form-group"><div class="dp-label">Levels</div><div class="proj-tags">';
+        audience.levels.forEach(function(l){h+='<span class="proj-tag" style="background:rgba(22,163,74,0.06);border-color:rgba(22,163,74,0.15);color:var(--green)">'+esc(l)+'</span>'});
+        h+='</div></div>';
+      }
+      if((audience.roles||[]).length){
+        h+='<div class="form-group"><div class="dp-label">Roles</div><div class="proj-tags">';
+        audience.roles.forEach(function(r){h+='<span class="proj-tag skill">'+esc(r)+'</span>'});
+        h+='</div></div>';
+      }
+      if((audience.employees||[]).length){
+        h+='<div class="form-group"><div class="dp-label">Employees ('+audience.employees.length+')</div><div class="proj-tags">';
+        audience.employees.forEach(function(e){h+='<span class="proj-tag" style="background:rgba(0,0,0,0.03)">'+esc(e)+'</span>'});
+        h+='</div></div>';
+      }
+      h+='</div>';
+    }
+
+    // Type-specific configuration
+    h+=renderTypeConfigCard(p.Project_Type,tc);
+
+    // Activities section
+    h+=renderActivitiesSection(p);
+
+    h+='</div><div class="dp-sidebar">';
+
+    // Project details sidebar
+    h+='<div class="dp-card"><div class="dp-section-title">Project Details</div>';
+    h+=roField('Project ID',p.Project_ID);
+    h+=roField('Project Type',p.Project_Type);
+    h+=roField('Status',p.Project_Status);
+    h+=roField('Priority',p.Priority);
+    h+=roField('Created',p.Created_At?(p.Created_At.substring(0,10)):'—');
+    h+='</div>';
+
+    // Owner & Observers sidebar
+    h+='<div class="dp-card"><div class="dp-section-title">Owner & Observers</div>';
+    h+=roField('Project Owner',p.Project_Owner);
+    if((p.Observers||[]).length){
+      h+='<div class="form-group"><div class="dp-label">Observers</div>';
+      p.Observers.forEach(function(o){h+='<div class="dp-val" style="font-size:11px;padding:2px 0">'+esc(o)+'</div>'});
+      h+='</div>';
+    } else { h+=roField('Observers','—'); }
+    h+='</div>';
+
+    // Schedule sidebar
+    h+='<div class="dp-card"><div class="dp-section-title">Schedule</div>';
+    h+=roField('Start Date',p.Start_Date||tc.startDate||tc.launchDate||tc.assignDate||'—');
+    h+=roField('End Date',p.Target_End_Date||tc.endDate||tc.completionDeadline||tc.deadline||tc.closeDate||'—');
+    h+='</div>';
+
+    h+='</div></div>';
+  }
+
+  body.innerHTML=h;
+}
+
+var editingSubIdx=-1;
+
+function renderActivitiesSection(p){
+  var subs=p.subProjects||[];
+  var typeColors={'Survey':'#8B5CF6','Skill Assessment':'#3B82F6','Competency Assessment':'#0891B2','Training Session':'#16A34A','Workshop':'#D97706','Certification Exam':'#DC2626','Coaching Session':'#C9A84C','Review Meeting':'#6B7280','Feedback Collection':'#8B5CF6','Knowledge Test':'#3B82F6','Discovery Session':'#0891B2','OD Intervention':'#D97706'};
+  function selOpts(arr,cur){return arr.map(function(v){return'<option'+(v===cur?' selected':'')+'>'+esc(v)+'</option>'}).join('')}
+
+  var h='<div class="dp-card"><div class="dp-section-title">Activities &amp; Delegated Tasks ('+subs.length+')</div>';
+  if(subs.length){
+    subs.forEach(function(s,si){
+      var col=typeColors[s.type]||'#6B7280';
+      var stCls=s.status==='Completed'?'completed':s.status==='In Progress'?'active':s.status==='Cancelled'?'hold':'planned';
+
+      if(editingSubIdx===si){
+        // Inline edit form
+        h+='<div class="sub-item" style="border-color:var(--accent);background:rgba(201,168,76,0.02)">';
+        h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Activity Name *</div><input class="dp-input" id="edSubName" value="'+esc(s.name)+'"></div></div>';
+        h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Type</div><select class="dp-select" id="edSubType">'+selOpts(SUB_TYPES,s.type)+'</select></div>';
+        h+='<div class="form-group"><div class="dp-label">Assign To</div><select class="dp-select" id="edSubAssign">'+selOpts(ASSIGN_OPTIONS,s.assignedTo)+'</select></div></div>';
+        h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Status</div><select class="dp-select" id="edSubStatus">'+selOpts(SUB_STATUSES,s.status)+'</select></div>';
+        h+='<div class="form-group"><div class="dp-label">Due Date</div><input class="dp-input" type="date" id="edSubDue" value="'+esc(s.dueDate||'')+'"></div></div>';
+        h+='<div class="form-group"><div class="dp-label">Notes</div><input class="dp-input" id="edSubNotes" value="'+esc(s.notes||'')+'"></div>';
+        h+='<div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-primary btn-sm" onclick="saveSubEdit('+si+')">Save</button><button class="btn btn-sm" onclick="editingSubIdx=-1;renderDetail()">Cancel</button></div>';
+        h+='</div>';
+      } else {
+        // Readonly view
+        h+='<div class="sub-item">';
+        h+='<div class="sub-head">';
+        h+='<div class="sub-type-icon" style="background:'+col+'15;color:'+col+'">'+getSubIcon(s.type)+'</div>';
+        h+='<div class="sub-name">'+esc(s.name)+'</div>';
+        h+='<span class="proj-pill '+stCls+'" style="font-size:9px">'+esc(s.status)+'</span>';
+        h+='<button class="btn btn-sm" style="padding:2px 6px;font-size:9px" onclick="editingSubIdx='+si+';renderDetail()">Edit</button>';
+        h+='<button class="btn btn-sm" style="padding:2px 6px;font-size:9px;color:var(--red);border-color:var(--red)" onclick="removeSubProject('+si+')">x</button>';
+        h+='</div>';
+        h+='<div class="sub-meta">';
+        h+='<span>'+esc(s.type)+'</span>';
+        if(s.dueDate) h+='<span>Due: '+esc(s.dueDate)+'</span>';
+        var subAud=s.audience||{};var subAudLabel=s.assignedTo||'';
+        if(subAud.departments&&subAud.departments.length) subAudLabel=subAud.departments.join(', ');
+        else if(subAud.levels&&subAud.levels.length) subAudLabel=subAud.levels.join(', ');
+        else if(subAud.roles&&subAud.roles.length) subAudLabel=subAud.roles.join(', ');
+        if(subAudLabel) h+='<span class="sub-assign">'+esc(subAudLabel)+'</span>';
+        if(subAud.employees&&subAud.employees.length) h+='<span style="font-size:9.5px;color:var(--text-muted)">'+subAud.employees.length+' employee'+(subAud.employees.length>1?'s':'')+'</span>';
+        h+='</div>';
+        if(s.notes) h+='<div style="font-size:10.5px;color:var(--text-secondary);margin-top:4px;line-height:1.4">'+esc(s.notes)+'</div>';
+        h+='</div>';
+      }
+    });
+  } else {
+    h+='<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;border:2px dashed var(--border);border-radius:8px">No activities yet. Add surveys, assessments, training sessions, or other delegated tasks.</div>';
+  }
+  h+='<button class="btn btn-sm" onclick="showAddSubForm()" style="margin-top:8px"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Activity</button>';
+  h+='<div id="addSubForm" style="display:none;margin-top:10px;padding:14px;border:1px solid var(--accent);border-radius:8px;background:rgba(201,168,76,0.02)"></div>';
+  h+='</div>';
+  return h;
+}
+
+function getSubIcon(type){
+  var map={'Survey':'📊','Skill Assessment':'📋','Competency Assessment':'🧠','Training Session':'🎓','Workshop':'🛠','Certification Exam':'📜','Coaching Session':'💬','Review Meeting':'📅','Feedback Collection':'💭','Knowledge Test':'✏️','Discovery Session':'🔍','OD Intervention':'🔄'};
+  return map[type]||'📌';
+}
+
+function roField(label,val){
+  return '<div class="form-group"><div class="dp-label">'+esc(label)+'</div><div class="dp-val">'+esc(val||'—')+'</div></div>';
+}
+
+function renderTypeConfigCard(type,tc){
+  if(!tc||!tc.projectType) return '';
+  var h='<div class="dp-card"><div class="dp-section-title">'+esc(type)+' Configuration</div>';
+
+  if(type==='Assessments'){
+    if(tc.assessmentType) h+=roField('Assessment Type',tc.assessmentType);
+    if(tc.timeLimit) h+=roField('Time Limit',tc.timeLimit+' minutes');
+    if(tc.totalQuestions) h+=roField('Total Questions',tc.totalQuestions);
+    h+=roField('Include Qualitative',tc.includeQualitative?'Yes':'No');
+    if(tc.launchDate) h+=roField('Launch Date',tc.launchDate);
+    if(tc.completionDeadline) h+=roField('Completion Deadline',tc.completionDeadline);
+  }
+  else if(type==='Skills Matrix'){
+    if((tc.skills||[]).length) h+=tagField('Skills',tc.skills,'skill');
+    if(tc.proficiencyScale) h+=roField('Proficiency Scale',tc.proficiencyScale);
+    h+=roField('Self-Assessment',tc.allowSelfAssessment?'Enabled':'Disabled');
+    if(tc.initialDate) h+=roField('Initial Assessment Date',tc.initialDate);
+    if(tc.updateFrequency) h+=roField('Update Frequency',tc.updateFrequency);
+  }
+  else if(type==='Surveys'){
+    if(tc.surveyType) h+=roField('Survey Type',tc.surveyType);
+    if(tc.totalQuestions) h+=roField('Total Questions',tc.totalQuestions);
+    h+=roField('Anonymous',tc.anonymous?'Yes':'No');
+    h+=roField('Allow Comments',tc.allowComments?'Yes':'No');
+    h+=roField('Progress Bar',tc.showProgress?'Yes':'No');
+    if(tc.distributionScope) h+=roField('Distribution Scope',tc.distributionScope);
+    if(tc.launchDate) h+=roField('Launch Date',tc.launchDate);
+    if(tc.closeDate) h+=roField('Close Date',tc.closeDate);
+    h+=roField('Reminders',tc.sendReminders?'Yes':'No');
+  }
+  else if(type==='Training Programs'){
+    if(tc.category) h+=roField('Program Category',tc.category);
+    if(tc.deliveryMode) h+=roField('Delivery Mode',tc.deliveryMode);
+    if(tc.totalDuration) h+=roField('Total Duration',tc.totalDuration+' hours');
+    if(tc.modules) h+=roField('Modules',tc.modules);
+    if((tc.skillsToDevelop||[]).length) h+=tagField('Skills to Develop',tc.skillsToDevelop,'skill');
+    if(tc.completionReq) h+=roField('Completion Requirement',tc.completionReq);
+    h+=roField('Certificate',tc.issueCertificate?'Yes':'No');
+    if(tc.trainerNames) h+=roField('Trainers',tc.trainerNames);
+    if(tc.resourceLinks) h+=roField('Resources',tc.resourceLinks);
+    if(tc.startDate) h+=roField('Start Date',tc.startDate);
+    if(tc.endDate) h+=roField('End Date',tc.endDate);
+  }
+  else if(type==='Coaching'){
+    if(tc.focusArea) h+=roField('Focus Area',tc.focusArea);
+    if(tc.coachingType) h+=roField('Coaching Type',tc.coachingType);
+    if(tc.totalSessions) h+=roField('Total Sessions',tc.totalSessions);
+    if(tc.sessionDuration) h+=roField('Session Duration',tc.sessionDuration+' min');
+    if(tc.sessionFrequency) h+=roField('Frequency',tc.sessionFrequency);
+    h+=roField('Track Notes',tc.trackNotes?'Yes':'No');
+    if(tc.coach) h+=roField('Assigned Coach',tc.coach);
+    if(tc.coachType) h+=roField('Coach Type',tc.coachType);
+    if(tc.format) h+=roField('Format',tc.format);
+    if(tc.goals) h+=roField('Development Goals',tc.goals);
+    if((tc.metrics||[]).length) h+=tagField('Success Metrics',tc.metrics,'skill');
+    h+=roField('Progress Updates',tc.requireProgress?'Required':'Not required');
+    if(tc.startDate) h+=roField('Start',tc.startDate);
+    if(tc.endDate) h+=roField('End',tc.endDate);
+  }
+  else if(type==='Mentoring'){
+    if(tc.theme) h+=roField('Theme',tc.theme);
+    if(tc.mentoringType) h+=roField('Mentoring Type',tc.mentoringType);
+    if(tc.durationMonths) h+=roField('Duration',tc.durationMonths+' months');
+    if(tc.meetingFrequency) h+=roField('Meeting Frequency',tc.meetingFrequency);
+    h+=roField('Reverse Mentoring',tc.reverseMentoring?'Yes':'No');
+    h+=roField('Peer Circles',tc.peerCircles?'Yes':'No');
+    if((tc.mentors||[]).length) h+=tagField('Mentors',tc.mentors,'dept');
+    if(tc.matchingMethod) h+=roField('Matching Method',tc.matchingMethod);
+    if(tc.objectives) h+=roField('Objectives',tc.objectives);
+    if(tc.milestones) h+=roField('Milestones',tc.milestones+' checkpoints');
+    h+=roField('Track Progress',tc.trackProgress?'Yes':'No');
+    if(tc.startDate) h+=roField('Start',tc.startDate);
+    if(tc.endDate) h+=roField('End',tc.endDate);
+  }
+  else if(type==='eLearning Assignment'){
+    if(tc.contentCategory) h+=roField('Content Category',tc.contentCategory);
+    if(tc.course) h+=roField('Course',tc.course);
+    if(tc.externalUrl) h+=roField('External URL',tc.externalUrl);
+    if(tc.estimatedDuration) h+=roField('Duration',tc.estimatedDuration+' hours');
+    if(tc.completionCriteria) h+=roField('Completion Criteria',tc.completionCriteria);
+    if(tc.passingScore) h+=roField('Passing Score',tc.passingScore+'%');
+    h+=roField('Multiple Attempts',tc.multipleAttempts?'Yes':'No');
+    if((tc.prerequisites||[]).length) h+=tagField('Prerequisites',tc.prerequisites,'skill');
+    if(tc.assignmentType) h+=roField('Assignment Type',tc.assignmentType);
+    h+=roField('Reminders',tc.sendReminders?'Yes':'No');
+    if(tc.assignDate) h+=roField('Assignment Date',tc.assignDate);
+    if(tc.deadline) h+=roField('Deadline',tc.deadline);
+  }
+  else if(type==='Webinars'){
+    if(tc.category) h+=roField('Category',tc.category);
+    if((tc.tags||[]).length) h+=tagField('Tags',tc.tags,'skill');
+    if(tc.platform) h+=roField('Platform',tc.platform);
+    if(tc.speakers) h+=roField('Speakers',tc.speakers);
+    if(tc.meetingLink) h+=roField('Meeting Link',tc.meetingLink);
+    if(tc.maxAttendees) h+=roField('Max Attendees',tc.maxAttendees);
+    h+=roField('Q&A',tc.enableQA?'Enabled':'Disabled');
+    if(tc.webinarStart) h+=roField('Start',tc.webinarStart);
+    if(tc.duration) h+=roField('Duration',tc.duration+' min');
+    if(tc.timezone) h+=roField('Timezone',tc.timezone);
+    h+=roField('On-Demand Replay',tc.allowReplay?'Yes':'No');
+    if(tc.accessType) h+=roField('Access Type',tc.accessType);
+    h+=roField('Registration',tc.requireRegistration?'Required':'Not required');
+    h+=roField('Invites',tc.sendInvites?'Yes':'No');
+    h+=roField('Reminders',tc.sendReminders?'Yes':'No');
+  }
+  else if(type==='Talent Development Programs'){
+    if(tc.programType) h+=roField('Program Type',tc.programType);
+    if((tc.assessments||[]).length) h+=tagField('Assessments',tc.assessments,'skill');
+    if((tc.training||[]).length) h+=tagField('Training',tc.training,'skill');
+    if((tc.coaching||[]).length) h+=tagField('Coaching',tc.coaching,'skill');
+    if((tc.mentoring||[]).length) h+=tagField('Mentoring',tc.mentoring,'skill');
+    if((tc.elearning||[]).length) h+=tagField('eLearning',tc.elearning,'skill');
+    if((tc.webinars||[]).length) h+=tagField('Webinars',tc.webinars,'skill');
+    h+=roField('Sequential',tc.sequential?'Yes':'Parallel');
+    if(tc.durationMonths) h+=roField('Duration',tc.durationMonths+' months');
+    if(tc.cohortSize) h+=roField('Cohort Size',tc.cohortSize);
+    if(tc.completionReq) h+=roField('Completion Req.',tc.completionReq);
+    h+=roField('Certificate',tc.issueCertificate?'Yes':'No');
+    if(tc.startDate) h+=roField('Start',tc.startDate);
+    if(tc.endDate) h+=roField('End',tc.endDate);
+  }
+
+  h+='</div>';
+  return h;
+}
+
+function tagField(label,arr,cls){
+  var h='<div class="form-group"><div class="dp-label">'+esc(label)+'</div><div class="proj-tags">';
+  arr.forEach(function(v){h+='<span class="proj-tag '+(cls||'')+'">'+esc(v)+'</span>'});
+  h+='</div></div>';
+  return h;
+}
+
+function renderEditForm(p){
+  var h='';
+  function sel(opts,cur){var o='';opts.forEach(function(v){o+='<option'+(v===cur?' selected':'')+'>'+esc(v)+'</option>'});return o}
+
+  h+='<div class="dp-section"><div class="dp-section-title">Project Information</div>';
+  h+='<div class="form-group"><div class="dp-label">Project Name *</div><input class="dp-input" id="edName" value="'+esc(p.Project_Name)+'"></div>';
+  h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Type</div><select class="dp-select" id="edType">'+sel(PROJECT_TYPES,p.Project_Type)+'</select></div></div>';
+  h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Status</div><select class="dp-select" id="edStatus">'+sel(PROJECT_STATUSES,p.Project_Status)+'</select></div>';
+  h+='<div class="form-group"><div class="dp-label">Priority</div><select class="dp-select" id="edPriority">'+sel(PRIORITIES,p.Priority)+'</select></div></div>';
+  h+='<div class="form-group"><div class="dp-label">Owner</div>'+renderOwnerSelect('edOwner',p.Project_Owner)+'</div>';
+  h+='<div class="form-group"><div class="dp-label">Observers (comma-separated)</div><input class="dp-input" id="edObservers" value="'+esc((p.Observers||[]).join(', '))+'"></div>';
+  h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Start Date</div><input class="dp-input" type="date" id="edStart" value="'+esc(p.Start_Date||((p.typeConfig)&&(p.typeConfig.startDate||p.typeConfig.launchDate||p.typeConfig.assignDate))||'')+'"></div>';
+  h+='<div class="form-group"><div class="dp-label">End Date</div><input class="dp-input" type="date" id="edEnd" value="'+esc(p.Target_End_Date||((p.typeConfig)&&(p.typeConfig.endDate||p.typeConfig.completionDeadline||p.typeConfig.deadline||p.typeConfig.closeDate))||'')+'"></div></div>';
+  h+='</div>';
+
+  h+='<div class="dp-section"><div class="dp-section-title">Description & Goals</div>';
+  h+='<div class="form-group"><div class="dp-label">Description</div><textarea class="dp-textarea" id="edDesc">'+esc(p.Description)+'</textarea></div>';
+  h+='<div class="form-group"><div class="dp-label">Goals & Objectives</div><textarea class="dp-textarea" id="edGoals">'+esc(p.Goals_Objectives||'')+'</textarea></div>';
+  h+='<div class="form-group"><div class="dp-label">Projected Outcomes</div><textarea class="dp-textarea" id="edOutcomes">'+esc(p.Projected_Outcomes||'')+'</textarea></div></div>';
+
+  // Audience section
+  var aud=(p.typeConfig&&p.typeConfig.audience)||{};
+  h+='<div class="dp-section"><div class="dp-section-title">Audience</div>';
+  h+='<div class="form-group"><div class="dp-label">Business Units (comma-separated)</div><input class="dp-input" id="edBUs" value="'+esc((aud.businessUnits||[]).join(', '))+'"></div>';
+  h+='<div class="form-group"><div class="dp-label">Departments (comma-separated)</div><input class="dp-input" id="edAudDepts" value="'+esc((aud.departments||[]).join(', '))+'"></div>';
+  h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Levels (comma-separated)</div><input class="dp-input" id="edLevels" value="'+esc((aud.levels||[]).join(', '))+'"></div>';
+  h+='<div class="form-group"><div class="dp-label">Roles (comma-separated)</div><input class="dp-input" id="edRoles" value="'+esc((aud.roles||[]).join(', '))+'"></div></div>';
+  h+='<div class="form-group"><div class="dp-label">Employees (comma-separated)</div><input class="dp-input" id="edAudEmps" value="'+esc((aud.employees||[]).join(', '))+'"></div>';
+  h+='</div>';
+
+  return h;
+}
+
+function saveEdit(){
+  var projects=loadProjects();
+  var p=projects[detailIdx];
+  if(!p)return;
+  var name=document.getElementById('edName').value.trim();
+  if(!name){showToast('Enter a project name');return}
+
+  p.Project_Name=name;
+  p.Project_Type=document.getElementById('edType').value;
+  p.Project_Status=document.getElementById('edStatus').value;
+  p.Priority=document.getElementById('edPriority').value;
+  var ownerVal=document.getElementById('edOwner').value;
+  p.Project_Owner=ownerVal==='__custom'?'':ownerVal;
+  p.Observers=document.getElementById('edObservers').value.split(',').map(function(s){return s.trim()}).filter(Boolean);
+  p.Start_Date=document.getElementById('edStart').value;
+  p.Target_End_Date=document.getElementById('edEnd').value;
+  p.Description=document.getElementById('edDesc').value.trim();
+  p.Goals_Objectives=(document.getElementById('edGoals')?document.getElementById('edGoals').value.trim():'');
+  p.Projected_Outcomes=(document.getElementById('edOutcomes')?document.getElementById('edOutcomes').value.trim():'');
+  // Update audience in typeConfig
+  if(!p.typeConfig) p.typeConfig={};
+  if(!p.typeConfig.audience) p.typeConfig.audience={};
+  function splitCSV(id){var el=document.getElementById(id);return el?el.value.split(',').map(function(s){return s.trim()}).filter(Boolean):[];}
+  p.typeConfig.audience.businessUnits=splitCSV('edBUs');
+  p.typeConfig.audience.departments=splitCSV('edAudDepts');
+  p.typeConfig.audience.levels=splitCSV('edLevels');
+  p.typeConfig.audience.roles=splitCSV('edRoles');
+  p.typeConfig.audience.employees=splitCSV('edAudEmps');
+
+  saveProjects(projects);
+  editMode=false;
+  renderDetail();
+  render();
+  showToast('Project updated');
+}
+
+// ── Sub-Project / Activity Management ──
+function showAddSubForm(){
+  var el=document.getElementById('addSubForm');
+  if(el.style.display==='block'){el.style.display='none';return}
+  function selOpts(arr){return arr.map(function(v){return'<option>'+esc(v)+'</option>'}).join('')}
+  var h='<div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:8px">New Activity</div>';
+  h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Activity Name *</div><input class="dp-input" id="subName" placeholder="e.g. Pre-training Skills Assessment"></div></div>';
+  h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Type</div><select class="dp-select" id="subType">'+selOpts(SUB_TYPES)+'</select></div>';
+  h+='<div class="form-group"><div class="dp-label">Assign To</div><select class="dp-select" id="subAssign">'+selOpts(ASSIGN_OPTIONS)+'</select></div></div>';
+  h+='<div class="dp-row"><div class="form-group"><div class="dp-label">Status</div><select class="dp-select" id="subStatus">'+selOpts(SUB_STATUSES)+'</select></div>';
+  h+='<div class="form-group"><div class="dp-label">Due Date</div><input class="dp-input" type="date" id="subDue"></div></div>';
+  h+='<div class="form-group"><div class="dp-label">Notes</div><input class="dp-input" id="subNotes" placeholder="Instructions, scope, or context..."></div>';
+  h+='<div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-primary btn-sm" onclick="saveSubProject()">Add Activity</button><button class="btn btn-sm" onclick="document.getElementById(\'addSubForm\').style.display=\'none\'">Cancel</button></div>';
+  el.innerHTML=h;
+  el.style.display='block';
+}
+
+function saveSubProject(){
+  var name=document.getElementById('subName').value.trim();
+  if(!name){showToast('Enter activity name');return}
+  var projects=loadProjects();
+  var p=projects[detailIdx];
+  if(!p)return;
+  if(!p.subProjects)p.subProjects=[];
+  p.subProjects.push({
+    id:'ACT-'+String(Date.now()).slice(-6),
+    name:name,
+    type:document.getElementById('subType').value,
+    assignedTo:document.getElementById('subAssign').value,
+    status:document.getElementById('subStatus').value,
+    dueDate:document.getElementById('subDue').value,
+    notes:document.getElementById('subNotes').value.trim(),
+    createdAt:new Date().toISOString()
+  });
+  saveProjects(projects);
+  renderDetail();
+  render();
+  showToast('Activity "'+name+'" added');
+}
+
+function saveSubEdit(subIdx){
+  var projects=loadProjects();
+  var p=projects[detailIdx];
+  if(!p||!p.subProjects||!p.subProjects[subIdx])return;
+  var name=document.getElementById('edSubName').value.trim();
+  if(!name){showToast('Enter activity name');return}
+  p.subProjects[subIdx].name=name;
+  p.subProjects[subIdx].type=document.getElementById('edSubType').value;
+  p.subProjects[subIdx].assignedTo=document.getElementById('edSubAssign').value;
+  p.subProjects[subIdx].status=document.getElementById('edSubStatus').value;
+  p.subProjects[subIdx].dueDate=document.getElementById('edSubDue').value;
+  p.subProjects[subIdx].notes=document.getElementById('edSubNotes').value.trim();
+  saveProjects(projects);
+  editingSubIdx=-1;
+  renderDetail();
+  showToast('Activity updated');
+}
+
+function removeSubProject(subIdx){
+  var projects=loadProjects();
+  var p=projects[detailIdx];
+  if(!p||!p.subProjects)return;
+  var name=p.subProjects[subIdx]?p.subProjects[subIdx].name:'';
+  if(!confirm('Remove activity "'+name+'"?'))return;
+  p.subProjects.splice(subIdx,1);
+  saveProjects(projects);
+  renderDetail();
+  render();
+  showToast('Activity removed');
+}
+
+function deleteFromDetail(){
+  var projects=loadProjects();
+  var name=projects[detailIdx]?projects[detailIdx].Project_Name:'';
+  if(!confirm('Delete project "'+name+'"?'))return;
+  projects.splice(detailIdx,1);
+  saveProjects(projects);
+  closeDetail();
+  render();
+  showToast('Project deleted');
+}
+
+function cloneProject(idx){
+  var projects=loadProjects();
+  var orig=projects[idx];
+  if(!orig)return;
+  var clone=JSON.parse(JSON.stringify(orig));
+  // Generate new ID
+  var prefixes={'Assessments':'ASMT','Skills Matrix':'SKLM','Surveys':'SRVY','Training Programs':'TRNG','Coaching':'COCH','Mentoring':'MNTR','eLearning Assignment':'ELRN','Webinars':'WBNR','Talent Development Programs':'TDEV'};
+  var pfx=prefixes[clone.Project_Type]||'PROJ';
+  clone.Project_ID=pfx+'-'+String(Date.now()).slice(-5);
+  clone.Project_Name='[Clone] '+clone.Project_Name;
+  clone.Project_Status='Planned';
+  clone.Created_At=new Date().toISOString();
+  // Clear sub-project statuses
+  (clone.subProjects||[]).forEach(function(s){s.status='Not Started';s.id='ACT-'+String(Date.now()+Math.random()*10000).slice(-6)});
+  projects.push(clone);
+  saveProjects(projects);
+  showToast('Project cloned as "'+clone.Project_Name+'"');
+  // Open the cloned project
+  detailIdx=projects.length-1;
+  editMode=false;
+  renderDetail();
+}
+
+function openEditDirect(idx){
+  detailIdx=idx;
+  editMode=true;
+  renderDetail();
+}
+
+function quickStatusChange(newStatus){
+  if(!newStatus)return;
+  var projects=loadProjects();
+  var p=projects[detailIdx];
+  if(!p)return;
+  var old=p.Project_Status;
+  p.Project_Status=newStatus;
+  saveProjects(projects);
+  showToast('Status changed: '+old+' → '+newStatus);
+  renderDetail();
+}
+
+render();
+</script>
+</body>
+</html>

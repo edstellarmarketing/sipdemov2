@@ -1,0 +1,1965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AssessEngine — Assessment Cycles · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   ASSESSENGINE — 6-STAGE WIZARD
+   ══════════════════════════════════════════════════════════════ */
+.content{flex:1;padding:24px 28px;display:flex;flex-direction:column;gap:18px;overflow-y:auto}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes typingDot{0%,80%,100%{opacity:.3;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
+@keyframes pipeStep{0%{width:0}100%{width:100%}}
+
+/* ── STAGE NAV ── */
+.stage-nav{display:flex;align-items:center;justify-content:center;gap:0;padding:16px 0 8px;animation:fadeUp .4s ease both}
+.stage-step{display:flex;align-items:center;gap:0;cursor:default}
+.stage-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:13px;font-weight:600;border:2px solid #d1d5db;color:#9ca3af;background:var(--card);transition:all .3s;flex-shrink:0}
+.stage-label{font-size:11px;color:var(--text-muted);margin-left:8px;white-space:nowrap;font-weight:500;transition:all .3s}
+.stage-line{width:48px;height:2px;background:#d1d5db;margin:0 6px;flex-shrink:0;transition:background .3s}
+.stage-step.active .stage-circle{border-color:var(--teal);color:#fff;background:var(--teal)}
+.stage-step.active .stage-label{color:var(--teal);font-weight:600}
+.stage-step.done .stage-circle{border-color:var(--green);color:#fff;background:var(--green)}
+.stage-step.done .stage-label{color:var(--green)}
+.stage-step.done{cursor:pointer}
+.stage-line.done{background:var(--green)}
+.stage-line.active{background:linear-gradient(90deg,var(--teal),#d1d5db)}
+
+/* ── STAGE PANELS ── */
+.stage-panel{display:none;animation:fadeUp .4s ease both}
+.stage-panel.active{display:block}
+
+/* ── KPI STRIP ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;animation:fadeUp .4s ease both}
+.kpi-card{background:var(--card);border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.kpi-label{font-size:10px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase}
+.kpi-value{font-family:var(--font-display);font-size:22px;font-weight:600;line-height:1}
+.kpi-value.teal{color:var(--teal)}.kpi-value.green{color:var(--green)}.kpi-value.gold{color:var(--accent)}.kpi-value.purple{color:var(--purple)}
+
+/* ── PANEL ── */
+.panel{background:var(--card);border:1px solid rgba(0,0,0,0.08);border-radius:14px;display:flex;flex-direction:column;overflow:visible}
+.panel-head{padding:14px 18px 12px;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.panel-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary)}
+.panel-body{flex:1;padding:14px 18px}
+.panel-body.no-pad{padding:0}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:11.5px;min-width:600px}
+.tbl th{text-align:left;padding:10px 12px;font-size:9.5px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid rgba(0,0,0,0.08);font-weight:500;background:rgba(0,0,0,0.015)}
+.tbl td{padding:10px 12px;border-bottom:1px solid rgba(0,0,0,0.04);color:var(--text-secondary);vertical-align:middle}
+.tbl tr:last-child td{border:none}
+.tbl tbody tr{cursor:pointer;transition:background .15s}
+.tbl tbody tr:hover td{background:rgba(8,145,178,0.04)}
+.tbl-wrap{overflow-x:auto;border-radius:0 0 14px 14px}
+.chip{padding:3px 10px;border-radius:100px;font-size:9.5px;font-weight:600;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;line-height:1.4}
+.chip-green{background:#F0FDF4;color:#16A34A;border:1px solid rgba(22,163,74,.25)}
+.chip-teal{background:#ECFEFF;color:#0891B2;border:1px solid rgba(8,145,178,.25)}
+.chip-amber{background:#FFFBEB;color:#D97706;border:1px solid rgba(217,119,6,.25)}
+.chip-red{background:#FEF2F2;color:#DC2626;border:1px solid rgba(220,38,38,.25)}
+.chip-purple{background:#F5F3FF;color:#7C3AED;border:1px solid rgba(124,58,237,.25)}
+.blink-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 1.5s infinite}
+
+/* ── QUICK-START CARDS ── */
+.qs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.qs-card{background:var(--card);border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:20px 18px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.qs-card:hover{border-color:rgba(0,0,0,.14);transform:translateY(-2px)}
+.qs-card.selected{border-color:var(--teal);box-shadow:0 0 0 2px rgba(8,145,178,.15)}
+.qs-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.qs-icon svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.qs-title{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.qs-sub{font-size:11px;color:var(--text-secondary);font-style:italic;margin-bottom:8px}
+.qs-desc{font-size:10.5px;color:var(--text-muted);line-height:1.5}
+
+/* ── SUB CHOOSER ── */
+.sub-chooser{display:none;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.sub-chooser.show{display:grid}
+.sub-opt{padding:12px 14px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);cursor:pointer;transition:all .2s;font-size:11.5px;font-weight:500;color:var(--text-primary);display:flex;align-items:center;gap:8px}
+.sub-opt:hover{border-color:rgba(0,0,0,.16);transform:translateY(-1px)}
+.sub-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── BRIEF FORM ── */
+.brief-form{display:none;margin-top:16px;padding:20px;background:var(--card);border:1px solid rgba(0,0,0,0.08);border-radius:12px;animation:fadeUp .3s ease both}
+.brief-form.show{display:block}
+.bf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bf-group{display:flex;flex-direction:column;gap:4px}
+.bf-group.full{grid-column:1/-1}
+.bf-label{font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.bf-input,.bf-select,.bf-textarea{padding:8px 12px;border:1px solid rgba(0,0,0,0.1);border-radius:6px;font-family:var(--font-body);font-size:12px;color:var(--text-primary);background:var(--card);outline:none;transition:border-color .2s}
+.bf-input:focus,.bf-select:focus,.bf-textarea:focus{border-color:var(--teal)}
+.bf-textarea{resize:vertical;min-height:60px}
+
+/* ── BUTTONS ── */
+.btn-primary{padding:10px 22px;border-radius:8px;border:none;background:var(--teal);color:#fff;font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary:hover{opacity:.88}
+.btn-outline{padding:8px 18px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);background:transparent;color:var(--text-secondary);font-family:var(--font-body);font-size:12px;cursor:pointer;transition:all .15s}
+.btn-outline:hover{border-color:rgba(0,0,0,.2);color:var(--text-primary)}
+
+/* ── GENERATION ANIMATION ── */
+.gen-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;align-items:center;justify-content:center}
+.gen-overlay.show{display:flex}
+.gen-box{background:var(--card);border-radius:16px;padding:40px 50px;text-align:center;max-width:400px}
+.gen-spinner{width:48px;height:48px;border:3px solid rgba(8,145,178,.15);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+.gen-text{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:6px}
+.gen-sub{font-size:11px;color:var(--text-muted)}
+.gen-steps{display:flex;flex-direction:column;gap:6px;margin-top:16px;text-align:left}
+.gen-step{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+.gen-step.done{color:var(--green)}
+.gen-step .gs-icon{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gen-step.done .gs-icon{background:var(--green-bg);color:var(--green)}
+.gen-step.current .gs-icon{background:rgba(8,145,178,.1);color:var(--teal)}
+
+/* ── STAGE 2: REVIEW ── */
+.review-layout{display:flex;gap:0;min-height:500px}
+.review-left{flex:7;padding:0 18px 18px;overflow-y:auto;max-height:70vh}
+.review-left::-webkit-scrollbar{width:3px}
+.review-left::-webkit-scrollbar-thumb{background:rgba(0,0,0,.06);border-radius:2px}
+.review-right{flex:3;border-left:1px solid #E5E7EB;background:linear-gradient(180deg,var(--card) 0%,var(--bg) 100%);display:flex;flex-direction:column;overflow:hidden;min-width:260px}
+.review-header{padding:14px 18px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.review-badge{padding:2px 8px;border-radius:100px;font-size:9.5px;font-weight:600}
+.review-meta{font-size:10.5px;color:var(--text-muted);display:flex;gap:12px}
+.coverage-bar{margin:0 18px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.cov-outer{height:6px;background:rgba(0,0,0,0.05);border-radius:3px;overflow:hidden;margin-top:4px}
+.cov-inner{height:100%;background:var(--green);border-radius:3px;transition:width .6s}
+.cov-label{font-size:10px;color:var(--text-secondary);display:flex;justify-content:space-between}
+.diff-dist{display:flex;gap:10px;margin:0 18px;padding:8px 0 10px;border-bottom:1px solid rgba(0,0,0,0.04)}
+.diff-item{font-size:9.5px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+.diff-bar{width:40px;height:5px;border-radius:3px;background:rgba(0,0,0,.05);overflow:hidden}
+.diff-fill{height:100%;border-radius:3px}
+
+/* ── QUESTION CARDS ── */
+.q-card{background:var(--card);border:1px solid rgba(0,0,0,0.06);border-radius:10px;padding:14px 16px;margin:10px 0;animation:fadeUp .3s ease both}
+.q-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.q-num{font-family:var(--font-display);font-size:12px;font-weight:600;color:var(--text-primary)}
+.q-tag{padding:2px 7px;border-radius:100px;font-size:8.5px;font-weight:500}
+.q-text{font-size:12px;color:var(--text-secondary);line-height:1.55;margin-bottom:10px}
+.q-format{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.q-pill{padding:5px 14px;border-radius:100px;font-size:10.5px;border:1px solid rgba(0,0,0,0.1);cursor:pointer;transition:all .15s;background:var(--card);color:var(--text-secondary)}
+.q-pill.selected{background:var(--teal);border-color:var(--teal);color:#fff}
+.q-pill.correct{background:var(--green-bg);border-color:rgba(22,163,74,.3);color:var(--green)}
+.q-opt{display:flex;align-items:flex-start;gap:8px;padding:6px 10px;border-radius:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;transition:background .15s}
+.q-opt:hover{background:rgba(0,0,0,.02)}
+.q-opt-radio{width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,.15);flex-shrink:0;margin-top:1px}
+.q-opt.selected .q-opt-radio{border-color:var(--teal);background:var(--teal);box-shadow:inset 0 0 0 2px #fff}
+.q-opt.correct-ans{background:var(--green-bg);border:1px solid rgba(22,163,74,.15);border-radius:6px}
+.q-opt.correct-ans .q-opt-radio{border-color:var(--green);background:var(--green);box-shadow:inset 0 0 0 2px #fff}
+.q-scenario{font-size:11.5px;color:var(--text-secondary);line-height:1.6;font-style:italic;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px;margin-bottom:8px}
+.q-why{font-size:10px;color:var(--teal);background:rgba(8,145,178,.05);border:1px solid rgba(8,145,178,.12);border-radius:6px;padding:6px 10px;margin-bottom:6px;line-height:1.5}
+.q-actions{display:flex;gap:6px;margin-top:6px}
+.q-act{padding:4px 12px;border-radius:6px;font-size:10px;cursor:pointer;border:1px solid;font-family:var(--font-body);transition:all .15s}
+.q-accept{background:var(--green-bg);color:var(--green);border-color:rgba(22,163,74,.2)}
+.q-accept:hover{background:rgba(22,163,74,.12)}
+.q-replace{background:rgba(8,145,178,.06);color:var(--teal);border-color:rgba(8,145,178,.2)}
+.q-remove{background:transparent;color:var(--text-muted);border-color:rgba(0,0,0,.08)}
+.q-remove:hover{color:var(--red);border-color:rgba(220,38,38,.25)}
+.add-q-btn{width:100%;padding:12px;border:2px dashed rgba(8,145,178,.3);border-radius:10px;background:transparent;color:var(--teal);font-family:var(--font-body);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;margin-top:10px}
+.add-q-btn:hover{background:rgba(8,145,178,.04);border-color:var(--teal)}
+
+/* ── AI SIDEBAR ── */
+.ai-header{padding:14px 16px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:10px}
+.ai-avatar-ring{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple) 0%,var(--blue) 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.ai-avatar-ring::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid transparent;border-top-color:var(--purple);animation:spin 3s linear infinite}
+.ai-avatar-ring svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.8}
+.ai-name{font-family:var(--font-display);font-size:12px;font-weight:600;color:var(--text-primary)}
+.ai-status{font-size:9px;color:var(--green);display:flex;align-items:center;gap:4px}
+.ai-status-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+.ai-chat{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.ai-chat::-webkit-scrollbar{width:3px}
+.ai-chat::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.06);border-radius:2px}
+.ai-bubble{display:flex;gap:8px;animation:fadeUp .35s ease both}
+.ai-bubble-avatar{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--purple) 0%,var(--blue) 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.ai-bubble-avatar svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2}
+.ai-msg{background:rgba(124,58,237,0.05);border:1px solid rgba(124,58,237,0.12);border-radius:2px 10px 10px 10px;padding:10px 13px;font-size:11px;color:var(--text-secondary);line-height:1.65;max-width:100%}
+.ai-msg strong{color:var(--text-primary);font-weight:500}
+.ai-context-card{background:linear-gradient(135deg,rgba(217,119,6,.06) 0%,rgba(124,58,237,.06) 100%);border:1px solid rgba(217,119,6,.15);border-radius:8px;padding:10px 12px;animation:fadeUp .4s ease both}
+.ai-context-card h5{font-family:var(--font-display);font-size:10px;font-weight:600;color:var(--accent);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
+.ai-context-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.03)}
+.ai-context-row:last-child{border:none}
+.ai-context-key{font-size:9px;color:var(--text-muted)}
+.ai-context-val{font-size:10px;color:var(--text-primary);font-weight:500}
+.ai-action-btn{width:100%;padding:7px 12px;border-radius:6px;font-size:10px;font-weight:500;cursor:pointer;border:1px solid;font-family:var(--font-body);transition:all .15s;text-align:left}
+.ai-action-btn:hover{opacity:.85}
+.ai-footer{padding:10px 14px;border-top:1px solid #E5E7EB;display:flex;align-items:center;gap:8px}
+.ai-footer-step{font-size:9px;color:var(--text-muted);flex:1}
+.ai-footer-progress{width:60px;height:4px;border-radius:2px;background:rgba(0,0,0,0.06);overflow:hidden}
+.ai-footer-bar{height:100%;background:var(--purple);border-radius:2px;transition:width .6s ease}
+
+/* ── STAGE 3: APPROVE & ASSIGN ── */
+.approval-card{background:var(--card);border:1px solid rgba(0,0,0,0.08);border-left:4px solid var(--teal);border-radius:12px;padding:20px 22px;margin-bottom:18px;animation:fadeUp .3s ease both}
+.approval-card h3{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.approval-card .card-desc{font-size:11px;color:var(--text-muted);margin-bottom:14px}
+.approver-table{width:100%;border-collapse:collapse;font-size:11.5px;margin:14px 0}
+.approver-table th{text-align:left;padding:8px 10px;font-size:9.5px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid rgba(0,0,0,0.06);font-weight:500}
+.approver-table td{padding:9px 10px;border-bottom:1px solid rgba(0,0,0,0.04);color:var(--text-secondary)}
+.approver-table tr:last-child td{border:none}
+.approver-status{padding:3px 10px;border-radius:100px;font-size:10px;font-weight:600;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.approver-status.approved{background:var(--green-bg);color:var(--green);border:1px solid rgba(22,163,74,.25)}
+.approver-status.approved-comments{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(217,119,6,.25)}
+.approver-status.pending{background:rgba(0,0,0,.04);color:var(--text-muted);border:1px solid rgba(0,0,0,.08);animation:pulse 2s ease-in-out infinite}
+.approver-status.rejected{background:rgba(220,38,38,.08);color:var(--red);border:1px solid rgba(220,38,38,.25)}
+.approval-progress{margin:12px 0;display:flex;align-items:center;gap:10px}
+.approval-progress-bar{flex:1;height:6px;background:rgba(0,0,0,.05);border-radius:3px;overflow:hidden}
+.approval-progress-fill{height:100%;background:var(--green);border-radius:3px;transition:width .6s}
+.approval-progress-text{font-size:11px;color:var(--text-secondary);font-weight:500;white-space:nowrap}
+.comment-bubble{background:rgba(217,119,6,.06);border:1px solid rgba(217,119,6,.15);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--text-secondary);line-height:1.6;margin:10px 0;font-style:italic}
+.comment-bubble .comment-author{font-style:normal;font-size:10px;color:var(--text-muted);margin-top:6px;font-weight:500}
+
+.assign-methods{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.assign-methods label{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);cursor:pointer;font-size:11.5px;color:var(--text-secondary);transition:all .2s}
+.assign-methods label:hover{border-color:rgba(0,0,0,.2)}
+.assign-methods input[type=radio]{accent-color:var(--teal)}
+.assign-methods label.active-method{border-color:var(--teal);background:rgba(8,145,178,.04);color:var(--text-primary);font-weight:500}
+.assign-method-content{display:none;animation:fadeUp .3s ease both}
+.assign-method-content.show{display:block}
+.dept-check-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+.dept-check-list label{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-secondary);cursor:pointer;padding:4px 0}
+.dept-check-list input[type=checkbox]{accent-color:var(--teal);width:14px;height:14px}
+.dept-check-list .dept-count{font-size:10px;color:var(--text-muted)}
+.emp-search-input{width:100%;padding:8px 12px;border:1px solid rgba(0,0,0,0.1);border-radius:6px;font-family:var(--font-body);font-size:12px;color:var(--text-primary);background:var(--card);outline:none;transition:border-color .2s}
+.emp-search-input:focus{border-color:var(--teal)}
+.emp-autocomplete{position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid rgba(0,0,0,.12);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.08);max-height:180px;overflow-y:auto;z-index:10;display:none}
+.emp-autocomplete.show{display:block}
+.emp-autocomplete-item{padding:8px 12px;font-size:11.5px;color:var(--text-secondary);cursor:pointer;transition:background .15s}
+.emp-autocomplete-item:hover{background:rgba(8,145,178,.06);color:var(--text-primary)}
+.emp-tag-list{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.emp-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:100px;font-size:10.5px;background:rgba(8,145,178,.08);color:var(--teal);border:1px solid rgba(8,145,178,.2);font-weight:500}
+.emp-tag .emp-tag-remove{cursor:pointer;font-size:12px;line-height:1;opacity:.7;transition:opacity .15s}
+.emp-tag .emp-tag-remove:hover{opacity:1;color:var(--red)}
+
+.approval-section{margin-top:12px}
+.approval-section.hidden{display:none}
+.approval-radio-group{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.approval-radio-group label{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-secondary);cursor:pointer}
+.approval-radio-group input[type=radio]{accent-color:var(--teal)}
+.specific-managers-input{display:none;margin-top:8px}
+.specific-managers-input.show{display:block}
+.manager-suggestion{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:10px;background:rgba(124,58,237,.06);color:var(--purple);border:1px solid rgba(124,58,237,.15);cursor:pointer;transition:all .15s;margin:3px 2px}
+.manager-suggestion:hover{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.3)}
+
+/* ── STAGE 4: PREVIEW / PILOT ── */
+.pp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pp-card{background:var(--card);border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:24px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+.pp-icon{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center}
+.pp-icon svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.pp-title{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-primary)}
+.pp-desc{font-size:11.5px;color:var(--text-muted);line-height:1.5;max-width:300px}
+.recipient-chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.r-chip{padding:4px 10px;border-radius:100px;font-size:10px;background:rgba(124,58,237,.06);color:var(--purple);border:1px solid rgba(124,58,237,.15)}
+
+/* Preview mode */
+.preview-mode{display:none;background:var(--card);border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:24px;animation:fadeUp .3s ease both}
+.preview-mode.show{display:block}
+.pv-progress{height:4px;background:rgba(0,0,0,.05);border-radius:2px;overflow:hidden;margin-bottom:16px}
+.pv-bar{height:100%;background:var(--teal);border-radius:2px;transition:width .4s}
+.pv-q-label{font-size:10px;color:var(--text-muted);margin-bottom:8px}
+.pv-q-text{font-size:13px;color:var(--text-primary);line-height:1.6;margin-bottom:14px}
+.pv-timer{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);text-align:right;margin-bottom:8px}
+
+/* Pilot simulation */
+.pilot-sim{display:none;background:var(--card);border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:24px;animation:fadeUp .3s ease both;text-align:center}
+.pilot-sim.show{display:block}
+.pilot-step{font-size:12px;color:var(--text-muted);margin:8px 0;display:flex;align-items:center;justify-content:center;gap:6px}
+.pilot-step.done{color:var(--green)}
+.pilot-results{display:none;animation:fadeUp .3s ease both}
+.pilot-results.show{display:block}
+.pilot-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.pilot-kpi{padding:12px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);text-align:center}
+.pilot-kpi-val{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-primary)}
+.pilot-kpi-label{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.pilot-ai{background:rgba(124,58,237,.05);border:1px solid rgba(124,58,237,.12);border-radius:8px;padding:12px 14px;font-size:11px;color:var(--text-secondary);line-height:1.6;margin-top:12px;text-align:left}
+
+/* ── STAGE 5: PUBLISH ── */
+.pub-form{max-width:560px}
+.pub-group{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.pub-label{font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.pub-toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary)}
+.pub-toggle input[type=checkbox]{accent-color:var(--teal);width:16px;height:16px}
+.live-tracker{display:none;animation:fadeUp .4s ease both}
+.live-tracker.show{display:block}
+.lt-status{padding:10px 16px;background:rgba(8,145,178,.06);border:1px solid rgba(8,145,178,.12);border-radius:8px;font-size:12px;color:var(--teal);font-weight:500;margin-bottom:14px}
+.dept-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.dept-name{width:180px;font-size:11.5px;color:var(--text-secondary);flex-shrink:0}
+.dept-bar{flex:1;height:8px;background:rgba(0,0,0,.05);border-radius:4px;overflow:hidden}
+.dept-fill{height:100%;border-radius:4px;transition:width .6s}
+.dept-pct{width:40px;font-size:11px;font-weight:500;text-align:right;color:var(--text-primary)}
+.dept-nudge{padding:3px 10px;border-radius:5px;font-size:9px;cursor:pointer;border:1px solid rgba(8,145,178,.2);background:rgba(8,145,178,.06);color:var(--teal);font-family:var(--font-body);transition:all .15s}
+.dept-nudge:hover{background:rgba(8,145,178,.12)}
+.assign-ref{font-size:12px;color:var(--text-secondary);padding:10px 14px;background:rgba(8,145,178,.04);border:1px solid rgba(8,145,178,.12);border-radius:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.assign-ref a{color:var(--teal);cursor:pointer;text-decoration:none;font-weight:500}
+.assign-ref a:hover{text-decoration:underline}
+
+/* ── STAGE 6: RESULTS ── */
+.sub-tabs{display:flex;gap:0;border-bottom:1px solid rgba(0,0,0,0.08);margin-bottom:16px}
+.sub-tab{padding:10px 18px;font-size:12px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;font-weight:500;transition:all .2s}
+.sub-tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+.sub-tab:hover{color:var(--text-primary)}
+.sub-panel{display:none;animation:fadeUp .3s ease both}
+.sub-panel.active{display:block}
+.big-score{font-family:var(--font-display);font-size:48px;font-weight:600;color:var(--green);line-height:1}
+.score-delta{font-size:12px;color:var(--green);margin-top:4px;display:flex;align-items:center;gap:4px}
+.sg-card{padding:12px 14px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);margin:6px 0;font-size:12px;color:var(--text-primary);display:flex;justify-content:space-between;align-items:center}
+.sg-card.strength{border-left:3px solid var(--green)}
+.sg-card.gap{border-left:3px solid var(--red)}
+.sg-score{font-family:var(--font-display);font-weight:600}
+.ai-narrative{background:rgba(124,58,237,.05);border:1px solid rgba(124,58,237,.12);border-radius:10px;padding:14px 16px;font-size:11.5px;color:var(--text-secondary);line-height:1.65;margin-top:14px}
+
+/* Heatmap */
+.hm-table{width:100%;border-collapse:collapse;font-size:11px}
+.hm-table th{padding:8px;font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(0,0,0,0.06);text-align:center;font-weight:500}
+.hm-table th:first-child{text-align:left}
+.hm-table td{padding:8px;text-align:center;font-weight:500;border-bottom:1px solid rgba(0,0,0,0.04)}
+.hm-table td:first-child{text-align:left;color:var(--text-secondary);font-weight:400}
+.hm-green{background:rgba(22,163,74,.1);color:var(--green);border-radius:4px}
+.hm-amber{background:rgba(217,119,6,.1);color:var(--amber);border-radius:4px}
+.hm-red{background:rgba(220,38,38,.1);color:var(--red);border-radius:4px}
+.wnw-item{padding:10px 14px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);margin:6px 0;font-size:11.5px;color:var(--text-secondary);display:flex;align-items:center;gap:8px}
+.wnw-item a{color:var(--teal);text-decoration:none;font-weight:500;margin-left:auto;white-space:nowrap}
+.wnw-item a:hover{text-decoration:underline}
+
+/* Individual report */
+.emp-profile{display:flex;gap:14px;align-items:center;padding:14px;background:var(--card);border:1px solid rgba(0,0,0,0.06);border-radius:10px;margin-bottom:14px}
+.emp-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-display);font-size:14px;font-weight:600;flex-shrink:0}
+.emp-info{display:flex;flex-direction:column;gap:2px}
+.emp-name{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary)}
+.emp-role{font-size:10px;color:var(--text-muted)}
+.skill-bar-row{display:flex;align-items:center;gap:10px;padding:6px 0}
+.skill-bar-label{width:120px;font-size:11px;color:var(--text-secondary);flex-shrink:0}
+.skill-bar-outer{flex:1;height:8px;background:rgba(0,0,0,.05);border-radius:4px;overflow:hidden}
+.skill-bar-fill{height:100%;border-radius:4px;transition:width .6s}
+.skill-bar-val{width:32px;font-size:11px;font-weight:500;text-align:right;color:var(--text-primary)}
+.ai-dev-recs{margin-top:14px;padding:14px;background:rgba(124,58,237,.04);border:1px solid rgba(124,58,237,.1);border-radius:8px}
+.ai-dev-recs h4{font-family:var(--font-display);font-size:12px;font-weight:600;color:var(--purple);margin-bottom:8px}
+.ai-dev-recs li{font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:4px}
+
+/* ── ASSESSMENT REPORT POPUP ── */
+.ar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .25s}
+.ar-overlay.open{display:flex;opacity:1}
+.ar-popup{background:var(--card);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);width:92%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;animation:fadeUp .3s ease both;overflow:hidden}
+.ar-header{padding:18px 22px;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;gap:12px}
+.ar-header-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ar-header-icon svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2}
+.ar-header-info{flex:1}
+.ar-header-title{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-primary)}
+.ar-header-meta{font-size:11px;color:var(--text-muted);margin-top:2px;display:flex;gap:12px;flex-wrap:wrap}
+.ar-close{width:32px;height:32px;border-radius:8px;border:none;background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.ar-close:hover{background:rgba(0,0,0,0.04);color:var(--text-primary)}
+.ar-close svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.ar-body{padding:18px 22px;overflow-y:auto;flex:1}
+.ar-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.ar-kpi{padding:12px;border-radius:10px;text-align:center;border:1px solid rgba(0,0,0,0.06)}
+.ar-kpi-val{font-family:var(--font-display);font-size:20px;font-weight:600;line-height:1}
+.ar-kpi-key{font-size:9px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
+.ar-progress{margin-bottom:18px}
+.ar-progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary);margin-bottom:4px}
+.ar-progress-track{height:8px;background:rgba(0,0,0,0.04);border-radius:4px;overflow:hidden;display:flex}
+.ar-progress-seg{height:100%;transition:width .6s}
+.ar-legend{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap}
+.ar-legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-muted)}
+.ar-legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.ar-emp-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.ar-emp-tbl th{text-align:left;padding:8px 10px;font-size:9px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid rgba(0,0,0,0.08);font-weight:500;background:rgba(0,0,0,0.015)}
+.ar-emp-tbl td{padding:8px 10px;border-bottom:1px solid rgba(0,0,0,0.03);color:var(--text-secondary)}
+.ar-emp-tbl tr:hover td{background:rgba(0,0,0,0.01)}
+.ar-emp-name{font-weight:500;color:var(--text-primary)}
+.ar-filter-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.ar-filter-row select,.ar-filter-row input{padding:6px 10px;border:1px solid rgba(0,0,0,0.1);border-radius:6px;font-size:11px;font-family:var(--font-body);color:var(--text-secondary);background:var(--card);outline:none}
+.ar-filter-row input{min-width:160px}
+.ar-filter-row select:focus,.ar-filter-row input:focus{border-color:var(--teal)}
+.ar-count{font-size:10px;color:var(--text-muted);margin-left:auto}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:8px;font-size:12px;color:#fff;background:var(--text-primary);z-index:1000;animation:fadeUp .3s ease both;pointer-events:none}
+.toast.hide{opacity:0;transform:translateY(10px);transition:all .3s}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+  <div class="content">
+
+    <!-- Stage navigation bar -->
+    <div class="stage-nav" id="stageNav">
+      <div class="stage-step active" data-stage="1">
+        <div class="stage-circle">1</div>
+        <div class="stage-label">Brief</div>
+      </div>
+      <div class="stage-line" id="line1"></div>
+      <div class="stage-step" data-stage="2">
+        <div class="stage-circle">2</div>
+        <div class="stage-label">Review & Refine</div>
+      </div>
+      <div class="stage-line" id="line2"></div>
+      <div class="stage-step" data-stage="3">
+        <div class="stage-circle">3</div>
+        <div class="stage-label">Approve & Assign</div>
+      </div>
+      <div class="stage-line" id="line2b"></div>
+      <div class="stage-step" data-stage="4">
+        <div class="stage-circle">4</div>
+        <div class="stage-label">Preview & Pilot</div>
+      </div>
+      <div class="stage-line" id="line3"></div>
+      <div class="stage-step" data-stage="5">
+        <div class="stage-circle">5</div>
+        <div class="stage-label">Publish & Distribute</div>
+      </div>
+      <div class="stage-line" id="line4"></div>
+      <div class="stage-step" data-stage="6">
+        <div class="stage-circle">6</div>
+        <div class="stage-label">Results & Actions</div>
+      </div>
+    </div>
+
+    <!-- Stage 1: Brief -->
+    <div class="stage-panel active" id="stage1">
+
+      <!-- Inner tabs: Create | Recent | Summary -->
+      <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid rgba(0,0,0,0.06)">
+        <div class="s1-tab active" onclick="switchS1Tab('create',this)" style="padding:10px 20px;cursor:pointer;font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--teal);border-bottom:2px solid var(--teal);margin-bottom:-2px;transition:all .15s">Create Assessment</div>
+        <div class="s1-tab" onclick="switchS1Tab('recent',this)" style="padding:10px 20px;cursor:pointer;font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s">Recent Assessments</div>
+        <div class="s1-tab" onclick="switchS1Tab('summary',this)" style="padding:10px 20px;cursor:pointer;font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s">Summary</div>
+      </div>
+
+      <!-- Tab: Create Assessment (default, prominent) -->
+      <div class="s1-content" id="s1Create">
+        <div style="margin-bottom:8px">
+          <span style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text-primary)">Create New Assessment</span>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Select an assessment type to get started. AI will generate the framework, questions, and scoring criteria.</div>
+        </div>
+
+        <div class="qs-grid">
+          <!-- Card 1: Skill Gap Check -->
+          <div class="qs-card" id="qsSkill" onclick="selectQuickStart('catA')">
+            <div class="qs-icon" style="background:linear-gradient(135deg,var(--blue),#3b82f6)">
+              <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="qs-title">Skill Gap Check</div>
+            <div class="qs-sub">My team has a skill gap — I need to measure it</div>
+            <div class="qs-desc">Measures current proficiency against role requirements from FrameworkBible</div>
+          </div>
+
+          <!-- Card 2: Training Effectiveness -->
+          <div class="qs-card" id="qsTraining" onclick="selectQuickStart('catC')">
+            <div class="qs-icon" style="background:linear-gradient(135deg,var(--teal),#06b6d4)">
+              <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </div>
+            <div class="qs-title">Training Effectiveness</div>
+            <div class="qs-sub">We ran a training — did it work?</div>
+            <div class="qs-desc">Pre/post knowledge test with Kirkpatrick L2 measurement and retention tracking</div>
+          </div>
+
+          <!-- Card 3: People Intelligence -->
+          <div class="qs-card" id="qsPeople" onclick="selectQuickStart('people')">
+            <div class="qs-icon" style="background:linear-gradient(135deg,var(--purple),#8b5cf6)">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="qs-title">People Intelligence</div>
+            <div class="qs-sub">I need to understand my people better</div>
+            <div class="qs-desc">Choose from 360 feedback, psychometric profiling, surveys, or discovery sessions</div>
+            <div class="sub-chooser" id="subChooser">
+              <div class="sub-opt" onclick="event.stopPropagation();selectQuickStart('catD')"><div class="sub-dot" style="background:var(--amber)"></div>360&deg; Feedback</div>
+              <div class="sub-opt" onclick="event.stopPropagation();selectQuickStart('catB')"><div class="sub-dot" style="background:var(--purple)"></div>Psychometric & Behavioural</div>
+              <div class="sub-opt" onclick="event.stopPropagation();selectQuickStart('catE')"><div class="sub-dot" style="background:var(--green)"></div>Organisation Survey</div>
+              <div class="sub-opt" onclick="event.stopPropagation();selectQuickStart('catF')"><div class="sub-dot" style="background:var(--red)"></div>Discovery Sessions</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Brief Form -->
+        <div class="brief-form" id="briefForm">
+          <div class="bf-grid">
+            <div class="bf-group full">
+              <div class="bf-label">Assessment Name</div>
+              <input class="bf-input" id="bfName" type="text">
+            </div>
+            <div class="bf-group">
+              <div class="bf-label">Target Population</div>
+              <select class="bf-select" id="bfPop">
+                <option>All Employees</option>
+                <option>Engineering Track</option>
+                <option>Digital Track</option>
+                <option>Managers Only</option>
+                <option>Custom</option>
+              </select>
+            </div>
+            <div class="bf-group">
+              <div class="bf-label">Length</div>
+              <select class="bf-select" id="bfLength">
+                <option>Quick (5-10 min)</option>
+                <option>Standard (15-25 min)</option>
+                <option>Comprehensive (30-45 min)</option>
+              </select>
+            </div>
+            <div class="bf-group full">
+              <div class="bf-label">Objective</div>
+              <textarea class="bf-textarea" id="bfObj" rows="3"></textarea>
+            </div>
+            <div class="bf-group">
+              <div class="bf-label">Difficulty</div>
+              <select class="bf-select" id="bfDiff">
+                <option>Foundational</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
+                <option>Mixed — AI determines</option>
+              </select>
+            </div>
+            <div class="bf-group" style="justify-content:flex-end">
+              <button class="btn-primary" onclick="generateAssessment()" style="align-self:flex-end">Generate Assessment <span style="margin-left:4px">&rarr;</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div><!-- /s1Create -->
+
+      <!-- Tab: Recent Assessments -->
+      <div class="s1-content" id="s1Recent" style="display:none">
+        <div class="panel">
+          <div class="panel-head">
+            <div><div class="panel-title">Recent Assessments</div></div>
+          </div>
+          <div class="panel-body no-pad">
+            <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>Assessment</th><th>Category</th><th>Population</th><th>Status</th><th>Completion</th><th>Closes</th></tr></thead>
+              <tbody>
+                <tr style="cursor:pointer" onclick="openAssessReport(0)"><td style="font-weight:500;color:var(--text-primary)">L2 Skills — Engineering Track</td><td>Cat A</td><td>324</td><td><span class="chip chip-green">Complete</span></td><td>94%</td><td>28 Feb</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(1)"><td style="font-weight:500;color:var(--text-primary)">L2 Skills — Digital & Tech</td><td>Cat A</td><td>118</td><td><span class="chip chip-green">Complete</span></td><td>89%</td><td>28 Feb</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(2)"><td style="font-weight:500;color:var(--text-primary)">AI & Data Literacy Post-Training</td><td>Cat C</td><td>72</td><td><span class="chip chip-teal"><span class="blink-dot"></span> Active</span></td><td>57%</td><td>15 Apr</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(3)"><td style="font-weight:500;color:var(--text-primary)">Leadership 360&deg;</td><td>Cat D</td><td>28</td><td><span class="chip chip-teal"><span class="blink-dot"></span> Active</span></td><td>42%</td><td>30 Apr</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(4)"><td style="font-weight:500;color:var(--text-primary)">ISO 45001 Certification</td><td>Cat A</td><td>96</td><td><span class="chip chip-amber">Upcoming</span></td><td>0%</td><td>15 May</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(5)"><td style="font-weight:500;color:var(--text-primary)">Wellbeing Pulse Q1</td><td>Cat E</td><td>812</td><td><span class="chip chip-green">Complete</span></td><td>89%</td><td>31 Mar</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(6)"><td style="font-weight:500;color:var(--text-primary)">BIM Competency Assessment</td><td>Cat A</td><td>48</td><td><span class="chip chip-green">Complete</span></td><td>92%</td><td>15 Jan</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(7)"><td style="font-weight:500;color:var(--text-primary)">New Hire Onboarding — Q1 Batch</td><td>Cat A</td><td>34</td><td><span class="chip chip-green">Complete</span></td><td>100%</td><td>31 Jan</td></tr>
+                <tr style="cursor:pointer" onclick="openAssessReport(8)"><td style="font-weight:500;color:var(--text-primary)">Safety Culture Baseline</td><td>Cat E</td><td>812</td><td><span class="chip chip-green">Complete</span></td><td>86%</td><td>15 Dec</td></tr>
+              </tbody>
+            </table>
+            </div>
+          </div>
+        </div>
+      </div><!-- /s1Recent -->
+
+      <!-- Tab: Summary -->
+      <div class="s1-content" id="s1Summary" style="display:none">
+        <div class="kpi-strip">
+          <div class="kpi-card"><div class="kpi-label">Assessment Cycles</div><div class="kpi-value teal">9</div></div>
+          <div class="kpi-card"><div class="kpi-label">Employees Assessed</div><div class="kpi-value green">681</div></div>
+          <div class="kpi-card"><div class="kpi-label">Avg Completion</div><div class="kpi-value gold">87%</div></div>
+          <div class="kpi-card"><div class="kpi-label">AI Confidence</div><div class="kpi-value purple">88%</div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+          <div class="panel"><div class="panel-head"><div class="panel-title">By Category</div></div><div class="panel-body">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--text-secondary);flex:1">Skill Gap Checks (Cat A)</span><span style="font-family:var(--font-display);font-weight:600;color:var(--teal)">4</span><div style="width:80px;height:6px;background:rgba(0,0,0,0.04);border-radius:3px;overflow:hidden"><div style="height:100%;width:44%;background:var(--teal);border-radius:3px"></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--text-secondary);flex:1">Training Effectiveness (Cat C)</span><span style="font-family:var(--font-display);font-weight:600;color:var(--teal)">1</span><div style="width:80px;height:6px;background:rgba(0,0,0,0.04);border-radius:3px;overflow:hidden"><div style="height:100%;width:11%;background:var(--teal);border-radius:3px"></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--text-secondary);flex:1">360° Feedback (Cat D)</span><span style="font-family:var(--font-display);font-weight:600;color:var(--amber)">1</span><div style="width:80px;height:6px;background:rgba(0,0,0,0.04);border-radius:3px;overflow:hidden"><div style="height:100%;width:11%;background:var(--amber);border-radius:3px"></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--text-secondary);flex:1">Organisation Surveys (Cat E)</span><span style="font-family:var(--font-display);font-weight:600;color:var(--green)">2</span><div style="width:80px;height:6px;background:rgba(0,0,0,0.04);border-radius:3px;overflow:hidden"><div style="height:100%;width:22%;background:var(--green);border-radius:3px"></div></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--text-secondary);flex:1">Psychometric (Cat B)</span><span style="font-family:var(--font-display);font-weight:600;color:var(--text-muted)">1</span><div style="width:80px;height:6px;background:rgba(0,0,0,0.04);border-radius:3px;overflow:hidden"><div style="height:100%;width:11%;background:var(--purple);border-radius:3px"></div></div></div>
+            </div>
+          </div></div>
+
+          <div class="panel"><div class="panel-head"><div class="panel-title">By Status</div></div><div class="panel-body">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:10px"><span class="chip chip-green">Complete</span><span style="font-family:var(--font-display);font-weight:600;flex:1;text-align:right">5</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span class="chip chip-teal"><span class="blink-dot"></span> Active</span><span style="font-family:var(--font-display);font-weight:600;flex:1;text-align:right">2</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span class="chip chip-amber">Upcoming</span><span style="font-family:var(--font-display);font-weight:600;flex:1;text-align:right">1</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span class="chip chip-purple">Draft</span><span style="font-family:var(--font-display);font-weight:600;flex:1;text-align:right">1</span></div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="panel" style="margin-top:14px"><div class="panel-head"><div class="panel-title">Coverage by Department</div></div><div class="panel-body">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <div style="padding:10px;border:1px solid var(--border);border-radius:8px"><div style="font-size:12px;font-weight:600;color:var(--text-primary)">Engineering</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">243 / 250 employees assessed (97%)</div><div style="height:4px;background:rgba(0,0,0,0.04);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;width:97%;background:var(--green);border-radius:2px"></div></div></div>
+            <div style="padding:10px;border:1px solid var(--border);border-radius:8px"><div style="font-size:12px;font-weight:600;color:var(--text-primary)">Project Delivery</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">188 / 200 employees assessed (94%)</div><div style="height:4px;background:rgba(0,0,0,0.04);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;width:94%;background:var(--green);border-radius:2px"></div></div></div>
+            <div style="padding:10px;border:1px solid var(--border);border-radius:8px"><div style="font-size:12px;font-weight:600;color:var(--text-primary)">Digital Delivery</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">102 / 120 employees assessed (85%)</div><div style="height:4px;background:rgba(0,0,0,0.04);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;width:85%;background:var(--amber);border-radius:2px"></div></div></div>
+            <div style="padding:10px;border:1px solid var(--border);border-radius:8px"><div style="font-size:12px;font-weight:600;color:var(--text-primary)">Corporate Services</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">72 / 100 employees assessed (72%)</div><div style="height:4px;background:rgba(0,0,0,0.04);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;width:72%;background:var(--amber);border-radius:2px"></div></div></div>
+            <div style="padding:10px;border:1px solid var(--border);border-radius:8px"><div style="font-size:12px;font-weight:600;color:var(--text-primary)">EHS & Risk</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">56 / 80 employees assessed (70%)</div><div style="height:4px;background:rgba(0,0,0,0.04);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;width:70%;background:var(--amber);border-radius:2px"></div></div></div>
+            <div style="padding:10px;border:1px solid var(--border);border-radius:8px"><div style="font-size:12px;font-weight:600;color:var(--text-primary)">HR & Talent</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">20 / 62 employees assessed (32%)</div><div style="height:4px;background:rgba(0,0,0,0.04);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;width:32%;background:var(--red);border-radius:2px"></div></div></div>
+          </div>
+        </div></div>
+      </div><!-- /s1Summary -->
+
+    </div>
+
+    <!-- Stage 2: Review & Refine -->
+    <div class="stage-panel" id="stage2">
+      <div class="panel" style="overflow:visible">
+        <div class="review-layout">
+          <div class="review-left">
+            <div class="review-header">
+              <span style="font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text-primary)" id="r2Name"></span>
+              <span class="review-badge" id="r2Badge"></span>
+              <div class="review-meta">
+                <span id="r2Count"></span>
+                <span id="r2Time"></span>
+              </div>
+            </div>
+            <div class="coverage-bar">
+              <div class="cov-label"><span id="covText">Covers 10 of 12 skills</span><span id="covPct">83%</span></div>
+              <div class="cov-outer"><div class="cov-inner" id="covBar" style="width:83%"></div></div>
+            </div>
+            <div class="diff-dist">
+              <div class="diff-item">Easy <div class="diff-bar"><div class="diff-fill" style="width:30%;background:var(--green)"></div></div></div>
+              <div class="diff-item">Medium <div class="diff-bar"><div class="diff-fill" style="width:50%;background:var(--amber)"></div></div></div>
+              <div class="diff-item">Hard <div class="diff-bar"><div class="diff-fill" style="width:20%;background:var(--red)"></div></div></div>
+            </div>
+            <div id="questionsContainer"></div>
+            <button class="add-q-btn" onclick="showToast('Adding new question to assessment...')">+ Add Question</button>
+            <div style="text-align:right;padding:14px 0">
+              <button class="btn-primary" onclick="goStage(3)">Continue to Approve & Assign <span style="margin-left:4px">&rarr;</span></button>
+            </div>
+          </div>
+          <div class="review-right">
+            <div class="ai-header">
+              <div class="ai-avatar-ring"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 3a3 3 0 1 1-3 3 3 3 0 0 1 3-3Zm0 14.2a7.2 7.2 0 0 1-6-3.22c.03-1.99 4-3.08 6-3.08s5.97 1.09 6 3.08a7.2 7.2 0 0 1-6 3.22Z"/></svg></div>
+              <div>
+                <div class="ai-name">SIP Architect</div>
+                <div class="ai-status"><div class="ai-status-dot"></div> Guiding you</div>
+              </div>
+            </div>
+            <div class="ai-chat" id="aiChat">
+              <div class="ai-bubble">
+                <div class="ai-bubble-avatar"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+                <div class="ai-msg" id="aiMsg1">Generated questions covering key skills. Review each question and <strong>accept</strong>, <strong>replace</strong>, or <strong>remove</strong>.</div>
+              </div>
+              <div class="ai-context-card" id="aiCovCard">
+                <h5>Coverage Analysis</h5>
+                <div id="aiCovRows"></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+                <button class="ai-action-btn" style="background:rgba(124,58,237,.06);color:var(--purple);border-color:rgba(124,58,237,.2)" onclick="showToast('Adding 2 questions for under-covered areas...')">Strengthen Coverage</button>
+                <button class="ai-action-btn" style="background:rgba(217,119,6,.06);color:var(--amber);border-color:rgba(217,119,6,.2)" onclick="showToast('Removing 1 low-value question...')">Shorten Assessment</button>
+                <button class="ai-action-btn" style="background:rgba(37,99,235,.06);color:var(--blue);border-color:rgba(37,99,235,.2)" onclick="showToast('No bias detected in current question set')">Check for Bias</button>
+                <button class="ai-action-btn" style="background:transparent;color:var(--red);border-color:rgba(220,38,38,.2)" onclick="showToast('Regenerating from brief...')">Regenerate All</button>
+              </div>
+            </div>
+            <div class="ai-footer">
+              <div class="ai-footer-step">Stage 2 of 6</div>
+              <div class="ai-footer-progress"><div class="ai-footer-bar" style="width:33%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 3: Approve & Assign -->
+    <div class="stage-panel" id="stage3">
+
+      <!-- Section 1: Approval Workflow -->
+      <div class="approval-card">
+        <h3>Manager Approval</h3>
+        <div class="card-desc">Send this assessment to team managers or department heads for review before distribution</div>
+
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <input type="checkbox" id="approvalToggle" checked onchange="toggleApproval()" style="accent-color:var(--teal);width:16px;height:16px">
+          <label for="approvalToggle" style="font-size:12px;color:var(--text-secondary);cursor:pointer">Require manager approval before publishing</label>
+        </div>
+
+        <div class="approval-section" id="approvalSection">
+          <div style="font-size:11px;color:var(--text-muted);font-weight:500;margin-bottom:6px">Send for approval to:</div>
+          <div class="approval-radio-group">
+            <label><input type="radio" name="approvalTarget" value="all" checked onchange="toggleSpecificManagers()"> All department heads in scope</label>
+            <label><input type="radio" name="approvalTarget" value="specific" onchange="toggleSpecificManagers()"> Specific managers</label>
+          </div>
+
+          <div class="specific-managers-input" id="specificManagersInput">
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px">Click to add:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">
+              <span class="manager-suggestion" onclick="addManagerSuggestion(this,'Rahul Sharma')">Rahul Sharma <span style="font-size:8px;opacity:.6">(VP Engineering)</span></span>
+              <span class="manager-suggestion" onclick="addManagerSuggestion(this,'Kavitha Ramachandran')">Kavitha Ramachandran <span style="font-size:8px;opacity:.6">(L&D Manager)</span></span>
+              <span class="manager-suggestion" onclick="addManagerSuggestion(this,'Vikram Patel')">Vikram Patel <span style="font-size:8px;opacity:.6">(Head Digital)</span></span>
+              <span class="manager-suggestion" onclick="addManagerSuggestion(this,'Meera Sundaram')">Meera Sundaram <span style="font-size:8px;opacity:.6">(Head EHS)</span></span>
+            </div>
+            <div class="emp-tag-list" id="managerTagList"></div>
+          </div>
+
+          <div style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap">
+            <div class="bf-group" style="min-width:160px">
+              <div class="bf-label">Approval Deadline</div>
+              <select class="bf-select" id="approvalDeadline">
+                <option>48 hours</option>
+                <option>72 hours</option>
+                <option selected>1 week</option>
+                <option>2 weeks</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bf-group" style="margin-top:12px">
+            <div class="bf-label">Message to Approvers</div>
+            <textarea class="bf-textarea" id="approvalMessage" rows="3">Please review the attached assessment and approve or suggest changes before we distribute to the team.</textarea>
+          </div>
+        </div>
+
+        <!-- Approval Status Panel -->
+        <div style="margin-top:18px;border-top:1px solid rgba(0,0,0,.06);padding-top:14px">
+          <div style="font-family:var(--font-display);font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:8px">Approval Status</div>
+          <table class="approver-table">
+            <thead>
+              <tr><th>Approver</th><th>Role</th><th>Department</th><th>Status</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:500;color:var(--text-primary)">Rahul Sharma</td>
+                <td>VP Engineering</td>
+                <td>Engineering & Delivery</td>
+                <td><span class="approver-status approved">&#10003; Approved</span></td>
+                <td>10 Apr 2026</td>
+              </tr>
+              <tr>
+                <td style="font-weight:500;color:var(--text-primary)">Vikram Patel</td>
+                <td>Head of Digital</td>
+                <td>Digital & Technology</td>
+                <td><span class="approver-status approved-comments">&#10003; Approved with comments</span></td>
+                <td>11 Apr 2026</td>
+              </tr>
+              <tr>
+                <td style="font-weight:500;color:var(--text-primary)">Meera Sundaram</td>
+                <td>Head of EHS</td>
+                <td>Sustainability & EHS</td>
+                <td><span class="approver-status pending">&#9203; Pending</span></td>
+                <td>&mdash;</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="approval-progress">
+            <div class="approval-progress-bar"><div class="approval-progress-fill" style="width:66%"></div></div>
+            <div class="approval-progress-text">2 of 3 approvals received</div>
+          </div>
+
+          <div class="comment-bubble">
+            "Suggest adding 2 more questions on cloud migration readiness for the Digital team. Otherwise looks good."
+            <div class="comment-author">— Vikram Patel, Head of Digital</div>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+          <button class="btn-outline" onclick="skipApproval()">Skip Approval & Continue &rarr;</button>
+          <button class="btn-primary" onclick="sendForApproval()">Send for Approval</button>
+          <button class="btn-primary" id="continueToPreviewBtn" onclick="goStage(4)">Continue to Preview &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Section 2: Employee Assignment -->
+      <div class="approval-card" style="border-left-color:var(--purple)">
+        <h3>Target Employees</h3>
+        <div class="card-desc">Define which employees will receive this assessment</div>
+
+        <div class="assign-methods" id="assignMethods">
+          <label class="active-method"><input type="radio" name="assignMethod" value="dept" checked onchange="switchAssignMethod('dept')"> By Department / Business Unit</label>
+          <label><input type="radio" name="assignMethod" value="role" onchange="switchAssignMethod('role')"> By Role / Seniority</label>
+          <label><input type="radio" name="assignMethod" value="individual" onchange="switchAssignMethod('individual')"> Specific Employees</label>
+        </div>
+
+        <!-- Method: By Department -->
+        <div class="assign-method-content show" id="assignDept">
+          <div style="display:flex;gap:10px;margin-bottom:8px">
+            <a href="javascript:void(0)" onclick="selectAllDepts(true)" style="font-size:10px;color:var(--teal);text-decoration:none;font-weight:500">Select All</a>
+            <a href="javascript:void(0)" onclick="selectAllDepts(false)" style="font-size:10px;color:var(--text-muted);text-decoration:none;font-weight:500">Deselect All</a>
+          </div>
+          <div class="dept-check-list" id="deptCheckList">
+            <label><input type="checkbox" checked onchange="updateDeptCount()"> Structural Engineering <span class="dept-count">(112)</span></label>
+            <label><input type="checkbox" checked onchange="updateDeptCount()"> Civil & Geotechnical <span class="dept-count">(98)</span></label>
+            <label><input type="checkbox" checked onchange="updateDeptCount()"> Project Delivery <span class="dept-count">(114)</span></label>
+            <label><input type="checkbox" onchange="updateDeptCount()"> BIM & Digital Delivery <span class="dept-count">(54)</span></label>
+            <label><input type="checkbox" onchange="updateDeptCount()"> IT Infrastructure <span class="dept-count">(64)</span></label>
+            <label><input type="checkbox" onchange="updateDeptCount()"> Corporate Services <span class="dept-count">(42)</span></label>
+            <label><input type="checkbox" onchange="updateDeptCount()"> EHS & Risk <span class="dept-count">(38)</span></label>
+            <label><input type="checkbox" onchange="updateDeptCount()"> Finance & Legal <span class="dept-count">(28)</span></label>
+            <label><input type="checkbox" onchange="updateDeptCount()"> HR & People Ops <span class="dept-count">(22)</span></label>
+            <label><input type="checkbox" onchange="updateDeptCount()"> Strategy & Growth <span class="dept-count">(18)</span></label>
+          </div>
+          <div style="font-size:12px;color:var(--teal);font-weight:600;margin-top:8px" id="deptCountLabel">324 employees selected</div>
+        </div>
+
+        <!-- Method: By Role / Seniority -->
+        <div class="assign-method-content" id="assignRole">
+          <div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Seniority Level</div>
+          <div class="dept-check-list" id="roleCheckList">
+            <label><input type="checkbox" onchange="updateRoleCount()"> L1 Entry <span class="dept-count">(86)</span></label>
+            <label><input type="checkbox" onchange="updateRoleCount()"> L2 Associate <span class="dept-count">(124)</span></label>
+            <label><input type="checkbox" checked onchange="updateRoleCount()"> L3 Mid <span class="dept-count">(168)</span></label>
+            <label><input type="checkbox" checked onchange="updateRoleCount()"> L4 Senior <span class="dept-count">(112)</span></label>
+            <label><input type="checkbox" checked onchange="updateRoleCount()"> L5 Lead <span class="dept-count">(54)</span></label>
+            <label><input type="checkbox" onchange="updateRoleCount()"> L6 Director <span class="dept-count">(18)</span></label>
+          </div>
+          <div style="font-size:10px;color:var(--text-muted);font-weight:500;margin:12px 0 6px;text-transform:uppercase;letter-spacing:.06em">Role Family</div>
+          <div class="dept-check-list" id="roleFamilyCheckList">
+            <label><input type="checkbox" checked onchange="updateRoleCount()"> Engineering <span class="dept-count">(218)</span></label>
+            <label><input type="checkbox" checked onchange="updateRoleCount()"> Operations <span class="dept-count">(96)</span></label>
+            <label><input type="checkbox" onchange="updateRoleCount()"> Corporate <span class="dept-count">(62)</span></label>
+            <label><input type="checkbox" onchange="updateRoleCount()"> Digital & Tech <span class="dept-count">(84)</span></label>
+          </div>
+          <div style="font-size:12px;color:var(--teal);font-weight:600;margin-top:8px" id="roleCountLabel">334 employees selected</div>
+        </div>
+
+        <!-- Method: Specific Employees -->
+        <div class="assign-method-content" id="assignIndividual">
+          <div style="position:relative" id="empSearchWrapper">
+            <input type="text" class="emp-search-input" id="empSearchInput" placeholder="Search employees by name..." oninput="filterEmployeeSearch(this.value)" onfocus="filterEmployeeSearch(this.value)" autocomplete="off">
+            <div class="emp-autocomplete" id="empAutocomplete"></div>
+          </div>
+          <div class="emp-tag-list" id="empTagList">
+            <span class="emp-tag">Priya Menon <span class="emp-tag-remove" onclick="removeEmployee('Priya Menon')">&times;</span></span>
+            <span class="emp-tag">Rajesh Kumar <span class="emp-tag-remove" onclick="removeEmployee('Rajesh Kumar')">&times;</span></span>
+            <span class="emp-tag">Anika Sundaram <span class="emp-tag-remove" onclick="removeEmployee('Anika Sundaram')">&times;</span></span>
+            <span class="emp-tag">Vikram Patel <span class="emp-tag-remove" onclick="removeEmployee('Vikram Patel')">&times;</span></span>
+            <span class="emp-tag">Meera Krishnan <span class="emp-tag-remove" onclick="removeEmployee('Meera Krishnan')">&times;</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+            <button class="btn-outline" onclick="showToast('CSV import — available in full platform')" style="font-size:11px;padding:6px 14px">Add from CSV</button>
+            <span style="font-size:12px;color:var(--teal);font-weight:600" id="empCountLabel">5 employees selected</span>
+          </div>
+        </div>
+
+        <div style="text-align:right;margin-top:16px">
+          <button class="btn-primary" onclick="goStage(4)">Continue to Preview &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 4: Preview & Pilot -->
+    <div class="stage-panel" id="stage4">
+      <div class="pp-grid" id="ppGrid">
+        <div class="pp-card">
+          <div class="pp-icon" style="background:linear-gradient(135deg,var(--teal),#06b6d4)">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div class="pp-title">Preview Assessment</div>
+          <div class="pp-desc">Experience the assessment exactly as your employees will see it</div>
+          <button class="btn-primary" onclick="startPreview()">Start Preview <span style="margin-left:4px">&rarr;</span></button>
+        </div>
+        <div class="pp-card">
+          <div class="pp-icon" style="background:linear-gradient(135deg,var(--purple),#8b5cf6)">
+            <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+          </div>
+          <div class="pp-title">Pilot Test</div>
+          <div class="pp-desc">Send to 3-5 people to test before full rollout</div>
+          <div class="recipient-chips">
+            <span class="r-chip">Kavitha R.</span>
+            <span class="r-chip">Rahul S.</span>
+            <span class="r-chip">Meera S.</span>
+          </div>
+          <button class="btn-primary" style="background:var(--purple)" onclick="startPilot()">Launch Pilot <span style="margin-left:4px">&rarr;</span></button>
+        </div>
+      </div>
+
+      <!-- Preview Mode -->
+      <div class="preview-mode" id="previewMode">
+        <div class="pv-timer" id="pvTimer">00:00</div>
+        <div class="pv-progress"><div class="pv-bar" id="pvBar" style="width:0%"></div></div>
+        <div class="pv-q-label" id="pvLabel">Q1 of 2</div>
+        <div class="pv-q-text" id="pvText"></div>
+        <div id="pvFormat"></div>
+        <div style="display:flex;gap:8px;justify-content:space-between;margin-top:16px">
+          <button class="btn-outline" onclick="endPreview()">Back to Review</button>
+          <button class="btn-primary" id="pvNext" onclick="nextPreviewQ()">Next &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Pilot Simulation -->
+      <div class="pilot-sim" id="pilotSim">
+        <div style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:12px">Running Pilot Test</div>
+        <div class="pilot-step" id="ps1"><span class="gs-icon" style="width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,.06);display:inline-block"></span> Sending to 3 recipients...</div>
+        <div class="pilot-step" id="ps2"><span class="gs-icon" style="width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,.06);display:inline-block"></span> Collecting responses...</div>
+        <div class="pilot-step" id="ps3"><span class="gs-icon" style="width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,.06);display:inline-block"></span> Analyzing results...</div>
+        <div class="pilot-results" id="pilotResults">
+          <div class="pilot-kpis">
+            <div class="pilot-kpi"><div class="pilot-kpi-val">12 min</div><div class="pilot-kpi-label">Avg Completion</div></div>
+            <div class="pilot-kpi"><div class="pilot-kpi-val">0%</div><div class="pilot-kpi-label">Drop-off Rate</div></div>
+            <div class="pilot-kpi"><div class="pilot-kpi-val">4.2 / 5</div><div class="pilot-kpi-label">Clarity Score</div></div>
+            <div class="pilot-kpi"><div class="pilot-kpi-val">0</div><div class="pilot-kpi-label">Bias Flags</div></div>
+          </div>
+          <div class="pilot-ai">All metrics within target range. Assessment is ready for full deployment.</div>
+          <div style="text-align:right;margin-top:14px">
+            <button class="btn-primary" onclick="goStage(5)">Continue to Publish <span style="margin-left:4px">&rarr;</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 5: Publish & Distribute -->
+    <div class="stage-panel" id="stage5">
+      <div class="panel" id="pubPanel">
+        <div class="panel-head"><div class="panel-title">Distribution Configuration</div></div>
+        <div class="panel-body">
+          <div class="pub-form">
+            <div class="pub-group">
+              <div class="pub-label">Who</div>
+              <div class="assign-ref" id="assignRef">
+                Distributing to: <strong id="assignRefCount">324</strong> employees (configured in Approve & Assign stage)
+                <a href="javascript:void(0)" onclick="goStage(3)">Edit Assignment</a>
+              </div>
+            </div>
+            <div class="pub-group">
+              <div class="pub-label">When</div>
+              <select class="bf-select" id="pubWhen">
+                <option>Immediately</option>
+                <option>Scheduled — 15 Apr 2026</option>
+                <option>Rolling — auto-assign new joiners</option>
+              </select>
+            </div>
+            <div class="pub-group">
+              <div class="pub-label">Deadline</div>
+              <input class="bf-input" id="pubDeadline" type="text" value="14 days from launch">
+            </div>
+            <div class="pub-group">
+              <div class="pub-toggle"><input type="checkbox" id="pubReminders" checked> <span>Auto-reminders at 50%, 75%, 90% of deadline</span></div>
+            </div>
+            <div class="pub-group">
+              <div class="pub-label">Grace Period</div>
+              <select class="bf-select" id="pubGrace">
+                <option>None</option>
+                <option>2 days</option>
+                <option selected>5 days</option>
+                <option>7 days</option>
+              </select>
+            </div>
+            <div style="margin-top:10px">
+              <button class="btn-primary" onclick="publishAssessment()">Publish & Distribute <span style="margin-left:4px">&rarr;</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Tracker -->
+      <div class="live-tracker" id="liveTracker">
+        <div class="lt-status">Published &middot; 324 employees &middot; Closes 29 Apr 2026</div>
+        <div class="kpi-strip">
+          <div class="kpi-card"><div class="kpi-label">Invited</div><div class="kpi-value teal">324</div></div>
+          <div class="kpi-card"><div class="kpi-label">Started</div><div class="kpi-value" style="color:var(--blue)">187 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">(57%)</span></div></div>
+          <div class="kpi-card"><div class="kpi-label">Submitted</div><div class="kpi-value green">142 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">(44%)</span></div></div>
+          <div class="kpi-card"><div class="kpi-label">Overdue</div><div class="kpi-value" style="color:var(--red)">14 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">(4%)</span></div></div>
+        </div>
+        <div class="panel" style="margin-top:14px">
+          <div class="panel-head"><div class="panel-title">Department Progress</div></div>
+          <div class="panel-body">
+            <div class="dept-row"><div class="dept-name">Structural Engineering</div><div class="dept-bar"><div class="dept-fill" style="width:62%;background:var(--green)"></div></div><div class="dept-pct">62%</div><button class="dept-nudge" onclick="showToast('Nudge sent to Structural Engineering')">Nudge</button></div>
+            <div class="dept-row"><div class="dept-name">Civil & Geotechnical</div><div class="dept-bar"><div class="dept-fill" style="width:48%;background:var(--amber)"></div></div><div class="dept-pct">48%</div><button class="dept-nudge" onclick="showToast('Nudge sent to Civil & Geotechnical')">Nudge</button></div>
+            <div class="dept-row"><div class="dept-name">Project Delivery</div><div class="dept-bar"><div class="dept-fill" style="width:55%;background:var(--amber)"></div></div><div class="dept-pct">55%</div><button class="dept-nudge" onclick="showToast('Nudge sent to Project Delivery')">Nudge</button></div>
+            <div class="dept-row"><div class="dept-name">BIM & Digital Delivery</div><div class="dept-bar"><div class="dept-fill" style="width:71%;background:var(--green)"></div></div><div class="dept-pct">71%</div><button class="dept-nudge" onclick="showToast('Nudge sent to BIM & Digital Delivery')">Nudge</button></div>
+            <div class="dept-row"><div class="dept-name">IT Infrastructure</div><div class="dept-bar"><div class="dept-fill" style="width:38%;background:var(--red)"></div></div><div class="dept-pct">38%</div><button class="dept-nudge" onclick="showToast('Nudge sent to IT Infrastructure')">Nudge</button></div>
+          </div>
+        </div>
+        <div style="text-align:right;margin-top:14px">
+          <button class="btn-primary" onclick="goStage(6)">Continue to Results <span style="margin-left:4px">&rarr;</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 6: Results & Actions -->
+    <div class="stage-panel" id="stage6">
+      <div class="sub-tabs">
+        <div class="sub-tab active" onclick="switchSubTab(0)">Executive Summary</div>
+        <div class="sub-tab" onclick="switchSubTab(1)">Team Drill-down</div>
+        <div class="sub-tab" onclick="switchSubTab(2)">Individual Reports</div>
+      </div>
+
+      <!-- Tab 1: Executive Summary -->
+      <div class="sub-panel active" id="subTab0">
+        <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:16px">
+          <div class="big-score">3.6 / 5.0</div>
+          <div class="score-delta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg> +0.3 from last cycle</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:500">Strengths</div>
+            <div class="sg-card strength"><span>BIM Coordination</span><span class="sg-score" style="color:var(--green)">4.2</span></div>
+            <div class="sg-card strength"><span>Safety Compliance</span><span class="sg-score" style="color:var(--green)">4.0</span></div>
+            <div class="sg-card strength"><span>Stakeholder Communication</span><span class="sg-score" style="color:var(--green)">3.9</span></div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:500">Gaps</div>
+            <div class="sg-card gap"><span>Data Analytics</span><span class="sg-score" style="color:var(--red)">2.3</span></div>
+            <div class="sg-card gap"><span>Cloud Architecture</span><span class="sg-score" style="color:var(--red)">2.1</span></div>
+            <div class="sg-card gap"><span>AI & Automation</span><span class="sg-score" style="color:var(--red)">1.8</span></div>
+          </div>
+        </div>
+        <div class="ai-narrative">The Engineering track shows strong improvement in core technical skills (+12% vs Q3), driven by the BIM upskilling programme. Digital skills remain 23% below target — recommend prioritising AI Literacy and Data Analytics training for 54 employees. Safety compliance is consistently high across all departments.</div>
+      </div>
+
+      <!-- Tab 2: Team Drill-down -->
+      <div class="sub-panel" id="subTab1">
+        <div class="panel" style="overflow-x:auto">
+          <div class="panel-head"><div class="panel-title">Employee Skill Heatmap</div></div>
+          <div class="panel-body no-pad">
+            <table class="hm-table">
+              <thead><tr><th>Employee</th><th>BIM</th><th>Safety</th><th>PM</th><th>Stakeholder</th><th>Data</th><th>Cloud</th></tr></thead>
+              <tbody>
+                <tr><td>Priya Menon</td><td class="hm-green">4.2</td><td class="hm-green">3.8</td><td class="hm-green">3.5</td><td class="hm-green">3.9</td><td class="hm-red">2.1</td><td class="hm-red">1.8</td></tr>
+                <tr><td>Rajesh Kumar</td><td class="hm-green">3.8</td><td class="hm-green">4.0</td><td class="hm-green">4.2</td><td class="hm-amber">3.2</td><td class="hm-amber">2.4</td><td class="hm-red">2.0</td></tr>
+                <tr><td>Anika Sundaram</td><td class="hm-green">4.5</td><td class="hm-green">3.5</td><td class="hm-amber">2.8</td><td class="hm-amber">3.1</td><td class="hm-amber">3.2</td><td class="hm-amber">2.5</td></tr>
+                <tr><td>Vikram Patel</td><td class="hm-amber">3.2</td><td class="hm-amber">3.0</td><td class="hm-green">3.8</td><td class="hm-green">4.1</td><td class="hm-green">3.8</td><td class="hm-green">3.5</td></tr>
+                <tr><td>Meera Krishnan</td><td class="hm-amber">2.8</td><td class="hm-green">4.2</td><td class="hm-amber">3.0</td><td class="hm-amber">2.9</td><td class="hm-red">2.0</td><td class="hm-red">1.5</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="margin-top:14px">
+          <div style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:8px">Who Needs What</div>
+          <div class="wnw-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> 5 employees need L3 training in Data Analytics <a href="#">View learning path &rarr;</a></div>
+          <div class="wnw-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> 3 employees need Cloud Architecture foundations <a href="#">View course &rarr;</a></div>
+          <div class="wnw-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> 2 employees need Stakeholder Communication coaching <a href="#">View IDP &rarr;</a></div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Individual Reports -->
+      <div class="sub-panel" id="subTab2">
+        <div style="margin-bottom:14px">
+          <div class="bf-label" style="margin-bottom:4px">Select Employee</div>
+          <select class="bf-select" id="empSelector" onchange="renderIndividual()" style="max-width:260px">
+            <option value="0">Priya Menon</option>
+            <option value="1">Rajesh Kumar</option>
+            <option value="2">Anika Sundaram</option>
+            <option value="3">Vikram Patel</option>
+            <option value="4">Meera Krishnan</option>
+          </select>
+        </div>
+        <div id="individualReport"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- Generation Overlay -->
+<div class="gen-overlay" id="genOverlay">
+  <div class="gen-box">
+    <div class="gen-spinner"></div>
+    <div class="gen-text">Generating Assessment</div>
+    <div class="gen-sub">SIP Architect is building your questions...</div>
+    <div class="gen-steps">
+      <div class="gen-step" id="gs1"><span class="gs-icon">&#9675;</span> Analyzing brief & objectives</div>
+      <div class="gen-step" id="gs2"><span class="gs-icon">&#9675;</span> Mapping skills from FrameworkBible</div>
+      <div class="gen-step" id="gs3"><span class="gs-icon">&#9675;</span> Generating questions & calibrating difficulty</div>
+      <div class="gen-step" id="gs4"><span class="gs-icon">&#9675;</span> Running bias & coverage checks</div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<!-- Assessment Report Popup -->
+<div class="ar-overlay" id="arOverlay" onclick="if(event.target===this)closeAssessReport()">
+  <div class="ar-popup">
+    <div class="ar-header">
+      <div class="ar-header-icon" id="arIcon"></div>
+      <div class="ar-header-info">
+        <div class="ar-header-title" id="arTitle"></div>
+        <div class="ar-header-meta" id="arMeta"></div>
+      </div>
+      <button class="ar-close" onclick="closeAssessReport()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="ar-body" id="arBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" style="display:none"></div>
+
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'admin',
+    activeNav: 'Assessment Cycles',
+    breadcrumbs: ['Assess', 'Assessment Cycles'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+// ── CATEGORY DATA ──
+var CATS = [
+  {id:'catA', cls:'cat-a', badge:'Active', badgeBg:'var(--blue-bg)', badgeC:'var(--blue)', badgeBd:'rgba(37,99,235,.3)',
+   icon:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+   label:'Category A', name:'Skill & Competency Assessment',
+   desc:'Self + Manager dual-rating against role skill requirements from FrameworkBible. Feeds Skills Matrix and weighted gap engine.',
+   stats:[{v:'681',k:'Assessed'},{v:'92%',k:'Complete'},{v:'2',k:'Cycles'}],
+   brief:{
+     type:'Skill & Competency',
+     pop:'Engineering & Delivery BU · 324 employees',
+     obj:'Validate BIM coordination, project management, and stakeholder communication skills at Practitioner level for the engineering track.',
+     length:'Standard (15-25 questions, 20 min)',
+     diff:'Mixed — AI determines per role',
+     tone:'Professional, role-specific language. Show AI baseline to managers.'
+   },
+   questions:[
+     {num:1, text:'Rate proficiency in <strong>BIM Coordination & Clash Detection</strong> — ability to manage multi-discipline models, run clash detection, and resolve coordination issues.', tags:[{t:'Skill Rating',bg:'rgba(37,99,235,.08)',bd:'rgba(37,99,235,.3)',c:'var(--blue)'},{t:'Critical · C1',bg:'var(--accent-lt)',bd:'var(--accent-bd)',c:'var(--accent)'},{t:'Dual-Rated',bg:'rgba(0,0,0,.02)',bd:'rgba(0,0,0,0.08)',c:'var(--text-muted)'}],
+      format:'rating', labels:['Novice','Basic','Competent','Advanced','Expert'], selected:2,
+      why:'Maps to BIM Advanced skill in FrameworkBible (C1 criticality). 87% confidence — strong role-skill match.',
+      extra:'<div style="display:flex;gap:12px;font-size:9.5px;margin-left:30px"><span style="color:var(--blue)">Self: <strong>3</strong></span><span style="color:var(--green)">Manager: <strong>2</strong></span><span style="color:var(--amber)">Gap: <strong>1.0</strong></span><span style="color:var(--text-muted)">AI Baseline: <strong>2.5</strong></span></div>'},
+     {num:2, text:'Rate proficiency in <strong>Stakeholder Communication</strong> — managing client expectations, presenting project status, and facilitating cross-functional meetings.', tags:[{t:'Competency',bg:'rgba(124,58,237,.08)',bd:'rgba(124,58,237,.3)',c:'var(--purple)'},{t:'Behavioural',bg:'rgba(0,0,0,.02)',bd:'rgba(0,0,0,0.08)',c:'var(--text-muted)'}],
+      format:'rating', labels:['Novice','Basic','Competent','Advanced','Expert'], selected:3,
+      why:'Leadership competency from FrameworkBible. 92% confidence — core to Sr Project Manager role.',
+      extra:'<div style="margin-left:30px;font-size:10px;color:var(--text-muted);line-height:1.4"><strong style="color:var(--text-secondary)">Per-skill note field:</strong> "Priya consistently leads stakeholder meetings with clarity. Recommend L4."</div>'}
+   ],
+   config:{
+     title:'Category-Specific Config',
+     rows:[{k:'Rating model',v:'1-5 Proficiency (from FrameworkBible)'},{k:'Dual rating',v:'Self + Manager simultaneous',hl:true},{k:'Weight split',v:'Manager 40% / Self 30% / Test 30%'},{k:'Reference display',v:'Show AI baseline to managers (on)'},{k:'Note field',v:'Recommended per skill'}],
+     assign:[{k:'Population',v:'780 in-scope employees'},{k:'Filtered by',v:'Role-skill matrix from FrameworkBible'},{k:'Per employee',v:'8-12 role-relevant skills'},{k:'Duration',v:'15-25 min'},{k:'Deadline',v:'14 days · Reminders Day 7, 12, 14'}],
+     flow:'Skills Matrix &#8594; Gap Analysis &#8594; Weighted LNA &#8594; Individual Learning Briefs', flowBg:'rgba(37,99,235,.06)', flowBd:'rgba(37,99,235,.15)', flowC:'var(--blue)'
+   }},
+
+  {id:'catB', cls:'cat-b', badge:'Active', badgeBg:'var(--purple-bg)', badgeC:'var(--purple)', badgeBd:'rgba(124,58,237,.3)',
+   icon:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
+   label:'Category B', name:'Psychometric & Behavioural',
+   desc:'Big Five, DISC, MBTI, cognitive ability — personality and behavioural profiling. Feeds IDP learning style and succession planning.',
+   stats:[{v:'142',k:'Assessed'},{v:'78%',k:'Complete'},{v:'1',k:'Cycles'}],
+   brief:{
+     type:'Psychometric & Personality',
+     pop:'Senior Managers + High-Potentials · 142 employees',
+     obj:'Profile leadership team personality traits and behavioural tendencies for succession planning and team composition analysis.',
+     length:'Comprehensive (60-80 items, 40 min)',
+     diff:'N/A — no right/wrong answers',
+     tone:'Neutral, non-judgmental. Emphasise that results inform development, not evaluation.'
+   },
+   questions:[
+     {num:1, text:'<strong>Big Five — Openness:</strong> "I enjoy exploring new ideas and unconventional approaches to solving problems."', tags:[{t:'Personality Trait',bg:'rgba(124,58,237,.08)',bd:'rgba(124,58,237,.3)',c:'var(--purple)'},{t:'Big Five',bg:'rgba(0,0,0,.02)',bd:'rgba(0,0,0,0.08)',c:'var(--text-muted)'}],
+      format:'likert', labels:['Strongly Disagree','Disagree','Neutral','Agree','Strongly Agree'], selected:3,
+      why:'Big Five Openness dimension. Maps to innovation readiness. 95% confidence — validated instrument.',
+      extra:'<div style="margin-left:30px;font-size:9.5px;color:var(--text-muted)">No right/wrong — scored to Openness percentile. Social desirability check active.</div>'},
+     {num:2, text:'<strong>DISC — Dominance:</strong> "When facing a disagreement in a team meeting, I tend to..."', tags:[{t:'DISC Profile',bg:'rgba(217,119,6,.08)',bd:'rgba(217,119,6,.3)',c:'var(--amber)'},{t:'Forced Choice',bg:'rgba(0,0,0,.02)',bd:'rgba(0,0,0,0.08)',c:'var(--text-muted)'}],
+      format:'options', opts:['State my position firmly and expect others to align','Listen to all sides, then propose a compromise','Avoid the conflict and wait for it to resolve','Analyse the data and present facts to settle it'], correct:1,
+      why:'DISC forced-choice ipsative item. Measures Dominance vs Influence. 91% confidence.',
+      extra:'<div style="margin-left:30px;font-size:9.5px;color:var(--text-muted)">Selected = Influence-dominant response. Scored to 4-dimension DISC profile.</div>'},
+     {num:3, text:'<strong>Cognitive:</strong> If all Zibbs are Wockets, and some Wockets are Plonks, which must be true?', tags:[{t:'Cognitive',bg:'rgba(37,99,235,.08)',bd:'rgba(37,99,235,.3)',c:'var(--blue)'},{t:'Logical Reasoning',bg:'rgba(0,0,0,.02)',bd:'rgba(0,0,0,0.08)',c:'var(--text-muted)'}],
+      format:'options', opts:['All Zibbs are Plonks','Some Zibbs might be Plonks','No Zibbs are Plonks','All Plonks are Zibbs'], correct:1,
+      why:'Abstract reasoning — tests logical deduction without domain knowledge. 89% confidence.',
+      extra:''}
+   ],
+   config:{
+     title:'Category-Specific Config',
+     rows:[{k:'Instruments',v:'Big Five, DISC, MBTI, Cognitive',hl:true},{k:'Scoring',v:'Normed percentiles per dimension'},{k:'Validity checks',v:'Social desirability detection',hl:true},{k:'Re-assessment lockout',v:'12 months default'},{k:'Proctoring',v:'Secure browser session'}],
+     assign:[{k:'Population',v:'Managers + high-potentials'},{k:'Duration',v:'35-45 min (untimed)'},{k:'Privacy',v:'Results to Skill Passport only',hl:true},{k:'Debrief',v:'Manager-facing report auto-generated'},{k:'Deadline',v:'21 days · 2 reminders'}],
+     flow:'Skill Passport Profile &#8594; IDP Learning Style &#8594; Succession Planning &#8594; Team Composition', flowBg:'rgba(124,58,237,.06)', flowBd:'rgba(124,58,237,.15)', flowC:'var(--purple)'
+   }},
+
+  {id:'catC', cls:'cat-c', badge:'Complete', badgeBg:'var(--green-bg)', badgeC:'var(--green)', badgeBd:'rgba(22,163,74,.3)',
+   icon:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+   label:'Category C', name:'Knowledge Assessments',
+   desc:'Pre/post/retention tests with MCQ and scenario questions. Kirkpatrick L2 measurement. AI generates from skill brief.',
+   stats:[{v:'284',k:'Assessed'},{v:'94%',k:'Complete'},{v:'3',k:'Cycles'}],
+   brief:{
+     type:'Pre/Post Knowledge Test',
+     pop:'AI & Data Literacy cohort · 72 employees',
+     obj:'Pre-training knowledge baseline for AI & Data Literacy programme — validate current understanding of data analysis, Power BI, and ML fundamentals before workshop.',
+     length:'Standard (25 questions, 30 min)',
+     diff:'Mixed — Entry to Advanced',
+     tone:'Technical but accessible. Scenario-based where possible.'
+   },
+   questions:[
+     {num:1, text:'In a BIM execution plan (BEP), which of the following defines the Level of Development (LOD) for structural elements at the Design Development phase?', tags:[{t:'MCQ',bg:'rgba(8,145,178,.08)',bd:'rgba(8,145,178,.3)',c:'var(--teal)'},{t:'L2-L3',bg:'var(--accent-lt)',bd:'var(--accent-bd)',c:'var(--accent)'},{t:'2 pts',bg:'rgba(0,0,0,.02)',bd:'rgba(0,0,0,0.08)',c:'var(--text-muted)'}],
+      format:'options', opts:['LOD 100 — Conceptual massing','LOD 200 — Generic placeholder','LOD 300 — Accurate geometry with specifications','LOD 400 — Fabrication-ready detail'], correct:2,
+      why:'Tests BIM knowledge at Practitioner level. Mapped to "BIM Standards" skill. 93% confidence.',
+      extra:''},
+     {num:2, text:'<strong>Scenario:</strong> A project team discovers 47 clash detection issues between MEP and structural models 2 weeks before construction. The BIM coordinator must prioritise. Which approach is most effective?', tags:[{t:'Scenario-Based',bg:'rgba(220,38,38,.08)',bd:'rgba(220,38,38,.3)',c:'var(--red)'},{t:'L3-L4',bg:'var(--accent-lt)',bd:'var(--accent-bd)',c:'var(--accent)'},{t:'5 pts',bg:'rgba(0,0,0,.02)',bd:'rgba(0,0,0,0.08)',c:'var(--text-muted)'}],
+      format:'options', opts:['Resolve all 47 clashes before proceeding — zero-clash policy','Categorise by severity (hard/soft/pseudo), resolve critical first, defer cosmetic','Escalate to the project manager and pause construction start','Document all clashes in a report and let the site team resolve'], correct:1,
+      why:'Tests practical judgment, not recall. Mapped to "BIM Coordination" skill (C1). 88% confidence.',
+      extra:'<div style="margin-left:30px;font-size:9.5px;color:var(--green)">Correct — distractor rationale: Option A is too rigid, C delays unnecessarily, D abdicates responsibility.</div>'}
+   ],
+   config:{
+     title:'Category-Specific Config',
+     rows:[{k:'Test linking',v:'Pre &#8594; Post &#8594; 90-day retention',hl:true},{k:'Scoring',v:'Raw threshold — 70% pass'},{k:'Equivalent forms',v:'Parallel questions prevent answer memory'},{k:'Difficulty calibration',v:'Auto after 30+ responses'},{k:'Retakes',v:'Max 2 with new question set'}],
+     assign:[{k:'Population',v:'Training cohort participants'},{k:'Duration',v:'30 min (timed)'},{k:'Scheduling',v:'Pre: day before workshop',hl:true},{k:'Post',v:'Day after · auto-calculates gain %'},{k:'Retention',v:'Auto-scheduled at 30/60/90 days'}],
+     flow:'Training Effectiveness (Kirkpatrick L2) &#8594; Pre/Post Delta &#8594; Certificate Eligibility &#8594; Retention Tracking', flowBg:'rgba(8,145,178,.06)', flowBd:'rgba(8,145,178,.15)', flowC:'var(--teal)'
+   }},
+
+  {id:'catD', cls:'cat-d', badge:'Upcoming', badgeBg:'var(--amber-bg)', badgeC:'var(--amber)', badgeBd:'rgba(217,119,6,.3)',
+   icon:'<path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>',
+   label:'Category D', name:'360° Feedback',
+   desc:'Multi-rater feedback from 5 groups with anonymity enforcement. Competency-grouped questionnaire with perception gap analysis.',
+   stats:[{v:'68',k:'Assessed'},{v:'—',k:'Complete'},{v:'1',k:'Cycles'}],
+   brief:{
+     type:'360-Degree Feedback',
+     pop:'Senior Managers · 28 ratees · 8-12 raters each',
+     obj:'Leadership competency feedback for senior managers — assess communication, coaching, strategic thinking, and decision-making from multiple perspectives.',
+     length:'Standard (16 rating + 3 open-ended per rater)',
+     diff:'N/A',
+     tone:'Constructive and development-focused. Emphasise anonymity in rater instructions.'
+   },
+   questions:[
+     {num:1, text:'How effectively does <strong>Priya Menon</strong> communicate project risks to senior stakeholders in a timely manner?', tags:[{t:'Multi-Rater',bg:'rgba(217,119,6,.08)',bd:'rgba(217,119,6,.3)',c:'var(--amber)'},{t:'Leadership',bg:'rgba(0,0,0,.02)',bd:'rgba(0,0,0,0.08)',c:'var(--text-muted)'}],
+      format:'likert', labels:['Never','Rarely','Sometimes','Often','Always'], selected:3,
+      why:'Leadership competency from FrameworkBible. Matrix/grid format — 5 behaviours rated on same scale. 94% confidence.',
+      extra:'<div style="display:flex;gap:12px;font-size:9.5px;margin-left:30px"><span style="color:var(--blue)">Self: <strong>Often</strong></span><span style="color:var(--green)">Manager: <strong>Always</strong></span><span style="color:var(--purple)">Peers: <strong>Often</strong></span><span style="color:var(--amber)">Gap: <strong>0.3</strong></span></div>'},
+     {num:2, text:'Provide one specific example of how <strong>Priya</strong> has demonstrated <em>coaching and developing others</em> in the past 6 months.', tags:[{t:'Open-Ended',bg:'rgba(217,119,6,.08)',bd:'rgba(217,119,6,.3)',c:'var(--amber)'},{t:'Qualitative',bg:'rgba(0,0,0,.02)',bd:'rgba(0,0,0,0.08)',c:'var(--text-muted)'},{t:'Anonymous',bg:'rgba(22,163,74,.06)',bd:'rgba(22,163,74,.25)',c:'var(--green)'}],
+      format:'scenario',
+      scenario:'"Priya paired junior PMs with experienced leads during the Marina Bay project. She ran weekly debrief sessions where juniors presented their coordination challenges and received structured feedback. Two of the three juniors are now running sub-projects independently."<div style="font-style:normal;font-size:9px;color:var(--text-muted);margin-top:4px">— Peer rater · Anonymous · 18 Mar 2026</div>',
+      why:'Open text captures evidence that rating scales cannot. AI theme-tags responses automatically. 90% confidence.',
+      extra:''}
+   ],
+   config:{
+     title:'Category-Specific Config',
+     rows:[{k:'Rater groups',v:'Manager, Peers, Reports, Cross-func, External'},{k:'Min per group',v:'3 raters (below = results suppressed)',hl:true},{k:'Anonymity',v:'Anonymous default · Named optional'},{k:'External access',v:'Tokenised link — no login needed'},{k:'Self-reflection',v:'Parallel self-rating enabled'}],
+     assign:[{k:'Ratees',v:'28 senior managers'},{k:'Raters per person',v:'8-12 across 5 groups'},{k:'Duration',v:'15-20 min per rater'},{k:'Collection window',v:'21 days'},{k:'Reminders',v:'Day 7, 14, 19'}],
+     flow:'Perception Gap Analysis &#8594; Blind Spot / Hidden Strength &#8594; Leadership IDP &#8594; Succession Pipeline', flowBg:'rgba(217,119,6,.06)', flowBd:'rgba(217,119,6,.15)', flowC:'var(--amber)'
+   }},
+
+  {id:'catE', cls:'cat-e', badge:'Complete', badgeBg:'var(--green-bg)', badgeC:'var(--green)', badgeBd:'rgba(22,163,74,.3)',
+   icon:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+   label:'Category E', name:'Organisation Surveys',
+   desc:'Engagement, change readiness, culture pulse, strategy alignment. Anonymous collection with longitudinal trend tracking.',
+   stats:[{v:'634',k:'Responses'},{v:'89%',k:'Complete'},{v:'2',k:'Cycles'}],
+   brief:{
+     type:'Employee Engagement Survey',
+     pop:'All employees · 812 org-wide',
+     obj:'Q2 2026 engagement pulse — track sentiment following digital transformation rollout and recent restructure. Compare against Q1 baseline.',
+     length:'Quick Pulse (10 questions, 5 min)',
+     diff:'N/A',
+     tone:'Neutral, non-threatening. This follows a major restructure — keep language supportive.'
+   },
+   questions:[
+     {num:1, text:'<strong>Engagement:</strong> "I feel motivated and energised by the work I do in my current role."', tags:[{t:'Engagement',bg:'rgba(22,163,74,.08)',bd:'rgba(22,163,74,.3)',c:'var(--green)'},{t:'Anonymous',bg:'rgba(22,163,74,.06)',bd:'rgba(22,163,74,.25)',c:'var(--green)'}],
+      format:'likert', labels:['Strongly Disagree','Disagree','Neutral','Agree','Strongly Agree'], selected:3,
+      why:'Core engagement item — held constant across cycles for longitudinal benchmarking. 96% confidence.',
+      extra:'<div style="margin-left:30px;font-size:9.5px;color:var(--text-muted)">Benchmark question — will not rotate. Q1 baseline: 3.6 avg.</div>'},
+     {num:2, text:'<strong>Change Readiness:</strong> "I understand why the organisation is investing in digital transformation and I support the direction."', tags:[{t:'Change Readiness',bg:'rgba(8,145,178,.08)',bd:'rgba(8,145,178,.3)',c:'var(--teal)'},{t:'Transformation Dial',bg:'rgba(0,0,0,.02)',bd:'rgba(0,0,0,0.08)',c:'var(--text-muted)'}],
+      format:'likert', labels:['Strongly Disagree','Disagree','Neutral','Agree','Strongly Agree'], selected:4,
+      why:'Directly feeds Transformation Dial score. Measures change adoption vs resistance. 94% confidence.',
+      extra:''},
+     {num:3, text:'<strong>Wellbeing:</strong> "Over the past 2 weeks, how would you rate your overall energy level at work?"', tags:[{t:'Wellbeing',bg:'rgba(220,38,38,.08)',bd:'rgba(220,38,38,.3)',c:'var(--red)'},{t:'Anonymous',bg:'rgba(22,163,74,.06)',bd:'rgba(22,163,74,.25)',c:'var(--green)'}],
+      format:'rating', labels:['Very Low','Low','Moderate','High','Very High'], selected:2,
+      why:'Feeds Burnout Risk Score algorithm. Low energy = elevated risk flag for timeline adjustment. 91% confidence.',
+      extra:''}
+   ],
+   config:{
+     title:'Category-Specific Config',
+     rows:[{k:'Templates',v:'4 pre-built: Engagement, Change, Culture, Strategy',hl:true},{k:'Pulse mode',v:'Max 10 questions · weekly/fortnightly'},{k:'Benchmark Qs',v:'Held constant for longitudinal tracking'},{k:'Question rotation',v:'Core every cycle + rotational pool'},{k:'Formats',v:'Likert, NPS, rating, ranking, open-text'}],
+     assign:[{k:'Population',v:'All 812 employees (org-wide)'},{k:'Anonymity',v:'Fully anonymous — team-level aggregation only',hl:true},{k:'Duration',v:'5-10 min'},{k:'Response target',v:'75%+ for statistical validity'},{k:'Channels',v:'Email, in-app, Slack, MS Teams'}],
+     flow:'Wellbeing Dashboard &#8594; Burnout Risk Score &#8594; Timeline Adjustment &#8594; InsightBoard Engagement Widgets', flowBg:'rgba(22,163,74,.06)', flowBd:'rgba(22,163,74,.15)', flowC:'var(--green)'
+   }},
+
+  {id:'catF', cls:'cat-f', badge:'Scheduled', badgeBg:'var(--amber-bg)', badgeC:'var(--amber)', badgeBd:'rgba(217,119,6,.3)',
+   icon:'<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+   label:'Category F', name:'L&D Needs Discovery',
+   desc:'1:1 interviews and focus group structured capture. Qualitative need signals with AI theme extraction feeding LNA multiplier.',
+   stats:[{v:'—',k:'Captured'},{v:'Apr',k:'Scheduled'},{v:'0',k:'Cycles'}],
+   brief:{
+     type:'L&D Discovery Sessions',
+     pop:'EHS & Risk Department · 6-8 per focus group',
+     obj:'Capture learning needs from EHS team — identify barriers to digital tool adoption, skill confidence gaps, and manager-reported development priorities.',
+     length:'Structured (12 prompts + open capture)',
+     diff:'N/A',
+     tone:'Conversational, safe space. Encourage honest input — results are not attributed individually.'
+   },
+   questions:[
+     {num:1, text:'<strong>1:1 Prompt:</strong> "What skill do you most wish you had right now to perform better in your current role? Why?"', tags:[{t:'1:1 Interview',bg:'rgba(220,38,38,.08)',bd:'rgba(220,38,38,.3)',c:'var(--red)'},{t:'Employee-Declared Need',bg:'rgba(0,0,0,.02)',bd:'rgba(0,0,0,0.08)',c:'var(--text-muted)'}],
+      format:'scenario',
+      scenario:'"I need better data analysis skills. We\'re using Power BI now for project reporting but I\'m still exporting to Excel because I don\'t know how to build dashboards. My manager expects automated reports but I haven\'t had any training on it."<div style="font-style:normal;font-size:9px;color:var(--text-muted);margin-top:4px">— EMP-234 · Sr Site Engineer · Project Delivery · 12 Mar 2026</div>',
+      why:'Captures employee-declared need. AI extracts themes: Data Literacy, Tool Proficiency. Adds LNA multiplier x1.3.',
+      extra:'<div style="margin-left:30px;display:flex;gap:4px;flex-wrap:wrap"><span style="padding:2px 7px;border-radius:100px;font-size:8.5px;background:var(--accent-lt);border:1px solid var(--accent-bd);color:var(--accent)">AI Theme: Data Literacy</span><span style="padding:2px 7px;border-radius:100px;font-size:8.5px;background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.3);color:var(--red)">LNA Multiplier: x1.3</span></div>'},
+     {num:2, text:'<strong>Focus Group:</strong> "What barriers prevent your team from adopting new digital tools?"', tags:[{t:'Focus Group',bg:'rgba(124,58,237,.08)',bd:'rgba(124,58,237,.3)',c:'var(--purple)'},{t:'6 participants',bg:'rgba(0,0,0,.02)',bd:'rgba(0,0,0,0.08)',c:'var(--text-muted)'}],
+      format:'scenario',
+      scenario:'<strong style="font-style:normal;color:var(--text-primary)">AI-Extracted Themes:</strong><br>1. <strong>Training timing</strong> — sessions during peak delivery (4/6 mentioned)<br>2. <strong>Tool overload</strong> — 3 new tools in 6 months (5/6 mentioned)<br>3. <strong>Manager support</strong> — no protected learning time (3/6 mentioned)<div style="font-style:normal;font-size:9px;color:var(--text-muted);margin-top:4px">— Focus Group #7 · EHS & Risk · Facilitated by L&D Manager · 15 Mar 2026</div>',
+      why:'Focus group themes weighted by mention frequency. AI sentiment: Frustration (moderate). Feeds gap weighting.',
+      extra:''}
+   ],
+   config:{
+     title:'Category-Specific Config',
+     rows:[{k:'Session types',v:'1:1, Focus Group, Dept Review'},{k:'AI processing',v:'Theme extraction + sentiment analysis',hl:true},{k:'Structured prompts',v:'12 per session type'},{k:'LNA multiplier',v:'x1.1 to x1.5 based on frequency',hl:true},{k:'Output',v:'Declared needs + themes + sentiment'}],
+     assign:[{k:'1:1 interviews',v:'High-potential + flagged employees'},{k:'Focus groups',v:'6-8 per group, per department'},{k:'Dept reviews',v:'Department heads + L&D'},{k:'Facilitator',v:'L&D Manager or HRBP'},{k:'Duration',v:'30 min (1:1) / 60 min (group)'}],
+     flow:'Employee-Declared Needs &#8594; LNA Multiplier (Discovery x1.1-1.5) &#8594; Gap Weighting &#8594; Wellbeing Signals', flowBg:'rgba(220,38,38,.06)', flowBd:'rgba(220,38,38,.15)', flowC:'var(--red)'
+   }}
+];
+
+// ── ASSESSMENT REPORT DATA ──
+var ASSESS_REPORTS = [
+  {name:'L2 Skills — Engineering Track',cat:'Cat A · Skill & Competency',status:'Complete',color:'#16A34A',iconBg:'linear-gradient(135deg,#2563EB,#3b82f6)',
+   population:324,completed:304,inProgress:12,notStarted:5,overdue:3,avgScore:'3.6/5.0',closes:'28 Feb 2026',launched:'1 Feb 2026',
+   employees:[
+     {name:'Priya Menon',dept:'Structural Engineering',role:'Sr Structural Engineer',status:'Completed',score:'4.2',date:'12 Feb'},
+     {name:'Rajesh Kumar',dept:'Project Delivery',role:'Project Manager',status:'Completed',score:'3.8',date:'14 Feb'},
+     {name:'Anika Sundaram',dept:'BIM & Digital',role:'BIM Coordinator',status:'Completed',score:'4.5',date:'10 Feb'},
+     {name:'Vikram Patel',dept:'IT Infrastructure',role:'Cloud Architect',status:'Completed',score:'3.2',date:'18 Feb'},
+     {name:'Meera Krishnan',dept:'EHS & Risk',role:'Safety Manager',status:'Completed',score:'3.9',date:'15 Feb'},
+     {name:'Arjun Nair',dept:'Civil & Geotech',role:'Geotechnical Engineer',status:'Completed',score:'3.5',date:'16 Feb'},
+     {name:'Deepa Balakrishnan',dept:'Structural Engineering',role:'Design Engineer',status:'Completed',score:'4.0',date:'13 Feb'},
+     {name:'Sanjay Gupta',dept:'Project Delivery',role:'Site Supervisor',status:'In Progress',score:'—',date:'—'},
+     {name:'Fatima Al-Rashid',dept:'Sustainability',role:'ESG Consultant',status:'Completed',score:'3.7',date:'20 Feb'},
+     {name:'Chen Wei Ming',dept:'BIM & Digital',role:'CAD Technician',status:'In Progress',score:'—',date:'—'},
+     {name:'Neha Kapoor',dept:'Structural Engineering',role:'Junior Engineer',status:'Completed',score:'2.8',date:'22 Feb'},
+     {name:'Suresh Iyer',dept:'Civil & Geotech',role:'Sr Civil Engineer',status:'Not Started',score:'—',date:'—'},
+     {name:'Ravi Chandran',dept:'Project Delivery',role:'Quantity Surveyor',status:'Overdue',score:'—',date:'—'},
+     {name:'Pooja Sharma',dept:'EHS & Risk',role:'HSE Officer',status:'Completed',score:'3.6',date:'19 Feb'},
+     {name:'Lim Mei Ling',dept:'Sustainability',role:'Environmental Eng.',status:'Completed',score:'4.1',date:'17 Feb'}
+   ]},
+  {name:'L2 Skills — Digital & Tech',cat:'Cat A · Skill & Competency',status:'Complete',color:'#16A34A',iconBg:'linear-gradient(135deg,#2563EB,#3b82f6)',
+   population:118,completed:105,inProgress:8,notStarted:3,overdue:2,avgScore:'3.4/5.0',closes:'28 Feb 2026',launched:'1 Feb 2026',
+   employees:[
+     {name:'Vikram Patel',dept:'IT Infrastructure',role:'Cloud Architect',status:'Completed',score:'3.8',date:'11 Feb'},
+     {name:'Chen Wei Ming',dept:'BIM & Digital',role:'CAD Technician',status:'Completed',score:'3.2',date:'14 Feb'},
+     {name:'Anika Sundaram',dept:'BIM & Digital',role:'BIM Coordinator',status:'Completed',score:'4.3',date:'12 Feb'},
+     {name:'Tanya D\'Souza',dept:'IT Infrastructure',role:'DevOps Engineer',status:'Completed',score:'3.9',date:'15 Feb'},
+     {name:'Ahmad Hassan',dept:'BIM & Digital',role:'BIM Modeller',status:'In Progress',score:'—',date:'—'},
+     {name:'Kiran Rao',dept:'IT Infrastructure',role:'Data Analyst',status:'Completed',score:'3.1',date:'18 Feb'},
+     {name:'Mohamed Ali',dept:'IT Infrastructure',role:'Network Engineer',status:'Not Started',score:'—',date:'—'}
+   ]},
+  {name:'AI & Data Literacy Post-Training',cat:'Cat C · Knowledge Test',status:'Active',color:'#0891B2',iconBg:'linear-gradient(135deg,#0891B2,#06b6d4)',
+   population:72,completed:41,inProgress:17,notStarted:8,overdue:6,avgScore:'78%',closes:'15 Apr 2026',launched:'15 Mar 2026',
+   employees:[
+     {name:'Priya Menon',dept:'Structural Engineering',role:'Sr Structural Engineer',status:'Completed',score:'85%',date:'20 Mar'},
+     {name:'Arjun Nair',dept:'Civil & Geotech',role:'Geotechnical Engineer',status:'Completed',score:'72%',date:'22 Mar'},
+     {name:'Deepa Balakrishnan',dept:'Structural Engineering',role:'Design Engineer',status:'In Progress',score:'—',date:'—'},
+     {name:'Sanjay Gupta',dept:'Project Delivery',role:'Site Supervisor',status:'Not Started',score:'—',date:'—'},
+     {name:'Neha Kapoor',dept:'Structural Engineering',role:'Junior Engineer',status:'Completed',score:'68%',date:'25 Mar'},
+     {name:'Ravi Chandran',dept:'Project Delivery',role:'Quantity Surveyor',status:'Overdue',score:'—',date:'—'},
+     {name:'Pooja Sharma',dept:'EHS & Risk',role:'HSE Officer',status:'In Progress',score:'—',date:'—'}
+   ]},
+  {name:'Leadership 360\u00B0',cat:'Cat D · 360 Feedback',status:'Active',color:'#0891B2',iconBg:'linear-gradient(135deg,#D97706,#f59e0b)',
+   population:28,completed:12,inProgress:9,notStarted:4,overdue:3,avgScore:'3.8/5.0',closes:'30 Apr 2026',launched:'1 Apr 2026',
+   employees:[
+     {name:'Rahul Sharma',dept:'Engineering & Delivery',role:'VP Engineering',status:'Completed',score:'4.1',date:'8 Apr'},
+     {name:'Kavitha Ramachandran',dept:'Human Resources',role:'L&D Manager',status:'Completed',score:'4.3',date:'9 Apr'},
+     {name:'Vikram Patel',dept:'Digital & Technology',role:'Head of Digital',status:'In Progress',score:'—',date:'—'},
+     {name:'Meera Sundaram',dept:'Sustainability & EHS',role:'Head of EHS',status:'In Progress',score:'—',date:'—'},
+     {name:'Rajesh Kumar',dept:'Project Delivery',role:'Sr Project Manager',status:'Completed',score:'3.6',date:'10 Apr'},
+     {name:'Arjun Nair',dept:'Civil & Geotech',role:'Lead Engineer',status:'Not Started',score:'—',date:'—'}
+   ]},
+  {name:'ISO 45001 Certification',cat:'Cat A · Skill & Competency',status:'Upcoming',color:'#D97706',iconBg:'linear-gradient(135deg,#D97706,#f59e0b)',
+   population:96,completed:0,inProgress:0,notStarted:96,overdue:0,avgScore:'—',closes:'15 May 2026',launched:'Not yet',
+   employees:[
+     {name:'Meera Krishnan',dept:'EHS & Risk',role:'Safety Manager',status:'Not Started',score:'—',date:'—'},
+     {name:'Pooja Sharma',dept:'EHS & Risk',role:'HSE Officer',status:'Not Started',score:'—',date:'—'},
+     {name:'Ravi Chandran',dept:'Project Delivery',role:'Quantity Surveyor',status:'Not Started',score:'—',date:'—'},
+     {name:'Sanjay Gupta',dept:'Project Delivery',role:'Site Supervisor',status:'Not Started',score:'—',date:'—'}
+   ]},
+  {name:'Wellbeing Pulse Q1',cat:'Cat E · Organisation Survey',status:'Complete',color:'#16A34A',iconBg:'linear-gradient(135deg,#16A34A,#22c55e)',
+   population:812,completed:723,inProgress:45,notStarted:22,overdue:22,avgScore:'3.7/5.0',closes:'31 Mar 2026',launched:'1 Mar 2026',
+   employees:[
+     {name:'Priya Menon',dept:'Structural Engineering',role:'Sr Structural Engineer',status:'Completed',score:'—',date:'5 Mar'},
+     {name:'Rajesh Kumar',dept:'Project Delivery',role:'Project Manager',status:'Completed',score:'—',date:'6 Mar'},
+     {name:'Kavitha Ramachandran',dept:'Human Resources',role:'L&D Manager',status:'Completed',score:'—',date:'4 Mar'},
+     {name:'Vikram Patel',dept:'IT Infrastructure',role:'Cloud Architect',status:'Completed',score:'—',date:'7 Mar'},
+     {name:'Anika Sundaram',dept:'BIM & Digital',role:'BIM Coordinator',status:'Completed',score:'—',date:'5 Mar'},
+     {name:'Meera Krishnan',dept:'EHS & Risk',role:'Safety Manager',status:'Completed',score:'—',date:'8 Mar'},
+     {name:'Arjun Nair',dept:'Civil & Geotech',role:'Geotechnical Engineer',status:'Not Started',score:'—',date:'—'},
+     {name:'Deepa Balakrishnan',dept:'Structural Engineering',role:'Design Engineer',status:'Completed',score:'—',date:'9 Mar'}
+   ]}
+];
+
+function openAssessReport(idx){
+  var r = ASSESS_REPORTS[idx]; if(!r) return;
+  document.getElementById('arIcon').style.background = r.iconBg;
+  document.getElementById('arIcon').innerHTML = '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+  document.getElementById('arTitle').textContent = r.name;
+  document.getElementById('arMeta').innerHTML = '<span>'+r.cat+'</span><span>Launched: '+r.launched+'</span><span>Closes: '+r.closes+'</span>';
+
+  var pctComplete = r.population > 0 ? Math.round(r.completed/r.population*100) : 0;
+  var pctInProg = r.population > 0 ? Math.round(r.inProgress/r.population*100) : 0;
+  var pctOverdue = r.population > 0 ? Math.round(r.overdue/r.population*100) : 0;
+  var pctNotStarted = r.population > 0 ? Math.round(r.notStarted/r.population*100) : 0;
+
+  var h = '';
+  // KPIs
+  h += '<div class="ar-kpi-row">';
+  h += '<div class="ar-kpi" style="background:#F0FDF4"><div class="ar-kpi-val" style="color:#16A34A">'+r.completed+'</div><div class="ar-kpi-key">Completed</div></div>';
+  h += '<div class="ar-kpi" style="background:#ECFEFF"><div class="ar-kpi-val" style="color:#0891B2">'+r.inProgress+'</div><div class="ar-kpi-key">In Progress</div></div>';
+  h += '<div class="ar-kpi" style="background:#FEF2F2"><div class="ar-kpi-val" style="color:#DC2626">'+r.overdue+'</div><div class="ar-kpi-key">Overdue</div></div>';
+  h += '<div class="ar-kpi" style="background:rgba(0,0,0,0.02)"><div class="ar-kpi-val" style="color:#6B7280">'+r.notStarted+'</div><div class="ar-kpi-key">Not Started</div></div>';
+  h += '</div>';
+
+  // Progress bar
+  h += '<div class="ar-progress">';
+  h += '<div class="ar-progress-label"><span>Overall Progress</span><span>'+pctComplete+'% complete ('+r.completed+' of '+r.population+')</span></div>';
+  h += '<div class="ar-progress-track">';
+  h += '<div class="ar-progress-seg" style="width:'+pctComplete+'%;background:#16A34A"></div>';
+  h += '<div class="ar-progress-seg" style="width:'+pctInProg+'%;background:#0891B2"></div>';
+  h += '<div class="ar-progress-seg" style="width:'+pctOverdue+'%;background:#DC2626"></div>';
+  h += '<div class="ar-progress-seg" style="width:'+pctNotStarted+'%;background:#d1d5db"></div>';
+  h += '</div>';
+  h += '<div class="ar-legend">';
+  h += '<div class="ar-legend-item"><div class="ar-legend-dot" style="background:#16A34A"></div>Completed '+r.completed+'</div>';
+  h += '<div class="ar-legend-item"><div class="ar-legend-dot" style="background:#0891B2"></div>In Progress '+r.inProgress+'</div>';
+  h += '<div class="ar-legend-item"><div class="ar-legend-dot" style="background:#DC2626"></div>Overdue '+r.overdue+'</div>';
+  h += '<div class="ar-legend-item"><div class="ar-legend-dot" style="background:#d1d5db"></div>Not Started '+r.notStarted+'</div>';
+  h += '</div></div>';
+
+  // Avg score
+  if(r.avgScore && r.avgScore !== '—'){
+    h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:rgba(124,58,237,.04);border:1px solid rgba(124,58,237,.1);border-radius:8px">';
+    h += '<span style="font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--purple)">'+r.avgScore+'</span>';
+    h += '<span style="font-size:11px;color:var(--text-muted)">Average Score</span></div>';
+  }
+
+  // Filters
+  h += '<div class="ar-filter-row">';
+  h += '<input type="text" placeholder="Search employee..." oninput="filterReportTable('+idx+')"  id="arSearch">';
+  h += '<select onchange="filterReportTable('+idx+')" id="arStatusFilter"><option value="">All Statuses</option><option value="Completed">Completed</option><option value="In Progress">In Progress</option><option value="Not Started">Not Started</option><option value="Overdue">Overdue</option></select>';
+  h += '<span class="ar-count" id="arCount">'+r.employees.length+' employees shown</span>';
+  h += '</div>';
+
+  // Employee table
+  h += '<table class="ar-emp-tbl" id="arEmpTbl">';
+  h += '<thead><tr><th>Employee</th><th>Department</th><th>Role</th><th>Status</th>'+(r.avgScore!=='—'?'<th>Score</th>':'')+'<th>Date</th></tr></thead>';
+  h += '<tbody>';
+  r.employees.forEach(function(e){
+    var sc = e.status==='Completed'?'chip-green':e.status==='In Progress'?'chip-teal':e.status==='Overdue'?'chip-red':'';
+    h += '<tr><td class="ar-emp-name">'+e.name+'</td><td>'+e.dept+'</td><td>'+e.role+'</td>';
+    h += '<td><span class="chip '+(sc||'')+'" style="'+(sc?'':'background:rgba(0,0,0,.04);color:#6B7280;border:1px solid rgba(0,0,0,.08)')+'">'+e.status+'</span></td>';
+    if(r.avgScore!=='—') h += '<td style="font-family:var(--font-mono);'+(e.score!=='—'?'font-weight:600;color:var(--text-primary)':'color:var(--text-muted)')+'">'+e.score+'</td>';
+    h += '<td style="color:var(--text-muted)">'+e.date+'</td></tr>';
+  });
+  h += '</tbody></table>';
+
+  document.getElementById('arBody').innerHTML = h;
+  document.getElementById('arOverlay').classList.add('open');
+}
+
+function closeAssessReport(){
+  document.getElementById('arOverlay').classList.remove('open');
+}
+
+function filterReportTable(idx){
+  var r = ASSESS_REPORTS[idx]; if(!r) return;
+  var q = (document.getElementById('arSearch').value||'').toLowerCase();
+  var sf = document.getElementById('arStatusFilter').value;
+  var rows = document.querySelectorAll('#arEmpTbl tbody tr');
+  var count = 0;
+  rows.forEach(function(row, i){
+    var emp = r.employees[i]; if(!emp){row.style.display='none';return}
+    var matchSearch = !q || emp.name.toLowerCase().indexOf(q)>-1 || emp.dept.toLowerCase().indexOf(q)>-1 || emp.role.toLowerCase().indexOf(q)>-1;
+    var matchStatus = !sf || emp.status === sf;
+    if(matchSearch && matchStatus){row.style.display='';count++} else {row.style.display='none'}
+  });
+  document.getElementById('arCount').textContent = count+' of '+r.employees.length+' employees shown';
+}
+
+// ── STATE MANAGEMENT ──
+var STATE = { current:1, completed:{}, assessmentType:null, quickStart:null, briefData:{}, published:false };
+function loadState(){ try { var s = sessionStorage.getItem('sip_assess_engine'); if(s) STATE = JSON.parse(s); } catch(e){} }
+function saveState(){ try { sessionStorage.setItem('sip_assess_engine', JSON.stringify(STATE)); } catch(e){} }
+
+// ── HELPERS ──
+function getCat(id){ return CATS.find(function(c){ return c.id === id; }); }
+function showToast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block'; t.classList.remove('hide');
+  setTimeout(function(){ t.classList.add('hide'); setTimeout(function(){ t.style.display='none'; },300); },2500);
+}
+
+// ── STAGE 1 INNER TABS ──
+function switchS1Tab(tab,btn){
+  document.querySelectorAll('.s1-tab').forEach(function(t){t.style.color='var(--text-muted)';t.style.borderBottomColor='transparent'});
+  btn.style.color='var(--teal)';btn.style.borderBottomColor='var(--teal)';
+  document.querySelectorAll('.s1-content').forEach(function(c){c.style.display='none'});
+  var map={create:'s1Create',recent:'s1Recent',summary:'s1Summary'};
+  if(map[tab])document.getElementById(map[tab]).style.display='block';
+}
+
+// ── STAGE NAVIGATION ──
+function goStage(n){
+  if(n > STATE.current + 1) return;
+  // Mark previous stages as done
+  for(var i = 1; i < n; i++) STATE.completed[i] = true;
+  STATE.current = n;
+  saveState();
+  renderStageNav();
+  renderStage(n);
+}
+
+function renderStageNav(){
+  var steps = document.querySelectorAll('.stage-step');
+  var lines = document.querySelectorAll('.stage-line');
+  steps.forEach(function(s){
+    var sn = parseInt(s.getAttribute('data-stage'));
+    s.className = 'stage-step';
+    if(sn === STATE.current) s.classList.add('active');
+    else if(STATE.completed[sn]) s.classList.add('done');
+    // Update circle content for done steps
+    var circle = s.querySelector('.stage-circle');
+    if(STATE.completed[sn]) circle.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+    else circle.textContent = sn;
+    // Click handler
+    s.onclick = STATE.completed[sn] ? function(){ goStage(sn); } : null;
+  });
+  lines.forEach(function(l, i){
+    var ln = i + 1;
+    l.className = 'stage-line';
+    if(STATE.completed[ln] && STATE.completed[ln+1]) l.classList.add('done');
+    else if(STATE.completed[ln] && STATE.current === ln+1) l.classList.add('done');
+    else if(ln === STATE.current) l.classList.add('active');
+  });
+}
+
+function renderStage(n){
+  document.querySelectorAll('.stage-panel').forEach(function(p){ p.classList.remove('active'); });
+  var panel = document.getElementById('stage' + n);
+  if(panel) panel.classList.add('active');
+  // Stage-specific rendering
+  if(n === 2) renderStage2();
+  if(n === 6) renderIndividual();
+}
+
+// ── STAGE 1: QUICK START ──
+function selectQuickStart(type){
+  // Reset all cards
+  document.querySelectorAll('.qs-card').forEach(function(c){ c.classList.remove('selected'); });
+  document.getElementById('subChooser').classList.remove('show');
+
+  if(type === 'people'){
+    document.getElementById('qsPeople').classList.add('selected');
+    document.getElementById('subChooser').classList.add('show');
+    document.getElementById('briefForm').classList.remove('show');
+    return;
+  }
+
+  STATE.assessmentType = type;
+  STATE.quickStart = type;
+  saveState();
+
+  // Highlight the right card
+  if(type === 'catA') document.getElementById('qsSkill').classList.add('selected');
+  else if(type === 'catC') document.getElementById('qsTraining').classList.add('selected');
+  else document.getElementById('qsPeople').classList.add('selected');
+
+  // Fill brief form
+  var cat = getCat(type);
+  if(cat){
+    var d = new Date(); var dateStr = d.getDate() + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] + ' ' + d.getFullYear();
+    document.getElementById('bfName').value = cat.brief.type + ' — ' + dateStr;
+    document.getElementById('bfObj').value = cat.brief.obj;
+    // Set population
+    var popSel = document.getElementById('bfPop');
+    if(cat.brief.pop.indexOf('Engineering') >= 0) popSel.value = 'Engineering Track';
+    else if(cat.brief.pop.indexOf('All') >= 0) popSel.value = 'All Employees';
+    else if(cat.brief.pop.indexOf('Manager') >= 0) popSel.value = 'Managers Only';
+    else popSel.value = 'Custom';
+    // Difficulty
+    var diffSel = document.getElementById('bfDiff');
+    if(cat.brief.diff.indexOf('Mixed') >= 0) diffSel.value = 'Mixed — AI determines';
+    else if(cat.brief.diff.indexOf('N/A') >= 0) diffSel.value = 'Foundational';
+    // Length
+    var lenSel = document.getElementById('bfLength');
+    if(cat.brief.length.indexOf('Quick') >= 0) lenSel.value = 'Quick (5-10 min)';
+    else if(cat.brief.length.indexOf('Comprehensive') >= 0) lenSel.value = 'Comprehensive (30-45 min)';
+    else lenSel.value = 'Standard (15-25 min)';
+  }
+  document.getElementById('briefForm').classList.add('show');
+}
+
+// ── GENERATION ANIMATION ──
+function generateAssessment(){
+  STATE.briefData = {
+    name: document.getElementById('bfName').value,
+    pop: document.getElementById('bfPop').value,
+    obj: document.getElementById('bfObj').value,
+    length: document.getElementById('bfLength').value,
+    diff: document.getElementById('bfDiff').value
+  };
+  saveState();
+
+  var ov = document.getElementById('genOverlay');
+  ov.classList.add('show');
+  var steps = ['gs1','gs2','gs3','gs4'];
+  var i = 0;
+  function tick(){
+    if(i < steps.length){
+      var el = document.getElementById(steps[i]);
+      el.classList.add('done','current');
+      el.querySelector('.gs-icon').innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+      i++;
+      setTimeout(tick, 800);
+    } else {
+      setTimeout(function(){
+        ov.classList.remove('show');
+        // Reset step icons
+        steps.forEach(function(s){
+          var el = document.getElementById(s);
+          el.classList.remove('done','current');
+          el.querySelector('.gs-icon').innerHTML = '&#9675;';
+        });
+        goStage(2);
+      }, 600);
+    }
+  }
+  setTimeout(tick, 400);
+}
+
+// ── STAGE 2: RENDER QUESTIONS ──
+function renderStage2(){
+  var cat = getCat(STATE.assessmentType);
+  if(!cat) return;
+  var qs = cat.questions;
+
+  // Header
+  document.getElementById('r2Name').textContent = STATE.briefData.name || (cat.brief.type + ' Assessment');
+  var badge = document.getElementById('r2Badge');
+  badge.textContent = cat.label;
+  badge.style.background = cat.badgeBg; badge.style.color = cat.badgeC; badge.style.border = '1px solid ' + cat.badgeBd;
+  document.getElementById('r2Count').textContent = qs.length + ' questions';
+  document.getElementById('r2Time').textContent = '~' + (qs.length * 3) + ' min';
+
+  // AI sidebar message
+  document.getElementById('aiMsg1').innerHTML = 'Generated <strong>' + qs.length + ' questions</strong> covering key skills. Review each question and <strong>accept</strong>, <strong>replace</strong>, or <strong>remove</strong>.';
+
+  // Coverage card
+  var covRows = document.getElementById('aiCovRows');
+  covRows.innerHTML = '<div class="ai-context-row"><span class="ai-context-key">Questions</span><span class="ai-context-val">' + qs.length + '</span></div>' +
+    '<div class="ai-context-row"><span class="ai-context-key">Skills covered</span><span class="ai-context-val">10 of 12</span></div>' +
+    '<div class="ai-context-row"><span class="ai-context-key">Avg confidence</span><span class="ai-context-val">91%</span></div>' +
+    '<div class="ai-context-row"><span class="ai-context-key">Bias check</span><span class="ai-context-val" style="color:var(--green)">Passed</span></div>';
+
+  // Questions
+  var container = document.getElementById('questionsContainer');
+  var h = '';
+  qs.forEach(function(q, idx){
+    h += '<div class="q-card" id="qcard' + idx + '">';
+    h += '<div class="q-top"><span class="q-num">Q' + q.num + '</span>';
+    q.tags.forEach(function(tg){
+      h += '<span class="q-tag" style="background:'+tg.bg+';border:1px solid '+tg.bd+';color:'+tg.c+'">'+tg.t+'</span>';
+    });
+    h += '</div>';
+    h += '<div class="q-text">' + q.text + '</div>';
+
+    // Format renderer
+    if(q.format === 'rating' || q.format === 'likert'){
+      h += '<div class="q-format">';
+      q.labels.forEach(function(lb, li){
+        h += '<span class="q-pill' + (li === q.selected ? ' selected' : '') + '">' + lb + '</span>';
+      });
+      h += '</div>';
+    } else if(q.format === 'options'){
+      q.opts.forEach(function(op, oi){
+        var cls = 'q-opt';
+        if(oi === q.correct) cls += ' correct-ans';
+        else if(oi === (q.correct === 1 ? 0 : 1)) cls += ' selected';
+        h += '<div class="' + cls + '"><div class="q-opt-radio"></div><span>' + op + '</span></div>';
+      });
+    } else if(q.format === 'scenario'){
+      h += '<div class="q-scenario">' + q.scenario + '</div>';
+    }
+
+    // Why box
+    h += '<div class="q-why">' + q.why + '</div>';
+
+    // Extra
+    if(q.extra) h += q.extra;
+
+    // Actions
+    h += '<div class="q-actions">';
+    h += '<button class="q-act q-accept" onclick="showToast(\'Q' + q.num + ' accepted\')">&#10003; Accept</button>';
+    h += '<button class="q-act q-replace" onclick="showToast(\'Replacing Q' + q.num + '...\')">&#8635; Replace</button>';
+    h += '<button class="q-act q-remove" onclick="removeQ(' + idx + ')">&#10005; Remove</button>';
+    h += '</div></div>';
+  });
+  container.innerHTML = h;
+}
+
+function removeQ(idx){
+  var el = document.getElementById('qcard' + idx);
+  if(el){ el.style.opacity = '0'; el.style.transform = 'translateX(-20px)'; el.style.transition = 'all .3s';
+    setTimeout(function(){ el.style.height = '0'; el.style.padding = '0'; el.style.margin = '0'; el.style.overflow = 'hidden'; },300);
+  }
+  showToast('Question removed');
+}
+
+// ── STAGE 3: APPROVE & ASSIGN ──
+function toggleApproval(){
+  var checked = document.getElementById('approvalToggle').checked;
+  var section = document.getElementById('approvalSection');
+  if(checked){
+    section.classList.remove('hidden');
+  } else {
+    section.classList.add('hidden');
+  }
+}
+
+function toggleSpecificManagers(){
+  var radios = document.getElementsByName('approvalTarget');
+  var specificInput = document.getElementById('specificManagersInput');
+  for(var i = 0; i < radios.length; i++){
+    if(radios[i].value === 'specific' && radios[i].checked){
+      specificInput.classList.add('show');
+      return;
+    }
+  }
+  specificInput.classList.remove('show');
+}
+
+function addManagerSuggestion(el, name){
+  var tagList = document.getElementById('managerTagList');
+  // Check if already added
+  var existing = tagList.querySelectorAll('.emp-tag');
+  for(var i = 0; i < existing.length; i++){
+    if(existing[i].getAttribute('data-name') === name) return;
+  }
+  var tag = document.createElement('span');
+  tag.className = 'emp-tag';
+  tag.setAttribute('data-name', name);
+  tag.innerHTML = name + ' <span class="emp-tag-remove" onclick="this.parentElement.remove()">&times;</span>';
+  tagList.appendChild(tag);
+  el.style.opacity = '.4';
+  el.style.pointerEvents = 'none';
+}
+
+function sendForApproval(){
+  showToast('Approval requests sent to 3 managers');
+}
+
+function skipApproval(){
+  goStage(4);
+}
+
+// ── STAGE 3: EMPLOYEE ASSIGNMENT ──
+function switchAssignMethod(method){
+  // Update radio label styles
+  var labels = document.querySelectorAll('.assign-methods label');
+  labels.forEach(function(lbl){
+    var radio = lbl.querySelector('input[type=radio]');
+    if(radio.value === method){
+      lbl.classList.add('active-method');
+    } else {
+      lbl.classList.remove('active-method');
+    }
+  });
+  // Show/hide content
+  document.getElementById('assignDept').classList.toggle('show', method === 'dept');
+  document.getElementById('assignRole').classList.toggle('show', method === 'role');
+  document.getElementById('assignIndividual').classList.toggle('show', method === 'individual');
+}
+
+function selectAllDepts(checked){
+  var boxes = document.querySelectorAll('#deptCheckList input[type=checkbox]');
+  boxes.forEach(function(b){ b.checked = checked; });
+  updateDeptCount();
+}
+
+function updateDeptCount(){
+  var counts = [112, 98, 114, 54, 64, 42, 38, 28, 22, 18];
+  var boxes = document.querySelectorAll('#deptCheckList input[type=checkbox]');
+  var total = 0;
+  boxes.forEach(function(b, i){ if(b.checked) total += counts[i]; });
+  document.getElementById('deptCountLabel').textContent = total + ' employees selected';
+  // Also update the Stage 5 reference count
+  var refCount = document.getElementById('assignRefCount');
+  if(refCount) refCount.textContent = total;
+}
+
+function updateRoleCount(){
+  // Simple demo calculation
+  var seniorCounts = [86, 124, 168, 112, 54, 18];
+  var seniorBoxes = document.querySelectorAll('#roleCheckList input[type=checkbox]');
+  var seniorTotal = 0;
+  seniorBoxes.forEach(function(b, i){ if(b.checked) seniorTotal += seniorCounts[i]; });
+  document.getElementById('roleCountLabel').textContent = seniorTotal + ' employees selected';
+}
+
+// ── EMPLOYEE AUTOCOMPLETE (Stage 3) ──
+var DEMO_EMPLOYEES = [
+  'Priya Menon','Rajesh Kumar','Anika Sundaram','Vikram Patel','Meera Krishnan',
+  'Arjun Nair','Deepa Balakrishnan','Sanjay Gupta','Fatima Al-Rashid','Chen Wei Ming',
+  'Kavitha Ramachandran','Rahul Sharma','Neha Kapoor','Suresh Iyer','Lim Mei Ling',
+  'Ahmad Hassan','Ravi Chandran','Pooja Sharma','Mohamed Ali','Tanya D\'Souza'
+];
+var selectedEmployees = ['Priya Menon','Rajesh Kumar','Anika Sundaram','Vikram Patel','Meera Krishnan'];
+
+function filterEmployeeSearch(query){
+  var dropdown = document.getElementById('empAutocomplete');
+  if(!query || query.length < 1){
+    dropdown.classList.remove('show');
+    return;
+  }
+  var q = query.toLowerCase();
+  var matches = DEMO_EMPLOYEES.filter(function(name){
+    return name.toLowerCase().indexOf(q) >= 0 && selectedEmployees.indexOf(name) === -1;
+  });
+  if(matches.length === 0){
+    dropdown.classList.remove('show');
+    return;
+  }
+  var h = '';
+  matches.forEach(function(name){
+    h += '<div class="emp-autocomplete-item" onmousedown="addEmployee(\'' + name.replace(/'/g,"\\'") + '\')">' + name + '</div>';
+  });
+  dropdown.innerHTML = h;
+  dropdown.classList.add('show');
+}
+
+function addEmployee(name){
+  if(selectedEmployees.indexOf(name) >= 0) return;
+  selectedEmployees.push(name);
+  renderEmployeeTags();
+  document.getElementById('empSearchInput').value = '';
+  document.getElementById('empAutocomplete').classList.remove('show');
+}
+
+function removeEmployee(name){
+  selectedEmployees = selectedEmployees.filter(function(n){ return n !== name; });
+  renderEmployeeTags();
+}
+
+function renderEmployeeTags(){
+  var tagList = document.getElementById('empTagList');
+  var h = '';
+  selectedEmployees.forEach(function(name){
+    h += '<span class="emp-tag">' + name + ' <span class="emp-tag-remove" onclick="removeEmployee(\'' + name.replace(/'/g,"\\'") + '\')">&times;</span></span>';
+  });
+  tagList.innerHTML = h;
+  document.getElementById('empCountLabel').textContent = selectedEmployees.length + ' employees selected';
+}
+
+// Close autocomplete on click outside
+document.addEventListener('click', function(e){
+  var wrapper = document.getElementById('empSearchWrapper');
+  if(wrapper && !wrapper.contains(e.target)){
+    document.getElementById('empAutocomplete').classList.remove('show');
+  }
+});
+
+// ── STAGE 4: PREVIEW ──
+var pvIdx = 0, pvTimer = null, pvSec = 0;
+function startPreview(){
+  var cat = getCat(STATE.assessmentType);
+  if(!cat) return;
+  document.getElementById('ppGrid').style.display = 'none';
+  document.getElementById('previewMode').classList.add('show');
+  pvIdx = 0; pvSec = 0;
+  renderPreviewQ(cat);
+  pvTimer = setInterval(function(){
+    pvSec++;
+    var m = Math.floor(pvSec/60), s = pvSec%60;
+    document.getElementById('pvTimer').textContent = (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  },1000);
+}
+
+function renderPreviewQ(cat){
+  var qs = cat.questions;
+  var q = qs[pvIdx];
+  document.getElementById('pvLabel').textContent = 'Q' + (pvIdx+1) + ' of ' + qs.length;
+  document.getElementById('pvBar').style.width = ((pvIdx+1)/qs.length*100) + '%';
+  document.getElementById('pvText').innerHTML = q.text.replace(/<strong>/g,'<strong>').replace(/<\/strong>/g,'</strong>');
+  var fmtEl = document.getElementById('pvFormat');
+  var h = '';
+  if(q.format === 'rating' || q.format === 'likert'){
+    h += '<div class="q-format">';
+    q.labels.forEach(function(lb){ h += '<span class="q-pill">' + lb + '</span>'; });
+    h += '</div>';
+  } else if(q.format === 'options'){
+    q.opts.forEach(function(op){ h += '<div class="q-opt"><div class="q-opt-radio"></div><span>' + op + '</span></div>'; });
+  } else if(q.format === 'scenario'){
+    h += '<div class="q-scenario">' + q.scenario + '</div>';
+  }
+  fmtEl.innerHTML = h;
+  document.getElementById('pvNext').textContent = (pvIdx >= qs.length - 1) ? 'Complete' : 'Next \u2192';
+}
+
+function nextPreviewQ(){
+  var cat = getCat(STATE.assessmentType);
+  if(!cat) return;
+  if(pvIdx >= cat.questions.length - 1){
+    endPreview();
+    showToast('Preview Complete — ' + cat.questions.length + ' questions, ~' + Math.ceil(pvSec/60) + ' min estimated');
+    return;
+  }
+  pvIdx++;
+  renderPreviewQ(cat);
+}
+
+function endPreview(){
+  clearInterval(pvTimer);
+  document.getElementById('previewMode').classList.remove('show');
+  document.getElementById('ppGrid').style.display = 'grid';
+}
+
+// ── STAGE 4: PILOT ──
+function startPilot(){
+  document.getElementById('ppGrid').style.display = 'none';
+  document.getElementById('pilotSim').classList.add('show');
+  var steps = ['ps1','ps2','ps3'];
+  var i = 0;
+  function tick(){
+    if(i < steps.length){
+      var el = document.getElementById(steps[i]);
+      el.classList.add('done');
+      el.querySelector('.gs-icon').style.background = 'var(--green-bg)';
+      el.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> ' + el.textContent.replace(/^\s*/, '');
+      i++;
+      setTimeout(tick, 2000);
+    } else {
+      document.getElementById('pilotResults').classList.add('show');
+    }
+  }
+  setTimeout(tick, 500);
+}
+
+// ── STAGE 5: PUBLISH ──
+function publishAssessment(){
+  STATE.published = true;
+  saveState();
+  // Animate
+  document.getElementById('pubPanel').style.opacity = '0';
+  document.getElementById('pubPanel').style.transition = 'opacity .3s';
+  setTimeout(function(){
+    document.getElementById('pubPanel').style.display = 'none';
+    document.getElementById('liveTracker').classList.add('show');
+  },300);
+  showToast('Assessment published to 324 employees');
+}
+
+// ── STAGE 6: SUB-TABS ──
+function switchSubTab(idx){
+  document.querySelectorAll('.sub-tab').forEach(function(t,i){ t.classList.toggle('active', i===idx); });
+  document.querySelectorAll('.sub-panel').forEach(function(p,i){ p.classList.toggle('active', i===idx); });
+  if(idx === 2) renderIndividual();
+}
+
+// ── STAGE 6: INDIVIDUAL REPORTS ──
+var EMP_DATA = [
+  {name:'Priya Menon', initials:'PM', role:'Sr Project Manager', dept:'Project Delivery', date:'28 Feb 2026', skills:{BIM:4.2,Safety:3.8,PM:3.5,Stakeholder:3.9,Data:2.1,Cloud:1.8}, recs:['Complete AI & Data Literacy programme (Priority: High)','Enrol in Cloud Architecture Foundations course on Edstellar','Continue BIM mentoring — on track for L4 certification']},
+  {name:'Rajesh Kumar', initials:'RK', role:'Lead Structural Engineer', dept:'Structural Engineering', date:'28 Feb 2026', skills:{BIM:3.8,Safety:4.0,PM:4.2,Stakeholder:3.2,Data:2.4,Cloud:2.0}, recs:['Stakeholder Communication workshop recommended','Data Analytics L2 training — intermediate track','Cloud fundamentals self-paced module']},
+  {name:'Anika Sundaram', initials:'AS', role:'BIM Coordinator', dept:'BIM & Digital Delivery', date:'28 Feb 2026', skills:{BIM:4.5,Safety:3.5,PM:2.8,Stakeholder:3.1,Data:3.2,Cloud:2.5}, recs:['Project Management L3 programme recommended','Leadership communication coaching sessions','Continue advanced BIM — expert track']},
+  {name:'Vikram Patel', initials:'VP', role:'Digital Solutions Lead', dept:'IT Infrastructure', date:'28 Feb 2026', skills:{BIM:3.2,Safety:3.0,PM:3.8,Stakeholder:4.1,Data:3.8,Cloud:3.5}, recs:['BIM Coordination cross-training with engineering team','Safety compliance refresher — annual requirement','On track for Digital Leadership pathway']},
+  {name:'Meera Krishnan', initials:'MK', role:'EHS Specialist', dept:'EHS & Risk', date:'28 Feb 2026', skills:{BIM:2.8,Safety:4.2,PM:3.0,Stakeholder:2.9,Data:2.0,Cloud:1.5}, recs:['Priority: Data Analytics & Cloud Architecture foundations','Stakeholder Communication L2 workshop','BIM Awareness module for EHS integration']}
+];
+
+function renderIndividual(){
+  var idx = parseInt(document.getElementById('empSelector').value) || 0;
+  var emp = EMP_DATA[idx];
+  var h = '<div class="emp-profile"><div class="emp-avatar">' + emp.initials + '</div><div class="emp-info"><div class="emp-name">' + emp.name + '</div><div class="emp-role">' + emp.role + ' &middot; ' + emp.dept + ' &middot; Assessed ' + emp.date + '</div></div></div>';
+
+  // Skill bars
+  var skills = Object.keys(emp.skills);
+  skills.forEach(function(sk){
+    var val = emp.skills[sk];
+    var pct = (val/5)*100;
+    var col = val >= 3.5 ? 'var(--green)' : val >= 2.5 ? 'var(--amber)' : 'var(--red)';
+    h += '<div class="skill-bar-row"><div class="skill-bar-label">' + sk + '</div><div class="skill-bar-outer"><div class="skill-bar-fill" style="width:' + pct + '%;background:' + col + '"></div></div><div class="skill-bar-val" style="color:' + col + '">' + val.toFixed(1) + '</div></div>';
+  });
+
+  // AI recs
+  h += '<div class="ai-dev-recs"><h4>AI Development Recommendations</h4><ul>';
+  emp.recs.forEach(function(r){ h += '<li>' + r + '</li>'; });
+  h += '</ul></div>';
+  h += '<div style="margin-top:12px"><button class="btn-outline" onclick="showToast(\'Opening full IDP for ' + emp.name + '...\')">View Full IDP &rarr;</button></div>';
+
+  document.getElementById('individualReport').innerHTML = h;
+}
+
+// ── INIT ──
+(function(){
+  loadState();
+  renderStageNav();
+  renderStage(STATE.current);
+  // If we have a saved assessment type and are past stage 1, re-render
+  if(STATE.current >= 2 && STATE.assessmentType) renderStage2();
+  if(STATE.current >= 5 && STATE.published){
+    document.getElementById('pubPanel').style.display = 'none';
+    document.getElementById('liveTracker').classList.add('show');
+  }
+})();
+</script>
+
+</body>
+</html>

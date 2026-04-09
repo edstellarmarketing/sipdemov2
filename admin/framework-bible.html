@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Framework Bible — Skills & Competency Framework · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   FRAMEWORK BIBLE — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.content>*{flex-shrink:0}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+
+.panel{background:var(--card);border:1px solid rgba(0,0,0,0.08);border-radius:12px;overflow:hidden}
+.panel-head{padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1;min-width:120px}
+.panel-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500}
+.panel-body{padding:18px 20px}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:960px){.two-col{grid-template-columns:1fr}}
+
+/* TB PILLS & BUTTONS */
+.tb-pill{padding:4px 11px;border-radius:100px;font-size:11px;border:1px solid;white-space:nowrap}
+.tb-pill.green{border-color:rgba(22,163,74,.35);color:var(--green)}
+.tb-pill.gold{border-color:var(--accent-bd);color:var(--accent)}
+.tb-btn{padding:6px 14px;border-radius:6px;border:1px solid rgba(0,0,0,0.08);background:transparent;color:var(--text-secondary);font-family:var(--font-body);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s,color .15s;text-decoration:none;white-space:nowrap}
+.tb-btn:hover{background:rgba(0,0,0,0.04);color:var(--text-primary)}
+.tb-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.tb-btn.primary:hover{opacity:.88}
+
+/* LOCKED BANNER */
+.locked-banner{display:flex;align-items:center;gap:14px;padding:16px 22px;background:linear-gradient(135deg,var(--card) 0%,var(--green-bg) 100%);border:1px solid rgba(22,163,74,0.25);border-radius:12px}
+.lock-icon{width:44px;height:44px;border-radius:10px;background:var(--green-bg);border:1px solid rgba(22,163,74,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lock-icon svg{width:20px;height:20px;stroke:var(--green);fill:none;stroke-width:1.8;stroke-linecap:round}
+.lock-info{flex:1;min-width:0}
+.lock-title{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--green);margin-bottom:3px}
+.lock-sub{font-size:12px;color:var(--text-secondary)}
+.lock-meta{display:flex;gap:16px;margin-top:6px;flex-wrap:wrap}
+.lock-meta-item{font-size:10px;color:var(--text-muted)}
+.lock-meta-item strong{color:var(--text-secondary)}
+
+/* TAXONOMY TREE */
+.tax-domain{margin-bottom:16px}
+.tax-domain-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;transition:background .15s;border-left:3px solid transparent}
+.tax-domain-head:hover{background:rgba(0,0,0,0.03)}
+.tax-domain-head.expanded{background:rgba(0,0,0,0.02)}
+.tax-chevron{width:14px;height:14px;stroke:var(--text-muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s;flex-shrink:0}
+.tax-domain-head.expanded .tax-chevron{transform:rotate(90deg)}
+.tax-domain-name{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary)}
+.tax-domain-count{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-left:auto}
+.tax-skills{display:none;padding:6px 0 6px 28px}
+.tax-skills.show{display:block}
+.tax-skill{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:6px;margin-bottom:2px;transition:background .15s;cursor:pointer}
+.tax-skill:hover{background:rgba(0,0,0,0.03)}
+.tax-skill-name{font-size:12px;color:var(--text-secondary);flex:1}
+.tax-skill-crit{padding:2px 8px;border-radius:100px;font-size:9px;font-weight:500;flex-shrink:0}
+.tax-skill-levels{font-family:var(--font-mono);font-size:10px;color:var(--text-muted);flex-shrink:0}
+
+/* VERSION HISTORY */
+.ver-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.05)}
+.ver-row:last-child{border-bottom:none}
+.ver-num{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--accent);width:40px;flex-shrink:0}
+.ver-info{flex:1;min-width:0}
+.ver-title{font-size:12px;color:var(--text-primary);font-weight:500}
+.ver-meta{font-size:10px;color:var(--text-muted);margin-top:2px}
+.ver-badge{padding:2px 8px;border-radius:100px;font-size:9px;font-weight:500;flex-shrink:0}
+.ver-action{padding:4px 10px;border-radius:5px;font-size:10px;border:1px solid rgba(0,0,0,0.08);color:var(--text-secondary);cursor:pointer;flex-shrink:0;background:transparent;font-family:var(--font-body);transition:all .15s}
+.ver-action:hover{border-color:var(--blue);color:var(--blue)}
+
+/* COMPETENCY CARD */
+.comp-card{border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:12px 14px;margin-bottom:8px}
+.comp-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.comp-type{padding:2px 8px;border-radius:100px;font-size:9px;font-weight:500;flex-shrink:0}
+.comp-name{font-size:12px;color:var(--text-primary);font-weight:500;flex:1}
+.comp-desc{font-size:11px;color:var(--text-muted);line-height:1.5}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:960px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--card);border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.stat-label{font-size:11px;color:var(--text-muted);white-space:nowrap}
+.stat-val{font-family:var(--font-display);font-size:24px;font-weight:600;line-height:1}
+.stat-sub{font-size:11px;color:var(--text-muted)}
+
+/* EDIT MODE WARNING */
+.edit-warning{display:none;padding:14px 18px;background:var(--amber-bg);border:1px solid rgba(217,119,6,0.25);border-radius:10px;align-items:center;gap:12px}
+.edit-warning.show{display:flex;animation:fadeUp .3s ease}
+
+/* FORM INPUTS (edit mode) */
+.form-input{border:1px solid rgba(0,0,0,0.12);border-radius:6px;background:var(--card);color:var(--text-primary);font-family:var(--font-body);outline:none;transition:border-color .15s}
+.form-input:focus{border-color:var(--accent)}
+.form-select{border:1px solid rgba(0,0,0,0.12);border-radius:6px;background:var(--card);color:var(--text-secondary);font-family:var(--font-body)}
+
+/* LEVEL BANNER */
+.level-banner{display:flex;align-items:center;gap:12px;padding:0 28px;height:36px;background:linear-gradient(90deg,var(--accent-lt) 0%,transparent 60%);border-bottom:1px solid var(--accent-bd);text-decoration:none;flex-shrink:0}
+
+/* FOOTER BAR */
+.footer-bar{display:flex;align-items:center;gap:10px;padding:10px 28px;background:var(--accent-lt);border-top:1px solid var(--accent-bd);flex-shrink:0}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.fade-up{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <!-- TOPBAR EXTRAS (pills + buttons) -->
+  <div style="display:flex;align-items:center;gap:10px;padding:0 28px;height:48px;border-bottom:1px solid rgba(0,0,0,0.06);flex-shrink:0;background:var(--card)">
+    <div style="flex:1"></div>
+    <div class="tb-pill green">Published &middot; Locked</div>
+    <div class="tb-pill gold">v1.2</div>
+    <button class="tb-btn" onclick="showToast('Generating branded PDF...')">
+      <svg style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export PDF
+    </button>
+    <button class="tb-btn" onclick="toggleEditMode()">
+      <svg style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Edit (Re-approval)
+    </button>
+  </div>
+
+  <a href="../level-journey.html" class="level-banner">
+    <div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite"></div><span style="font-size:10px;font-family:var(--font-display);font-weight:600;letter-spacing:.08em;color:var(--accent)">L1 PUBLISHED</span></div>
+    <div style="width:1px;height:14px;background:var(--accent-bd)"></div>
+    <div style="font-size:11px;color:var(--text-secondary)">Read-only published framework &middot; Edit triggers 3-tier re-approval</div>
+    <div style="margin-left:auto;font-size:10px;font-family:var(--font-display);font-weight:600;letter-spacing:.06em;color:var(--accent);text-transform:uppercase">View journey &rarr;</div>
+  </a>
+
+  <div class="content">
+
+    <!-- EDIT WARNING (hidden by default) -->
+    <div class="edit-warning" id="editWarning">
+      <svg style="width:20px;height:20px;stroke:var(--amber);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div style="flex:1"><div style="font-size:13px;color:var(--amber);font-weight:500">Edit Mode Activated</div><div style="font-size:11px;color:var(--text-secondary)">Any changes will create a new draft version and require 3-tier re-approval before publishing. Current published version remains active until new version is approved.</div></div>
+      <button class="tb-btn" style="font-size:11px;padding:5px 11px;border-color:rgba(217,119,6,0.3);color:var(--amber)" onclick="toggleEditMode()">Cancel Edit</button>
+    </div>
+
+    <!-- LOCKED BANNER -->
+    <div class="locked-banner fade-up">
+      <div class="lock-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+      <div class="lock-info">
+        <div class="lock-title">Framework Published & Locked — Version 1.2</div>
+        <div class="lock-sub">Arcova Infrastructure skill and competency framework. 48 skills across 6 domains + 8 competencies. Approved via 3-tier review.</div>
+        <div class="lock-meta">
+          <div class="lock-meta-item">Published: <strong>15 Mar 2026</strong></div>
+          <div class="lock-meta-item">Approved by: <strong>Sunita Nair (CHRO)</strong></div>
+          <div class="lock-meta-item">Skills: <strong>48</strong></div>
+          <div class="lock-meta-item">Competencies: <strong>8</strong></div>
+          <div class="lock-meta-item">Proficiency Levels: <strong>4 (L1-L4)</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row fade-up" style="animation-delay:.06s">
+      <div class="stat-card"><div class="stat-label">Total Skills</div><div class="stat-val" style="color:var(--blue)">48</div><div class="stat-sub">Across 6 domains</div></div>
+      <div class="stat-card"><div class="stat-label">Competencies</div><div class="stat-val" style="color:var(--purple)">8</div><div class="stat-sub">Core, Leadership, Technical</div></div>
+      <div class="stat-card"><div class="stat-label">Version</div><div class="stat-val" style="color:var(--accent)">1.2</div><div class="stat-sub">3 revisions since v1.0</div></div>
+      <div class="stat-card"><div class="stat-label">Coverage</div><div class="stat-val" style="color:var(--green)">100%</div><div class="stat-sub">All 10 departments mapped</div></div>
+    </div>
+
+    <div class="two-col">
+      <!-- TAXONOMY BROWSER -->
+      <div class="panel fade-up" style="animation-delay:.12s">
+        <div class="panel-head">
+          <svg style="width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <div class="panel-title">Skill Taxonomy Browser</div>
+          <div class="panel-badge" style="background:var(--blue-bg);color:var(--blue)">6 domains</div>
+        </div>
+        <div class="panel-body" id="taxonomyTree"></div>
+      </div>
+
+      <!-- COMPETENCIES + VERSION HISTORY -->
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <!-- COMPETENCIES -->
+        <div class="panel fade-up" style="animation-delay:.18s">
+          <div class="panel-head">
+            <svg style="width:14px;height:14px;stroke:var(--purple);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <div class="panel-title">Competency Framework</div>
+            <div class="panel-badge" style="background:var(--purple-bg);color:var(--purple)">8 competencies</div>
+          </div>
+          <div class="panel-body" id="compList"></div>
+        </div>
+
+        <!-- VERSION HISTORY -->
+        <div class="panel fade-up" style="animation-delay:.24s">
+          <div class="panel-head">
+            <svg style="width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div class="panel-title">Version History</div>
+          </div>
+          <div class="panel-body" id="versionHistory"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-bar">
+    <svg style="width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <span style="font-size:11px;color:var(--accent);font-weight:500;letter-spacing:.03em">Published & locked framework &middot; Edit triggers 3-tier re-approval &middot; Feeds all portals and assessments</span>
+    <span style="margin-left:auto;font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase">L1 FrameworkBible</span>
+  </div>
+
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal: 'admin',
+  activeNav: 'Skills & Competency Framework',
+  breadcrumbs: ['Framework', 'Skills & Competency Framework'],
+  topbarActions: []
+});
+</script>
+
+<script>
+// TAXONOMY DATA
+var domains = [
+  {name:'Technical / Domain',color:'var(--blue)',bd:'rgba(37,99,235,0.15)',skills:[
+    {name:'Structural Analysis & Design',crit:'C1',levels:'L1-L4'},
+    {name:'Geotechnical Investigation',crit:'C1',levels:'L1-L4'},
+    {name:'BIM Coordination',crit:'C2',levels:'L1-L4'},
+    {name:'Civil Engineering Design',crit:'C1',levels:'L1-L4'},
+    {name:'Foundation Design',crit:'C2',levels:'L1-L4'},
+    {name:'Construction Materials Science',crit:'C3',levels:'L1-L4'},
+    {name:'Quantity Surveying',crit:'C3',levels:'L1-L4'},
+    {name:'Code Compliance (Eurocode/BS)',crit:'C1',levels:'L1-L4'}
+  ]},
+  {name:'Digital & Data',color:'var(--purple)',bd:'rgba(124,58,237,0.15)',skills:[
+    {name:'Data Analytics & Reporting',crit:'C1',levels:'L1-L4'},
+    {name:'AI Literacy',crit:'C1',levels:'L1-L4'},
+    {name:'Digital Twin Technology',crit:'C2',levels:'L1-L4'},
+    {name:'Cloud Infrastructure',crit:'C2',levels:'L1-L4'},
+    {name:'Cybersecurity Awareness',crit:'C2',levels:'L1-L4'},
+    {name:'Power BI / Dashboarding',crit:'C3',levels:'L1-L4'},
+    {name:'AutoCAD / CAD Proficiency',crit:'C3',levels:'L1-L4'},
+    {name:'IoT & Smart Infrastructure',crit:'C3',levels:'L1-L4'}
+  ]},
+  {name:'Safety & Compliance',color:'var(--green)',bd:'rgba(22,163,74,0.15)',skills:[
+    {name:'Health & Safety (ISO 45001)',crit:'C1',levels:'L1-L4'},
+    {name:'Risk Assessment & Mitigation',crit:'C1',levels:'L1-L4'},
+    {name:'Safety Audit & Investigation',crit:'C1',levels:'L1-L4'},
+    {name:'Environmental Compliance',crit:'C2',levels:'L1-L4'},
+    {name:'Quality Management (ISO 9001)',crit:'C2',levels:'L1-L4'},
+    {name:'Regulatory Knowledge',crit:'C2',levels:'L1-L4'},
+    {name:'SOX Compliance',crit:'C3',levels:'L1-L4'},
+    {name:'GDPR / Data Protection',crit:'C2',levels:'L1-L4'}
+  ]},
+  {name:'Leadership & Management',color:'var(--accent)',bd:'var(--accent-bd)',skills:[
+    {name:'Strategic Leadership',crit:'C1',levels:'L1-L4'},
+    {name:'Team Management',crit:'C2',levels:'L1-L4'},
+    {name:'Decision Making',crit:'C2',levels:'L1-L4'},
+    {name:'Mentoring & Coaching',crit:'C2',levels:'L1-L4'},
+    {name:'Change Management',crit:'C2',levels:'L1-L4'},
+    {name:'Project Risk Management',crit:'C1',levels:'L1-L4'},
+    {name:'Budget & Resource Planning',crit:'C2',levels:'L1-L4'},
+    {name:'Succession Planning',crit:'C2',levels:'L1-L4'}
+  ]},
+  {name:'Communication',color:'var(--amber)',bd:'rgba(217,119,6,0.15)',skills:[
+    {name:'Stakeholder Communication',crit:'C2',levels:'L1-L4'},
+    {name:'Technical Report Writing',crit:'C2',levels:'L1-L4'},
+    {name:'Presentation Skills',crit:'C3',levels:'L1-L4'},
+    {name:'Client Relationship Mgmt',crit:'C2',levels:'L1-L4'},
+    {name:'Cross-Cultural Communication',crit:'C3',levels:'L1-L4'},
+    {name:'Conflict Resolution',crit:'C3',levels:'L1-L4'},
+    {name:'Negotiation',crit:'C3',levels:'L1-L4'},
+    {name:'Executive Communication',crit:'C2',levels:'L1-L4'}
+  ]},
+  {name:'Innovation & Problem Solving',color:'var(--red)',bd:'rgba(220,38,38,0.15)',skills:[
+    {name:'Sustainability & ESG',crit:'C2',levels:'L1-L4'},
+    {name:'Design Thinking',crit:'C3',levels:'L1-L4'},
+    {name:'Continuous Improvement',crit:'C2',levels:'L1-L4'},
+    {name:'Research & Development',crit:'C3',levels:'L1-L4'},
+    {name:'Innovation Mindset',crit:'C3',levels:'L1-L4'},
+    {name:'Problem Decomposition',crit:'C2',levels:'L1-L4'},
+    {name:'Systems Thinking',crit:'C3',levels:'L1-L4'},
+    {name:'Green Building Standards',crit:'C2',levels:'L1-L4'}
+  ]}
+];
+
+function critClass(c){return c==='C1'?'background:var(--red-bg);color:var(--red)':c==='C2'?'background:var(--amber-bg);color:var(--amber)':c==='C3'?'background:var(--blue-bg);color:var(--blue)':'background:rgba(0,0,0,0.04);color:var(--text-muted)'}
+
+function renderTaxonomy(){
+  var h='';
+  domains.forEach(function(d,di){
+    var exp = di===0 ? ' expanded' : '';
+    var show = di===0 ? ' show' : '';
+    h+='<div class="tax-domain">';
+    h+='<div class="tax-domain-head'+exp+'" onclick="toggleDomain(this)" style="border-left-color:'+d.color+'">';
+    h+='<svg class="tax-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>';
+    h+='<span class="tax-domain-name">'+d.name+'</span>';
+    h+='<span class="tax-domain-count">'+d.skills.length+' skills</span>';
+    if(editMode) h+='<span style="margin-left:8px;padding:2px 8px;border-radius:5px;font-size:9px;background:var(--amber-bg);color:var(--amber);cursor:pointer" onclick="event.stopPropagation();addSkill('+di+')">+ Add Skill</span>';
+    h+='</div>';
+    h+='<div class="tax-skills'+show+'">';
+    d.skills.forEach(function(s,si){
+      if(editMode){
+        h+='<div class="tax-skill" style="gap:6px">';
+        h+='<input class="form-input" value="'+s.name+'" onchange="domains['+di+'].skills['+si+'].name=this.value;showToast(\'Renamed to: \'+this.value)" style="flex:1;padding:5px 8px;font-size:11px">';
+        h+='<select onchange="domains['+di+'].skills['+si+'].crit=this.value;renderTaxonomy();showToast(\'Criticality changed to \'+this.value)" style="padding:4px 6px;border-radius:5px;border:1px solid rgba(0,0,0,0.12);background:var(--card);color:var(--text-secondary);font-size:10px;font-family:var(--font-body);width:60px">';
+        ['C1','C2','C3','C4'].forEach(function(c){h+='<option'+(s.crit===c?' selected':'')+'>'+c+'</option>'});
+        h+='</select>';
+        h+='<span style="padding:2px 6px;border-radius:4px;font-size:9px;background:var(--red-bg);color:var(--red);cursor:pointer" onclick="domains['+di+'].skills.splice('+si+',1);renderTaxonomy();updateStats();showToast(\'Skill removed\')">&times;</span>';
+        h+='</div>';
+      } else {
+        h+='<div class="tax-skill" onclick="showToast(\''+s.name.replace(/'/g,"\\'")+' — '+s.crit+' criticality, proficiency '+s.levels+'\')">';
+        h+='<span class="tax-skill-name">'+s.name+'</span>';
+        h+='<span class="tax-skill-crit" style="'+critClass(s.crit)+'">'+s.crit+'</span>';
+        h+='<span class="tax-skill-levels">'+s.levels+'</span>';
+        h+='</div>';
+      }
+    });
+    h+='</div></div>';
+  });
+  if(editMode){
+    h+='<div style="border:1px dashed rgba(0,0,0,0.12);border-radius:10px;padding:14px 18px;margin-top:12px">';
+    h+='<div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:8px">Add New Domain</div>';
+    h+='<div style="display:flex;gap:8px"><input class="form-input" id="newDomainName" placeholder="e.g. Emerging Technologies" style="flex:1;padding:6px 10px;font-size:11px"><button class="tb-btn primary" style="font-size:11px;padding:5px 12px" onclick="addDomain()">+ Add Domain</button></div>';
+    h+='</div>';
+  }
+  document.getElementById('taxonomyTree').innerHTML=h;
+}
+
+function addSkill(di){
+  var name=prompt('Enter new skill name:');
+  if(!name)return;
+  domains[di].skills.push({name:name,crit:'C3',levels:'L1-L4'});
+  renderTaxonomy();updateStats();
+  showToast(name+' added to '+domains[di].name);
+}
+
+function addDomain(){
+  var name=document.getElementById('newDomainName').value.trim();
+  if(!name){showToast('Enter domain name');return}
+  var colors=['var(--teal)','var(--purple)','var(--amber)','var(--blue)'];
+  domains.push({name:name,color:colors[domains.length%colors.length],bd:'rgba(0,0,0,0.08)',skills:[]});
+  renderTaxonomy();updateStats();
+  showToast('Domain "'+name+'" added — now add skills to it');
+}
+
+function toggleDomain(el){
+  el.classList.toggle('expanded');
+  var skills=el.nextElementSibling;
+  skills.classList.toggle('show');
+}
+
+// COMPETENCIES
+var comps=[
+  {name:'Safety-First Mindset',type:'Core',typeColor:'background:var(--green-bg);color:var(--green)',desc:'Proactively identifies and mitigates safety risks in all work contexts. Champions zero-harm culture.'},
+  {name:'Innovation & Continuous Improvement',type:'Core',typeColor:'background:var(--green-bg);color:var(--green)',desc:'Seeks better ways of working. Applies design thinking and data to improve processes and outcomes.'},
+  {name:'Client Partnership',type:'Core',typeColor:'background:var(--green-bg);color:var(--green)',desc:'Builds trusted relationships with clients. Understands needs, manages expectations, delivers value.'},
+  {name:'Digital Fluency',type:'Technical',typeColor:'background:var(--blue-bg);color:var(--blue)',desc:'Confident using digital tools (BIM, Power BI, cloud). Adapts to new technology quickly.'},
+  {name:'Strategic Leadership',type:'Leadership',typeColor:'background:var(--accent-lt);color:var(--accent)',desc:'Aligns team actions with org strategy. Makes decisions under uncertainty. Develops others.'},
+  {name:'Cross-Cultural Collaboration',type:'Core',typeColor:'background:var(--green-bg);color:var(--green)',desc:'Works effectively across Singapore, Mumbai, Dubai, KL offices. Respects cultural differences.'},
+  {name:'Technical Excellence',type:'Technical',typeColor:'background:var(--blue-bg);color:var(--blue)',desc:'Maintains deep domain expertise. Applies engineering standards rigorously. Mentors juniors.'},
+  {name:'Sustainability Orientation',type:'Core',typeColor:'background:var(--green-bg);color:var(--green)',desc:'Integrates ESG principles into project decisions. Champions green building and carbon reduction.'}
+];
+
+function renderComps(){
+  var h='';
+  comps.forEach(function(c,ci){
+    if(editMode){
+      h+='<div class="comp-card" style="border-color:rgba(217,119,6,0.2)">';
+      h+='<div class="comp-head">';
+      h+='<select onchange="comps['+ci+'].type=this.value;renderComps();showToast(\'Type changed\')" style="padding:3px 6px;border-radius:5px;border:1px solid rgba(0,0,0,0.12);background:var(--card);color:var(--text-secondary);font-size:10px;font-family:var(--font-body)">';
+      ['Core','Technical','Leadership'].forEach(function(t){h+='<option'+(c.type===t?' selected':'')+'>'+t+'</option>'});
+      h+='</select>';
+      h+='<input class="form-input" value="'+c.name+'" onchange="comps['+ci+'].name=this.value;showToast(\'Renamed\')" style="flex:1;padding:4px 8px;font-size:12px;font-weight:500">';
+      h+='<span style="padding:2px 6px;border-radius:4px;font-size:9px;background:var(--red-bg);color:var(--red);cursor:pointer" onclick="comps.splice('+ci+',1);renderComps();updateStats();showToast(\'Competency removed\')">&times;</span>';
+      h+='</div>';
+      h+='<textarea onchange="comps['+ci+'].desc=this.value;showToast(\'Description updated\')" style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid rgba(0,0,0,0.12);background:var(--card);color:var(--text-secondary);font-family:var(--font-body);font-size:11px;resize:vertical;min-height:40px;outline:none">'+c.desc+'</textarea>';
+      h+='</div>';
+    } else {
+      h+='<div class="comp-card"><div class="comp-head"><span class="comp-type" style="'+c.typeColor+'">'+c.type+'</span><span class="comp-name">'+c.name+'</span></div><div class="comp-desc">'+c.desc+'</div></div>';
+    }
+  });
+  if(editMode){
+    h+='<div style="border:1px dashed rgba(0,0,0,0.12);border-radius:8px;padding:12px 14px;margin-top:8px">';
+    h+='<div style="display:flex;gap:8px;align-items:flex-end">';
+    h+='<div style="flex:1"><div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">Competency Name</div><input class="form-input" id="newCompName" placeholder="e.g. Agile Mindset" style="padding:6px 10px;font-size:11px"></div>';
+    h+='<div style="width:110px"><div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">Type</div><select class="form-select" id="newCompType" style="padding:6px;font-size:10px"><option>Core</option><option>Technical</option><option>Leadership</option></select></div>';
+    h+='<button class="tb-btn primary" style="font-size:11px;padding:5px 12px" onclick="addComp()">+ Add</button>';
+    h+='</div></div>';
+  }
+  document.getElementById('compList').innerHTML=h;
+}
+
+// VERSION HISTORY
+function renderVersions(){
+  var versions=[
+    {ver:'1.2',title:'Added 3 skills to Digital & Data domain',meta:'15 Mar 2026 · Approved by Sunita Nair (CHRO)',badge:'Current',badgeStyle:'background:var(--green-bg);color:var(--green)'},
+    {ver:'1.1',title:'Criticality reclassification — AI Literacy moved to C1',meta:'28 Feb 2026 · Approved by Sunita Nair (CHRO)',badge:'Archived',badgeStyle:'background:rgba(0,0,0,0.04);color:var(--text-muted)'},
+    {ver:'1.0',title:'Initial publication — 45 skills, 8 competencies',meta:'10 Jan 2026 · Auto-generated from SkillForge + 3-tier approval',badge:'Original',badgeStyle:'background:var(--accent-lt);color:var(--accent)'}
+  ];
+  var h='';
+  versions.forEach(function(v){
+    h+='<div class="ver-row">';
+    h+='<span class="ver-num">v'+v.ver+'</span>';
+    h+='<div class="ver-info"><div class="ver-title">'+v.title+'</div><div class="ver-meta">'+v.meta+'</div></div>';
+    h+='<span class="ver-badge" style="'+v.badgeStyle+'">'+v.badge+'</span>';
+    h+='<button class="ver-action" onclick="showToast(\'Loading v'+v.ver+' diff view...\')">View</button>';
+    h+='</div>';
+  });
+  document.getElementById('versionHistory').innerHTML=h;
+}
+
+function addComp(){
+  var name=document.getElementById('newCompName').value.trim();
+  if(!name){showToast('Enter competency name');return}
+  var type=document.getElementById('newCompType').value;
+  var typeColors={Core:'background:var(--green-bg);color:var(--green)',Technical:'background:var(--blue-bg);color:var(--blue)',Leadership:'background:var(--accent-lt);color:var(--accent)'};
+  comps.push({name:name,type:type,typeColor:typeColors[type],desc:'Define behavioural descriptors for this competency.'});
+  renderComps();updateStats();
+  showToast(name+' competency added');
+}
+
+function updateStats(){
+  var totalSkills=0;
+  domains.forEach(function(d){totalSkills+=d.skills.length});
+  var statCards=document.querySelectorAll('.stat-card .stat-val');
+  if(statCards[0])statCards[0].textContent=totalSkills;
+  if(statCards[1])statCards[1].textContent=comps.length;
+}
+
+// EDIT MODE
+var editMode=false;
+function toggleEditMode(){
+  editMode=!editMode;
+  var w=document.getElementById('editWarning');
+  if(editMode){
+    w.classList.add('show');
+    showToast('Edit mode ON — click skill names, criticality, or descriptions to edit. Add new skills and competencies.');
+  } else {
+    w.classList.remove('show');
+    showToast('Edit mode OFF — framework remains at v1.2');
+  }
+  renderTaxonomy();
+  renderComps();
+}
+
+// TOAST
+function showToast(msg){var t=document.getElementById('sip-toast');if(!t){t=document.createElement('div');t.id='sip-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:var(--font-body);padding:10px 18px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap';document.body.appendChild(t)}t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)'},2400)}
+
+document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.getAttribute('href')==='#'){e.preventDefault();showToast((a.textContent||'').trim().substring(0,36)+' — available in full platform')}});
+
+// INIT
+renderTaxonomy();renderComps();renderVersions();
+</script>
+</body>
+</html>

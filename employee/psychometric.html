@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psychometric · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+<style>
+/* ── PANELS ── */
+.panel{background:var(--card);border:1px solid rgba(0,0,0,0.07);border-radius:12px;overflow:hidden}
+.panel-head{padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-title{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text-primary);flex:1;min-width:120px}
+.panel-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500}
+.panel-body{padding:18px 20px}
+
+/* ── ASSESSMENT HEADER ── */
+.assess-header{display:flex;align-items:center;gap:16px;padding:18px 22px;background:var(--card);border:1px solid rgba(0,0,0,0.07);border-radius:12px}
+.ah-icon{width:48px;height:48px;border-radius:12px;background:var(--purple-bg);color:var(--purple);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ah-icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ah-info{flex:1;min-width:0}
+.ah-title{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text-primary)}
+.ah-meta{font-size:11px;color:var(--text-secondary);margin-top:3px}
+.ah-status{padding:5px 14px;border-radius:100px;font-size:11px;font-weight:500;flex-shrink:0;background:var(--green-bg);color:var(--green)}
+
+/* ── BIG FIVE BARS ── */
+.b5-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.05)}
+.b5-item:last-child{border-bottom:none}
+.b5-label{width:140px;flex-shrink:0}
+.b5-name{font-size:12px;font-weight:500;color:var(--text-primary)}
+.b5-tag{font-size:10px;color:var(--text-secondary);margin-top:1px}
+.b5-bar{flex:1;height:8px;background:rgba(0,0,0,0.06);border-radius:4px;overflow:hidden;min-width:0}
+.b5-fill{height:100%;border-radius:4px;transition:width .8s ease}
+.b5-score{width:50px;text-align:right;font-family:var(--font-mono);font-size:13px;font-weight:500;flex-shrink:0}
+
+/* ── DISC ── */
+.disc-profile{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.disc-badge{width:80px;height:80px;border-radius:16px;background:linear-gradient(135deg,var(--blue-bg) 0%,var(--purple-bg) 100%);border:2px solid rgba(37,99,235,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.disc-badge-text{font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--blue)}
+.disc-info{flex:1;min-width:200px}
+.disc-type{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px}
+.disc-desc{font-size:12px;color:var(--text-secondary);line-height:1.7}
+
+/* ── COGNITIVE ── */
+.cog-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:900px){.cog-grid{grid-template-columns:repeat(2,1fr)}}
+.cog-card{padding:16px;background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.07);border-radius:10px;text-align:center}
+.cog-val{font-family:var(--font-display);font-size:22px;font-weight:800;line-height:1}
+.cog-label{font-size:10px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.cog-card.highlight{border-color:rgba(37,99,235,0.25);background:rgba(37,99,235,0.05)}
+
+/* ── INSIGHTS ── */
+.insight-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid rgba(0,0,0,0.05)}
+.insight-item:last-child{border-bottom:none}
+.insight-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.insight-text{flex:1;font-size:12px;color:var(--text-secondary);line-height:1.7}
+.insight-text strong{color:var(--text-primary);font-weight:500}
+
+/* ── FEED LINKS ── */
+.feed-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:860px){.feed-grid{grid-template-columns:1fr}}
+.feed-card{padding:16px 18px;background:rgba(0,0,0,0.01);border:1px solid rgba(0,0,0,0.07);border-radius:10px;text-decoration:none;transition:border-color .2s,background .2s;display:flex;flex-direction:column;gap:8px}
+.feed-card:hover{border-color:rgba(0,0,0,0.18);background:rgba(0,0,0,0.03)}
+.feed-card-title{font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px}
+.feed-card-title svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.feed-card-desc{font-size:11px;color:var(--text-secondary);line-height:1.5}
+.feed-card-arrow{font-size:11px;color:var(--blue);font-weight:500;margin-top:4px}
+
+/* ── CONFIDENCE FOOTER ── */
+.confidence-footer{display:flex;align-items:center;gap:10px;padding:10px 28px;background:rgba(201,168,76,0.06);border-top:1px solid rgba(201,168,76,0.15);flex-shrink:0;margin:0 -28px -28px}
+.confidence-footer .cf-text{font-size:11px;color:var(--accent);font-weight:500;letter-spacing:.03em}
+.confidence-footer .cf-level{margin-left:auto;font-size:10px;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase}
+
+/* ── PAGE-LEVEL LAYOUT ── */
+.page-stack{display:flex;flex-direction:column;gap:20px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.fade-up{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+<div class="page-stack">
+
+  <!-- ASSESSMENT HEADER -->
+  <div class="assess-header fade-up">
+    <div class="ah-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
+    </div>
+    <div class="ah-info">
+      <div class="ah-title">Q1 2026 — Psychometric &amp; Behavioural Profile</div>
+      <div class="ah-meta">Completed 18 Mar 2026 &middot; Assessed by AI + Validated by Arun Krishnan &middot; PSY-2026-Q1-PM</div>
+    </div>
+    <div class="ah-status">Completed</div>
+  </div>
+
+  <!-- BIG FIVE PERSONALITY -->
+  <div class="panel fade-up" style="animation-delay:.06s">
+    <div class="panel-head">
+      <div class="panel-title">Big Five Personality Profile</div>
+      <div class="panel-badge" style="background:var(--purple-bg);color:var(--purple)">OCEAN Model</div>
+    </div>
+    <div class="panel-body">
+      <div class="b5-item">
+        <div class="b5-label"><div class="b5-name">Openness</div><div class="b5-tag">High</div></div>
+        <div class="b5-bar"><div class="b5-fill" style="width:82%;background:var(--blue)"></div></div>
+        <div class="b5-score" style="color:var(--blue)">82</div>
+      </div>
+      <div class="b5-item">
+        <div class="b5-label"><div class="b5-name">Conscientiousness</div><div class="b5-tag">Very High</div></div>
+        <div class="b5-bar"><div class="b5-fill" style="width:88%;background:var(--green)"></div></div>
+        <div class="b5-score" style="color:var(--green)">88</div>
+      </div>
+      <div class="b5-item">
+        <div class="b5-label"><div class="b5-name">Extraversion</div><div class="b5-tag">Moderate</div></div>
+        <div class="b5-bar"><div class="b5-fill" style="width:54%;background:var(--amber)"></div></div>
+        <div class="b5-score" style="color:var(--amber)">54</div>
+      </div>
+      <div class="b5-item">
+        <div class="b5-label"><div class="b5-name">Agreeableness</div><div class="b5-tag">High</div></div>
+        <div class="b5-bar"><div class="b5-fill" style="width:76%;background:var(--blue)"></div></div>
+        <div class="b5-score" style="color:var(--blue)">76</div>
+      </div>
+      <div class="b5-item">
+        <div class="b5-label"><div class="b5-name">Neuroticism</div><div class="b5-tag">Low &mdash; Positive</div></div>
+        <div class="b5-bar"><div class="b5-fill" style="width:28%;background:var(--green)"></div></div>
+        <div class="b5-score" style="color:var(--green)">28</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISC PROFILE -->
+  <div class="panel fade-up" style="animation-delay:.12s">
+    <div class="panel-head">
+      <div class="panel-title">DISC Behavioural Profile</div>
+      <div class="panel-badge" style="background:var(--blue-bg);color:var(--blue)">DISC</div>
+    </div>
+    <div class="panel-body">
+      <div class="disc-profile">
+        <div class="disc-badge"><div class="disc-badge-text">DC</div></div>
+        <div class="disc-info">
+          <div class="disc-type">Dominant-Conscientious (DC)</div>
+          <div class="disc-desc">
+            Priya exhibits a strong DC profile, combining results-driven determination with meticulous attention to detail and quality standards. She approaches challenges methodically, preferring data-backed decisions over intuition. In team settings, she is direct and efficient in communication, often taking the lead on technical problem-solving while ensuring compliance with engineering standards. Under pressure, she maintains composure and prioritises accuracy, making her well-suited for high-stakes structural engineering projects where precision is non-negotiable.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COGNITIVE ABILITY -->
+  <div class="panel fade-up" style="animation-delay:.18s">
+    <div class="panel-head">
+      <div class="panel-title">Cognitive Ability Assessment</div>
+      <div class="panel-badge" style="background:rgba(201,168,76,0.12);color:var(--accent)">78th Percentile</div>
+    </div>
+    <div class="panel-body">
+      <div class="cog-grid">
+        <div class="cog-card highlight">
+          <div class="cog-val" style="color:var(--blue)">78<span style="font-size:12px;font-weight:400">th</span></div>
+          <div class="cog-label">Overall</div>
+        </div>
+        <div class="cog-card">
+          <div class="cog-val" style="color:var(--green)">82<span style="font-size:12px;font-weight:400">nd</span></div>
+          <div class="cog-label">Verbal</div>
+        </div>
+        <div class="cog-card">
+          <div class="cog-val" style="color:var(--amber)">74<span style="font-size:12px;font-weight:400">th</span></div>
+          <div class="cog-label">Numerical</div>
+        </div>
+        <div class="cog-card">
+          <div class="cog-val" style="color:var(--purple)">76<span style="font-size:12px;font-weight:400">th</span></div>
+          <div class="cog-label">Abstract</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;font-size:11px;color:var(--text-secondary);line-height:1.6;padding:10px 14px;background:rgba(0,0,0,0.02);border-radius:8px;border-left:3px solid var(--accent)">
+        Priya scores in the 78th percentile overall, indicating strong cognitive ability relative to the engineering professional cohort. Verbal reasoning is her strongest area, supporting her ability to interpret complex technical specifications and communicate findings. Numerical reasoning at the 74th percentile is solid for her role, with abstract reasoning at 76th percentile reflecting strong spatial and systems-level thinking.
+      </div>
+    </div>
+  </div>
+
+  <!-- AI-GENERATED BEHAVIOURAL INSIGHTS -->
+  <div class="panel fade-up" style="animation-delay:.24s">
+    <div class="panel-head">
+      <div class="panel-title">AI-Generated Behavioural Insights</div>
+      <div class="panel-badge" style="background:var(--purple-bg);color:var(--purple)">AI Analysis</div>
+    </div>
+    <div class="panel-body">
+      <div class="insight-item">
+        <div class="insight-icon" style="background:var(--green-bg);color:var(--green)">
+          <svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="insight-text"><strong>Leadership readiness under pressure:</strong> Priya's combination of low neuroticism and high conscientiousness indicates she remains calm and detail-oriented in high-stakes situations. This is a strong indicator for future project leadership roles, particularly on complex structural programmes.</div>
+      </div>
+      <div class="insight-item">
+        <div class="insight-icon" style="background:var(--blue-bg);color:var(--blue)">
+          <svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>
+        </div>
+        <div class="insight-text"><strong>Effective cross-functional communicator:</strong> Despite moderate extraversion, her high agreeableness and verbal reasoning score suggest she communicates technical concepts clearly to non-technical stakeholders. She is collaborative when engaged, though she may prefer structured meetings over open brainstorming.</div>
+      </div>
+      <div class="insight-item">
+        <div class="insight-icon" style="background:var(--amber-bg);color:var(--amber)">
+          <svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="insight-text"><strong>Potential development area &mdash; delegation:</strong> High conscientiousness paired with the DC DISC profile may lead to over-control of deliverables. Coaching on strategic delegation and trust-building with junior engineers would accelerate her transition into senior leadership.</div>
+      </div>
+      <div class="insight-item">
+        <div class="insight-icon" style="background:var(--purple-bg);color:var(--purple)">
+          <svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="insight-text"><strong>Innovation catalyst:</strong> High openness (82) combined with strong abstract reasoning means Priya is well-positioned to drive innovation in engineering methodology. She is likely to embrace new tools (BIM, AI-assisted design) and can champion adoption across the team.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW THIS FEEDS YOUR PROFILE -->
+  <div class="panel fade-up" style="animation-delay:.30s">
+    <div class="panel-head">
+      <div class="panel-title">How This Feeds Your Profile</div>
+    </div>
+    <div class="panel-body">
+      <div class="feed-grid">
+        <a class="feed-card" href="skill-passport.html">
+          <div class="feed-card-title">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Skill Passport
+          </div>
+          <div class="feed-card-desc">Psychometric data enriches your soft-skill competencies and behavioural tags in the passport, giving managers a 360-degree view.</div>
+          <div class="feed-card-arrow">View Skill Passport &rarr;</div>
+        </a>
+        <a class="feed-card" href="my-idp.html">
+          <div class="feed-card-title">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            Individual Development Plan
+          </div>
+          <div class="feed-card-desc">AI uses your DISC and Big Five results to recommend personalised development goals, such as delegation coaching and leadership exposure.</div>
+          <div class="feed-card-arrow">View My IDP &rarr;</div>
+        </a>
+        <a class="feed-card" href="#">
+          <div class="feed-card-title">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Succession Planning
+          </div>
+          <div class="feed-card-desc">Your psychometric profile informs readiness ratings in the succession pipeline, helping leadership identify future project leads.</div>
+          <div class="feed-card-arrow">View Succession &rarr;</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIDENCE FOOTER -->
+  <div class="confidence-footer">
+    <svg style="width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <span class="cf-text">Psychometric profile for Priya Menon &middot; AI-validated &middot; Feeds Skill Passport, IDP &amp; Succession</span>
+    <span class="cf-level">L2 Intelligence</span>
+  </div>
+
+</div>
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'employee',
+    activeNav: 'Psychometric',
+    breadcrumbs: ['Assessments', 'Psychometric'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+function showToast(msg) {
+  var t = document.getElementById('sip-toast');
+  if (!t) { t=document.createElement('div');t.id='sip-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#152438;border:1px solid rgba(255,255,255,0.1);color:#8AACC4;font-size:12px;font-family:"DM Sans",sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap';document.body.appendChild(t); }
+  t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)'},2400);
+}
+
+document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.getAttribute('href')==='#'){e.preventDefault();showToast((a.textContent||'').trim().substring(0,36)+' \u2014 available in full platform')}});
+</script>
+</body>
+</html>

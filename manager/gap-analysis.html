@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gap Analysis · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   GAP ANALYSIS — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.content>*{flex-shrink:0}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+.panel{background:var(--card);border:1px solid rgba(0,0,0,0.07);border-radius:12px;overflow:hidden}
+.panel-head{padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1;min-width:120px}
+.panel-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500}
+.panel-body{padding:18px 20px}
+
+/* TABS */
+.tab-bar{display:flex;gap:2px;padding:4px;background:var(--card);border:1px solid rgba(0,0,0,0.07);border-radius:10px;align-self:flex-start}
+.tab-btn{padding:7px 16px;border-radius:7px;border:none;background:transparent;font-family:var(--font-body);font-size:12px;color:var(--text-secondary);cursor:pointer;transition:background .15s,color .15s;white-space:nowrap}
+.tab-btn.active{background:rgba(0,0,0,0.06);color:var(--text-primary);font-weight:500}
+.tab-btn:hover:not(.active){color:var(--text-primary)}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:960px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--card);border:1px solid rgba(0,0,0,0.07);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.stat-label{font-size:11px;color:var(--text-secondary);white-space:nowrap}
+.stat-val{font-family:var(--font-display);font-size:24px;font-weight:600;line-height:1;white-space:nowrap}
+.stat-sub{font-size:11px;color:var(--text-secondary)}
+
+/* HEATMAP */
+.heatmap{display:grid;gap:3px}
+.heat-cell{padding:8px 6px;border-radius:6px;text-align:center;font-family:var(--font-mono);font-size:11px;font-weight:500;cursor:pointer;transition:transform .15s,box-shadow .15s;min-width:0}
+.heat-cell:hover{transform:scale(1.08);box-shadow:0 4px 12px rgba(0,0,0,0.1);z-index:2;position:relative}
+.heat-header{font-size:9px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;padding:6px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.heat-row-label{font-size:11px;color:var(--text-secondary);padding:8px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.hg-critical{background:var(--red-bg);color:var(--red);border:1px solid rgba(220,38,38,0.2)}
+.hg-high{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(217,119,6,0.2)}
+.hg-medium{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(37,99,235,0.15)}
+.hg-low{background:var(--green-bg);color:var(--green);border:1px solid rgba(22,163,74,0.15)}
+.hg-none{background:rgba(0,0,0,0.02);color:var(--text-muted);border:1px solid rgba(0,0,0,0.06)}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:960px){.two-col{grid-template-columns:1fr}}
+
+/* RISK ALERTS */
+.risk-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.risk-item:last-child{border-bottom:none}
+.risk-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.risk-icon svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
+.risk-title{font-size:12px;color:var(--text-primary);font-weight:500;margin-bottom:2px}
+.risk-desc{font-size:11px;color:var(--text-secondary);line-height:1.5}
+.risk-tag{padding:2px 8px;border-radius:100px;font-size:9px;font-weight:500;margin-left:auto;flex-shrink:0}
+
+/* EMPLOYEE GAP LIST */
+.emp-gap{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.emp-gap:last-child{border-bottom:none}
+.eg-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:9px;font-weight:600;flex-shrink:0}
+.eg-info{flex:1;min-width:0}
+.eg-name{font-size:12px;color:var(--text-primary);font-weight:500}
+.eg-role{font-size:10px;color:var(--text-secondary)}
+.eg-score{font-family:var(--font-mono);font-size:12px;font-weight:500;flex-shrink:0}
+.eg-bar{width:60px;height:5px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden;flex-shrink:0}
+.eg-fill{height:100%;border-radius:3px}
+
+/* MOBILITY */
+.mob-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.mob-item:last-child{border-bottom:none}
+.mob-arrow{color:var(--text-secondary);font-size:12px;flex-shrink:0}
+.mob-from,.mob-to{font-size:11px;padding:4px 10px;border-radius:5px;flex-shrink:0}
+.mob-match{font-family:var(--font-mono);font-size:11px;font-weight:500;margin-left:auto;flex-shrink:0}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.fade-up{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+  <div class="content">
+
+    <!-- TABS: 4 views -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchView('org',this)">Org-Wide</button>
+        <button class="tab-btn" onclick="switchView('dept',this)">By Department</button>
+        <button class="tab-btn" onclick="switchView('role',this)">By Role</button>
+        <button class="tab-btn" onclick="switchView('individual',this)">Individual</button>
+      </div>
+      <div style="padding:6px 14px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:var(--text-secondary);font-family:var(--font-body);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s,color .15s;white-space:nowrap" onclick="showToast('PDF export triggered')">Export Report</div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row fade-up">
+      <div class="stat-card"><div class="stat-label">Total Gaps Identified</div><div class="stat-val" style="color:var(--red)">142</div><div class="stat-sub">Across 812 employees</div></div>
+      <div class="stat-card"><div class="stat-label">Critical (C1) Gaps</div><div class="stat-val" style="color:var(--red)">23</div><div class="stat-sub">Require immediate intervention</div></div>
+      <div class="stat-card"><div class="stat-label">Avg Gap Score</div><div class="stat-val" style="color:var(--amber)">1.2</div><div class="stat-sub">Scale: 0 (no gap) to 4 (critical)</div></div>
+      <div class="stat-card"><div class="stat-label">Talent Mobility Ready</div><div class="stat-val" style="color:var(--green)">38</div><div class="stat-sub">Employees with transferable skills</div></div>
+    </div>
+
+    <!-- VIEW: ORG-WIDE HEATMAP -->
+    <div id="viewOrg">
+      <div class="panel fade-up" style="animation-delay:.06s">
+        <div class="panel-head">
+          <svg style="width:14px;height:14px;stroke:var(--red);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          <div class="panel-title">Org-Wide Gap Heatmap — Skill × Department</div>
+          <div class="panel-badge" style="background:var(--red-bg);color:var(--red)">23 critical cells</div>
+        </div>
+        <div class="panel-body" style="overflow-x:auto">
+          <div class="heatmap" id="orgHeatmap" style="min-width:700px"></div>
+          <div style="display:flex;gap:14px;margin-top:14px;flex-wrap:wrap;font-size:10px;color:var(--text-secondary)">
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--red-bg);margin-right:4px;vertical-align:middle;border:1px solid rgba(220,38,38,0.2)"></span>Critical (>2.0)</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--amber-bg);margin-right:4px;vertical-align:middle;border:1px solid rgba(217,119,6,0.2)"></span>High (1.5-2.0)</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--blue-bg);margin-right:4px;vertical-align:middle;border:1px solid rgba(37,99,235,0.15)"></span>Medium (0.5-1.5)</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--green-bg);margin-right:4px;vertical-align:middle;border:1px solid rgba(22,163,74,0.15)"></span>Low (<0.5)</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:rgba(0,0,0,0.02);margin-right:4px;vertical-align:middle;border:1px solid rgba(0,0,0,0.06)"></span>No Gap</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TWO COL: Risk Alerts + Mobility -->
+      <div class="two-col" style="margin-top:20px">
+        <div class="panel fade-up" style="animation-delay:.12s">
+          <div class="panel-head">
+            <svg style="width:14px;height:14px;stroke:var(--red);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div class="panel-title">Strategic Risk Flags</div>
+            <div class="panel-badge" style="background:var(--red-bg);color:var(--red)">5 alerts</div>
+          </div>
+          <div class="panel-body" id="riskAlerts"></div>
+        </div>
+
+        <div class="panel fade-up" style="animation-delay:.18s">
+          <div class="panel-head">
+            <svg style="width:14px;height:14px;stroke:var(--green);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            <div class="panel-title">Talent Mobility Signals</div>
+            <div class="panel-badge" style="background:var(--green-bg);color:var(--green)">38 candidates</div>
+          </div>
+          <div class="panel-body" id="mobilityList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: DEPARTMENT -->
+    <div id="viewDept" style="display:none">
+      <div class="panel fade-up">
+        <div class="panel-head">
+          <div class="panel-title">Department Gap Breakdown</div>
+          <select id="deptFilter" onchange="renderDeptView()" style="padding:5px 10px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:var(--card);color:var(--text-secondary);font-size:11px;font-family:var(--font-body);cursor:pointer">
+            <option>Structural Engineering</option><option>Civil & Geotechnical</option><option>Project Delivery</option><option>BIM & Digital Delivery</option><option>IT Infrastructure</option><option>Finance & Procurement</option><option>Human Resources</option><option>Legal & Compliance</option><option>EHS & Risk</option><option>Sustainability Advisory</option>
+          </select>
+        </div>
+        <div class="panel-body" id="deptBody"></div>
+      </div>
+    </div>
+
+    <!-- VIEW: ROLE -->
+    <div id="viewRole" style="display:none">
+      <div class="panel fade-up">
+        <div class="panel-head">
+          <div class="panel-title">Role-Level Gap Analysis</div>
+          <div class="panel-badge" style="background:var(--purple-bg);color:var(--purple)">6 roles mapped</div>
+        </div>
+        <div class="panel-body" id="roleBody"></div>
+      </div>
+    </div>
+
+    <!-- VIEW: INDIVIDUAL -->
+    <div id="viewIndiv" style="display:none">
+      <div class="panel fade-up">
+        <div class="panel-head">
+          <div class="panel-title">Individual Employee Gaps</div>
+          <select id="empFilter" onchange="renderIndivView()" style="padding:5px 10px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:var(--card);color:var(--text-secondary);font-size:11px;font-family:var(--font-body);cursor:pointer">
+            <option>All Employees</option><option>Critical Gaps Only</option><option>Engineering & Delivery</option><option>Digital & Technology</option><option>Corporate Functions</option><option>Sustainability & EHS</option>
+          </select>
+        </div>
+        <div class="panel-body" id="indivBody"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;padding:10px 28px;background:rgba(201,168,76,0.06);border-top:1px solid rgba(201,168,76,0.15);flex-shrink:0">
+    <svg style="width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <span style="font-size:11px;color:var(--accent);font-weight:500;letter-spacing:.03em">Gap analysis from Q1 2026 assessment data &middot; Weighted by criticality &middot; Feeds into LNI briefs &amp; execution planning</span>
+    <span style="margin-left:auto;font-size:10px;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase">L2 Intelligence</span>
+  </div>
+</main>
+
+<!-- Shell Component -->
+<script src="../components/shell.js"></script>
+<script>
+  EdstellarShell.init({
+    portal: 'manager',
+    activeNav: 'Gap Analysis',
+    breadcrumbs: ['Analysis', 'Gap Analysis'],
+    topbarActions: []
+  });
+</script>
+
+<script>
+// ── DATA ──
+var skills=['Structural Analysis','BIM Coordination','Project Risk Mgmt','Health & Safety','Geotechnical','Data Analytics','Stakeholder Comms','Sustainability & ESG','AI Literacy','Digital Delivery'];
+var depts=['Structural Eng','Civil & Geo','Project Delivery','BIM & Digital','IT Infra','Finance','HR','Legal','EHS & Risk','Sustainability'];
+var gapData=[
+  [0.3,0.8,1.2,0.5,0.4,1.8,2.1,1.4,0.6,0.9],
+  [0.2,1.5,0.8,0.3,0.6,2.2,1.9,1.1,0.4,0.7],
+  [0.4,1.2,0.6,0.2,0.8,1.6,2.4,0.9,0.3,1.1],
+  [1.8,0.2,1.4,0.8,2.1,0.3,0.5,1.2,0.4,0.6],
+  [2.0,0.4,1.6,0.6,1.8,0.5,0.8,1.0,0.3,0.4],
+  [1.4,2.2,0.4,0.3,1.0,0.2,2.8,0.8,1.2,1.6],
+  [1.2,1.8,0.6,0.4,0.8,0.3,2.4,1.0,1.4,2.0],
+  [0.8,2.4,0.3,0.2,0.6,1.8,1.2,0.4,2.2,1.4],
+  [0.4,1.0,2.2,0.1,0.3,1.4,1.8,0.2,0.6,0.8],
+  [0.6,1.4,1.8,0.2,0.4,1.2,2.0,0.1,0.3,0.5]
+];
+
+var employees=[
+  {name:'Priya Menon',init:'PM',dept:'Structural Eng',role:'Sr. Structural Engineer',gaps:[{skill:'BIM Coordination',score:1.5},{skill:'Data Analytics',score:2.1}],mobility:'BIM & Digital'},
+  {name:'Karthik Subramanian',init:'KS',dept:'Structural Eng',role:'Design Engineer',gaps:[{skill:'AI Literacy',score:2.4},{skill:'Stakeholder Comms',score:1.8},{skill:'BIM Coordination',score:2.0},{skill:'Data Analytics',score:1.6}],mobility:null},
+  {name:'Rahul Sharma',init:'RS',dept:'Project Delivery',role:'Project Manager',gaps:[{skill:'Digital Delivery',score:2.2},{skill:'AI Literacy',score:1.9},{skill:'Data Analytics',score:1.4}],mobility:null},
+  {name:'Meera Sundaram',init:'MS',dept:'EHS & Risk',role:'Safety Manager',gaps:[{skill:'Digital Delivery',score:2.6},{skill:'Data Analytics',score:2.0}],mobility:null},
+  {name:'Suresh Iyer',init:'SI',dept:'Finance',role:'Finance Controller',gaps:[{skill:'AI Literacy',score:2.8},{skill:'Stakeholder Comms',score:1.2}],mobility:null},
+  {name:'Deepa Nair',init:'DN',dept:'BIM & Digital',role:'BIM Coordinator',gaps:[],mobility:'IT Infra'},
+  {name:'Vikram Patel',init:'VP',dept:'IT Infra',role:'Cloud Architect',gaps:[],mobility:'BIM & Digital'},
+  {name:'Anita Desai',init:'AD',dept:'Sustainability',role:'ESG Analyst',gaps:[{skill:'Data Analytics',score:1.6},{skill:'AI Literacy',score:1.4}],mobility:null},
+  {name:'Rajesh Gupta',init:'RG',dept:'Project Delivery',role:'Site Supervisor',gaps:[{skill:'BIM Coordination',score:2.0},{skill:'Health & Safety',score:0.8}],mobility:'EHS & Risk'},
+  {name:'Sneha Pillai',init:'SP',dept:'HR',role:'Talent Acquisition Lead',gaps:[{skill:'Data Analytics',score:1.8},{skill:'AI Literacy',score:2.2}],mobility:null},
+  {name:'Divya Ramesh',init:'DR',dept:'BIM & Digital',role:'Digital Twin Engineer',gaps:[],mobility:'Sustainability'},
+  {name:'Mohan Das',init:'MD',dept:'EHS & Risk',role:'EHS Auditor',gaps:[{skill:'Digital Delivery',score:2.4},{skill:'Stakeholder Comms',score:1.6},{skill:'AI Literacy',score:2.0}],mobility:null}
+];
+
+// ── HEATMAP ──
+function gapClass(v){if(v>2)return'hg-critical';if(v>1.5)return'hg-high';if(v>0.5)return'hg-medium';if(v>0)return'hg-low';return'hg-none'}
+
+function renderOrgHeatmap(){
+  var cols=depts.length+1;
+  var h='<div class="heatmap" style="grid-template-columns:140px repeat('+depts.length+',1fr)">';
+  h+='<div class="heat-header"></div>';
+  depts.forEach(function(d){h+='<div class="heat-header">'+d+'</div>'});
+  skills.forEach(function(sk,si){
+    h+='<div class="heat-row-label">'+sk+'</div>';
+    depts.forEach(function(d,di){
+      var v=gapData[si][di];
+      h+='<div class="heat-cell '+gapClass(v)+'" onclick="showToast(\''+sk+' × '+d+': gap score '+v.toFixed(1)+'\')">'+v.toFixed(1)+'</div>';
+    });
+  });
+  h+='</div>';
+  document.getElementById('orgHeatmap').innerHTML=h;
+}
+
+// ── RISK ALERTS ──
+function renderRiskAlerts(){
+  var alerts=[
+    {title:'AI Literacy — Universal Deficit',desc:'AI Literacy scores below 2.0 across ALL departments. This is the only skill with org-wide critical gap. Requires immediate enterprise-wide training programme.',level:'Critical',color:'var(--red)',bg:'var(--red-bg)'},
+    {title:'Digital Delivery — Engineering Gap',desc:'BIM & Digital Delivery skills at 2.1 gap in Structural Engineering — the largest department. 40% BIM dependency reduction target at risk.',level:'Critical',color:'var(--red)',bg:'var(--red-bg)'},
+    {title:'Data Analytics — Cross-Functional Deficit',desc:'6 of 10 departments show gaps >1.5 in Data Analytics. Power BI adoption lagging outside Digital & Technology team.',level:'High',color:'var(--amber)',bg:'var(--amber-bg)'},
+    {title:'Sustainability Dept — Multi-Skill Gap',desc:'Sustainability Advisory shows gaps in 4 skill categories simultaneously. Risk of programme delay for BCA Green Mark projects.',level:'High',color:'var(--amber)',bg:'var(--amber-bg)'},
+    {title:'Stakeholder Comms — Finance Weakness',desc:'Finance & Procurement has 2.8 gap in Stakeholder Communication. SOX compliance rollout requires strong stakeholder management.',level:'Medium',color:'var(--blue)',bg:'var(--blue-bg)'}
+  ];
+  var h='';
+  alerts.forEach(function(a){
+    h+='<div class="risk-item"><div class="risk-icon" style="background:'+a.bg+';color:'+a.color+'"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>';
+    h+='<div><div class="risk-title">'+a.title+'</div><div class="risk-desc">'+a.desc+'</div></div>';
+    h+='<span class="risk-tag" style="background:'+a.bg+';color:'+a.color+'">'+a.level+'</span></div>';
+  });
+  document.getElementById('riskAlerts').innerHTML=h;
+}
+
+// ── MOBILITY ──
+function renderMobility(){
+  var mobs=[
+    {name:'Priya Menon',from:'Structural Eng',to:'BIM & Digital',match:82,color:'var(--blue)'},
+    {name:'Rajesh Gupta',from:'Project Delivery',to:'EHS & Risk',match:76,color:'var(--green)'},
+    {name:'Deepa Nair',from:'BIM & Digital',to:'IT Infrastructure',match:88,color:'var(--green)'},
+    {name:'Vikram Patel',from:'IT Infrastructure',to:'BIM & Digital',match:71,color:'var(--amber)'},
+    {name:'Divya Ramesh',from:'BIM & Digital',to:'Sustainability',match:68,color:'var(--amber)'}
+  ];
+  var h='';
+  mobs.forEach(function(m){
+    h+='<div class="mob-item">';
+    h+='<span style="font-size:12px;color:var(--text-primary);font-weight:500;min-width:110px">'+m.name+'</span>';
+    h+='<span class="mob-from" style="background:rgba(0,0,0,0.04);color:var(--text-secondary)">'+m.from+'</span>';
+    h+='<span class="mob-arrow">&rarr;</span>';
+    h+='<span class="mob-to" style="background:var(--blue-bg);color:var(--blue)">'+m.to+'</span>';
+    h+='<span class="mob-match" style="color:'+m.color+'">'+m.match+'% match</span>';
+    h+='</div>';
+  });
+  document.getElementById('mobilityList').innerHTML=h;
+}
+
+// ── DEPT VIEW ──
+function renderDeptView(){
+  var dept=document.getElementById('deptFilter').value;
+  var dIdx=depts.indexOf(dept.replace('Structural Engineering','Structural Eng').replace('Civil & Geotechnical','Civil & Geo').replace('BIM & Digital Delivery','BIM & Digital').replace('IT Infrastructure','IT Infra').replace('Finance & Procurement','Finance').replace('Human Resources','HR').replace('Legal & Compliance','Legal').replace('Sustainability Advisory','Sustainability'));
+  if(dIdx<0)dIdx=0;
+  var emps=employees.filter(function(e){return e.dept===depts[dIdx]||e.dept===dept});
+  var h='<div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px">Showing gaps for <strong style="color:var(--text-primary)">'+dept+'</strong></div>';
+  // Skill gaps for this dept
+  h+='<div style="margin-bottom:16px">';
+  skills.forEach(function(sk,si){
+    var v=gapData[si][dIdx];
+    if(v>0.3){
+      h+='<div style="display:flex;align-items:center;gap:10px;padding:6px 0"><span style="font-size:11px;color:var(--text-secondary);width:140px;flex-shrink:0">'+sk+'</span>';
+      h+='<div style="flex:1;height:8px;background:rgba(0,0,0,0.06);border-radius:4px;overflow:hidden"><div style="width:'+Math.min(v/3*100,100)+'%;height:100%;background:'+(v>2?'var(--red)':v>1.5?'var(--amber)':v>0.5?'var(--blue)':'var(--green)')+';border-radius:4px"></div></div>';
+      h+='<span style="font-family:var(--font-mono);font-size:11px;width:28px;text-align:right;color:'+(v>2?'var(--red)':v>1.5?'var(--amber)':'var(--blue)')+'">'+v.toFixed(1)+'</span></div>';
+    }
+  });
+  h+='</div>';
+  // Employees
+  h+='<div style="font-size:11px;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Employees with gaps</div>';
+  if(emps.length===0) emps=employees.slice(0,3);
+  emps.forEach(function(e){
+    if(e.gaps.length===0)return;
+    h+='<div class="emp-gap"><div class="eg-av" style="background:var(--blue);color:#fff">'+e.init+'</div>';
+    h+='<div class="eg-info"><div class="eg-name">'+e.name+'</div><div class="eg-role">'+e.role+' — '+e.gaps.length+' gaps</div></div>';
+    var worst=Math.max.apply(null,e.gaps.map(function(g){return g.score}));
+    h+='<div class="eg-bar"><div class="eg-fill" style="width:'+Math.min(worst/3*100,100)+'%;background:'+(worst>2?'var(--red)':'var(--amber)')+'"></div></div>';
+    h+='<span class="eg-score" style="color:'+(worst>2?'var(--red)':'var(--amber)')+'">'+worst.toFixed(1)+'</span></div>';
+  });
+  document.getElementById('deptBody').innerHTML=h;
+}
+
+// ── ROLE VIEW ──
+function renderRoleView(){
+  var roles=[
+    {title:'Sr. Structural Engineer',dept:'Structural Eng',avgGap:1.8,topGaps:['BIM Coordination (1.5)','Data Analytics (2.1)','AI Literacy (1.8)'],count:112},
+    {title:'Project Manager',dept:'Project Delivery',avgGap:1.8,topGaps:['Digital Delivery (2.2)','AI Literacy (1.9)','Data Analytics (1.4)'],count:34},
+    {title:'Safety Manager',dept:'EHS & Risk',avgGap:2.3,topGaps:['Digital Delivery (2.6)','Data Analytics (2.0)','AI Literacy (1.8)'],count:18},
+    {title:'BIM Coordinator',dept:'BIM & Digital',avgGap:0.4,topGaps:['Stakeholder Comms (0.5)','Sustainability (0.4)'],count:22},
+    {title:'Finance Controller',dept:'Finance',avgGap:2.0,topGaps:['AI Literacy (2.8)','Data Analytics (1.6)','Stakeholder Comms (1.2)'],count:14},
+    {title:'ESG Analyst',dept:'Sustainability',avgGap:1.5,topGaps:['Data Analytics (1.6)','AI Literacy (1.4)','Digital Delivery (1.2)'],count:28}
+  ];
+  var h='';
+  roles.forEach(function(r){
+    var col=r.avgGap>2?'var(--red)':r.avgGap>1.5?'var(--amber)':r.avgGap>0.5?'var(--blue)':'var(--green)';
+    h+='<div style="border:1px solid rgba(0,0,0,0.07);border-radius:10px;padding:14px 18px;margin-bottom:12px">';
+    h+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1">'+r.title+'</span><span style="font-size:10px;color:var(--text-secondary)">'+r.dept+' · '+r.count+' employees</span><span style="font-family:var(--font-mono);font-size:14px;font-weight:600;color:'+col+'">'+r.avgGap.toFixed(1)+' avg</span></div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    r.topGaps.forEach(function(g){
+      var gv=parseFloat(g.match(/\(([\d.]+)\)/)[1]);
+      var gc=gv>2?'border-color:rgba(220,38,38,0.2);color:var(--red)':gv>1.5?'border-color:rgba(217,119,6,0.2);color:var(--amber)':'border-color:rgba(37,99,235,0.15);color:var(--blue)';
+      h+='<span style="padding:4px 10px;border-radius:5px;font-size:10px;border:1px solid;'+gc+'">'+g+'</span>';
+    });
+    h+='</div></div>';
+  });
+  document.getElementById('roleBody').innerHTML=h;
+}
+
+// ── INDIVIDUAL VIEW ──
+function renderIndivView(){
+  var filter=document.getElementById('empFilter').value;
+  var list=employees;
+  if(filter==='Critical Gaps Only')list=employees.filter(function(e){return e.gaps.some(function(g){return g.score>2})});
+  else if(filter!=='All Employees')list=employees.filter(function(e){return filter.indexOf(e.dept)>-1||e.dept===filter.replace('Engineering & Delivery','Structural Eng').replace('Digital & Technology','BIM & Digital').replace('Corporate Functions','Finance').replace('Sustainability & EHS','EHS & Risk')});
+  var h='';
+  list.forEach(function(e){
+    h+='<div style="border:1px solid rgba(0,0,0,0.07);border-radius:10px;padding:14px 18px;margin-bottom:10px">';
+    h+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">';
+    h+='<div class="eg-av" style="background:var(--blue);color:#fff">'+e.init+'</div>';
+    h+='<div class="eg-info"><div class="eg-name">'+e.name+'</div><div class="eg-role">'+e.role+' · '+e.dept+'</div></div>';
+    h+='<span style="font-size:11px;color:'+(e.gaps.length>2?'var(--red)':e.gaps.length>0?'var(--amber)':'var(--green)')+'">'+e.gaps.length+' gaps</span>';
+    if(e.mobility)h+='<span style="padding:2px 8px;border-radius:100px;font-size:9px;background:var(--green-bg);color:var(--green);border:1px solid rgba(22,163,74,0.2)">Mobility: '+e.mobility+'</span>';
+    h+='</div>';
+    if(e.gaps.length>0){
+      h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+      e.gaps.forEach(function(g){
+        var gc=g.score>2?'background:var(--red-bg);color:var(--red);border:1px solid rgba(220,38,38,0.2)':g.score>1.5?'background:var(--amber-bg);color:var(--amber);border:1px solid rgba(217,119,6,0.2)':'background:var(--blue-bg);color:var(--blue);border:1px solid rgba(37,99,235,0.15)';
+        h+='<span style="padding:4px 10px;border-radius:5px;font-size:10px;'+gc+'">'+g.skill+': '+g.score.toFixed(1)+'</span>';
+      });
+      h+='</div>';
+    } else { h+='<div style="font-size:11px;color:var(--green)">No gaps — proficient across all assessed skills</div>'; }
+    h+='</div>';
+  });
+  document.getElementById('indivBody').innerHTML=h;
+}
+
+// ── VIEW SWITCHER ──
+function switchView(view,btn){
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+  ['viewOrg','viewDept','viewRole','viewIndiv'].forEach(function(id){document.getElementById(id).style.display='none'});
+  if(view==='org')document.getElementById('viewOrg').style.display='block';
+  if(view==='dept'){document.getElementById('viewDept').style.display='block';renderDeptView()}
+  if(view==='role'){document.getElementById('viewRole').style.display='block';renderRoleView()}
+  if(view==='individual'){document.getElementById('viewIndiv').style.display='block';renderIndivView()}
+}
+
+function showToast(msg){var t=document.getElementById('sip-toast');if(!t){t=document.createElement('div');t.id='sip-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:var(--font-body);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.1)';document.body.appendChild(t)}t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)'},2400)}
+
+document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.getAttribute('href')==='#'){e.preventDefault();showToast((a.textContent||'').trim().substring(0,36)+' — available in full platform')}});
+
+// INIT
+renderOrgHeatmap();renderRiskAlerts();renderMobility();
+</script>
+</body>
+</html>

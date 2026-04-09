@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Dashboard · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   HR DASHBOARD — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.content>*{flex-shrink:0}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+
+.panel{background:var(--card);border:1px solid #E5E7EB;border-radius:12px;overflow:hidden}
+.panel-head{padding:14px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1;min-width:120px}
+.panel-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500}
+.panel-body{padding:18px 20px}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:960px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+
+.stat-card{background:var(--card);border:1px solid #E5E7EB;border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.stat-label{font-size:11px;color:var(--text-secondary);white-space:nowrap}
+.stat-val{font-family:var(--font-display);font-size:24px;font-weight:600;line-height:1}
+.stat-sub{font-size:11px;color:var(--text-secondary)}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:960px){.two-col{grid-template-columns:1fr}}
+
+.team-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.team-row:last-child{border-bottom:none}
+.team-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:9px;font-weight:600;flex-shrink:0}
+.team-info{flex:1;min-width:0}
+.team-name{font-size:12px;color:var(--text-primary);font-weight:500}
+.team-role{font-size:10px;color:var(--text-secondary)}
+.team-metric{text-align:center;flex-shrink:0;min-width:60px}
+.team-metric-val{font-family:var(--font-mono);font-size:13px;font-weight:600}
+.team-metric-label{font-size:9px;color:var(--text-secondary)}
+
+.action-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.action-item:last-child{border-bottom:none}
+.action-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.action-icon svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
+.action-text{font-size:12px;color:var(--text-secondary);flex:1;min-width:0}
+.action-text strong{color:var(--text-primary)}
+.action-tag{padding:2px 8px;border-radius:100px;font-size:9px;font-weight:500;flex-shrink:0}
+
+/* Table styles */
+.dept-table{width:100%;border-collapse:collapse;min-width:500px}
+.dept-table th{font-size:10px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:8px 10px;border-bottom:1px solid #E5E7EB}
+.dept-table th:not(:first-child){text-align:center}
+.dept-table td{font-size:12px;color:var(--text-secondary);padding:10px;border-bottom:1px solid rgba(0,0,0,0.04)}
+.dept-table td:not(:first-child){text-align:center}
+.dept-table tr:last-child td{border-bottom:none}
+.dept-table .mono{font-family:var(--font-mono);font-size:13px}
+
+/* Level banner */
+.level-banner{display:flex;align-items:center;gap:12px;padding:0 28px;height:36px;background:linear-gradient(90deg,rgba(201,168,76,0.10) 0%,transparent 60%);border-bottom:1px solid rgba(201,168,76,0.2);text-decoration:none;flex-shrink:0}
+.level-banner:hover{background:linear-gradient(90deg,rgba(201,168,76,0.14) 0%,transparent 60%)}
+
+/* Scope info bar */
+.scope-bar{font-size:12px;color:var(--text-secondary);padding:10px 14px;background:var(--blue-bg);border:1px solid rgba(37,99,235,0.15);border-radius:8px}
+.scope-bar strong{color:var(--blue)}
+
+/* Footer bar */
+.footer-bar{display:flex;align-items:center;gap:10px;padding:10px 28px;background:rgba(201,168,76,0.05);border-top:1px solid rgba(201,168,76,0.15);flex-shrink:0}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.fade-up{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <a href="../level-journey.html" class="level-banner fade-up">
+    <div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite"></div><span style="font-size:10px;font-family:var(--font-display);font-weight:600;letter-spacing:.08em;color:var(--accent)">L2 ACTIVE</span></div>
+    <div style="width:1px;height:14px;background:rgba(201,168,76,0.2)"></div>
+    <div style="font-size:11px;color:var(--text-secondary)">Team-scoped view — Corporate Functions (198 employees)</div>
+    <div style="margin-left:auto;font-size:10px;font-family:var(--font-display);font-weight:600;letter-spacing:.06em;color:var(--accent);text-transform:uppercase">View journey &rarr;</div>
+  </a>
+
+  <div class="content">
+
+    <div class="scope-bar fade-up">
+      <strong>Scoped to:</strong> Corporate Functions — Finance &amp; Procurement (76), Human Resources (48), Legal &amp; Compliance (74) — <strong>198 employees</strong>
+    </div>
+
+    <div class="stats-row fade-up" style="animation-delay:.06s">
+      <div class="stat-card"><div class="stat-label">Team Size</div><div class="stat-val" style="color:var(--text-primary)">198</div><div class="stat-sub">3 departments</div></div>
+      <div class="stat-card"><div class="stat-label">Assessment Completion</div><div class="stat-val" style="color:var(--amber)">82%</div><div class="stat-sub">162 of 198</div></div>
+      <div class="stat-card"><div class="stat-label">Passport Coverage</div><div class="stat-val" style="color:var(--green)">91%</div><div class="stat-sub">180 active passports</div></div>
+      <div class="stat-card"><div class="stat-label">Team Gaps (C1+C2)</div><div class="stat-val" style="color:var(--red)">14</div><div class="stat-sub">AI Literacy, Data Analytics</div></div>
+    </div>
+
+    <div class="two-col">
+      <!-- Team Members with Gaps -->
+      <div class="panel fade-up" style="animation-delay:.12s">
+        <div class="panel-head">
+          <svg style="width:14px;height:14px;stroke:var(--red);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <div class="panel-title">Team Members with Gaps</div>
+          <div class="panel-badge" style="background:var(--red-bg);color:var(--red)">14 gaps</div>
+        </div>
+        <div class="panel-body">
+          <div class="team-row"><div class="team-av" style="background:var(--blue);color:#fff">SI</div><div class="team-info"><div class="team-name">Suresh Iyer</div><div class="team-role">Finance Controller · Finance</div></div><div class="team-metric"><div class="team-metric-val" style="color:var(--red)">2.8</div><div class="team-metric-label">AI Literacy</div></div><div class="team-metric"><div class="team-metric-val" style="color:var(--amber)">1.2</div><div class="team-metric-label">Comms</div></div></div>
+          <div class="team-row"><div class="team-av" style="background:var(--blue);color:#fff">SP</div><div class="team-info"><div class="team-name">Sneha Pillai</div><div class="team-role">Talent Acquisition Lead · HR</div></div><div class="team-metric"><div class="team-metric-val" style="color:var(--red)">2.2</div><div class="team-metric-label">AI Literacy</div></div><div class="team-metric"><div class="team-metric-val" style="color:var(--amber)">1.8</div><div class="team-metric-label">Data</div></div></div>
+          <div class="team-row"><div class="team-av" style="background:var(--blue);color:#fff">LV</div><div class="team-info"><div class="team-name">Lakshmi Venkatesh</div><div class="team-role">Compliance Officer · Legal</div></div><div class="team-metric"><div class="team-metric-val" style="color:var(--amber)">1.6</div><div class="team-metric-label">Digital</div></div><div class="team-metric"><div class="team-metric-val" style="color:var(--amber)">1.4</div><div class="team-metric-label">AI</div></div></div>
+          <div class="team-row"><div class="team-av" style="background:var(--blue);color:#fff">AR</div><div class="team-info"><div class="team-name">Ananya Rao</div><div class="team-role">Payroll Manager · Finance</div></div><div class="team-metric"><div class="team-metric-val" style="color:var(--red)">2.4</div><div class="team-metric-label">AI Literacy</div></div><div class="team-metric"><div class="team-metric-val" style="color:var(--blue)">0.8</div><div class="team-metric-label">Analytics</div></div></div>
+          <div class="team-row"><div class="team-av" style="background:var(--blue);color:#fff">RB</div><div class="team-info"><div class="team-name">Ravi Balakrishnan</div><div class="team-role">Legal Counsel · Legal</div></div><div class="team-metric"><div class="team-metric-val" style="color:var(--amber)">1.8</div><div class="team-metric-label">Data</div></div><div class="team-metric"><div class="team-metric-val" style="color:var(--amber)">1.6</div><div class="team-metric-label">Digital</div></div></div>
+        </div>
+      </div>
+
+      <!-- Actions Required -->
+      <div class="panel fade-up" style="animation-delay:.18s">
+        <div class="panel-head">
+          <svg style="width:14px;height:14px;stroke:var(--amber);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+          <div class="panel-title">Actions Required</div>
+          <div class="panel-badge" style="background:var(--amber-bg);color:var(--amber)">8 items</div>
+        </div>
+        <div class="panel-body">
+          <div class="action-item"><div class="action-icon" style="background:var(--red-bg);color:var(--red)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="action-text"><strong>36 assessments overdue</strong> — 18 in Finance, 12 in Legal, 6 in HR</div><div class="action-tag" style="background:var(--red-bg);color:var(--red)">Urgent</div></div>
+          <div class="action-item"><div class="action-icon" style="background:var(--amber-bg);color:var(--amber)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div class="action-text"><strong>5 IDPs awaiting review</strong> — manager sign-off pending</div><div class="action-tag" style="background:var(--amber-bg);color:var(--amber)">Review</div></div>
+          <div class="action-item"><div class="action-icon" style="background:var(--amber-bg);color:var(--amber)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78"/></svg></div><div class="action-text"><strong>2 burnout risk flags</strong> — Suresh Iyer (Finance), pending conversation</div><div class="action-tag" style="background:var(--red-bg);color:var(--red)">Wellbeing</div></div>
+          <div class="action-item"><div class="action-icon" style="background:var(--blue-bg);color:var(--blue)"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div><div class="action-text"><strong>3 certifications expiring</strong> within 90 days — CIPD, SOX, GDPR DPO</div><div class="action-tag" style="background:var(--blue-bg);color:var(--blue)">Certs</div></div>
+          <div class="action-item"><div class="action-icon" style="background:var(--green-bg);color:var(--green)"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div><div class="action-text"><strong>AI Literacy programme</strong> — 198 employees to enrol for enterprise-wide rollout</div><div class="action-tag" style="background:var(--green-bg);color:var(--green)">Training</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Department Comparison -->
+    <div class="panel fade-up" style="animation-delay:.24s">
+      <div class="panel-head">
+        <svg style="width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <div class="panel-title">Department Comparison — Corporate Functions</div>
+      </div>
+      <div class="panel-body" style="overflow-x:auto">
+        <table class="dept-table">
+          <thead><tr>
+            <th>Metric</th>
+            <th>Finance (76)</th>
+            <th>HR (48)</th>
+            <th>Legal (74)</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>Assessment Completion</td><td><span class="mono" style="color:var(--amber)">78%</span></td><td><span class="mono" style="color:var(--green)">92%</span></td><td><span class="mono" style="color:var(--amber)">76%</span></td></tr>
+            <tr><td>Avg Proficiency</td><td><span class="mono" style="color:var(--blue)">3.1</span></td><td><span class="mono" style="color:var(--blue)">3.4</span></td><td><span class="mono" style="color:var(--blue)">3.2</span></td></tr>
+            <tr><td>Critical Gaps</td><td><span class="mono" style="color:var(--red)">6</span></td><td><span class="mono" style="color:var(--amber)">3</span></td><td><span class="mono" style="color:var(--amber)">5</span></td></tr>
+            <tr><td>IDP Coverage</td><td><span class="mono" style="color:var(--amber)">64%</span></td><td><span class="mono" style="color:var(--green)">88%</span></td><td><span class="mono" style="color:var(--amber)">58%</span></td></tr>
+            <tr><td>Wellbeing Score</td><td><span class="mono" style="color:var(--green)">3.6</span></td><td><span class="mono" style="color:var(--green)">3.8</span></td><td><span class="mono" style="color:var(--blue)">3.4</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-bar">
+    <svg style="width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <span style="font-size:11px;color:var(--accent);font-weight:500;letter-spacing:.03em">Team-scoped dashboard &middot; Corporate Functions (198 employees) &middot; Persona: HR Manager</span>
+    <span style="margin-left:auto;font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase">L2 InsightBoard</span>
+  </div>
+
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal: 'manager',
+  activeNav: 'HR Dashboard',
+  breadcrumbs: ['Dashboards', 'HR Dashboard'],
+  topbarActions: []
+});
+</script>
+<script>
+function showToast(msg){var t=document.getElementById('sip-toast');if(!t){t=document.createElement('div');t.id='sip-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#ffffff;border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:"DM Sans",sans-serif;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08)';document.body.appendChild(t)}t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)'},2400)}
+document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.getAttribute('href')==='#'){e.preventDefault();showToast((a.textContent||'').trim().substring(0,36)+' — available in full platform')}});
+</script>
+</body>
+</html>

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Level Journey Map · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/design-system.css">
+<style>
+/* ── OVERRIDE design-system layout for this standalone page ── */
+html,body{height:auto;overflow:auto;}
+body{
+  display:block;
+  min-height:100%;
+  background:var(--bg);
+  color:var(--text-primary);
+  font-family:var(--font-body);
+}
+
+/* ── TOP NAV ── */
+.topnav{
+  height:52px;background:var(--card);border-bottom:1px solid rgba(0,0,0,0.07);
+  display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:20;
+  box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.brand-hex{width:26px;height:26px;background:var(--accent);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);flex-shrink:0;cursor:pointer;transition:opacity .15s}
+.brand-hex:hover{opacity:.8}
+.topnav-title{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);flex:1}
+.topnav-meta{font-size:11px;color:var(--text-secondary)}
+.level-badge{padding:4px 12px;border-radius:100px;font-size:11px;border:1px solid var(--accent-bd);color:var(--accent)}
+.back-btn{padding:6px 14px;border-radius:6px;border:1px solid rgba(0,0,0,0.07);background:transparent;color:var(--text-secondary);font-family:var(--font-body);font-size:12px;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:5px;transition:background .15s,color .15s}
+.back-btn:hover{background:rgba(0,0,0,0.04);color:var(--text-primary)}
+.back-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── HERO ── */
+.hero{
+  padding:40px 40px 32px;text-align:center;
+  background:linear-gradient(180deg,rgba(37,99,235,.06) 0%,transparent 100%);
+  border-bottom:1px solid rgba(0,0,0,0.07);
+}
+.hero-eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:10px}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';display:block;width:28px;height:1px;background:var(--accent);opacity:.4}
+.hero-title{font-family:var(--font-display);font-size:clamp(26px,3vw,38px);font-weight:800;color:var(--text-primary);line-height:1.1;margin-bottom:10px}
+.hero-title em{font-style:normal;color:var(--accent)}
+.hero-sub{font-size:13px;color:var(--text-secondary);max-width:520px;margin:0 auto;line-height:1.7}
+
+/* ── CURRENT LEVEL BANNER ── */
+.current-banner{
+  margin:24px 40px;
+  padding:16px 24px;
+  background:linear-gradient(135deg,var(--accent-lt) 0%,rgba(250,250,248,0) 60%);
+  border:1px solid var(--accent-bd);
+  border-radius:12px;
+  display:flex;align-items:center;gap:20px;
+}
+.cb-indicator{
+  display:flex;align-items:center;gap:10px;
+}
+.cb-level-badge{
+  padding:6px 16px;border-radius:100px;
+  background:var(--accent);color:#fff;
+  font-family:var(--font-display);font-size:13px;font-weight:800;
+  letter-spacing:.04em;flex-shrink:0;
+}
+.cb-text{flex:1}
+.cb-label{font-size:10px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.cb-status{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text-primary)}
+.cb-sub{font-size:12px;color:var(--text-secondary);margin-top:2px}
+.cb-progress{display:flex;flex-direction:column;gap:5px;align-items:flex-end;min-width:140px}
+.cb-pct{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--accent);line-height:1}
+.cb-bar-track{width:140px;height:5px;background:rgba(0,0,0,0.08);border-radius:3px;overflow:hidden}
+.cb-bar-fill{height:100%;border-radius:3px;background:var(--accent);transition:width 1.2s ease;width:0%}
+.cb-bar-label{font-size:10px;color:var(--text-muted)}
+.cb-next{
+  padding:10px 20px;border-radius:8px;
+  background:var(--accent);border:none;
+  font-family:var(--font-display);font-size:12px;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;color:#fff;
+  cursor:pointer;white-space:nowrap;transition:opacity .15s;flex-shrink:0;
+}
+.cb-next:hover{opacity:.86}
+
+/* ── JOURNEY TRACK ── */
+.journey-outer{padding:32px 40px 40px;overflow-x:auto}
+.journey-track{
+  display:flex;gap:0;align-items:stretch;
+  min-width:900px;
+}
+
+/* connector line between cards */
+.connector{
+  display:flex;align-items:center;justify-content:center;
+  width:32px;flex-shrink:0;padding-top:56px;
+}
+.connector-line{
+  width:32px;height:2px;position:relative;
+}
+.connector-line::before{
+  content:'';position:absolute;left:0;top:0;height:100%;background:rgba(0,0,0,0.1);width:100%;border-radius:1px;
+}
+.connector-arrow{
+  position:absolute;right:-4px;top:-4px;
+  width:0;height:0;
+  border-left:8px solid rgba(0,0,0,0.15);
+  border-top:5px solid transparent;
+  border-bottom:5px solid transparent;
+}
+.connector.active .connector-line::before{background:var(--accent);opacity:.5}
+.connector.active .connector-arrow{border-left-color:var(--accent)}
+
+/* ── LEVEL CARD ── */
+.level-card{
+  flex:1;min-width:0;
+  background:var(--card);
+  border:1px solid rgba(0,0,0,0.07);
+  border-radius:14px;overflow:hidden;
+  display:flex;flex-direction:column;
+  transition:border-color .2s,transform .2s;
+  cursor:pointer;
+  position:relative;
+  box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.level-card:hover{transform:translateY(-3px)}
+.level-card.active{border-color:var(--accent-bd)}
+.level-card.upcoming{opacity:.65}
+.level-card.locked{opacity:.4;cursor:default}
+.level-card.locked:hover{transform:none}
+
+.lc-top{padding:16px 16px 12px;border-bottom:1px solid rgba(0,0,0,0.07)}
+
+.lc-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lc-num{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:13px;font-weight:800;
+  flex-shrink:0;
+}
+.lc-title-wrap{flex:1;min-width:0}
+.lc-level-label{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.lc-title{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text-primary);line-height:1.2}
+
+.lc-status{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 9px;border-radius:100px;font-size:10px;border:1px solid;
+  width:fit-content;letter-spacing:.05em;margin-bottom:10px;
+}
+.status-dot{width:5px;height:5px;border-radius:50%}
+
+.lc-question{
+  font-size:11.5px;color:var(--text-secondary);line-height:1.55;
+  font-style:italic;padding:8px 10px;border-radius:6px;
+  background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.05);
+  margin-bottom:0;
+}
+
+/* body */
+.lc-body{padding:12px 16px;flex:1;display:flex;flex-direction:column;gap:10px}
+
+.lc-section-label{font-size:9.5px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+
+.module-list{display:flex;flex-wrap:wrap;gap:4px}
+.module-pill{
+  padding:3px 8px;border-radius:100px;font-size:10px;
+  border:1px solid rgba(0,0,0,0.08);color:var(--text-secondary);
+  background:rgba(0,0,0,0.02);
+}
+.module-pill.ai{border-color:rgba(37,99,235,.3);color:var(--blue);background:var(--blue-bg)}
+
+.unlock-row{display:flex;align-items:center;gap:6px}
+.unlock-icon{width:14px;height:14px;stroke:var(--green);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.unlock-icon.lock{stroke:var(--text-muted)}
+.unlock-text{font-size:11px;color:var(--text-secondary)}
+.unlock-text.muted{color:var(--text-muted)}
+
+/* footer */
+.lc-footer{padding:10px 16px;border-top:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;justify-content:space-between}
+.lc-roi{font-size:10.5px;color:var(--text-secondary);line-height:1.4;flex:1}
+.lc-roi strong{color:var(--text-primary);font-weight:500}
+.lc-cta{
+  padding:6px 12px;border-radius:6px;font-family:var(--font-display);font-size:10px;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;cursor:pointer;border:1px solid;
+  white-space:nowrap;flex-shrink:0;margin-left:8px;transition:opacity .15s;
+}
+.lc-cta:hover{opacity:.82}
+.lc-cta.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.lc-cta.outline{background:transparent;border-color:var(--accent-bd);color:var(--accent)}
+.lc-cta.ghost{background:transparent;border-color:rgba(0,0,0,0.07);color:var(--text-muted)}
+
+/* gate condition */
+.gate-row{
+  display:flex;align-items:flex-start;gap:6px;
+  padding:8px 10px;border-radius:6px;
+  background:rgba(0,0,0,0.02);
+  border:1px solid rgba(0,0,0,0.05);
+}
+.gate-icon{width:13px;height:13px;flex-shrink:0;margin-top:1px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.gate-text{font-size:10.5px;color:var(--text-secondary);line-height:1.45}
+.gate-text strong{color:var(--text-primary);font-weight:500}
+
+/* ── TIMELINE BAR ── */
+.timeline-section{padding:0 40px 32px}
+.tl-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-bottom:8px}
+.tl-seg{height:100%;transition:width 1s ease}
+.tl-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted)}
+
+/* ── WHAT UNLOCKS NEXT ── */
+.next-section{
+  margin:0 40px 40px;
+  padding:20px 24px;
+  background:linear-gradient(135deg,var(--blue-bg) 0%,rgba(250,250,248,0) 60%);
+  border:1px solid rgba(37,99,235,.2);
+  border-radius:12px;
+  display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;
+}
+.next-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:10px;font-weight:500}
+.next-items{display:flex;flex-direction:column;gap:6px;flex:1;min-width:180px}
+.next-item{display:flex;align-items:flex-start;gap:8px}
+.next-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.next-text{font-size:12px;color:var(--text-secondary);line-height:1.5}
+.next-text strong{color:var(--text-primary);font-weight:500}
+
+/* ── ANIM ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.hero{animation:fadeUp .5s ease both}
+.current-banner{animation:fadeUp .5s ease .1s both}
+.journey-outer{animation:fadeUp .5s ease .2s both}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div class="topnav">
+  <div class="brand-hex" onclick="window.location.href='index.html'" title="Back to portal selector"></div>
+  <div class="topnav-title">Platform Journey</div>
+  <div class="topnav-meta">Edstellar · Skills Intelligence Platform</div>
+  <div class="level-badge">Currently at L3</div>
+  <a href="manager/chro-dashboard.html" class="back-btn">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    InsightBoard
+  </a>
+  <a href="nav-menus.html" class="back-btn">
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    All screens
+  </a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Your platform journey</div>
+  <h1 class="hero-title">Five levels. <em>One direction.</em></h1>
+  <p class="hero-sub">Each level delivers standalone value and unlocks the next. Arcova is at Level 3 — 14 months in, 812 employees with verified skill intelligence driving every training and hiring decision.</p>
+</div>
+
+<!-- CURRENT LEVEL BANNER -->
+<div class="current-banner">
+  <div class="cb-indicator">
+    <div class="cb-level-badge">L3 Active</div>
+  </div>
+  <div class="cb-text">
+    <div class="cb-label">You are here</div>
+    <div class="cb-status">Training Execution & Delivery</div>
+    <div class="cb-sub">7 active training programmes · 284 enrolled · 186 certificates issued this cycle</div>
+  </div>
+  <div class="cb-progress">
+    <div class="cb-pct" id="pct">63%</div>
+    <div class="cb-bar-track"><div class="cb-bar-fill" id="barFill"></div></div>
+    <div class="cb-bar-label">L3 completion</div>
+  </div>
+  <button class="cb-next" onclick="scrollToLevel(3)">See what L4 unlocks →</button>
+</div>
+
+<!-- JOURNEY TRACK -->
+<div class="journey-outer">
+  <div class="journey-track" id="journeyTrack">
+
+    <!-- L1 -->
+    <div class="level-card" onclick="showDetail(1)">
+      <div class="lc-top">
+        <div class="lc-header">
+          <div class="lc-num" style="background:rgba(99,102,241,.12);color:var(--l1)">L1</div>
+          <div class="lc-title-wrap">
+            <div class="lc-level-label" style="color:var(--l1)">Foundation</div>
+            <div class="lc-title">Data Import & Intelligence</div>
+          </div>
+        </div>
+        <div class="lc-status" style="border-color:rgba(22,163,74,.4);color:var(--green);background:var(--green-bg)">
+          <div class="status-dot" style="background:var(--green)"></div>Complete · Oct 2025
+        </div>
+        <div class="lc-question">"Do we know what skills we have across our organisation?"</div>
+      </div>
+      <div class="lc-body">
+        <div>
+          <div class="lc-section-label">What it delivers</div>
+          <div class="module-list">
+            <span class="module-pill">OrgSetup</span>
+            <span class="module-pill">DataPort</span>
+            <span class="module-pill ai">SkillForge AI</span>
+            <span class="module-pill">ApprovalHub</span>
+            <span class="module-pill">InsightBoard</span>
+            <span class="module-pill">Skill Passport</span>
+          </div>
+        </div>
+        <div>
+          <div class="lc-section-label">Key outcomes</div>
+          <div class="unlock-row"><svg class="unlock-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><div class="unlock-text">48-skill framework generated by AI in 2m 47s</div></div>
+          <div class="unlock-row"><svg class="unlock-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><div class="unlock-text">812 Skill Passports created and live</div></div>
+          <div class="unlock-row"><svg class="unlock-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><div class="unlock-text">CHRO InsightBoard showing org readiness for first time</div></div>
+        </div>
+      </div>
+      <div class="lc-footer">
+        <div class="lc-roi"><strong>Time to value:</strong> 14 days from signing to first verified intelligence</div>
+        <button class="lc-cta outline" onclick="event.stopPropagation();window.location.href='manager/chro-dashboard.html'">View dashboard</button>
+      </div>
+    </div>
+
+    <!-- connector -->
+    <div class="connector active">
+      <div class="connector-line"><div class="connector-arrow"></div></div>
+    </div>
+
+    <!-- L2 -->
+    <div class="level-card" onclick="showDetail(2)">
+      <div class="lc-top">
+        <div class="lc-header">
+          <div class="lc-num" style="background:rgba(8,145,178,.12);color:var(--l2)">L2</div>
+          <div class="lc-title-wrap">
+            <div class="lc-level-label" style="color:var(--l2)">Assessment</div>
+            <div class="lc-title">Validation & Learning</div>
+          </div>
+        </div>
+        <div class="lc-status" style="border-color:rgba(22,163,74,.4);color:var(--green);background:var(--green-bg)">
+          <div class="status-dot" style="background:var(--green)"></div>Complete · Dec 2025
+        </div>
+        <div class="lc-question">"Do we know what our workforce can actually do — verified, not estimated?"</div>
+      </div>
+      <div class="lc-body">
+        <div>
+          <div class="lc-section-label">What it delivers</div>
+          <div class="module-list">
+            <span class="module-pill">AssessEngine</span>
+            <span class="module-pill">Skills Matrix</span>
+            <span class="module-pill ai">LNA / TNA AI</span>
+            <span class="module-pill ai">LearnPath AI</span>
+            <span class="module-pill">Succession</span>
+            <span class="module-pill">360° Feedback</span>
+          </div>
+        </div>
+        <div>
+          <div class="lc-section-label">Key outcomes</div>
+          <div class="unlock-row"><svg class="unlock-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><div class="unlock-text">681 employees with validated proficiency (84% coverage)</div></div>
+          <div class="unlock-row"><svg class="unlock-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><div class="unlock-text">14 critical gaps identified with weighted scores</div></div>
+          <div class="unlock-row"><svg class="unlock-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><div class="unlock-text">AI-generated learning paths for all 812 employees</div></div>
+        </div>
+      </div>
+      <div class="lc-footer">
+        <div class="lc-roi"><strong>Decision speed:</strong> Training investment decisions 6x faster with validated gap data</div>
+        <button class="lc-cta outline" onclick="event.stopPropagation();window.location.href='manager/lna-report.html'">View LNA report</button>
+      </div>
+    </div>
+
+    <!-- connector -->
+    <div class="connector active">
+      <div class="connector-line"><div class="connector-arrow"></div></div>
+    </div>
+
+    <!-- L3 — CURRENT -->
+    <div class="level-card active" id="level-3" onclick="showDetail(3)">
+      <div style="position:absolute;top:12px;right:12px;padding:3px 9px;border-radius:100px;background:var(--accent);font-size:9.5px;font-family:var(--font-display);font-weight:700;color:#fff;letter-spacing:.05em">YOU ARE HERE</div>
+      <div class="lc-top">
+        <div class="lc-header">
+          <div class="lc-num" style="background:rgba(217,119,6,.12);color:var(--l4)">L3</div>
+          <div class="lc-title-wrap">
+            <div class="lc-level-label" style="color:var(--amber)">Execution</div>
+            <div class="lc-title">Training Delivery</div>
+          </div>
+        </div>
+        <div class="lc-status" style="border-color:var(--accent-bd);color:var(--accent);background:var(--accent-lt)">
+          <div class="status-dot" style="background:var(--accent);animation:blink 1.5s infinite"></div>Active · 63% complete
+        </div>
+        <div class="lc-question">"Are we closing the gaps we identified — and can we prove it?"</div>
+      </div>
+      <div class="lc-body">
+        <div>
+          <div class="lc-section-label">What it delivers</div>
+          <div class="module-list">
+            <span class="module-pill">TrainConnect</span>
+            <span class="module-pill">Certificate Engine</span>
+            <span class="module-pill ai">AI Content Outline</span>
+            <span class="module-pill">Kirkpatrick</span>
+            <span class="module-pill">L&D Projects</span>
+            <span class="module-pill">Coaching & Mentoring</span>
+          </div>
+        </div>
+        <div>
+          <div class="lc-section-label">Current status</div>
+          <div class="unlock-row"><svg class="unlock-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><div class="unlock-text">3 programmes completed · 186 certificates issued</div></div>
+          <div class="unlock-row"><svg class="unlock-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><div class="unlock-text">4 programmes in progress · 284 enrolled</div></div>
+          <div class="unlock-row"><svg class="unlock-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="unlock-text" style="color:var(--accent)">Gap closure: 27% · Target: 40% by Q3 2026</div></div>
+        </div>
+        <div class="gate-row" style="border-color:rgba(217,119,6,.2)">
+          <svg class="gate-icon" viewBox="0 0 24 24" style="color:var(--amber)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div class="gate-text">To unlock L4: complete at least 1 post-training reassessment cycle. <strong>Next reassessment: May 2026.</strong></div>
+        </div>
+      </div>
+      <div class="lc-footer">
+        <div class="lc-roi"><strong>Kirkpatrick L1 avg:</strong> 4.2 / 5 satisfaction · <strong>L2 knowledge gain:</strong> 74%</div>
+        <button class="lc-cta primary" onclick="event.stopPropagation()">In progress →</button>
+      </div>
+    </div>
+
+    <!-- connector -->
+    <div class="connector">
+      <div class="connector-line"><div class="connector-arrow"></div></div>
+    </div>
+
+    <!-- L4 -->
+    <div class="level-card upcoming" id="level-4" onclick="showDetail(4)">
+      <div class="lc-top">
+        <div class="lc-header">
+          <div class="lc-num" style="background:rgba(124,58,237,.12);color:var(--l5)">L4</div>
+          <div class="lc-title-wrap">
+            <div class="lc-level-label" style="color:var(--purple)">Intelligence</div>
+            <div class="lc-title">Continuous Tracking</div>
+          </div>
+        </div>
+        <div class="lc-status" style="border-color:rgba(124,58,237,.3);color:var(--purple);background:var(--purple-bg)">
+          <div class="status-dot" style="background:var(--purple)"></div>Unlocks after L3 gate
+        </div>
+        <div class="lc-question">"Can we stay ahead of skill change — before gaps become crises?"</div>
+      </div>
+      <div class="lc-body">
+        <div>
+          <div class="lc-section-label">What it unlocks</div>
+          <div class="module-list">
+            <span class="module-pill">PulseStrategy</span>
+            <span class="module-pill ai">Predictive Engine</span>
+            <span class="module-pill">Signal Intelligence</span>
+            <span class="module-pill">Transformation Dial</span>
+            <span class="module-pill">Jira · Salesforce</span>
+          </div>
+        </div>
+        <div>
+          <div class="lc-section-label">Key capabilities</div>
+          <div class="unlock-row"><svg class="unlock-icon lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><div class="unlock-text muted">Real-time proficiency updates from Jira and Salesforce signals</div></div>
+          <div class="unlock-row"><svg class="unlock-icon lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><div class="unlock-text muted">3-12 month emerging gap forecasting · Early warning alerts</div></div>
+          <div class="unlock-row"><svg class="unlock-icon lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><div class="unlock-text muted">Transformation Dial: culture target setting and impact preview</div></div>
+        </div>
+        <div class="gate-row">
+          <svg class="gate-icon" viewBox="0 0 24 24" style="color:var(--text-muted)"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <div class="gate-text"><strong>Gate condition:</strong> Complete at least 1 post-training reassessment cycle. Estimated unlock: June 2026.</div>
+        </div>
+      </div>
+      <div class="lc-footer">
+        <div class="lc-roi"><strong>Impact:</strong> Organisations at L4 detect critical skill gaps <strong>11+ months</strong> before they become delivery failures</div>
+        <button class="lc-cta ghost" onclick="event.stopPropagation()">Locked</button>
+      </div>
+    </div>
+
+    <!-- connector -->
+    <div class="connector">
+      <div class="connector-line"><div class="connector-arrow"></div></div>
+    </div>
+
+    <!-- L5 -->
+    <div class="level-card locked" onclick="showDetail(5)">
+      <div class="lc-top">
+        <div class="lc-header">
+          <div class="lc-num" style="background:rgba(22,163,74,.08);color:var(--green);opacity:.5">L5</div>
+          <div class="lc-title-wrap">
+            <div class="lc-level-label" style="color:var(--green);opacity:.5">Strategic</div>
+            <div class="lc-title">Workforce Planning</div>
+          </div>
+        </div>
+        <div class="lc-status" style="border-color:rgba(0,0,0,0.1);color:var(--text-muted)">
+          <div class="status-dot" style="background:var(--text-muted)"></div>Requires L4 · 90 days of continuous data
+        </div>
+        <div class="lc-question">"Can workforce capability be a strategic competitive advantage?"</div>
+      </div>
+      <div class="lc-body">
+        <div>
+          <div class="lc-section-label">What it unlocks</div>
+          <div class="module-list">
+            <span class="module-pill" style="opacity:.5">Scenario Modelling</span>
+            <span class="module-pill" style="opacity:.5">M&A Due Diligence</span>
+            <span class="module-pill" style="opacity:.5">Board Dashboards</span>
+            <span class="module-pill" style="opacity:.5">Benchmarking</span>
+            <span class="module-pill" style="opacity:.5">Passport Verification</span>
+          </div>
+        </div>
+        <div>
+          <div class="lc-section-label">Key capabilities</div>
+          <div class="unlock-row"><svg class="unlock-icon lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><div class="unlock-text muted">What-if scenario modelling: "What if this role disappears?"</div></div>
+          <div class="unlock-row"><svg class="unlock-icon lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><div class="unlock-text muted">M&A skill due diligence: merge two org skill profiles</div></div>
+          <div class="unlock-row"><svg class="unlock-icon lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><div class="unlock-text muted">Board-level dashboards: multi-year investment planning</div></div>
+        </div>
+      </div>
+      <div class="lc-footer">
+        <div class="lc-roi"><strong>Strategic position:</strong> The CHRO presents workforce intelligence alongside financial intelligence at board level</div>
+        <button class="lc-cta ghost" onclick="event.stopPropagation()">Locked</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="timeline-section">
+  <div class="tl-bar">
+    <div class="tl-seg" style="background:var(--l1);width:20%" title="L1 complete"></div>
+    <div class="tl-seg" style="background:var(--l2);width:20%" title="L2 complete"></div>
+    <div class="tl-seg" style="background:linear-gradient(90deg,var(--l4) 63%,rgba(217,119,6,.15) 63%);width:20%" title="L3 in progress"></div>
+    <div class="tl-seg" style="background:rgba(124,58,237,.12);width:20%" title="L4 locked"></div>
+    <div class="tl-seg" style="background:rgba(22,163,74,.08);width:20%" title="L5 locked"></div>
+  </div>
+  <div class="tl-labels">
+    <span style="color:var(--l1)">L1 ✓ Oct 2025</span>
+    <span style="color:var(--l2)">L2 ✓ Dec 2025</span>
+    <span style="color:var(--amber)">L3 · In progress</span>
+    <span style="color:var(--purple)">L4 · Jun 2026 est.</span>
+    <span style="color:var(--text-muted)">L5 · 2027</span>
+  </div>
+</div>
+
+<!-- WHAT UNLOCKS AT L4 -->
+<div class="next-section">
+  <div style="flex:none;width:180px">
+    <div class="next-label">Coming up · Level 4</div>
+    <div style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:4px">Continuous Intelligence</div>
+    <div style="font-size:12px;color:var(--text-secondary)">Estimated unlock: June 2026 · after post-training reassessment</div>
+  </div>
+  <div class="next-items">
+    <div class="next-label">What Arcova gains at L4</div>
+    <div class="next-item"><div class="next-dot" style="background:var(--purple)"></div><div class="next-text"><strong>Real-time skill signals</strong> from Jira, Salesforce, and GitHub — proficiency scores update automatically as employees work on projects, not just at assessment cycles.</div></div>
+    <div class="next-item"><div class="next-dot" style="background:var(--purple)"></div><div class="next-text"><strong>Predictive gap forecasting</strong> — the platform will flag emerging gaps 3 to 12 months before they become delivery risks. The CHRO stops reacting and starts anticipating.</div></div>
+    <div class="next-item"><div class="next-dot" style="background:var(--purple)"></div><div class="next-text"><strong>Transformation Dial</strong> — set culture targets and see in advance how they change training priorities, learning paths, and budget allocation across all departments.</div></div>
+  </div>
+  <div style="flex:none;align-self:flex-end">
+    <button class="lc-cta ghost" style="font-size:11px;padding:8px 16px">Unlock at L3 completion →</button>
+  </div>
+</div>
+
+<script>
+// Animate progress bar on load
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('barFill').style.width = '63%';
+  }, 400);
+});
+
+function showDetail(level) {
+  // Could expand to show a detail drawer — for demo shell just highlight
+  document.querySelectorAll('.level-card').forEach(c => c.style.boxShadow = '');
+  const colors = { 1:'#6366F1', 2:'#0891B2', 3:'#C9A84C', 4:'#7C3AED', 5:'#16A34A' };
+  const cards = document.querySelectorAll('.level-card');
+  if (cards[level - 1]) {
+    cards[level - 1].style.boxShadow = `0 0 0 2px ${colors[level]}55`;
+  }
+}
+
+function scrollToLevel(n) {
+  const el = document.getElementById('level-' + n);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+</script>
+</body>
+</html>

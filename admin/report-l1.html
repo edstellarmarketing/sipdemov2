@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports L1 · Edstellar SIP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/design-system.css">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   REPORT L1 — PAGE-SPECIFIC STYLES
+   ══════════════════════════════════════════════════════════════ */
+
+.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.content>*{flex-shrink:0}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:2px}
+.panel{background:var(--card);border:1px solid rgba(0,0,0,0.07);border-radius:12px;overflow:hidden}
+.panel-head{padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-title{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--text-primary);flex:1;min-width:120px}
+.panel-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:500}
+.panel-body{padding:18px 20px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:960px){.two-col{grid-template-columns:1fr}}
+
+/* REPORT PREVIEW */
+.report-preview{background:linear-gradient(135deg,#f8f7f4 0%,#ffffff 100%);border:1px solid rgba(201,168,76,0.2);border-radius:14px;padding:32px;position:relative;overflow:hidden}
+.report-preview::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--blue),var(--accent))}
+.rp-header{display:flex;align-items:flex-start;gap:20px;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid rgba(0,0,0,0.06)}
+.rp-logo{width:48px;height:48px;background:var(--accent);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);flex-shrink:0}
+.rp-title-block{flex:1}
+.rp-company{font-size:10px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+.rp-title{font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.rp-subtitle{font-size:12px;color:var(--text-secondary)}
+.rp-date{font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);text-align:right;flex-shrink:0}
+
+/* EXECUTIVE SUMMARY */
+.exec-summary{padding:18px 20px;background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.12);border-radius:10px;margin-bottom:20px}
+.exec-label{font-size:9px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.exec-label svg{width:12px;height:12px;stroke:var(--accent);fill:none;stroke-width:2}
+.exec-text{font-size:13px;color:var(--text-secondary);line-height:1.7}
+.exec-text strong{color:var(--text-primary);font-weight:500}
+
+/* ORG DNA */
+.dna-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:700px){.dna-grid{grid-template-columns:1fr}}
+.dna-card{padding:16px;background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.07);border-radius:10px;text-align:center}
+.dna-val{font-family:var(--font-display);font-size:28px;font-weight:600;line-height:1;margin-bottom:4px}
+.dna-label{font-size:10px;color:var(--text-secondary);letter-spacing:.04em}
+.dna-sub{font-size:10px;color:var(--text-secondary);margin-top:4px}
+
+/* RISK/OPPORTUNITY MATRIX */
+.matrix-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.matrix-row:last-child{border-bottom:none}
+.matrix-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.matrix-icon svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+.matrix-info{flex:1;min-width:0}
+.matrix-title{font-size:12px;color:var(--text-primary);font-weight:500;margin-bottom:3px}
+.matrix-desc{font-size:11px;color:var(--text-secondary);line-height:1.5}
+.matrix-tag{padding:2px 8px;border-radius:100px;font-size:9px;font-weight:500;flex-shrink:0;margin-top:2px}
+
+/* NEXT STEPS */
+.next-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.next-item:last-child{border-bottom:none}
+.next-num{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;font-weight:500;flex-shrink:0}
+.next-text{font-size:12px;color:var(--text-secondary);flex:1;line-height:1.5}
+.next-text strong{color:var(--text-primary);font-weight:500}
+.next-cta{padding:4px 12px;border-radius:6px;font-size:10px;border:1px solid rgba(0,0,0,0.07);color:var(--text-secondary);cursor:pointer;flex-shrink:0;background:transparent;font-family:var(--font-body);transition:all .15s;text-decoration:none}
+.next-cta:hover{border-color:var(--accent);color:var(--accent)}
+
+/* SHARE */
+.share-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.share-btn{padding:8px 16px;border-radius:7px;border:1px solid rgba(0,0,0,0.07);background:transparent;color:var(--text-secondary);font-family:var(--font-body);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+.share-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.share-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.fade-up{animation:fadeUp .4s ease both}
+</style>
+</head>
+<body>
+
+<main class="main" id="page-content">
+
+  <div class="content">
+
+    <!-- REPORT PREVIEW -->
+    <div class="report-preview fade-up">
+      <div class="rp-header">
+        <div class="rp-logo"></div>
+        <div class="rp-title-block">
+          <div class="rp-company">Arcova Infrastructure Pte. Ltd.</div>
+          <div class="rp-title">L1 Completion Report</div>
+          <div class="rp-subtitle">Skills Intelligence Platform — Context Setting Phase Complete</div>
+        </div>
+        <div class="rp-date">Generated: 15 Mar 2026<br>Report ID: RPT-L1-2026-001<br>Pages: 24<br>Classification: Confidential</div>
+      </div>
+
+      <!-- EXECUTIVE SUMMARY -->
+      <div class="exec-summary">
+        <div class="exec-label"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>AI-Generated Executive Summary</div>
+        <div class="exec-text">
+          Arcova Infrastructure has completed Level 1 (Context Setting) of the Skills Intelligence Platform. The AI pipeline processed <strong>113 organisational context fields</strong> and generated a comprehensive skill framework of <strong>48 skills across 6 domains</strong> and <strong>8 competencies</strong>, approved through 3-tier governance in 12 days.<br><br>
+          Key findings: The organisation's strategic push toward digital delivery creates an immediate demand for <strong>BIM, AI Literacy, and Data Analytics</strong> skills — all flagged as C1 Critical. The current workforce of <strong>812 employees</strong> across 4 business units and 10 departments is now baselined with AI-estimated proficiency scores, ready for L2 validated assessment.<br><br>
+          <strong>Recommendation:</strong> Proceed to L2 Assessment immediately. Prioritise the Engineering & Delivery BU (324 employees) as the highest-impact cohort given the BIM dependency reduction goal of 40% by Q4 2026.
+        </div>
+      </div>
+    </div>
+
+    <!-- ORG DNA -->
+    <div class="panel fade-up" style="animation-delay:.06s">
+      <div class="panel-head">
+        <svg style="width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <div class="panel-title">Org DNA Snapshot</div>
+        <div class="panel-badge" style="background:var(--blue-bg);color:var(--blue)">AI-Analysed</div>
+      </div>
+      <div class="panel-body">
+        <div class="dna-grid">
+          <div class="dna-card"><div class="dna-val" style="color:var(--text-primary)">812</div><div class="dna-label">Employees Onboarded</div><div class="dna-sub">4 BUs · 10 Departments · 4 Offices</div></div>
+          <div class="dna-card"><div class="dna-val" style="color:var(--blue)">48</div><div class="dna-label">Skills Generated</div><div class="dna-sub">6 Domains · 4 Proficiency Levels</div></div>
+          <div class="dna-card"><div class="dna-val" style="color:var(--purple)">8</div><div class="dna-label">Competencies Mapped</div><div class="dna-sub">Core · Technical · Leadership</div></div>
+          <div class="dna-card"><div class="dna-val" style="color:var(--accent)">91%</div><div class="dna-label">Context Completeness</div><div class="dna-sub">113 of 124 fields captured</div></div>
+          <div class="dna-card"><div class="dna-val" style="color:var(--green)">12d</div><div class="dna-label">Time to Framework</div><div class="dna-sub">OrgSetup → SkillForge → 3-Tier → Published</div></div>
+          <div class="dna-card"><div class="dna-val" style="color:var(--amber)">4</div><div class="dna-label">Strategic Goals Linked</div><div class="dna-sub">Digital Delivery · ISO · BIM · Succession</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RISK / OPPORTUNITY MATRIX -->
+    <div class="two-col">
+      <div class="panel fade-up" style="animation-delay:.12s">
+        <div class="panel-head">
+          <svg style="width:14px;height:14px;stroke:var(--red);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div class="panel-title">Risk Signals</div>
+          <div class="panel-badge" style="background:var(--red-bg);color:var(--red)">4 risks</div>
+        </div>
+        <div class="panel-body">
+          <div class="matrix-row"><div class="matrix-icon" style="background:var(--red-bg);color:var(--red)"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div><div class="matrix-info"><div class="matrix-title">AI Literacy — Universal Deficit</div><div class="matrix-desc">AI-estimated baselines show 0% of workforce at target proficiency for AI Literacy. This is the only skill with a universal gap across all 10 departments.</div></div><div class="matrix-tag" style="background:var(--red-bg);color:var(--red)">Critical</div></div>
+          <div class="matrix-row"><div class="matrix-icon" style="background:var(--red-bg);color:var(--red)"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div><div class="matrix-info"><div class="matrix-title">BIM Dependency — 40% Reduction at Risk</div><div class="matrix-desc">Only 22% of Engineering staff estimated at L3+ BIM proficiency. Strategic goal requires 62% by Q4 2026.</div></div><div class="matrix-tag" style="background:var(--red-bg);color:var(--red)">Critical</div></div>
+          <div class="matrix-row"><div class="matrix-icon" style="background:var(--amber-bg);color:var(--amber)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="matrix-info"><div class="matrix-title">Succession — Principal Eng Vacant</div><div class="matrix-desc">Critical role has no Ready Now candidate. Closest at 86% readiness — needs BIM Advanced certification.</div></div><div class="matrix-tag" style="background:var(--amber-bg);color:var(--amber)">High</div></div>
+          <div class="matrix-row"><div class="matrix-icon" style="background:var(--amber-bg);color:var(--amber)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="matrix-info"><div class="matrix-title">Data Analytics — Cross-Functional Gap</div><div class="matrix-desc">8 of 10 departments below target for Data Analytics. Power BI adoption concentrated only in Digital team.</div></div><div class="matrix-tag" style="background:var(--amber-bg);color:var(--amber)">High</div></div>
+        </div>
+      </div>
+
+      <div class="panel fade-up" style="animation-delay:.18s">
+        <div class="panel-head">
+          <svg style="width:14px;height:14px;stroke:var(--green);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+          <div class="panel-title">Opportunity Signals</div>
+          <div class="panel-badge" style="background:var(--green-bg);color:var(--green)">4 opportunities</div>
+        </div>
+        <div class="panel-body">
+          <div class="matrix-row"><div class="matrix-icon" style="background:var(--green-bg);color:var(--green)"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div><div class="matrix-info"><div class="matrix-title">Safety Compliance — Already Strong</div><div class="matrix-desc">EHS & Risk department shows 87% estimated proficiency in Safety Compliance. Quick win: validate and certify to demonstrate early platform value.</div></div><div class="matrix-tag" style="background:var(--green-bg);color:var(--green)">Quick Win</div></div>
+          <div class="matrix-row"><div class="matrix-icon" style="background:var(--green-bg);color:var(--green)"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div><div class="matrix-info"><div class="matrix-title">Digital Team — Internal Champions</div><div class="matrix-desc">BIM & Digital team at 4.2 avg proficiency. Deploy as internal trainers/mentors to accelerate cross-department BIM upskilling at zero external cost.</div></div><div class="matrix-tag" style="background:var(--green-bg);color:var(--green)">Leverage</div></div>
+          <div class="matrix-row"><div class="matrix-icon" style="background:var(--blue-bg);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg></div><div class="matrix-info"><div class="matrix-title">Talent Mobility — 38 Candidates</div><div class="matrix-desc">AI identified 38 employees with transferable skills across departments. Cross-pollination reduces external hiring needs by estimated 12%.</div></div><div class="matrix-tag" style="background:var(--blue-bg);color:var(--blue)">Strategic</div></div>
+          <div class="matrix-row"><div class="matrix-icon" style="background:var(--blue-bg);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg></div><div class="matrix-info"><div class="matrix-title">Graduate Cohort 2025 — Early Investment</div><div class="matrix-desc">12 recent graduates identified as high-potential for digital skills acceleration. IDP-first approach could build pipeline for 3 critical roles.</div></div><div class="matrix-tag" style="background:var(--blue-bg);color:var(--blue)">Strategic</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEXT STEPS -->
+    <div class="panel fade-up" style="animation-delay:.24s">
+      <div class="panel-head">
+        <svg style="width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round" viewBox="0 0 24 24"><polyline points="5 12 19 12"/><polyline points="13 6 19 12 13 18"/></svg>
+        <div class="panel-title">Recommended Next Steps</div>
+      </div>
+      <div class="panel-body">
+        <div class="next-item"><div class="next-num" style="background:var(--accent-lt);color:var(--accent)">1</div><div class="next-text"><strong>Launch L2 Assessment Cycle</strong> — Configure AssessEngine for Q1 2026 cycle. Start with Skills & Competency dual-rating (Category A) for all 812 employees.</div><a href="assess-engine.html" class="next-cta">Open AssessEngine →</a></div>
+        <div class="next-item"><div class="next-num" style="background:var(--blue-bg);color:var(--blue)">2</div><div class="next-text"><strong>Prioritise Engineering & Delivery</strong> — 324 employees in the highest-impact BU. Target 95% assessment completion within 4 weeks.</div><a href="../manager/gap-analysis.html" class="next-cta">View Gap Analysis →</a></div>
+        <div class="next-item"><div class="next-num" style="background:var(--green-bg);color:var(--green)">3</div><div class="next-text"><strong>Deploy AI Literacy Programme</strong> — Enterprise-wide, all 812 employees. The only skill with universal deficit. Estimated budget: SGD 96,000 (blended format).</div><a href="../manager/lna-report.html" class="next-cta">View LNA Report →</a></div>
+        <div class="next-item"><div class="next-num" style="background:var(--purple-bg);color:var(--purple)">4</div><div class="next-text"><strong>Share this report</strong> with CHRO Sunita Nair and CTO for strategic alignment before assessment cycle begins.</div><span class="next-cta" onclick="showToast('Report shared with Sunita Nair (CHRO) via secure link')">Share Report →</span></div>
+      </div>
+    </div>
+
+    <!-- SHARE & DISTRIBUTE -->
+    <div class="panel fade-up" style="animation-delay:.30s">
+      <div class="panel-head">
+        <div class="panel-title">Share & Distribute</div>
+      </div>
+      <div class="panel-body">
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">This report is classified as <strong style="color:var(--amber)">Confidential</strong>. Share only with authorised stakeholders.</div>
+        <div class="share-row">
+          <button class="share-btn" onclick="showToast('PDF downloading — 24 pages, branded...')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download PDF</button>
+          <button class="share-btn" onclick="showToast('PPT version generating...')"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Download PPT</button>
+          <button class="share-btn" onclick="showToast('Secure shareable link copied to clipboard')"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Copy Share Link</button>
+          <button class="share-btn" onclick="showToast('Email sent to Sunita Nair (CHRO), Rajiv Kumar (CLO)')"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Email to Stakeholders</button>
+          <button class="share-btn" onclick="showToast('Regenerating with latest data...')"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Regenerate Report</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script src="../components/shell.js"></script>
+<script>
+EdstellarShell.init({
+  portal: 'admin',
+  activeNav: 'InsightBoard',
+  breadcrumbs: ['Intelligence', 'Reports L1'],
+  topbarActions: []
+});
+</script>
+<script>
+function showToast(msg){var t=document.getElementById('sip-toast');if(!t){t=document.createElement('div');t.id='sip-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(0,0,0,0.1);color:var(--text-secondary);font-size:12px;font-family:var(--font-body);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.08)';document.body.appendChild(t)}t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)'},2400)}
+document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.getAttribute('href')==='#'){e.preventDefault();showToast((a.textContent||'').trim().substring(0,36)+' — available in full platform')}});
+</script>
+</body>
+</html>
