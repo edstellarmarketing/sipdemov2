@@ -36,21 +36,25 @@
 /* ── OVERRIDE SHELL MAIN PADDING ── */
 .main{padding:0 !important;overflow:hidden !important}
 
-/* ── LAYOUT ── */
-.report-layout{display:flex;height:100%}
+/* ── LAYOUT (single column) ── */
+.report-layout{display:flex;flex-direction:column;height:100%}
 
-/* ── REPORT SIDEBAR ── */
-.report-sidebar{width:216px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:12px 0;overflow-y:auto}
-.sb-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);padding:10px 16px 4px}
-.rpt-nav-item{display:flex;align-items:center;gap:9px;padding:7px 16px;font-size:12px;font-weight:500;color:var(--text-secondary);cursor:pointer;border-left:2px solid transparent;transition:all .15s;margin:1px 0}
-.rpt-nav-item:hover{background:var(--surface-alt);color:var(--text-primary)}
-.rpt-nav-item.active{background:var(--accent-lt);color:var(--accent);border-left-color:var(--accent);font-weight:600}
-.rpt-nav-item .ni{font-size:14px;width:18px;text-align:center;flex-shrink:0}
-.nb{margin-left:auto;font-size:9px;font-weight:700;padding:1px 6px;border-radius:100px}
-.nb.gold{background:var(--accent-lt);color:var(--accent);border:1px solid var(--accent-bd)}
-.nb.green{background:var(--green-bg);color:var(--green);border:1px solid rgba(16,185,129,0.2)}
-.nb.blue{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(37,99,235,0.2)}
-.nb.gray{background:var(--surface-alt);color:var(--text-muted);border:1px solid var(--border)}
+/* ── HORIZONTAL TAB BAR ── */
+.rpt-tabs{display:flex;align-items:center;gap:0;background:var(--card);border-bottom:1px solid var(--border);padding:0 20px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.rpt-tabs::-webkit-scrollbar{display:none}
+.rpt-tab{position:relative;padding:11px 14px;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--text-muted);background:none;border:none;cursor:pointer;white-space:nowrap;transition:color .15s;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.rpt-tab:hover{color:var(--text-primary);background:rgba(0,0,0,0.02)}
+.rpt-tab.active{color:var(--accent);font-weight:600}
+.rpt-tab.active::after{content:'';position:absolute;bottom:-1px;left:8px;right:8px;height:2px;background:var(--accent);border-radius:1px 1px 0 0}
+.rpt-tab .ni{font-size:13px}
+.rpt-tab .tb{font-size:8px;font-weight:700;padding:1px 5px;border-radius:100px;margin-left:2px}
+.rpt-tab .tb.gold{background:var(--accent-lt);color:var(--accent);border:1px solid var(--accent-bd)}
+.rpt-tab .tb.green{background:var(--green-bg);color:var(--green);border:1px solid rgba(16,185,129,0.2)}
+.rpt-tab .tb.blue{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(37,99,235,0.2)}
+.rpt-tab .tb.red{background:rgba(239,68,68,0.08);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+.rpt-tab .tb.purple{background:var(--purple-bg);color:var(--purple);border:1px solid rgba(124,58,237,0.2)}
+.rpt-tab .tb.gray{background:var(--surface-alt);color:var(--text-muted);border:1px solid var(--border)}
+.rpt-tabs-sep{width:1px;height:20px;background:var(--border);margin:0 6px;flex-shrink:0}
 
 /* ── MAIN ── */
 .main-scroll{flex:1;overflow-y:auto}
@@ -248,24 +252,23 @@ canvas{max-height:260px}
 <main class="main" id="page-content">
 <div class="report-layout">
 
-<!-- ══ REPORT SIDEBAR ══ -->
-<div class="report-sidebar">
-  <div class="sb-label">Level 1 Reports</div>
-  <div class="rpt-nav-item" onclick="showPage('exec-summary',this)"><span class="ni">⚡</span> Executive Summary <span class="nb red">L1 ∑</span></div>
-  <div class="rpt-nav-item active" onclick="showPage('overview',this)"><span class="ni">🏠</span> Org Overview <span class="nb gold">L1</span></div>
-  <div class="rpt-nav-item" onclick="showPage('skill-inv',this)"><span class="ni">📊</span> Skill Inventory <span class="nb gold">L1</span></div>
-  <div class="rpt-nav-item" onclick="showPage('comp-inv',this)"><span class="ni">🧭</span> Competency Inv. <span class="nb gold">L1</span></div>
-  <div class="rpt-nav-item" onclick="showPage('emp-skills',this)"><span class="ni">👤</span> Employee & Training <span class="nb gold">L1</span></div>
-  <div class="rpt-nav-item" onclick="showPage('role-matrix',this)"><span class="ni">⚡</span> Role–Skill Matrix <span class="nb gold">L1</span></div>
-  <div class="rpt-nav-item" onclick="showPage('dq-scorecard',this)"><span class="ni">✅</span> Data Quality <span class="nb gold">L1</span></div>
-  <div class="rpt-nav-item" onclick="showPage('benchmark',this)"><span class="ni">🏆</span> Industry Benchmark <span class="nb blue">L1</span></div>
-  <div class="rpt-nav-item" onclick="showPage('assessments',this)"><span class="ni">🔬</span> Assessments <span class="nb purple">New</span></div>
-  <div class="rpt-nav-item" onclick="showPage('org-journey',this)"><span class="ni">🌐</span> Org Context & Journey <span class="nb green">360°</span></div>
-  <div class="sb-label">Additional Views</div>
-  <div class="rpt-nav-item" onclick="showPage('employees',this)"><span class="ni">👥</span> Employees <span class="nb gray">50</span></div>
-  <div class="rpt-nav-item" onclick="showPage('career',this)"><span class="ni">🛤</span> Career Paths <span class="nb blue">New</span></div>
-  <div class="rpt-nav-item" onclick="showPage('projects',this)"><span class="ni">📦</span> Projects <span class="nb gray">8</span></div>
-  <div class="rpt-nav-item" onclick="showPage('finance',this)"><span class="ni">💰</span> Financial</div>
+<!-- ══ HORIZONTAL TAB BAR ══ -->
+<div class="rpt-tabs" id="rptTabs">
+  <button class="rpt-tab" data-page="exec-summary"><span class="ni">⚡</span> Executive Summary <span class="tb red">L1 ∑</span></button>
+  <button class="rpt-tab active" data-page="overview"><span class="ni">🏠</span> Org Overview <span class="tb gold">L1</span></button>
+  <button class="rpt-tab" data-page="skill-inv"><span class="ni">📊</span> Skill Inventory <span class="tb gold">L1</span></button>
+  <button class="rpt-tab" data-page="comp-inv"><span class="ni">🧭</span> Competency Inv. <span class="tb gold">L1</span></button>
+  <button class="rpt-tab" data-page="emp-skills"><span class="ni">👤</span> Employee &amp; Training <span class="tb gold">L1</span></button>
+  <button class="rpt-tab" data-page="role-matrix"><span class="ni">⚡</span> Role-Skill Matrix <span class="tb gold">L1</span></button>
+  <button class="rpt-tab" data-page="dq-scorecard"><span class="ni">✅</span> Data Quality <span class="tb gold">L1</span></button>
+  <button class="rpt-tab" data-page="benchmark"><span class="ni">🏆</span> Benchmark <span class="tb blue">L1</span></button>
+  <button class="rpt-tab" data-page="assessments"><span class="ni">🔬</span> Assessments <span class="tb purple">New</span></button>
+  <button class="rpt-tab" data-page="org-journey"><span class="ni">🌐</span> Org Journey <span class="tb green">360°</span></button>
+  <div class="rpt-tabs-sep"></div>
+  <button class="rpt-tab" data-page="employees"><span class="ni">👥</span> Employees <span class="tb gray">50</span></button>
+  <button class="rpt-tab" data-page="career"><span class="ni">🛤</span> Career Paths <span class="tb blue">New</span></button>
+  <button class="rpt-tab" data-page="projects"><span class="ni">📦</span> Projects <span class="tb gray">8</span></button>
+  <button class="rpt-tab" data-page="finance"><span class="ni">💰</span> Financial</button>
 </div>
 
 <!-- ══ MAIN ══ -->
@@ -2839,12 +2842,21 @@ Chart.defaults.plugins.legend.labels.padding = 12;
 const inited = new Set();
 function showPage(name, el) {
   document.querySelectorAll('.pv').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.rpt-nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.rpt-tab').forEach(t => t.classList.remove('active'));
   const pg = document.getElementById('pv-' + name);
   if (pg) pg.classList.add('active');
   if (el) el.classList.add('active');
+  // scroll active tab into view
+  if (el) el.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+  // scroll content to top
+  const ms = document.querySelector('.main-scroll');
+  if (ms) ms.scrollTop = 0;
   if (!inited.has(name)) { inited.add(name); buildCharts(name); }
 }
+// bind tab clicks
+document.querySelectorAll('.rpt-tab[data-page]').forEach(btn => {
+  btn.addEventListener('click', function(){ showPage(this.dataset.page, this); });
+});
 
 // ── CHART FACTORY ──
 function mk(id, cfg) {
