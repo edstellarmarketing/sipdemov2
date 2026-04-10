@@ -303,6 +303,7 @@ canvas{max-height:260px}
   <button class="rpt-tab" data-page="benchmark"><span class="ni">🏆</span> Benchmark <span class="tb blue">L1</span></button>
   <button class="rpt-tab" data-page="assessments"><span class="ni">🔬</span> Assessments <span class="tb purple">New</span></button>
   <button class="rpt-tab" data-page="org-journey"><span class="ni">🌐</span> Org Journey <span class="tb green">360°</span></button>
+  <button class="rpt-tab" data-page="changelog"><span class="ni">📋</span> Change Log <span class="tb green">Live</span></button>
   <div class="rpt-tabs-sep"></div>
   <button class="rpt-tab" data-page="employees"><span class="ni">👥</span> Employees <span class="tb gray">50</span></button>
   <button class="rpt-tab" data-page="career"><span class="ni">🛤</span> Career Paths <span class="tb blue">New</span></button>
@@ -357,6 +358,75 @@ canvas{max-height:260px}
 
   <!-- ══ 2. DOMAIN QUICK-SCORES STRIP ══ -->
   <div id="es_domainQuickScores" style="display:grid;grid-template-columns:repeat(10,1fr);gap:8px;margin-bottom:20px"></div>
+
+  <!-- ══ TOP 3 ACTIONS THIS WEEK ══ -->
+  <div class="phase-lbl">Top 3 Actions This Week</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+    <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid var(--red);border-radius:var(--r-md);padding:14px 16px;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:9px;font-weight:800;color:var(--red);background:rgba(239,68,68,0.1);padding:2px 7px;border-radius:100px;letter-spacing:.05em">CRITICAL</span>
+        <span style="font-size:9px;color:var(--text-muted)">#1</span>
+      </div>
+      <div style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;line-height:1.3">Gen AI launch at delivery risk</div>
+      <div style="font-size:11px;color:var(--text-secondary);line-height:1.55;margin-bottom:12px;flex:1">LLM bus factor = 1. Sara Kumar is the sole L4 expert. Priya Shah and Harish Patel (C1 skill holders) are flight-risk. <strong>Approve 2 senior LLM hires this week</strong> or delay Q2 launch.</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn sm" onclick="showPage('changelog',document.querySelector('[data-page=changelog]'))" style="background:var(--red);color:#fff;border-color:var(--red);font-size:10px">Log Action</button>
+        <span style="font-size:9px;color:var(--text-muted)">Owner: CEO · Due: this week</span>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid var(--amber);border-radius:var(--r-md);padding:14px 16px;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:9px;font-weight:800;color:var(--amber);background:rgba(245,158,11,0.1);padding:2px 7px;border-radius:100px;letter-spacing:.05em">HIGH</span>
+        <span style="font-size:9px;color:var(--text-muted)">#2</span>
+      </div>
+      <div style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;line-height:1.3">Harish Patel retention exposed</div>
+      <div style="font-size:11px;color:var(--text-secondary);line-height:1.55;margin-bottom:12px;flex:1">Director of Engineering carries 3 critical skills at bus factor 1. Flight risk score 4.6/5. Previous retention action (equity refresh) moved risk only marginally (4.6→4.2). <strong>CEO-level intervention required.</strong></div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn sm" onclick="showPage('changelog',document.querySelector('[data-page=changelog]'))" style="background:var(--amber);color:#fff;border-color:var(--amber);font-size:10px">Log Action</button>
+        <span style="font-size:9px;color:var(--text-muted)">Owner: CEO · Due: 14 days</span>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid var(--amber);border-radius:var(--r-md);padding:14px 16px;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:9px;font-weight:800;color:var(--amber);background:rgba(245,158,11,0.1);padding:2px 7px;border-radius:100px;letter-spacing:.05em">HIGH</span>
+        <span style="font-size:9px;color:var(--text-muted)">#3</span>
+      </div>
+      <div style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;line-height:1.3">40% of workforce unassessed</div>
+      <div style="font-size:11px;color:var(--text-secondary);line-height:1.55;margin-bottom:12px;flex:1">18 employees and 22 roles still have no proficiency data. All headline RCGS/SCR metrics on this dashboard exclude them. <strong>Assign assessment owner this week</strong> — target 100% coverage by Q2 FY26.</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn sm" onclick="showPage('changelog',document.querySelector('[data-page=changelog]'))" style="background:var(--amber);color:#fff;border-color:var(--amber);font-size:10px">Log Action</button>
+        <span style="font-size:9px;color:var(--text-muted)">Owner: CHRO · Due: Q2</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WHAT'S WORKING · WHAT MOVED (two-column compact) ══ -->
+  <div class="g2" style="margin-bottom:20px">
+    <div style="background:rgba(16,185,129,0.04);border:1px solid rgba(16,185,129,0.2);border-radius:var(--r-md);padding:14px 18px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div>
+        <div style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--green)">What's Working</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px dashed rgba(16,185,129,0.15)"><span style="font-size:11px;color:var(--text-primary);font-weight:600">Revenue growth</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--green);font-weight:700">+32.7% CAGR</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px dashed rgba(16,185,129,0.15)"><span style="font-size:11px;color:var(--text-primary);font-weight:600">Workforce stability (WSI)</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--green);font-weight:700">88% · 5yr low attrition</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px dashed rgba(16,185,129,0.15)"><span style="font-size:11px;color:var(--text-primary);font-weight:600">Gross margin</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--green);font-weight:700">76.1% · top quartile</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0"><span style="font-size:11px;color:var(--text-primary);font-weight:600">eNPS</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--green);font-weight:700">42 · +8 YoY</span></div>
+      </div>
+    </div>
+    <div style="background:rgba(37,99,235,0.04);border:1px solid rgba(37,99,235,0.2);border-radius:var(--r-md);padding:14px 18px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="width:7px;height:7px;border-radius:50%;background:var(--blue)"></div>
+        <div style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--blue)">What Moved This Quarter</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px dashed rgba(37,99,235,0.15)"><span style="font-size:11px;color:var(--text-primary);font-weight:600">SCR · Skill Coverage</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--green);font-weight:700">58% → 62% ▲</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px dashed rgba(37,99,235,0.15)"><span style="font-size:11px;color:var(--text-primary);font-weight:600">LLM Bus Factor</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--green);font-weight:700">1 → 3 ▲</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px dashed rgba(37,99,235,0.15)"><span style="font-size:11px;color:var(--text-primary);font-weight:600">Unassessed HC</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--green);font-weight:700">30 → 18 ▼</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0"><span style="font-size:11px;color:var(--text-primary);font-weight:600">Harish Flight Risk</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--amber);font-weight:700">4.6 → 4.2 ▼</span></div>
+      </div>
+    </div>
+  </div>
 
   <!-- ══ 3. CRITICAL ALERTS ══ -->
   <div style="background:rgba(239,68,68,0.04);border:1.5px solid rgba(239,68,68,0.25);border-radius:var(--r-md);padding:16px 20px;margin-bottom:20px">
@@ -1200,6 +1270,37 @@ canvas{max-height:260px}
     </div>
   </div>
 
+  <!-- ══ NEW: SKILLS BY DEPARTMENT ══ -->
+  <div class="phase-lbl">Skills by Department</div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="ch"><div class="ct">Department Skill Health Scorecard</div><span class="ctag">10 departments · coverage · critical gaps · bus factor · training</span></div>
+    <div class="ovx">
+    <table class="tbl">
+      <thead><tr>
+        <th>Department</th><th>HC</th><th>Skills in Use</th>
+        <th>Coverage %</th><th>C1 Gaps</th><th>Bus Factor ≤2</th>
+        <th>Training %</th><th>Health</th>
+      </tr></thead>
+      <tbody id="deptSkillBody"></tbody>
+    </table>
+    </div>
+  </div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="ch"><div class="ct">Skills × Department Heatmap</div><span class="ctag">Top 12 critical skills · employee count per department</span></div>
+      <div id="skillsDeptHeatmap" class="ovx"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">Cross-Department Skill Overlap</div><span class="ctag">Shared skills · internal mobility signal</span></div>
+      <div class="ovx">
+      <table class="tbl">
+        <thead><tr><th>Skill</th><th>Departments</th><th>Total Emps</th><th>Mobility Signal</th></tr></thead>
+        <tbody id="deptOverlapBody"></tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
   <!-- GAP 1: Full Skill Master Table with filters -->
   <div class="phase-lbl">Full Skill Master Table</div>
   <div class="card">
@@ -1294,6 +1395,93 @@ canvas{max-height:260px}
       <thead><tr><th>Skill</th><th>Lifecycle</th><th>Market Velocity</th><th>Org Velocity</th><th>Adoption Lag</th><th>2020 Org Coverage</th><th>2024 Org Coverage</th><th>Recommended Action</th></tr></thead>
       <tbody id="skillLifecycleBody"></tbody>
     </table>
+    </div>
+  </div>
+
+  <!-- ══ NEW: BUS FACTOR / SINGLE POINTS OF FAILURE ══ -->
+  <div class="phase-lbl">Bus Factor — Single Points of Failure</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="ch"><div class="ct">Bus Factor Distribution</div><span class="ctag">Employees at L3+ per critical skill</span></div>
+      <canvas id="busFactorChart" height="240"></canvas>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:8px;line-height:1.5">
+        Bus Factor = number of employees at Advanced (L3) or Expert (L4) proficiency. A value of 1 means if that person leaves, the skill is effectively lost. Target: ≥3 for all C1 critical skills.
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">Critical Bus Factor Risks</div><span class="ctag">C1/C2 skills · Bus factor ≤ 2</span></div>
+      <div class="ovx">
+      <table class="tbl">
+        <thead><tr><th>Skill</th><th>Crit</th><th>L4 Experts</th><th>L3+ Total</th><th>Bus Factor</th><th>Risk</th></tr></thead>
+        <tbody id="busFactorBody"></tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NEW: FORECASTED DEMAND ══ -->
+  <div class="phase-lbl">Forecasted Skill Demand — Tied to Product Roadmap</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="ch"><div class="ct">Current vs 12M vs 24M Demand</div><span class="ctag">Top 10 critical skills · role slots needed</span></div>
+      <canvas id="forecastDemandChart" height="260"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">Demand Drivers</div><span class="ctag">Product roadmap commitments</span></div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div style="padding:10px;border-left:3px solid var(--red);background:rgba(239,68,68,0.05);border-radius:var(--r-sm)">
+          <div style="font-size:11px;font-weight:700;color:var(--text-primary);margin-bottom:3px">Gen AI Module Launch · Q2 FY26</div>
+          <div style="font-size:10px;color:var(--text-secondary);line-height:1.5">Requires +8 LLM, +6 Prompt Eng, +5 MLOps engineers. Gap: 13 roles unfilled.</div>
+        </div>
+        <div style="padding:10px;border-left:3px solid var(--amber);background:rgba(245,158,11,0.05);border-radius:var(--r-sm)">
+          <div style="font-size:11px;font-weight:700;color:var(--text-primary);margin-bottom:3px">Analytics v2 Platform · Q3 FY26</div>
+          <div style="font-size:10px;color:var(--text-secondary);line-height:1.5">Requires +4 Data Eng, +3 Python, +2 Azure. Gap: 6 roles unfilled.</div>
+        </div>
+        <div style="padding:10px;border-left:3px solid var(--blue);background:rgba(37,99,235,0.05);border-radius:var(--r-sm)">
+          <div style="font-size:11px;font-weight:700;color:var(--text-primary);margin-bottom:3px">Mobile App Relaunch · Q4 FY26</div>
+          <div style="font-size:10px;color:var(--text-secondary);line-height:1.5">Requires +3 React Native, +2 Node.js. Gap: 4 roles unfilled.</div>
+        </div>
+        <div style="padding:10px;border-left:3px solid var(--purple);background:rgba(124,58,237,0.05);border-radius:var(--r-sm)">
+          <div style="font-size:11px;font-weight:700;color:var(--text-primary);margin-bottom:3px">Pre-IPO Compliance · FY27</div>
+          <div style="font-size:10px;color:var(--text-secondary);line-height:1.5">Requires +2 SOX, +1 InfoSec Audit, +1 Data Privacy. Gap: 4 roles unfilled.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NEW: BUILD vs BUY vs BORROW ══ -->
+  <div class="phase-lbl">Build vs Buy vs Borrow — Gap Closure Strategy</div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="ch">
+      <div class="ct">Recommended Action per Gap Skill</div>
+      <span class="ctag">Build = train · Buy = hire · Borrow = contract/partner</span>
+    </div>
+    <div class="ovx">
+    <table class="tbl">
+      <thead><tr>
+        <th>Skill</th><th>Crit</th><th>Gap</th><th>Time-to-Proficiency</th>
+        <th>Build Cost</th><th>Buy Cost</th><th>Borrow Cost</th>
+        <th>Recommendation</th><th>Rationale</th>
+      </tr></thead>
+      <tbody id="buildBuyBorrowBody"></tbody>
+    </table>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px">
+      <div style="padding:10px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:var(--r-sm);text-align:center">
+        <div style="font-size:9px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.05em">Build (Train)</div>
+        <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--green);margin:4px 0">7</div>
+        <div style="font-size:10px;color:var(--text-muted)">skills · ~$340K · 6–9 months</div>
+      </div>
+      <div style="padding:10px;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.2);border-radius:var(--r-sm);text-align:center">
+        <div style="font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em">Buy (Hire)</div>
+        <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--blue);margin:4px 0">8</div>
+        <div style="font-size:10px;color:var(--text-muted)">skills · ~$1.2M · 3–6 months</div>
+      </div>
+      <div style="padding:10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:var(--r-sm);text-align:center">
+        <div style="font-size:9px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.05em">Borrow (Contract)</div>
+        <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--amber);margin:4px 0">5</div>
+        <div style="font-size:10px;color:var(--text-muted)">skills · ~$480K · immediate</div>
+      </div>
     </div>
   </div>
 
@@ -1533,6 +1721,112 @@ canvas{max-height:260px}
     <canvas id="critCompByBU" height="200"></canvas>
   </div>
 
+  <!-- ══ NEW: COMPETENCY BY DEPARTMENT ══ -->
+  <div class="phase-lbl">Competencies by Department</div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="ch"><div class="ct">Department Competency Scorecard</div><span class="ctag">10 departments · CSI · gaps · readiness</span></div>
+    <div class="ovx">
+    <table class="tbl">
+      <thead><tr>
+        <th>Department</th><th>HC</th><th>Avg CSI</th><th>Leadership</th>
+        <th>Behavioural</th><th>Cognitive</th><th>Technical</th><th>Critical Gaps</th><th>Health</th>
+      </tr></thead>
+      <tbody id="deptCompBody"></tbody>
+    </table>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="ch"><div class="ct">Competencies × Department Heatmap</div><span class="ctag">Top 10 critical competencies · avg proficiency level per department</span></div>
+    <div id="compDeptHeatmap" class="ovx"></div>
+  </div>
+
+  <!-- ══ NEW: BUS FACTOR · LEADERSHIP DEPTH ══ -->
+  <div class="phase-lbl">Leadership Competency Depth — Single Points of Failure</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="ch"><div class="ct">Competency Bus Factor</div><span class="ctag">Employees at Expert (L4+) per critical competency</span></div>
+      <canvas id="compBusFactorChart" height="240"></canvas>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:8px;line-height:1.5">
+        Bus Factor = number of employees demonstrating the competency at Advanced/Expert level. A value of 1 means loss of that person collapses the capability org-wide.
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">Critical Competency Depth Risks</div><span class="ctag">Leadership & Cognitive · depth ≤ 2</span></div>
+      <div class="ovx">
+      <table class="tbl">
+        <thead><tr><th>Competency</th><th>Category</th><th>L4+ Experts</th><th>Bus Factor</th><th>Succession Risk</th></tr></thead>
+        <tbody id="compBusBody"></tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NEW: FORECASTED COMPETENCY DEMAND ══ -->
+  <div class="phase-lbl">Forecasted Competency Demand — Pre-IPO Leadership Pipeline</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="ch"><div class="ct">Current vs 12M vs 24M Demand</div><span class="ctag">Top 8 competencies · leader slots required</span></div>
+      <canvas id="compForecastChart" height="260"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">Pipeline Drivers</div><span class="ctag">Organisational commitments</span></div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div style="padding:10px;border-left:3px solid var(--red);background:rgba(239,68,68,0.05);border-radius:var(--r-sm)">
+          <div style="font-size:11px;font-weight:700;color:var(--text-primary);margin-bottom:3px">Pre-IPO Readiness · FY27</div>
+          <div style="font-size:10px;color:var(--text-secondary);line-height:1.5">Requires +3 Strategic Thinking, +2 Executive Presence, +2 Investor Communication at L4+.</div>
+        </div>
+        <div style="padding:10px;border-left:3px solid var(--amber);background:rgba(245,158,11,0.05);border-radius:var(--r-sm)">
+          <div style="font-size:11px;font-weight:700;color:var(--text-primary);margin-bottom:3px">Scale from 50 → 120 HC · FY26</div>
+          <div style="font-size:10px;color:var(--text-secondary);line-height:1.5">Requires +5 People Leadership, +4 Change Management, +3 Coaching at L3+.</div>
+        </div>
+        <div style="padding:10px;border-left:3px solid var(--blue);background:rgba(37,99,235,0.05);border-radius:var(--r-sm)">
+          <div style="font-size:11px;font-weight:700;color:var(--text-primary);margin-bottom:3px">Gen AI Product Launch · Q2 FY26</div>
+          <div style="font-size:10px;color:var(--text-secondary);line-height:1.5">Requires +4 Systems Thinking, +3 Data-Driven Judgement, +2 Customer Obsession.</div>
+        </div>
+        <div style="padding:10px;border-left:3px solid var(--purple);background:rgba(124,58,237,0.05);border-radius:var(--r-sm)">
+          <div style="font-size:11px;font-weight:700;color:var(--text-primary);margin-bottom:3px">Geo Expansion · DXB + SG · FY26</div>
+          <div style="font-size:10px;color:var(--text-secondary);line-height:1.5">Requires +3 Cross-Cultural Leadership, +2 Global Mindset at L3+.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NEW: BUILD vs BUY vs BORROW (COMPETENCY) ══ -->
+  <div class="phase-lbl">Build vs Buy vs Borrow — Competency Closure Strategy</div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="ch">
+      <div class="ct">Recommended Action per Competency Gap</div>
+      <span class="ctag">Build = development program · Buy = external hire · Borrow = coach/advisor</span>
+    </div>
+    <div class="ovx">
+    <table class="tbl">
+      <thead><tr>
+        <th>Competency</th><th>Category</th><th>Gap</th><th>Time-to-Proficiency</th>
+        <th>Build Cost</th><th>Buy Cost</th><th>Borrow Cost</th>
+        <th>Recommendation</th><th>Rationale</th>
+      </tr></thead>
+      <tbody id="compBbbBody"></tbody>
+    </table>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px">
+      <div style="padding:10px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:var(--r-sm);text-align:center">
+        <div style="font-size:9px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.05em">Build (Develop)</div>
+        <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--green);margin:4px 0">5</div>
+        <div style="font-size:10px;color:var(--text-muted)">comps · ~$220K · 9–12 months</div>
+      </div>
+      <div style="padding:10px;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.2);border-radius:var(--r-sm);text-align:center">
+        <div style="font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em">Buy (Hire)</div>
+        <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--blue);margin:4px 0">3</div>
+        <div style="font-size:10px;color:var(--text-muted)">comps · ~$780K · 4–6 months</div>
+      </div>
+      <div style="padding:10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:var(--r-sm);text-align:center">
+        <div style="font-size:9px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.05em">Borrow (Coach/Advisor)</div>
+        <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--amber);margin:4px 0">4</div>
+        <div style="font-size:10px;color:var(--text-muted)">comps · ~$180K · immediate</div>
+      </div>
+    </div>
+  </div>
+
   <div class="ai-block">
     <div class="ai-hd"><div class="ai-av"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><div class="ai-lbl">AI Insight — Competency Inventory</div></div>
     <div class="ai-txt">CSI of <strong>0.82</strong> indicates NovaTech scores 18% below industry benchmark overall. <strong>Cognitive</strong> and <strong>Technical</strong> competencies (2 each, 8% each) are severely under-represented for a product engineering company — peer SaaS firms average 20%+ coverage per category. <em>Recommended: Add 3 Cognitive competencies (Systems Thinking, Data-Driven Judgement, Hypothesis Testing) and elevate Technical competency proficiency targets at L4–L5.</em></div>
@@ -1721,6 +2015,89 @@ canvas{max-height:260px}
       </div>
     </div>
 
+    <!-- ══ NEW: ASSESSMENT COVERAGE GAP ══ -->
+    <div class="phase-lbl">Assessment Coverage Gap — The 30 Unassessed Employees</div>
+    <div class="g2" style="margin-bottom:14px">
+      <div class="card">
+        <div class="ch"><div class="ct">Unassessed Employees by Department</div><span class="ctag">30 of 50 employees · assessment plan required</span></div>
+        <canvas id="unassessedChart" height="240"></canvas>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:8px;line-height:1.5">
+          60% of the workforce has no proficiency data. Target: 100% assessed by end of Q2 FY26. Owner: HR CoE + Line Managers.
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">Unassessed Employee Register</div><span class="ctag">Prioritised by role criticality</span></div>
+        <div class="ovx">
+        <table class="tbl">
+          <thead><tr><th>Employee</th><th>Dept</th><th>Role</th><th>Last Assessed</th><th>Priority</th><th>Target Date</th></tr></thead>
+          <tbody id="unassessedBody"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NEW: FLIGHT RISK × CRITICAL SKILL OVERLAY ══ -->
+    <div class="phase-lbl">Flight Risk × Critical Skill Exposure</div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="ch"><div class="ct">Employees: Flight Risk vs Skill Criticality</div><span class="ctag">Top-right quadrant = immediate retention intervention</span></div>
+      <div style="display:grid;grid-template-columns:3fr 1fr;gap:14px;align-items:start">
+        <canvas id="flightRiskScatter" height="260"></canvas>
+        <div style="display:flex;flex-direction:column;gap:7px;font-size:10px">
+          <div style="font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-size:9px">Quadrants</div>
+          <div style="padding:6px 9px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--r-sm)"><div style="font-weight:700;color:var(--red);font-size:10px">Retain Now</div><div style="font-size:9px;color:var(--text-muted)">High risk · C1 skills</div></div>
+          <div style="padding:6px 9px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:var(--r-sm)"><div style="font-weight:700;color:var(--amber);font-size:10px">Watch</div><div style="font-size:9px;color:var(--text-muted)">Medium risk · C2</div></div>
+          <div style="padding:6px 9px;background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.25);border-radius:var(--r-sm)"><div style="font-weight:700;color:var(--blue);font-size:10px">Monitor</div><div style="font-size:9px;color:var(--text-muted)">Low risk · any skill</div></div>
+          <div style="padding:6px 9px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:var(--r-sm)"><div style="font-weight:700;color:var(--green);font-size:10px">Stable</div><div style="font-size:9px;color:var(--text-muted)">Low risk · C3/C4</div></div>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--text-primary);margin-bottom:8px">Retain-Now Register — Immediate Action</div>
+        <div class="ovx">
+        <table class="tbl">
+          <thead><tr><th>Employee</th><th>Role</th><th>Critical Skills Held</th><th>Flight Risk</th><th>Bus Factor Impact</th><th>Action</th></tr></thead>
+          <tbody id="retainNowBody"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NEW: INDIVIDUAL DEVELOPMENT PLANS ══ -->
+    <div class="phase-lbl">Individual Development Plans — HiPo & Critical Role Pipeline</div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="ch"><div class="ct">IDP Register</div><span class="ctag">18 HiPos + 7 critical roles · current → target role · readiness</span></div>
+      <div class="ovx">
+      <table class="tbl">
+        <thead><tr>
+          <th>Employee</th><th>Current Role</th><th>HiPo</th><th>Target Role</th>
+          <th>Gap Skills</th><th>Recommended Path</th><th>Readiness</th><th>ETA</th>
+        </tr></thead>
+        <tbody id="idpBody"></tbody>
+      </table>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px">
+        <div style="padding:10px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:var(--r-sm);text-align:center">
+          <div style="font-size:9px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.05em">Ready Now</div>
+          <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--green);margin:4px 0">4</div>
+          <div style="font-size:10px;color:var(--text-muted)">can move this quarter</div>
+        </div>
+        <div style="padding:10px;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.2);border-radius:var(--r-sm);text-align:center">
+          <div style="font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em">Ready 6–12 Mo</div>
+          <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--blue);margin:4px 0">9</div>
+          <div style="font-size:10px;color:var(--text-muted)">short gap-closure</div>
+        </div>
+        <div style="padding:10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:var(--r-sm);text-align:center">
+          <div style="font-size:9px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.05em">Ready 12–24 Mo</div>
+          <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--amber);margin:4px 0">8</div>
+          <div style="font-size:10px;color:var(--text-muted)">long development</div>
+        </div>
+        <div style="padding:10px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:var(--r-sm);text-align:center">
+          <div style="font-size:9px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.05em">Not Ready</div>
+          <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--red);margin:4px 0">4</div>
+          <div style="font-size:10px;color:var(--text-muted)">need external hire</div>
+        </div>
+      </div>
+    </div>
+
     <div class="ai-block">
       <div class="ai-hd"><div class="ai-av"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><div class="ai-lbl">AI Insight — Employee Skill Profiles</div></div>
       <div class="ai-txt">Only <strong>20 of 50 employees (40%)</strong> have proficiency data. Avg breadth is <strong>0.54</strong> — employees cover barely half their required skills. <strong>Sara Kumar</strong> and <strong>Uma Malik</strong> are at full breadth (1.0) with depth 3.8–3.9 — the org's strongest capability anchors. <strong>Pooja Verma (0.29)</strong>, <strong>Swathi Brown (0.33)</strong>, <strong>Meera Singh (0.38)</strong> are most at-risk. <em>Actions: (1) Complete assessments for 30 remaining employees; (2) Prioritise L&D for 8 employees with breadth &lt;0.50; (3) Deploy Uma Malik and Sara Kumar as LLM/ML peer mentors.</em></div>
@@ -1826,6 +2203,60 @@ canvas{max-height:260px}
     <div class="g2">
       <div class="card"><div class="ch"><div class="ct">Certifications by Job Family</div><span class="ctag">Compliance / Upskilling</span></div><canvas id="certByFamily" height="200"></canvas></div>
       <div class="card"><div class="ch"><div class="ct">Certifications by BU</div><span class="ctag">BU-level cert coverage</span></div><canvas id="certByBU" height="200"></canvas></div>
+    </div>
+
+    <!-- ══ NEW: PRE/POST ASSESSMENT — TRAINING EFFECTIVENESS ══ -->
+    <div class="phase-lbl">Pre/Post Assessment — Training Effectiveness (The Missing Measure)</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px">
+      <div class="kpi amber"><div class="kpi-lbl">Programs Measured</div><div class="kpi-val">6 / 18</div><div class="kpi-sub">33% measured · 67% untracked</div></div>
+      <div class="kpi green"><div class="kpi-lbl">Avg Proficiency Lift</div><div class="kpi-val">+0.82</div><div class="kpi-sub">levels gained post-training</div></div>
+      <div class="kpi blue"><div class="kpi-lbl">Avg Training NPS</div><div class="kpi-val">46</div><div class="kpi-sub">of measured programs</div></div>
+      <div class="kpi red"><div class="kpi-lbl">Cost per L-Point</div><div class="kpi-val">$412</div><div class="kpi-sub">$ / proficiency level gained</div></div>
+    </div>
+    <div class="g2" style="margin-bottom:14px">
+      <div class="card">
+        <div class="ch"><div class="ct">Pre vs Post Proficiency Lift</div><span class="ctag">Measured programs · avg proficiency L1–L4</span></div>
+        <canvas id="prePostChart" height="260"></canvas>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">Training ROI Table</div><span class="ctag">Cost · Lift · NPS · Time-to-Application</span></div>
+        <div class="ovx">
+        <table class="tbl">
+          <thead><tr><th>Program</th><th>N</th><th>Pre</th><th>Post</th><th>Lift</th><th>NPS</th><th>Cost / L-Point</th><th>T2A</th></tr></thead>
+          <tbody id="trainRoiBody"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:14px;padding:12px 14px;background:rgba(239,68,68,0.04);border-left:3px solid var(--red)">
+      <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px">12 programs have no pre/post measurement</div>
+      <div style="font-size:10px;color:var(--text-secondary);line-height:1.5">
+        67% of the $180K training budget ($120K) is spent on programs with no effectiveness data. Completion ≠ learning. Recommendation: instrument all C1/C2 critical-skill programs with pre-assessment, 30-day post-assessment, and 90-day on-the-job application check.
+      </div>
+    </div>
+
+    <!-- ══ NEW: CERTIFICATION EXPIRY TRACKER ══ -->
+    <div class="phase-lbl">Certification Expiry Tracker — Compliance & Renewal Pipeline</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px">
+      <div class="kpi red"><div class="kpi-lbl">Expired</div><div class="kpi-val">7</div><div class="kpi-sub">requires immediate action</div></div>
+      <div class="kpi amber"><div class="kpi-lbl">Expiring ≤30 Days</div><div class="kpi-val">11</div><div class="kpi-sub">renewal in progress</div></div>
+      <div class="kpi gold"><div class="kpi-lbl">Expiring ≤90 Days</div><div class="kpi-val">24</div><div class="kpi-sub">renewal pipeline</div></div>
+      <div class="kpi green"><div class="kpi-lbl">Valid >90 Days</div><div class="kpi-val">85</div><div class="kpi-sub">127 total certs tracked</div></div>
+    </div>
+    <div class="g2" style="margin-bottom:14px">
+      <div class="card">
+        <div class="ch"><div class="ct">Certifications by Expiry Window</div><span class="ctag">Next 12 months · org-level + individual</span></div>
+        <canvas id="certExpiryChart" height="240"></canvas>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">Critical Expiries — Next 90 Days</div><span class="ctag">Compliance risk · renewal owner assigned</span></div>
+        <div class="ovx">
+        <table class="tbl">
+          <thead><tr><th>Certification</th><th>Holder</th><th>Expires</th><th>Days</th><th>Risk</th><th>Owner</th></tr></thead>
+          <tbody id="certExpiryBody"></tbody>
+        </table>
+        </div>
+      </div>
     </div>
 
     <div class="ai-block">
@@ -1978,6 +2409,76 @@ canvas{max-height:260px}
     <table class="tbl">
       <thead><tr><th>Role</th><th>Level</th><th>Family</th><th>Python</th><th>AWS</th><th>SQL/DB</th><th>DevOps</th><th>Cybersec</th><th>Prompt Eng</th><th>ML</th><th>Azure</th><th>React</th><th>API Design</th><th>RCGS</th><th>Risk</th></tr></thead>
       <tbody id="rm_matrixBody"></tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- ══ NEW: UNASSESSED ROLE REGISTER ══ -->
+  <div class="phase-lbl">8 · Unassessed Role Register — The Missing 22 Roles</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="ch"><div class="ct">Assessment Coverage</div><span class="ctag">13 of 35 roles assessed · 63% gap</span></div>
+      <canvas id="rm_assessCoverage" height="220"></canvas>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:8px;line-height:1.5">
+        22 roles have no capability assessment on record. RCGS, RREI, and gap analysis on this page exclude them entirely. The assessed sample skews toward engineering and revenue roles; back-office and specialist roles are underrepresented.
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">Unassessed Roles — Prioritised Queue</div><span class="ctag">By business criticality · target FY26</span></div>
+      <div class="ovx">
+      <table class="tbl">
+        <thead><tr><th>Role</th><th>Family</th><th>HC</th><th>Priority</th><th>Target</th></tr></thead>
+        <tbody id="rm_unassessedBody"></tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NEW: VACANCY & HIRING PIPELINE ══ -->
+  <div class="phase-lbl">9 · Vacancy & Hiring Pipeline — Open Roles Impact</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px">
+    <div class="kpi red"><div class="kpi-lbl">Open Vacancies</div><div class="kpi-val">6</div><div class="kpi-sub">of 35 total roles</div></div>
+    <div class="kpi amber"><div class="kpi-lbl">Critical Vacancies</div><div class="kpi-val">3</div><div class="kpi-sub">C1 business impact</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">Avg Time-to-Fill</div><div class="kpi-val">87d</div><div class="kpi-sub">industry avg 62d</div></div>
+    <div class="kpi purple"><div class="kpi-lbl">Longest Open</div><div class="kpi-val">142d</div><div class="kpi-sub">Dir of Engineering</div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="ch"><div class="ct">Open Requisitions</div><span class="ctag">Position · stage · days open · business impact</span></div>
+    <div class="ovx">
+    <table class="tbl">
+      <thead><tr>
+        <th>Role</th><th>Level</th><th>Family</th><th>Priority</th>
+        <th>Days Open</th><th>Pipeline Stage</th><th>Candidates</th>
+        <th>Business Impact</th><th>Hiring Manager</th>
+      </tr></thead>
+      <tbody id="rm_vacancyBody"></tbody>
+    </table>
+    </div>
+    <div style="padding:10px 12px;margin-top:12px;background:rgba(239,68,68,0.05);border-left:3px solid var(--red);border-radius:var(--r-sm)">
+      <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:3px">Hidden RCGS Impact</div>
+      <div style="font-size:10px;color:var(--text-secondary);line-height:1.5">
+        Vacant roles are excluded from the RCGS average shown at the top of this page. If included (treating current proficiency as 0), org-wide RCGS would be +2.18 instead of +1.24. The 3 critical vacancies alone account for +0.94 of hidden gap.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NEW: SUCCESSION READINESS ══ -->
+  <div class="phase-lbl">10 · Succession Readiness — Critical Role Continuity</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px">
+    <div class="kpi green"><div class="kpi-lbl">Ready Now</div><div class="kpi-val">2</div><div class="kpi-sub">of 11 critical roles</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">Ready 1 Year</div><div class="kpi-val">3</div><div class="kpi-sub">with development</div></div>
+    <div class="kpi amber"><div class="kpi-lbl">Ready 2 Years</div><div class="kpi-val">2</div><div class="kpi-sub">long runway</div></div>
+    <div class="kpi red"><div class="kpi-lbl">No Successor</div><div class="kpi-val">4</div><div class="kpi-sub">external hire only</div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="ch"><div class="ct">Succession Bench — Critical Roles</div><span class="ctag">L5/L6 leadership + C1 specialist roles</span></div>
+    <div class="ovx">
+    <table class="tbl">
+      <thead><tr>
+        <th>Critical Role</th><th>Incumbent</th><th>Successor Candidate</th>
+        <th>Readiness</th><th>Skill Gap</th><th>Gap to Close</th><th>Risk if Incumbent Exits</th>
+      </tr></thead>
+      <tbody id="rm_successionBody"></tbody>
     </table>
     </div>
   </div>
@@ -3119,6 +3620,165 @@ canvas{max-height:260px}
   </div>
 </div>
 
+<!-- ═══════════ CHANGE LOG ═══════════ -->
+<div id="pv-changelog" class="pv">
+  <div class="ph">
+    <div class="ph-row">
+      <div>
+        <div class="ph-title">Change Log — Action Register</div>
+        <div class="ph-desc">Every action taken on insights surfaced by this platform · accountability · outcome tracking · FY2024–FY2026</div>
+      </div>
+      <div class="ph-badges">
+        <span class="badge gold">Level 1</span>
+        <span class="badge green">18 Actions Logged</span>
+        <span class="badge amber">6 Open</span>
+        <span class="badge blue">+4pp SCR Movement</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 1: KPI STRIP ══ -->
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px">
+    <div class="kpi gold"><div class="kpi-lbl">Total Actions</div><div class="kpi-val">18</div><div class="kpi-sub">Since Jan 2025</div></div>
+    <div class="kpi amber"><div class="kpi-lbl">Open</div><div class="kpi-val">6</div><div class="kpi-sub">in progress</div></div>
+    <div class="kpi green"><div class="kpi-lbl">Closed</div><div class="kpi-val">9</div><div class="kpi-sub">7 with impact</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">Avg Time-to-Close</div><div class="kpi-val">42d</div><div class="kpi-sub">target ≤ 45d</div></div>
+    <div class="kpi purple"><div class="kpi-lbl">Measurable Impact</div><div class="kpi-val">7</div><div class="kpi-sub">actions with before/after</div></div>
+    <div class="kpi red"><div class="kpi-lbl">No Owner</div><div class="kpi-val">3</div><div class="kpi-sub">accountability gap</div></div>
+  </div>
+
+  <!-- ══ SECTION 2: IMPACT SUMMARY STRIP ══ -->
+  <div class="phase-lbl">Measurable Impact — Did It Work?</div>
+  <div class="card" style="margin-bottom:14px;padding:14px 16px">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+      <div style="padding:10px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:var(--r-sm)">
+        <div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">SCR · Skill Coverage</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);text-decoration:line-through">58%</span>
+          <span style="font-size:14px;color:var(--green)">→</span>
+          <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--green)">62%</span>
+        </div>
+        <div style="font-size:9px;color:var(--green);font-weight:600">▲ +4pp · 2 programs added</div>
+      </div>
+      <div style="padding:10px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:var(--r-sm)">
+        <div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">LLM Bus Factor</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);text-decoration:line-through">1</span>
+          <span style="font-size:14px;color:var(--green)">→</span>
+          <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--green)">3</span>
+        </div>
+        <div style="font-size:9px;color:var(--green);font-weight:600">▲ +2 · 2 hires onboarded</div>
+      </div>
+      <div style="padding:10px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:var(--r-sm)">
+        <div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Unassessed Employees</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);text-decoration:line-through">30</span>
+          <span style="font-size:14px;color:var(--green)">→</span>
+          <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--green)">18</span>
+        </div>
+        <div style="font-size:9px;color:var(--green);font-weight:600">▼ −12 · 12 assessments completed</div>
+      </div>
+      <div style="padding:10px 12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:var(--r-sm)">
+        <div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Cert Expiry Backlog</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);text-decoration:line-through">7</span>
+          <span style="font-size:14px;color:var(--amber)">→</span>
+          <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--amber)">4</span>
+        </div>
+        <div style="font-size:9px;color:var(--amber);font-weight:600">▼ −3 · 4 still expired</div>
+      </div>
+      <div style="padding:10px 12px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:var(--r-sm)">
+        <div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Harish Flight Risk</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);text-decoration:line-through">4.6</span>
+          <span style="font-size:14px;color:var(--red)">→</span>
+          <span style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--red)">4.2</span>
+        </div>
+        <div style="font-size:9px;color:var(--red);font-weight:600">▼ −0.4 · marginal, still high</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 3: ACTION BREAKDOWN CHARTS ══ -->
+  <div class="phase-lbl">Action Distribution</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="ch"><div class="ct">Actions by Type</div><span class="ctag">Where we spend intervention energy</span></div>
+      <canvas id="clogTypeChart" height="220"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">Actions by Status</div><span class="ctag">Open · In Progress · Closed · Blocked</span></div>
+      <canvas id="clogStatusChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 4: ACTION REGISTER TABLE ══ -->
+  <div class="phase-lbl">Action Register — All Logged Actions</div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="ch">
+      <div class="ct">Full Action History</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <select id="clogFilterStatus" onchange="filterChangeLog()" style="font-size:10px;padding:3px 7px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-alt);color:var(--text-primary);font-family:var(--font-body)">
+          <option value="">All Status</option>
+          <option>Open</option><option>In Progress</option><option>Completed</option><option>Blocked</option>
+        </select>
+        <select id="clogFilterType" onchange="filterChangeLog()" style="font-size:10px;padding:3px 7px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-alt);color:var(--text-primary);font-family:var(--font-body)">
+          <option value="">All Types</option>
+          <option>Training Commissioned</option><option>Hire Approved</option>
+          <option>Risk Acknowledged</option><option>IDP Created</option>
+          <option>Assessment Scheduled</option><option>Retention Action</option>
+          <option>Cert Renewed</option><option>Gap Closed</option>
+        </select>
+        <button class="btn sm" onclick="alert('Demo: would open a form to log a new action')" style="background:var(--accent);color:#fff;border-color:var(--accent)">+ Log Action</button>
+      </div>
+    </div>
+    <div class="ovx">
+    <table class="tbl">
+      <thead><tr>
+        <th>Date</th><th>Type</th><th>What Was Done</th><th>Source</th>
+        <th>Owner</th><th>Target Metric</th><th>Before → After</th>
+        <th>Impact</th><th>Days Open</th><th>Status</th>
+      </tr></thead>
+      <tbody id="changeLogBody"></tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 5: IMPACT SCORECARD ══ -->
+  <div class="phase-lbl">Impact Scorecard — Did Actions Move the Needle?</div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="ch"><div class="ct">Effectiveness by Target Metric</div><span class="ctag">Aggregate movement per metric · effectiveness rate</span></div>
+    <div class="ovx">
+    <table class="tbl">
+      <thead><tr>
+        <th>Target Metric</th><th>Actions Taken</th><th>Baseline</th><th>Current</th>
+        <th>Movement</th><th>Target</th><th>Effectiveness</th>
+      </tr></thead>
+      <tbody id="impactScorecardBody"></tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 6: STALE / ORPHANED ACTIONS ══ -->
+  <div class="phase-lbl">Accountability Flags — Stale & Orphaned Actions</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="ch"><div class="ct">Stale Actions (Open &gt; 30 days)</div><span class="ctag">No progress update</span></div>
+      <div id="staleActionsList" style="display:flex;flex-direction:column;gap:7px"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">Orphaned Actions (No Owner)</div><span class="ctag">Accountability gap</span></div>
+      <div id="orphanActionsList" style="display:flex;flex-direction:column;gap:7px"></div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 7: AI NARRATIVE ══ -->
+  <div class="ai-block">
+    <div class="ai-hd"><div class="ai-av"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><div class="ai-lbl">AI Insight — Change Log Narrative</div></div>
+    <div class="ai-txt">Over the last 9 months NovaTech logged <strong>18 interventions</strong> against capability risks surfaced by this platform. <strong>Training commissioning and hiring dominate</strong> (11 of 18 actions), while coaching and retention interventions are under-represented (2 of 18) — a gap worth watching given the three active flight-risk employees. <strong>Effectiveness is mixed:</strong> SCR moved from 58% → 62% (+4pp) against a +17pp target, and LLM bus factor improved from 1 → 3. However, <strong>three actions have no owner</strong> and <strong>four are stale (>30 days open)</strong>, which is the single biggest accountability gap. The Harish Patel retention action has moved the needle only marginally (flight risk 4.6 → 4.2) — the intervention may be undersized for the risk level. <em>Recommended: (1) assign owners to the three orphaned actions this week; (2) escalate Harish retention to CEO-level sponsor; (3) double the coaching/retention action budget for the next quarter.</em></div>
+  </div>
+</div>
+
 </div></div><!-- /main -->
 </div><!-- /layout -->
 
@@ -3194,6 +3854,7 @@ function scatter(data, opts={}) {
 function buildCharts(name) {
   if (name === 'exec-summary') buildExecSummary();
   else if (name === 'overview') buildOverview();
+  else if (name === 'changelog') buildChangeLog();
   else if (name === 'skill-inv') buildSkillInv();
   else if (name === 'comp-inv') buildCompInv();
   else if (name === 'emp-skills') { buildEmpSkills(); buildTrainingMap(); buildTrainingRec(); }
@@ -3653,6 +4314,154 @@ function buildSkillInv() {
       <td style="font-size:10px;color:var(--text-secondary)">${actionMap[s.trend]}</td>
     </tr>`;
   }).join('');
+
+  // ── NEW: Bus Factor Chart + Table ──
+  const busData = [
+    {skill:'LLM / Gen AI',crit:'C1',l4:0,l3plus:1,bf:1},
+    {skill:'Machine Learning',crit:'C1',l4:1,l3plus:2,bf:2},
+    {skill:'MLOps',crit:'C2',l4:0,l3plus:1,bf:1},
+    {skill:'Python Programming',crit:'C1',l4:1,l3plus:3,bf:3},
+    {skill:'Azure Cloud',crit:'C2',l4:1,l3plus:2,bf:2},
+    {skill:'Data Eng & ETL',crit:'C2',l4:1,l3plus:2,bf:2},
+    {skill:'DevOps & CI/CD',crit:'C1',l4:2,l3plus:4,bf:4},
+    {skill:'Cybersecurity',crit:'C1',l4:2,l3plus:4,bf:4},
+    {skill:'Kubernetes',crit:'C3',l4:0,l3plus:1,bf:1},
+    {skill:'Prompt Engineering',crit:'C2',l4:1,l3plus:3,bf:3},
+  ];
+  mk('busFactorChart', bar(
+    busData.map(b=>b.skill),
+    [{label:'Bus Factor (L3+ employees)',
+      data:busData.map(b=>b.bf),
+      backgroundColor:busData.map(b=>b.bf===1?C.red:b.bf===2?C.amber:b.bf>=3?C.green:C.gray),
+      borderWidth:0}],
+    {indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,max:6,ticks:{stepSize:1}}}}
+  ));
+  const bfBody = document.getElementById('busFactorBody');
+  if (bfBody) bfBody.innerHTML = busData.filter(b=>b.bf<=2).map(b=>{
+    const rc = b.bf===1?C.red:C.amber;
+    const rl = b.bf===1?'CRITICAL':'HIGH';
+    return `<tr>
+      <td style="font-size:11px;font-weight:600">${b.skill}</td>
+      <td><span class="badge ${b.crit==='C1'?'red':'amber'}">${b.crit}</span></td>
+      <td class="td-num">${b.l4}</td>
+      <td class="td-num">${b.l3plus}</td>
+      <td class="td-num" style="font-weight:700;color:${rc}">${b.bf}</td>
+      <td><span style="font-size:9px;font-weight:700;color:${rc};background:${rc}15;padding:2px 6px;border-radius:3px">${rl}</span></td>
+    </tr>`;
+  }).join('');
+
+  // ── NEW: Forecast Demand Chart ──
+  const fcLabels = ['LLM','ML','Python','Azure','Prompt Eng','Data Eng','MLOps','React','Node.js','DevOps'];
+  mk('forecastDemandChart', { type:'bar', data:{ labels:fcLabels, datasets:[
+    {label:'Current Demand',data:[6,5,5,7,7,3,2,4,4,7],backgroundColor:C.gray},
+    {label:'12-Month Forecast',data:[14,10,8,10,13,7,7,6,6,9],backgroundColor:C.amber},
+    {label:'24-Month Forecast',data:[18,14,12,13,15,10,10,8,8,11],backgroundColor:C.red},
+  ]}, options:{responsive:true,scales:{y:{beginAtZero:true,grid:{color:GRID}},x:{grid:{display:false}}},plugins:{legend:{position:'bottom'}}}});
+
+  // ── NEW: Build vs Buy vs Borrow Table ──
+  const bbb = [
+    {skill:'LLM / Gen AI',crit:'C1',gap:14,ttp:'9 mo',build:'$85K',buy:'$420K',borrow:'$180K',rec:'BUY',recColor:C.blue,why:'Market scarcity 0.97 · build too slow for Q2 launch'},
+    {skill:'Machine Learning',crit:'C1',gap:9,ttp:'6 mo',build:'$60K',buy:'$280K',borrow:'$140K',rec:'BUILD',recColor:C.green,why:'6 employees already at L2 · fastest ROI'},
+    {skill:'Python Programming',crit:'C1',gap:7,ttp:'4 mo',build:'$35K',buy:'$240K',borrow:'$90K',rec:'BUILD',recColor:C.green,why:'Foundational · strong internal base at L2'},
+    {skill:'Azure Cloud',crit:'C2',gap:6,ttp:'5 mo',build:'$45K',buy:'$220K',borrow:'$110K',rec:'BUILD',recColor:C.green,why:'AWS team can cross-train · 7 L2 exist'},
+    {skill:'Prompt Engineering',crit:'C2',gap:6,ttp:'3 mo',build:'$25K',buy:'$180K',borrow:'$70K',rec:'BUILD',recColor:C.green,why:'Fast ramp · 6 employees at L2'},
+    {skill:'MLOps',crit:'C2',gap:8,ttp:'8 mo',build:'$55K',buy:'$260K',borrow:'$130K',rec:'BORROW',recColor:C.amber,why:'Scarcity 0.90 · bridge with contractors during Gen AI ramp'},
+    {skill:'Data Eng & ETL',crit:'C2',gap:4,ttp:'5 mo',build:'$30K',buy:'$190K',borrow:'$95K',rec:'BUILD',recColor:C.green,why:'SQL team adjacent · low ramp cost'},
+    {skill:'React / Frontend',crit:'C2',gap:5,ttp:'4 mo',build:'$28K',buy:'$160K',borrow:'$80K',rec:'BUY',recColor:C.blue,why:'Mobile relaunch urgency · hire senior lead'},
+    {skill:'Node.js / Backend',crit:'C2',gap:4,ttp:'4 mo',build:'$26K',buy:'$150K',borrow:'$75K',rec:'BUY',recColor:C.blue,why:'Paired with React hire for mobile team'},
+    {skill:'Kubernetes',crit:'C3',gap:3,ttp:'5 mo',build:'$32K',buy:'$170K',borrow:'$85K',rec:'BORROW',recColor:C.amber,why:'Low volume need · external managed service viable'},
+  ];
+  const bbbBody = document.getElementById('buildBuyBorrowBody');
+  if (bbbBody) bbbBody.innerHTML = bbb.map(b=>`
+    <tr>
+      <td style="font-size:11px;font-weight:600">${b.skill}</td>
+      <td><span class="badge ${b.crit==='C1'?'red':'amber'}">${b.crit}</span></td>
+      <td class="td-num" style="color:var(--red);font-weight:700">${b.gap}</td>
+      <td class="td-num">${b.ttp}</td>
+      <td class="td-num" style="color:var(--green)">${b.build}</td>
+      <td class="td-num" style="color:var(--blue)">${b.buy}</td>
+      <td class="td-num" style="color:var(--amber)">${b.borrow}</td>
+      <td><span style="font-size:10px;font-weight:700;color:${b.recColor};background:${b.recColor}15;padding:3px 8px;border-radius:3px">${b.rec}</span></td>
+      <td style="font-size:10px;color:var(--text-secondary)">${b.why}</td>
+    </tr>
+  `).join('');
+
+  // ── NEW: Skills by Department ──
+  const deptData = [
+    {dept:'Engineering',hc:18,skills:32,cov:62,c1gap:4,bf:5,train:78,health:'Risk'},
+    {dept:'Data & Analytics',hc:6,skills:18,cov:55,c1gap:3,bf:3,train:72,health:'Risk'},
+    {dept:'Product',hc:5,skills:14,cov:78,c1gap:1,bf:1,train:88,health:'Healthy'},
+    {dept:'Design',hc:3,skills:8,cov:82,c1gap:0,bf:1,train:92,health:'Healthy'},
+    {dept:'DevOps & SRE',hc:4,skills:11,cov:68,c1gap:2,bf:2,train:80,health:'Watch'},
+    {dept:'Sales',hc:5,skills:12,cov:85,c1gap:0,bf:0,train:94,health:'Healthy'},
+    {dept:'Customer Success',hc:4,skills:10,cov:80,c1gap:0,bf:1,train:90,health:'Healthy'},
+    {dept:'Marketing',hc:2,skills:9,cov:72,c1gap:0,bf:1,train:85,health:'Healthy'},
+    {dept:'HR & People',hc:2,skills:8,cov:88,c1gap:0,bf:0,train:95,health:'Healthy'},
+    {dept:'Finance & Legal',hc:1,skills:6,cov:70,c1gap:1,bf:2,train:80,health:'Watch'},
+  ];
+  const healthColor = {Healthy:C.green, Watch:C.amber, Risk:C.red};
+  const dsBody = document.getElementById('deptSkillBody');
+  if (dsBody) dsBody.innerHTML = deptData.map(d=>{
+    const hc = healthColor[d.health];
+    return `<tr>
+      <td style="font-size:11px;font-weight:600">${d.dept}</td>
+      <td class="td-num">${d.hc}</td>
+      <td class="td-num">${d.skills}</td>
+      <td class="td-num" style="color:${d.cov>=75?C.green:d.cov>=65?C.amber:C.red};font-weight:700">${d.cov}%</td>
+      <td class="td-num" style="color:${d.c1gap>2?C.red:d.c1gap>0?C.amber:C.green};font-weight:700">${d.c1gap}</td>
+      <td class="td-num" style="color:${d.bf>3?C.red:d.bf>1?C.amber:C.green}">${d.bf}</td>
+      <td class="td-num">${d.train}%</td>
+      <td><span style="font-size:9px;font-weight:700;color:${hc};background:${hc}15;padding:2px 7px;border-radius:3px">${d.health}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Skills x Department heatmap
+  const critSkills = ['LLM/GenAI','Python','Azure','ML','DevOps','Cybersec','Data Eng','React','Node.js','Prompt Eng','MLOps','SQL'];
+  const depts = ['Eng','Data','Prod','Design','DevOps','Sales','CS','Mktg','HR','Fin'];
+  const hmMatrix = [
+    [2,1,0,0,0,0,0,0,0,0],[5,4,0,0,1,0,0,0,0,0],[4,1,0,0,2,0,0,0,0,0],
+    [2,3,0,0,1,0,0,0,0,0],[6,0,0,0,4,0,0,0,0,0],[3,0,0,0,3,0,1,0,0,1],
+    [1,5,0,0,0,0,0,0,0,0],[5,0,0,1,0,0,0,0,0,0],[4,0,0,0,1,0,0,0,0,0],
+    [2,3,1,0,0,0,0,0,0,0],[1,2,0,0,1,0,0,0,0,0],[7,4,1,0,1,0,0,0,0,0],
+  ];
+  const hmEl = document.getElementById('skillsDeptHeatmap');
+  if (hmEl) {
+    const mx = 7;
+    let html = '<table class="tbl" style="font-size:10px"><thead><tr><th style="text-align:left">Skill</th>';
+    depts.forEach(d=>html+=`<th style="min-width:30px">${d}</th>`);
+    html += '</tr></thead><tbody>';
+    critSkills.forEach((s,i)=>{
+      html += `<tr><td style="font-weight:600;font-size:10px">${s}</td>`;
+      hmMatrix[i].forEach(v=>{
+        const op = v/mx;
+        const bg = v===0?'transparent':`rgba(37,99,235,${0.15+op*0.6})`;
+        const col = v===0?'var(--text-muted)':(op>0.5?'#fff':'var(--text-primary)');
+        html += `<td style="text-align:center;background:${bg};color:${col};font-weight:600">${v||'·'}</td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    hmEl.innerHTML = html;
+  }
+
+  // Cross-department overlap
+  const overlap = [
+    {skill:'Python',depts:'Eng · Data · DevOps',emps:8,signal:'High mobility · reskill ready'},
+    {skill:'SQL',depts:'Eng · Data · Product',emps:10,signal:'Broad base · cross-train candidate'},
+    {skill:'AWS Cloud',depts:'Eng · DevOps',emps:9,signal:'Cross-train to Azure viable'},
+    {skill:'Data Analysis',depts:'Data · Product · Marketing',emps:11,signal:'Strong lateral mobility'},
+    {skill:'Agile/Scrum',depts:'Eng · Product · Design',emps:12,signal:'Universal · already trained'},
+    {skill:'React',depts:'Eng · Design',emps:5,signal:'Narrow · expand to mobile'},
+  ];
+  const ovBody = document.getElementById('deptOverlapBody');
+  if (ovBody) ovBody.innerHTML = overlap.map(o=>`
+    <tr>
+      <td style="font-size:11px;font-weight:600">${o.skill}</td>
+      <td style="font-size:10px;color:var(--text-secondary)">${o.depts}</td>
+      <td class="td-num">${o.emps}</td>
+      <td style="font-size:10px;color:var(--text-secondary)">${o.signal}</td>
+    </tr>
+  `).join('');
 }
 
 // GAP 9: Filterable skill table
@@ -3790,6 +4599,132 @@ function buildCompInv() {
     {label:'0.85–0.94',data:[5,5,4,2],backgroundColor:C.gold,stack:'s'},
     {label:'0.95+ Strong',data:[2,3,4,1],backgroundColor:C.green,stack:'s'}
   ]}, options:{responsive:true,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true,grid:{color:GRID}}},plugins:{legend:{position:'bottom'}}}});
+
+  // ── NEW: Competency by Department ──
+  const deptComp = [
+    {dept:'Engineering',hc:18,csi:0.76,lead:0.72,beh:0.82,cog:0.70,tech:0.78,gaps:4,h:'Risk'},
+    {dept:'Data & Analytics',hc:6,csi:0.78,lead:0.74,beh:0.80,cog:0.82,tech:0.75,gaps:2,h:'Watch'},
+    {dept:'Product',hc:5,csi:0.86,lead:0.84,beh:0.88,cog:0.85,tech:0.82,gaps:1,h:'Healthy'},
+    {dept:'Design',hc:3,csi:0.88,lead:0.80,beh:0.92,cog:0.86,tech:0.84,gaps:0,h:'Healthy'},
+    {dept:'DevOps & SRE',hc:4,csi:0.80,lead:0.76,beh:0.82,cog:0.78,tech:0.82,gaps:1,h:'Watch'},
+    {dept:'Sales',hc:5,csi:0.84,lead:0.82,beh:0.88,cog:0.78,tech:0.72,gaps:1,h:'Healthy'},
+    {dept:'Customer Success',hc:4,csi:0.85,lead:0.80,beh:0.90,cog:0.78,tech:0.75,gaps:0,h:'Healthy'},
+    {dept:'Marketing',hc:2,csi:0.82,lead:0.78,beh:0.86,cog:0.80,tech:0.72,gaps:1,h:'Healthy'},
+    {dept:'HR & People',hc:2,csi:0.87,lead:0.84,beh:0.92,cog:0.80,tech:0.70,gaps:0,h:'Healthy'},
+    {dept:'Finance & Legal',hc:1,csi:0.80,lead:0.76,beh:0.82,cog:0.82,tech:0.72,gaps:1,h:'Watch'},
+  ];
+  const hc2 = {Healthy:C.green,Watch:C.amber,Risk:C.red};
+  const cellCol = v => v>=0.85?C.green:v>=0.78?C.amber:C.red;
+  const dcBody = document.getElementById('deptCompBody');
+  if (dcBody) dcBody.innerHTML = deptComp.map(d=>`
+    <tr>
+      <td style="font-size:11px;font-weight:600">${d.dept}</td>
+      <td class="td-num">${d.hc}</td>
+      <td class="td-num" style="color:${cellCol(d.csi)};font-weight:700">${d.csi.toFixed(2)}</td>
+      <td class="td-num" style="color:${cellCol(d.lead)}">${d.lead.toFixed(2)}</td>
+      <td class="td-num" style="color:${cellCol(d.beh)}">${d.beh.toFixed(2)}</td>
+      <td class="td-num" style="color:${cellCol(d.cog)}">${d.cog.toFixed(2)}</td>
+      <td class="td-num" style="color:${cellCol(d.tech)}">${d.tech.toFixed(2)}</td>
+      <td class="td-num" style="color:${d.gaps>2?C.red:d.gaps>0?C.amber:C.green};font-weight:700">${d.gaps}</td>
+      <td><span style="font-size:9px;font-weight:700;color:${hc2[d.h]};background:${hc2[d.h]}15;padding:2px 7px;border-radius:3px">${d.h}</span></td>
+    </tr>
+  `).join('');
+
+  // Competency x Department heatmap
+  const critComps = ['Strategic Thinking','Systems Thinking','Executive Presence','People Leadership','Data-Driven Judgement','Change Mgmt','Customer Obsession','Coaching','Cross-Cultural','Investor Comms'];
+  const depts2 = ['Eng','Data','Prod','Design','DevOps','Sales','CS','Mktg','HR','Fin'];
+  const cMat = [
+    [2.8,3.0,3.4,3.2,2.6,3.0,3.2,3.0,3.4,3.2],[2.6,3.2,3.4,2.8,2.4,2.6,2.8,2.6,2.8,2.6],
+    [3.0,3.0,3.8,3.4,2.8,3.6,3.4,3.2,3.0,3.0],[3.2,3.0,3.4,3.0,3.4,3.2,3.6,3.0,3.4,3.0],
+    [2.8,3.6,3.2,2.8,2.6,2.6,2.8,2.8,2.6,2.8],[2.8,2.6,3.0,2.8,2.6,2.6,2.8,2.8,3.0,2.4],
+    [3.2,2.6,3.0,3.6,2.6,3.0,4.0,3.2,3.2,2.8],[2.6,2.6,2.8,2.8,2.4,2.6,2.6,2.6,2.6,2.4],
+    [2.8,2.6,2.8,3.0,2.4,2.6,3.0,2.8,3.2,2.6],[2.6,2.4,3.4,2.6,2.4,2.8,2.6,2.6,2.8,3.0],
+  ];
+  const chEl = document.getElementById('compDeptHeatmap');
+  if (chEl) {
+    let html = '<table class="tbl" style="font-size:10px"><thead><tr><th style="text-align:left">Competency</th>';
+    depts2.forEach(d=>html+=`<th style="min-width:30px">${d}</th>`);
+    html += '</tr></thead><tbody>';
+    critComps.forEach((s,i)=>{
+      html += `<tr><td style="font-weight:600;font-size:10px">${s}</td>`;
+      cMat[i].forEach(v=>{
+        const op = (v-2)/2;
+        const bg = `rgba(124,58,237,${0.1+op*0.65})`;
+        const col = op>0.55?'#fff':'var(--text-primary)';
+        html += `<td style="text-align:center;background:${bg};color:${col};font-weight:600">${v.toFixed(1)}</td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    chEl.innerHTML = html;
+  }
+
+  // ── NEW: Competency Bus Factor ──
+  const compBus = [
+    {comp:'Strategic Thinking',cat:'Leadership',l4:1,bf:1},{comp:'Systems Thinking',cat:'Cognitive',l4:1,bf:1},
+    {comp:'Executive Presence',cat:'Leadership',l4:2,bf:2},{comp:'Data-Driven Judgement',cat:'Cognitive',l4:1,bf:2},
+    {comp:'People Leadership',cat:'Leadership',l4:3,bf:4},{comp:'Change Management',cat:'Behavioural',l4:2,bf:3},
+    {comp:'Investor Communication',cat:'Leadership',l4:1,bf:1},{comp:'Coaching & Mentoring',cat:'Leadership',l4:2,bf:3},
+    {comp:'Customer Obsession',cat:'Behavioural',l4:3,bf:5},{comp:'Cross-Cultural Leadership',cat:'Leadership',l4:1,bf:2},
+  ];
+  mk('compBusFactorChart', bar(
+    compBus.map(b=>b.comp),
+    [{label:'Bus Factor (L4+ experts)',
+      data:compBus.map(b=>b.bf),
+      backgroundColor:compBus.map(b=>b.bf===1?C.red:b.bf===2?C.amber:C.green),
+      borderWidth:0}],
+    {indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,max:6,ticks:{stepSize:1}}}}
+  ));
+  const cbBody = document.getElementById('compBusBody');
+  if (cbBody) cbBody.innerHTML = compBus.filter(b=>b.bf<=2).map(b=>{
+    const rc = b.bf===1?C.red:C.amber;
+    const rl = b.bf===1?'CRITICAL':'HIGH';
+    return `<tr>
+      <td style="font-size:11px;font-weight:600">${b.comp}</td>
+      <td style="font-size:10px;color:var(--text-secondary)">${b.cat}</td>
+      <td class="td-num">${b.l4}</td>
+      <td class="td-num" style="font-weight:700;color:${rc}">${b.bf}</td>
+      <td><span style="font-size:9px;font-weight:700;color:${rc};background:${rc}15;padding:2px 6px;border-radius:3px">${rl}</span></td>
+    </tr>`;
+  }).join('');
+
+  // ── NEW: Forecasted Competency Demand ──
+  const cfLabels = ['Strategic Think','Systems Think','Exec Presence','People Lead','Data-Driven','Change Mgmt','Investor Comms','Coaching'];
+  mk('compForecastChart', { type:'bar', data:{labels:cfLabels, datasets:[
+    {label:'Current',data:[2,2,3,5,2,3,1,3],backgroundColor:C.gray},
+    {label:'12-Month Forecast',data:[4,5,5,9,5,6,3,6],backgroundColor:C.amber},
+    {label:'24-Month Forecast',data:[6,7,6,12,7,8,4,8],backgroundColor:C.red},
+  ]}, options:{responsive:true,scales:{y:{beginAtZero:true,grid:{color:GRID}},x:{grid:{display:false}}},plugins:{legend:{position:'bottom'}}}});
+
+  // ── NEW: Competency Build vs Buy vs Borrow ──
+  const cBbb = [
+    {c:'Strategic Thinking',cat:'Leadership',gap:4,ttp:'12 mo',build:'$65K',buy:'$280K',borrow:'$45K',rec:'BORROW',recColor:C.amber,why:'Fractional advisor + exec coaching'},
+    {c:'Systems Thinking',cat:'Cognitive',gap:5,ttp:'9 mo',build:'$40K',buy:'$240K',borrow:'$35K',rec:'BUILD',recColor:C.green,why:'Structured cohort program · 6 L2 candidates'},
+    {c:'Executive Presence',cat:'Leadership',gap:3,ttp:'6 mo',build:'$35K',buy:'$200K',borrow:'$25K',rec:'BORROW',recColor:C.amber,why:'1:1 executive coaching · faster than cohort'},
+    {c:'People Leadership',cat:'Leadership',gap:7,ttp:'9 mo',build:'$55K',buy:'$260K',borrow:'$50K',rec:'BUILD',recColor:C.green,why:'Management academy · highest ROI for scale'},
+    {c:'Data-Driven Judgement',cat:'Cognitive',gap:5,ttp:'6 mo',build:'$30K',buy:'$180K',borrow:'$30K',rec:'BUILD',recColor:C.green,why:'Decision frameworks + simulations'},
+    {c:'Change Management',cat:'Behavioural',gap:6,ttp:'6 mo',build:'$35K',buy:'$170K',borrow:'$28K',rec:'BUILD',recColor:C.green,why:'Prosci or similar cohort certification'},
+    {c:'Investor Communication',cat:'Leadership',gap:3,ttp:'4 mo',build:'$45K',buy:'$320K',borrow:'$60K',rec:'BUY',recColor:C.blue,why:'Hire experienced CFO or IR Head'},
+    {c:'Coaching & Mentoring',cat:'Leadership',gap:4,ttp:'5 mo',build:'$25K',buy:'$150K',borrow:'$20K',rec:'BUILD',recColor:C.green,why:'Train-the-trainer model'},
+    {c:'Cross-Cultural Leadership',cat:'Leadership',gap:3,ttp:'6 mo',build:'$28K',buy:'$220K',borrow:'$22K',rec:'BORROW',recColor:C.amber,why:'Regional advisors in SG + DXB'},
+    {c:'Customer Obsession',cat:'Behavioural',gap:2,ttp:'4 mo',build:'$18K',buy:'$140K',borrow:'$15K',rec:'BUY',recColor:C.blue,why:'Hire senior CX leader'},
+    {c:'Global Mindset',cat:'Leadership',gap:2,ttp:'5 mo',build:'$20K',buy:'$160K',borrow:'$18K',rec:'BUY',recColor:C.blue,why:'External hire with multi-region experience'},
+    {c:'Negotiation',cat:'Behavioural',gap:3,ttp:'4 mo',build:'$22K',buy:'$150K',borrow:'$18K',rec:'BORROW',recColor:C.amber,why:'External workshops + deal coach'},
+  ];
+  const cbbBody = document.getElementById('compBbbBody');
+  if (cbbBody) cbbBody.innerHTML = cBbb.map(b=>`
+    <tr>
+      <td style="font-size:11px;font-weight:600">${b.c}</td>
+      <td style="font-size:10px;color:var(--text-secondary)">${b.cat}</td>
+      <td class="td-num" style="color:var(--red);font-weight:700">${b.gap}</td>
+      <td class="td-num">${b.ttp}</td>
+      <td class="td-num" style="color:var(--green)">${b.build}</td>
+      <td class="td-num" style="color:var(--blue)">${b.buy}</td>
+      <td class="td-num" style="color:var(--amber)">${b.borrow}</td>
+      <td><span style="font-size:10px;font-weight:700;color:${b.recColor};background:${b.recColor}15;padding:3px 8px;border-radius:3px">${b.rec}</span></td>
+      <td style="font-size:10px;color:var(--text-secondary)">${b.why}</td>
+    </tr>
+  `).join('');
 }
 
 // 4. EMPLOYEE SKILL PROFILES
@@ -4299,6 +5234,182 @@ function buildRoleMatrix() {
       <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--${riskBadge})"></span></td>
     </tr>`;
   }).join('');
+
+  // ── NEW: Unassessed Role Coverage ──
+  mk('rm_assessCoverage', doughnut(['Assessed (13)','Unassessed (22)'],[13, 22],[C.green, C.red]));
+  const unassessedRoles = [
+    {n:'VP People',fam:'HR & People',hc:1,p:'HIGH',t:'Q2 FY26'},
+    {n:'Head of Finance',fam:'Corporate Fns',hc:1,p:'HIGH',t:'Q2 FY26'},
+    {n:'Legal Counsel',fam:'Corporate Fns',hc:1,p:'HIGH',t:'Q2 FY26'},
+    {n:'Head of Design',fam:'Product',hc:1,p:'HIGH',t:'Q2 FY26'},
+    {n:'Regional Sales Lead APAC',fam:'Sales & Marketing',hc:1,p:'MEDIUM',t:'Q3 FY26'},
+    {n:'Marketing Manager',fam:'Sales & Marketing',hc:2,p:'MEDIUM',t:'Q3 FY26'},
+    {n:'Business Development',fam:'Sales & Marketing',hc:3,p:'MEDIUM',t:'Q3 FY26'},
+    {n:'Financial Analyst',fam:'Corporate Fns',hc:2,p:'MEDIUM',t:'Q3 FY26'},
+    {n:'HR Business Partner',fam:'HR & People',hc:2,p:'MEDIUM',t:'Q3 FY26'},
+    {n:'Office / Admin Lead',fam:'Corporate Fns',hc:1,p:'LOW',t:'Q4 FY26'},
+    {n:'+ 12 more roles',fam:'mixed',hc:15,p:'LOW',t:'Q4 FY26'},
+  ];
+  const rmUaBody = document.getElementById('rm_unassessedBody');
+  if (rmUaBody) rmUaBody.innerHTML = unassessedRoles.map(r => {
+    const pc = r.p==='HIGH'?C.red:r.p==='MEDIUM'?C.amber:C.gray;
+    return `<tr>
+      <td style="font-size:11px;font-weight:600">${r.n}</td>
+      <td style="font-size:10px;color:var(--text-muted)">${r.fam}</td>
+      <td class="td-num">${r.hc}</td>
+      <td><span style="font-size:9px;font-weight:700;color:${pc};background:${pc}15;padding:2px 6px;border-radius:3px">${r.p}</span></td>
+      <td style="font-size:10px">${r.t}</td>
+    </tr>`;
+  }).join('');
+
+  // ── NEW: Vacancy Pipeline ──
+  const vacancies = [
+    {n:'Director of Engineering',lv:'L6',fam:'Engineering',p:'CRITICAL',days:142,stage:'Final interviews',cand:3,impact:'Gen AI delivery blocked · 4 teams without leader',mgr:'CEO (direct)'},
+    {n:'Principal MLOps Engineer',lv:'L5',fam:'Engineering',p:'CRITICAL',days:98,stage:'Technical round',cand:4,impact:'MLOps bus factor 1 · production risk',mgr:'Vamsi (VP Eng)'},
+    {n:'Head of People Analytics',lv:'L5',fam:'HR & People',p:'CRITICAL',days:76,stage:'Sourcing',cand:6,impact:'SIP platform adoption stalled',mgr:'CHRO'},
+    {n:'Senior Cloud Architect',lv:'L5',fam:'Engineering',p:'HIGH',days:54,stage:'Offer stage',cand:2,impact:'Azure migration delayed 1 quarter',mgr:'Rhea Menon'},
+    {n:'Enterprise AE (APAC)',lv:'L4',fam:'Sales & Marketing',p:'HIGH',days:43,stage:'Final round',cand:5,impact:'Singapore pipeline coverage 60%',mgr:'VP Sales'},
+    {n:'Senior Product Designer',lv:'L4',fam:'Product',p:'MEDIUM',days:28,stage:'Portfolio review',cand:8,impact:'Design system rollout delayed',mgr:'Tara Ghosh'},
+  ];
+  const vBody = document.getElementById('rm_vacancyBody');
+  if (vBody) vBody.innerHTML = vacancies.map(v => {
+    const pc = v.p==='CRITICAL'?C.red:v.p==='HIGH'?C.amber:C.gold;
+    const daysCol = v.days>90?C.red:v.days>60?C.amber:C.gray;
+    return `<tr>
+      <td style="font-size:11px;font-weight:700">${v.n}</td>
+      <td><span class="badge ${v.lv==='L6'?'purple':v.lv==='L5'?'green':'gold'}" style="font-size:8px">${v.lv}</span></td>
+      <td style="font-size:10px">${v.fam}</td>
+      <td><span style="font-size:9px;font-weight:700;color:${pc};background:${pc}15;padding:2px 6px;border-radius:3px">${v.p}</span></td>
+      <td class="td-num" style="color:${daysCol};font-weight:700">${v.days}</td>
+      <td style="font-size:10px">${v.stage}</td>
+      <td class="td-num">${v.cand}</td>
+      <td style="font-size:10px;color:var(--text-secondary)">${v.impact}</td>
+      <td style="font-size:10px">${v.mgr}</td>
+    </tr>`;
+  }).join('');
+
+  // ── NEW: Succession Readiness ──
+  const succession = [
+    {role:'Director of Engineering',inc:'VACANT',succ:'External hire only',rd:'No Successor',gap:'All skills',close:'Hire',risk:'Role already empty · Gen AI at risk'},
+    {role:'VP Sales',inc:'Current VP Sales',succ:'No internal candidate',rd:'No Successor',gap:'Strategic Sales · Deal Mgmt',close:'Hire or external coach',risk:'Revenue delivery exposure'},
+    {role:'Principal ML Engineer',inc:'Priya Shah',succ:'Sara Kumar (Staff LLM Eng)',rd:'Ready 1 Year',gap:'ML pipeline · Mentoring',close:'Technical stretch project',risk:'MLOps capability loss'},
+    {role:'Engineering Manager',inc:'Current EM',succ:'Uma Malik (Lead Data Eng)',rd:'Ready Now',gap:'People Leadership (mild)',close:'Shadow assignment',risk:'Low · successor ready'},
+    {role:'Staff LLM Engineer',inc:'Sara Kumar',succ:'No internal candidate',rd:'No Successor',gap:'LLM expertise org-wide',close:'Hire L5',risk:'Sole L4 LLM expert · Gen AI collapse'},
+    {role:'Lead Data Engineer',inc:'Uma Malik',succ:'Arjun Nair (promoted)',rd:'Ready 1 Year',gap:'Senior mentoring',close:'Shadow Uma 6mo',risk:'Data platform continuity'},
+    {role:'Cloud Architect',inc:'Rhea Menon',succ:'Kabir Roy (Sr DevOps)',rd:'Ready 2 Years',gap:'Azure L4 · FinOps',close:'Azure cert + 12mo project',risk:'Infra cost mgmt exposure'},
+    {role:'CISO (functional)',inc:'Kabir Roy (acting)',succ:'No internal candidate',rd:'No Successor',gap:'Security strategy · Compliance',close:'Hire or contract CISO',risk:'Pre-IPO compliance exposure'},
+    {role:'CHRO',inc:'Neha Iyer',succ:'Lokesh (HRBP)',rd:'Ready 2 Years',gap:'Board presence · Strategy',close:'Exec coaching + board obs',risk:'Pre-IPO HR leadership'},
+    {role:'Principal CSM',inc:'Current Principal',succ:'Neha Iyer (shared)',rd:'Ready 1 Year',gap:'Enterprise account mgmt',close:'Co-lead top-3 accounts',risk:'Top-account continuity'},
+    {role:'Head of Product',inc:'Current Head',succ:'Ready Now',rd:'Ready Now',gap:'None critical',close:'—',risk:'Very Low'},
+  ];
+  const succBody = document.getElementById('rm_successionBody');
+  if (succBody) succBody.innerHTML = succession.map(s => {
+    const rdCol = s.rd==='Ready Now'?C.green:s.rd==='Ready 1 Year'?C.blue:s.rd==='Ready 2 Years'?C.amber:C.red;
+    const riskCol = s.risk.includes('collapse')||s.risk.includes('empty')?C.red:s.risk.includes('exposure')||s.risk.includes('risk')?C.amber:C.green;
+    return `<tr>
+      <td style="font-size:11px;font-weight:700">${s.role}</td>
+      <td style="font-size:10px;${s.inc==='VACANT'?'color:var(--red);font-weight:700':''}">${s.inc}</td>
+      <td style="font-size:10px;color:var(--text-secondary)">${s.succ}</td>
+      <td><span style="font-size:9px;font-weight:700;color:${rdCol};background:${rdCol}15;padding:2px 7px;border-radius:3px;white-space:nowrap">${s.rd}</span></td>
+      <td style="font-size:10px;color:var(--text-secondary)">${s.gap}</td>
+      <td style="font-size:10px;color:var(--text-secondary)">${s.close}</td>
+      <td style="font-size:10px;color:${riskCol};font-weight:600">${s.risk}</td>
+    </tr>`;
+  }).join('');
+
+  // ── NEW: Unassessed Employees ──
+  mk('unassessedChart', hbar(
+    ['Product Eng','Customer Success','Sales & Mktg','Corporate Fns'],
+    [
+      {label:'Assessed',data:[9,5,4,2],backgroundColor:C.green,borderWidth:0,stack:'s1'},
+      {label:'Unassessed',data:[12,7,6,5],backgroundColor:C.red,borderWidth:0,stack:'s1'}
+    ],
+    {plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{color:GRID}},y:{stacked:true,grid:{display:false}}}}
+  ));
+  const unassessed = [
+    {n:'Rajiv Menon',d:'Product Eng',r:'Staff Engineer',last:'Never',p:'HIGH',t:'Q2 FY26'},
+    {n:'Kavya Rao',d:'Product Eng',r:'Senior ML Engineer',last:'Never',p:'HIGH',t:'Q2 FY26'},
+    {n:'Arjun Nair',d:'Product Eng',r:'Cloud Architect',last:'2022-08',p:'HIGH',t:'Q2 FY26'},
+    {n:'Neha Iyer',d:'Customer Success',r:'Principal CSM',last:'Never',p:'HIGH',t:'Q2 FY26'},
+    {n:'Vikram Das',d:'Sales & Mktg',r:'RVP Sales APAC',last:'Never',p:'HIGH',t:'Q2 FY26'},
+    {n:'Shalini Bose',d:'Product Eng',r:'Engineering Mgr',last:'2023-03',p:'MEDIUM',t:'Q3 FY26'},
+    {n:'+ 24 more',d:'—',r:'mixed roles',last:'—',p:'—',t:'Q3–Q4 FY26'},
+  ];
+  const uaBody = document.getElementById('unassessedBody');
+  if (uaBody) uaBody.innerHTML = unassessed.map(u => {
+    const pc = u.p==='HIGH'?C.red:u.p==='MEDIUM'?C.amber:C.gray;
+    return `<tr>
+      <td style="font-size:11px;font-weight:600">${u.n}</td>
+      <td style="font-size:10px">${u.d}</td>
+      <td style="font-size:10px;color:var(--text-secondary)">${u.r}</td>
+      <td style="font-size:10px;color:var(--text-muted)">${u.last}</td>
+      <td><span style="font-size:9px;font-weight:700;color:${pc};background:${pc}15;padding:2px 6px;border-radius:3px">${u.p}</span></td>
+      <td style="font-size:10px">${u.t}</td>
+    </tr>`;
+  }).join('');
+
+  // ── NEW: Flight Risk x Critical Skill Scatter ──
+  const fr = [
+    {n:'Harish Patel',x:4.6,y:4.8,c:C.red,r:'Dir of Engineering'},
+    {n:'Priya Shah',x:4.2,y:4.5,c:C.red,r:'Principal ML Eng'},
+    {n:'Sara Kumar',x:3.8,y:4.9,c:C.red,r:'Staff LLM Eng'},
+    {n:'Uma Malik',x:2.1,y:4.8,c:C.amber,r:'Lead Data Eng'},
+    {n:'Kabir Roy',x:3.5,y:3.2,c:C.amber,r:'Senior DevOps'},
+    {n:'Rhea Menon',x:2.8,y:3.8,c:C.amber,r:'Cloud Architect'},
+    {n:'Ankit Jha',x:1.5,y:2.2,c:C.blue,r:'QA Engineer'},
+    {n:'Tara Ghosh',x:1.2,y:2.8,c:C.blue,r:'Product Designer'},
+    {n:'Siddharth Rao',x:1.1,y:1.5,c:C.green,r:'Associate'},
+    {n:'Naina Joshi',x:0.9,y:1.2,c:C.green,r:'Analyst'},
+  ];
+  mk('flightRiskScatter', {
+    type:'scatter',
+    data:{datasets:fr.map(p=>({label:p.n,data:[{x:p.x,y:p.y}],backgroundColor:p.c,borderColor:p.c,pointRadius:8,pointHoverRadius:11}))},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fr[ctx.datasetIndex].n+' · '+fr[ctx.datasetIndex].r}}},
+      scales:{
+        x:{title:{display:true,text:'Flight Risk Score (0–5)'},min:0,max:5,grid:{color:GRID}},
+        y:{title:{display:true,text:'Skill Criticality Held'},min:0,max:5,grid:{color:GRID}}
+      }}
+  });
+  const retainNow = [
+    {n:'Harish Patel',r:'Dir of Engineering',sk:'LLM · ML · DevOps (C1)',fr:'HIGH 4.6',bf:'Bus factor 1 on 3 skills',act:'CEO 1:1 + retention bonus + equity refresh'},
+    {n:'Priya Shah',r:'Principal ML Engineer',sk:'ML · MLOps · Python (C1)',fr:'HIGH 4.2',bf:'Only L4 MLOps expert',act:'Promotion path + Gen AI lead role'},
+    {n:'Sara Kumar',r:'Staff LLM Engineer',sk:'LLM · Prompt Eng (C1)',fr:'HIGH 3.8',bf:'Sole LLM L4 org-wide',act:'Immediate comp review + sabbatical option'},
+  ];
+  const rnBody = document.getElementById('retainNowBody');
+  if (rnBody) rnBody.innerHTML = retainNow.map(e => `<tr>
+    <td style="font-size:11px;font-weight:700">${e.n}</td>
+    <td style="font-size:10px">${e.r}</td>
+    <td style="font-size:10px;color:var(--red);font-weight:600">${e.sk}</td>
+    <td style="font-size:10px;color:var(--red);font-weight:700">${e.fr}</td>
+    <td style="font-size:10px">${e.bf}</td>
+    <td style="font-size:10px;color:var(--text-secondary)">${e.act}</td>
+  </tr>`).join('');
+
+  // ── NEW: IDP Register ──
+  const idp = [
+    {n:'Priya Shah',cur:'Principal ML Eng',hp:'Y',tgt:'Director Gen AI',gap:'Strategic Thinking · Exec Presence',path:'Leadership L5 + Gen AI stretch proj',rd:'Ready 6–12mo',eta:'Q4 FY26'},
+    {n:'Sara Kumar',cur:'Staff LLM Eng',hp:'Y',tgt:'Principal Engineer',gap:'Systems Design · Mentoring',path:'Tech Lead bootcamp + mentor cohort',rd:'Ready Now',eta:'Q2 FY26'},
+    {n:'Uma Malik',cur:'Lead Data Eng',hp:'Y',tgt:'Engineering Manager',gap:'People Leadership · Coaching',path:'EM program + 3 direct reports',rd:'Ready Now',eta:'Q2 FY26'},
+    {n:'Kabir Roy',cur:'Senior DevOps',hp:'Y',tgt:'Staff SRE',gap:'Kubernetes L4 · Incident Mgmt',path:'K8s cert + on-call rotation',rd:'Ready 6–12mo',eta:'Q3 FY26'},
+    {n:'Rhea Menon',cur:'Cloud Architect',hp:'Y',tgt:'Principal Architect',gap:'Azure L4 · Cost Optimization',path:'Azure SA cert + FinOps training',rd:'Ready 12–24mo',eta:'FY27 Q1'},
+    {n:'Ankit Jha',cur:'QA Engineer',hp:'N',tgt:'Senior QA Lead',gap:'Automation · Performance Testing',path:'Selenium + JMeter bootcamp',rd:'Ready 6–12mo',eta:'Q4 FY26'},
+    {n:'Tara Ghosh',cur:'Product Designer',hp:'Y',tgt:'Lead Designer',gap:'Design Systems · Research Ops',path:'Design Lead cohort + portfolio review',rd:'Ready 12–24mo',eta:'FY27 Q2'},
+    {n:'Dir of Engineering',cur:'VACANT',hp:'—',tgt:'—',gap:'External hire required',path:'Executive search firm',rd:'Not Ready',eta:'Q3 FY26 hire'},
+  ];
+  const idpBody = document.getElementById('idpBody');
+  if (idpBody) idpBody.innerHTML = idp.map(i => {
+    const rdCol = i.rd==='Ready Now'?C.green:i.rd.startsWith('Ready 6')?C.blue:i.rd.startsWith('Ready 12')?C.amber:C.red;
+    return `<tr>
+      <td style="font-size:11px;font-weight:700">${i.n}</td>
+      <td style="font-size:10px">${i.cur}</td>
+      <td style="text-align:center"><span class="badge ${i.hp==='Y'?'gold':'gray'}" style="font-size:8px">${i.hp}</span></td>
+      <td style="font-size:10px;font-weight:600;color:var(--blue)">${i.tgt}</td>
+      <td style="font-size:10px;color:var(--text-secondary)">${i.gap}</td>
+      <td style="font-size:10px;color:var(--text-secondary)">${i.path}</td>
+      <td><span style="font-size:9px;font-weight:700;color:${rdCol};background:${rdCol}15;padding:2px 6px;border-radius:3px">${i.rd}</span></td>
+      <td style="font-size:10px">${i.eta}</td>
+    </tr>`;
+  }).join('');
 }
 
 // 6. TRAINING MAPPING
@@ -4393,6 +5504,67 @@ function buildTrainingRec() {
 
   // #49 Certifications by BU (Bar)
   mk('certByBU', hbar(['Prod Engineering','Customer Success','Sales & Marketing','Corporate Fns'],[{label:'Certifications held',data:[68,28,22,9],backgroundColor:C.blue,borderWidth:0}],{plugins:{legend:{display:false}}}));
+
+  // ── NEW: Pre/Post Assessment ──
+  const pp = [
+    {p:'Cloud AWS',n:18,pre:1.8,post:2.9,nps:62,cost:280,t2a:'45 days'},
+    {p:'DevOps CI/CD',n:15,pre:2.1,post:3.2,nps:58,cost:310,t2a:'30 days'},
+    {p:'Agile/Scrum',n:32,pre:2.4,post:3.0,nps:48,cost:180,t2a:'immediate'},
+    {p:'PMP',n:12,pre:2.6,post:3.4,nps:52,cost:520,t2a:'60 days'},
+    {p:'Leadership & People',n:22,pre:2.3,post:2.9,nps:44,cost:680,t2a:'90 days'},
+    {p:'Data Analysis',n:24,pre:1.9,post:2.6,nps:38,cost:290,t2a:'45 days'},
+  ];
+  mk('prePostChart', { type:'bar', data:{ labels:pp.map(p=>p.p), datasets:[
+    {label:'Pre',data:pp.map(p=>p.pre),backgroundColor:C.gray},
+    {label:'Post',data:pp.map(p=>p.post),backgroundColor:C.green},
+  ]}, options:{responsive:true,scales:{y:{beginAtZero:true,max:4,grid:{color:GRID},title:{display:true,text:'Avg Proficiency L1–L4'}},x:{grid:{display:false}}},plugins:{legend:{position:'bottom'}}}});
+  const roiBody = document.getElementById('trainRoiBody');
+  if (roiBody) roiBody.innerHTML = pp.map(p => {
+    const lift = +(p.post-p.pre).toFixed(2);
+    const liftCol = lift>=1 ? C.green : lift>=0.7 ? C.amber : C.red;
+    const npsCol = p.nps>=50 ? C.green : p.nps>=40 ? C.amber : C.red;
+    return `<tr>
+      <td style="font-size:11px;font-weight:600">${p.p}</td>
+      <td class="td-num">${p.n}</td>
+      <td class="td-num">${p.pre}</td>
+      <td class="td-num" style="font-weight:700">${p.post}</td>
+      <td class="td-num" style="color:${liftCol};font-weight:700">+${lift}</td>
+      <td class="td-num" style="color:${npsCol};font-weight:600">${p.nps}</td>
+      <td class="td-num">$${p.cost}</td>
+      <td style="font-size:10px">${p.t2a}</td>
+    </tr>`;
+  }).join('');
+
+  // ── NEW: Certification Expiry Tracker ──
+  mk('certExpiryChart', bar(
+    ['Expired','0–30d','31–60d','61–90d','91–180d','181–365d','>365d'],
+    [{label:'Certifications',
+      data:[7,11,8,5,14,22,60],
+      backgroundColor:[C.red,C.red,C.amber,C.amber,C.gold,C.blue,C.green],
+      borderWidth:0}],
+    {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:GRID}},x:{grid:{display:false}}}}
+  ));
+  const expiries = [
+    {c:'ISO 27001 (Org)',h:'Kabir Roy (InfoSec)',d:'2026-04-18',days:9,risk:'CRITICAL',own:'CISO'},
+    {c:'GDPR Training',h:'All 50 employees',d:'2026-04-30',days:21,risk:'CRITICAL',own:'HR CoE'},
+    {c:'POSH (Annual)',h:'All 50 employees',d:'2026-05-05',days:26,risk:'HIGH',own:'HR CoE'},
+    {c:'SOC 2 Type II',h:'Org certification',d:'2026-05-22',days:43,risk:'HIGH',own:'CISO'},
+    {c:'AWS Solutions Architect',h:'Rhea Menon',d:'2026-06-12',days:64,risk:'MEDIUM',own:'Eng Mgr'},
+    {c:'PMP',h:'Arjun Nair',d:'2026-06-28',days:80,risk:'MEDIUM',own:'Line Mgr'},
+    {c:'CISM',h:'Kabir Roy',d:'2026-07-02',days:84,risk:'MEDIUM',own:'CISO'},
+  ];
+  const exBody = document.getElementById('certExpiryBody');
+  if (exBody) exBody.innerHTML = expiries.map(e => {
+    const rc = e.risk==='CRITICAL'?C.red:e.risk==='HIGH'?C.amber:C.gold;
+    return `<tr>
+      <td style="font-size:11px;font-weight:600">${e.c}</td>
+      <td style="font-size:10px">${e.h}</td>
+      <td style="font-size:10px">${e.d}</td>
+      <td class="td-num" style="font-weight:700;color:${rc}">${e.days}</td>
+      <td><span style="font-size:9px;font-weight:700;color:${rc};background:${rc}15;padding:2px 6px;border-radius:3px">${e.risk}</span></td>
+      <td style="font-size:10px">${e.own}</td>
+    </tr>`;
+  }).join('');
 }
 
 // 8. DATA QUALITY
@@ -4823,6 +5995,143 @@ function switchProjTab(name) {
   const activeBtn = document.getElementById('ptab-'+name);
   if (active) active.style.display = '';
   if (activeBtn) { activeBtn.style.color='var(--accent)'; activeBtn.style.borderBottomColor='var(--accent)'; activeBtn.style.fontWeight='600'; }
+}
+
+// ── CHANGE LOG DATA & FUNCTIONS ──
+const CHANGE_LOG = [
+  {date:'2025-01-14',type:'Risk Acknowledged',what:'CLO acknowledged LLM bus factor = 1 risk · Gen AI launch flagged at delivery risk',src:'Org Overview → Risk Flags',owner:'Neha Iyer (CHRO)',metric:'LLM Bus Factor',before:'1',after:'1',delta:0,status:'Completed',days:2},
+  {date:'2025-01-22',type:'Training Commissioned',what:'Commissioned Python Bootcamp (external vendor Scaler) · 8 engineers enrolled',src:'Skill Inventory → Build/Buy/Borrow',owner:'Ranjith (L&D Lead)',metric:'SCR',before:'58%',after:'60%',delta:2,status:'Completed',days:38},
+  {date:'2025-02-03',type:'Hire Approved',what:'Approved 2 senior LLM engineer hires · JDs open on LinkedIn + AngelList',src:'Skill Inventory → Forecast Demand',owner:'Vamsi (VP Eng)',metric:'LLM Bus Factor',before:'1',after:'3',delta:2,status:'Completed',days:89},
+  {date:'2025-02-11',type:'Assessment Scheduled',what:'Scheduled skill assessments for 12 of 30 unassessed employees · batch 1',src:'Employee Profiles → Assessment Gap',owner:'Spandana (HR Ops)',metric:'Unassessed HC',before:'30',after:'18',delta:-12,status:'Completed',days:45},
+  {date:'2025-02-18',type:'Retention Action',what:'Harish Patel retention conversation · equity refresh + title change offered',src:'Flight Risk Register',owner:'CEO (direct)',metric:'Harish Flight Risk',before:'4.6',after:'4.2',delta:-0.4,status:'Completed',days:21},
+  {date:'2025-02-26',type:'Cert Renewed',what:'Renewed 3 of 7 expired certs · ISO 27001 org-level + GDPR all-hands',src:'Cert Expiry Tracker',owner:'Kiran (CISO proxy)',metric:'Expired Certs',before:'7',after:'4',delta:-3,status:'In Progress',days:42},
+  {date:'2025-03-04',type:'Training Commissioned',what:'Commissioned Azure Cloud certification track · 7 employees enrolled',src:'Skill Inventory → Top Unmapped',owner:'Ranjith (L&D Lead)',metric:'SCR',before:'60%',after:'62%',delta:2,status:'Completed',days:52},
+  {date:'2025-03-12',type:'IDP Created',what:'Created IDPs for 18 HiPo employees · target roles + recommended paths',src:'Employee Profiles → IDP Register',owner:'Lokesh (HRBP)',metric:'HiPo Pipeline Ready',before:'0',after:'13',delta:13,status:'Completed',days:31},
+  {date:'2025-03-20',type:'Risk Acknowledged',what:'Acknowledged CSI 0.82 cognitive/technical competency gap',src:'Competency Inventory',owner:'— (no owner)',metric:'CSI',before:'0.82',after:'0.82',delta:0,status:'Open',days:68},
+  {date:'2025-04-02',type:'Hire Approved',what:'Approved MLOps senior hire · position open since Q4 FY25',src:'Competency Inventory → Bus Factor',owner:'Vamsi (VP Eng)',metric:'MLOps Bus Factor',before:'1',after:'1',delta:0,status:'In Progress',days:55},
+  {date:'2025-04-11',type:'Retention Action',what:'Priya Shah promotion discussion · Gen AI lead role proposed',src:'Flight Risk Register',owner:'— (no owner)',metric:'Priya Flight Risk',before:'4.2',after:'4.2',delta:0,status:'Open',days:46},
+  {date:'2025-04-18',type:'Assessment Scheduled',what:'Batch 2 assessments for remaining 18 unassessed employees',src:'Employee Profiles → Assessment Gap',owner:'Spandana (HR Ops)',metric:'Unassessed HC',before:'18',after:'18',delta:0,status:'In Progress',days:39},
+  {date:'2025-04-25',type:'Gap Closed',what:'Python skill gap officially closed · 5 engineers certified at L3+',src:'Skill Inventory',owner:'Ranjith (L&D Lead)',metric:'Python L3+ HC',before:'3',after:'8',delta:5,status:'Completed',days:28},
+  {date:'2025-05-03',type:'Training Commissioned',what:'Prompt Engineering internal workshop · 15 seats filled in 2 hours',src:'Skill Inventory → Emerging Skills',owner:'Sara Kumar (self)',metric:'Prompt Eng HC',before:'6',after:'15',delta:9,status:'Completed',days:18},
+  {date:'2025-05-12',type:'Risk Acknowledged',what:'Acknowledged RDI 0.70 · 35 roles for 50 people · title fragmentation',src:'Org Overview → Indices',owner:'— (no owner)',metric:'RDI',before:'0.70',after:'0.70',delta:0,status:'Open',days:15},
+  {date:'2025-05-20',type:'IDP Created',what:'Career path conversations with 7 at-risk L3 associates',src:'Employee Profiles',owner:'Line Managers',metric:'Retention Signal',before:'baseline',after:'baseline',delta:0,status:'In Progress',days:7},
+  {date:'2025-05-28',type:'Cert Renewed',what:'POSH annual training re-certification for all 50 employees',src:'Cert Expiry Tracker',owner:'Spandana (HR Ops)',metric:'POSH Compliance',before:'expiring',after:'valid',delta:1,status:'Completed',days:3},
+  {date:'2025-06-02',type:'Retention Action',what:'Sara Kumar comp review · counter-offer drafted but not delivered',src:'Flight Risk Register',owner:'Vamsi (VP Eng)',metric:'Sara Flight Risk',before:'3.8',after:'3.8',delta:0,status:'Blocked',days:37},
+];
+
+function buildChangeLog() {
+  const typeCounts = {};
+  CHANGE_LOG.forEach(e => { typeCounts[e.type] = (typeCounts[e.type]||0) + 1; });
+  mk('clogTypeChart', hbar(
+    Object.keys(typeCounts),
+    [{label:'Actions',
+      data:Object.values(typeCounts),
+      backgroundColor:[C.gold,C.blue,C.amber,C.green,C.purple,C.red,C.accent||C.gold].slice(0,Object.keys(typeCounts).length),
+      borderWidth:0}],
+    {plugins:{legend:{display:false}}}
+  ));
+
+  const statusCounts = {Completed:0,'In Progress':0,Open:0,Blocked:0};
+  CHANGE_LOG.forEach(e => { statusCounts[e.status] = (statusCounts[e.status]||0) + 1; });
+  mk('clogStatusChart', doughnut(
+    Object.keys(statusCounts),
+    Object.values(statusCounts),
+    [C.green,C.blue,C.amber,C.red]
+  ));
+
+  renderChangeLogTable(CHANGE_LOG);
+
+  const metricGroups = {};
+  CHANGE_LOG.forEach(e => {
+    if (!metricGroups[e.metric]) metricGroups[e.metric] = {actions:0,totalDelta:0,first:null,last:null};
+    metricGroups[e.metric].actions++;
+    metricGroups[e.metric].totalDelta += (e.delta || 0);
+    if (!metricGroups[e.metric].first) metricGroups[e.metric].first = e.before;
+    metricGroups[e.metric].last = e.after;
+  });
+  const targets = {
+    'SCR':{target:'75%',cur:'62%',base:'58%'},
+    'LLM Bus Factor':{target:'5',cur:'3',base:'1'},
+    'Unassessed HC':{target:'0',cur:'18',base:'30'},
+    'Expired Certs':{target:'0',cur:'4',base:'7'},
+    'Harish Flight Risk':{target:'≤2.5',cur:'4.2',base:'4.6'},
+    'CSI':{target:'0.90',cur:'0.82',base:'0.82'},
+    'HiPo Pipeline Ready':{target:'18',cur:'13',base:'0'},
+    'Python L3+ HC':{target:'10',cur:'8',base:'3'},
+    'Prompt Eng HC':{target:'20',cur:'15',base:'6'},
+  };
+  const scoreBody = document.getElementById('impactScorecardBody');
+  if (scoreBody) scoreBody.innerHTML = Object.keys(targets).map(m => {
+    const t = targets[m];
+    const grp = metricGroups[m] || {actions:0};
+    const moved = t.cur !== t.base;
+    const eff = moved ? (grp.actions >= 2 ? 'HIGH' : 'MEDIUM') : 'NONE';
+    const effCol = eff==='HIGH'?C.green:eff==='MEDIUM'?C.amber:C.red;
+    return `<tr>
+      <td style="font-size:11px;font-weight:600">${m}</td>
+      <td class="td-num">${grp.actions}</td>
+      <td class="td-num" style="color:var(--text-muted)">${t.base}</td>
+      <td class="td-num" style="font-weight:700">${t.cur}</td>
+      <td class="td-num" style="color:${moved?C.green:C.red};font-weight:700">${moved?'MOVED':'NO CHANGE'}</td>
+      <td class="td-num" style="color:var(--blue)">${t.target}</td>
+      <td><span style="font-size:9px;font-weight:700;color:${effCol};background:${effCol}15;padding:2px 8px;border-radius:3px">${eff}</span></td>
+    </tr>`;
+  }).join('');
+
+  const stale = CHANGE_LOG.filter(e => (e.status==='Open' || e.status==='In Progress' || e.status==='Blocked') && e.days > 30);
+  const staleEl = document.getElementById('staleActionsList');
+  if (staleEl) staleEl.innerHTML = stale.length ? stale.map(e => `
+    <div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:var(--r-sm);border:1px solid rgba(245,158,11,0.3);background:rgba(245,158,11,0.05)">
+      <span style="font-size:8px;font-weight:700;color:var(--amber);background:rgba(245,158,11,0.15);border-radius:3px;padding:2px 6px;flex-shrink:0;margin-top:1px">${e.days}d</span>
+      <div style="flex:1">
+        <div style="font-size:10px;font-weight:600;color:var(--text-primary);margin-bottom:1px">${e.type}</div>
+        <div style="font-size:10px;color:var(--text-secondary);line-height:1.4">${e.what}</div>
+        <div style="font-size:9px;color:var(--text-muted);margin-top:2px">Owner: ${e.owner}</div>
+      </div>
+    </div>`).join('') : '<div style="font-size:10px;color:var(--text-muted)">No stale actions — all open items within SLA</div>';
+
+  const orphans = CHANGE_LOG.filter(e => e.owner.includes('no owner') || e.owner === '—');
+  const orphEl = document.getElementById('orphanActionsList');
+  if (orphEl) orphEl.innerHTML = orphans.length ? orphans.map(e => `
+    <div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:var(--r-sm);border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.05)">
+      <span style="font-size:8px;font-weight:700;color:var(--red);background:rgba(239,68,68,0.15);border-radius:3px;padding:2px 6px;flex-shrink:0;margin-top:1px">NO OWNER</span>
+      <div style="flex:1">
+        <div style="font-size:10px;font-weight:600;color:var(--text-primary);margin-bottom:1px">${e.type} · ${e.date}</div>
+        <div style="font-size:10px;color:var(--text-secondary);line-height:1.4">${e.what}</div>
+        <div style="font-size:9px;color:var(--text-muted);margin-top:2px">Source: ${e.src}</div>
+      </div>
+    </div>`).join('') : '<div style="font-size:10px;color:var(--text-muted)">All actions have owners assigned</div>';
+}
+
+function renderChangeLogTable(data) {
+  const body = document.getElementById('changeLogBody');
+  if (!body) return;
+  body.innerHTML = data.map(e => {
+    const statusCol = {'Completed':C.green,'In Progress':C.blue,'Open':C.amber,'Blocked':C.red}[e.status] || C.gray;
+    const impactCol = e.delta > 0 && !e.metric.includes('Risk') && !e.metric.includes('Expired') && !e.metric.includes('Unassessed') ? C.green
+                    : e.delta < 0 ? C.green
+                    : e.delta === 0 ? C.gray : C.red;
+    const impactLabel = e.delta === 0 ? '—' : (e.delta > 0 ? '+' : '') + e.delta;
+    const orphan = e.owner.includes('no owner') || e.owner === '—';
+    return `<tr>
+      <td style="font-size:10px;white-space:nowrap;color:var(--text-muted)">${e.date}</td>
+      <td style="font-size:10px;font-weight:600">${e.type}</td>
+      <td style="font-size:10px;color:var(--text-secondary);max-width:260px">${e.what}</td>
+      <td style="font-size:9px;color:var(--text-muted)">${e.src}</td>
+      <td style="font-size:10px;${orphan?'color:var(--red);font-weight:700':'color:var(--text-secondary)'}">${e.owner}</td>
+      <td style="font-size:10px;color:var(--blue)">${e.metric}</td>
+      <td style="font-size:10px;white-space:nowrap"><span style="color:var(--text-muted);text-decoration:line-through">${e.before}</span> → <span style="font-weight:700">${e.after}</span></td>
+      <td class="td-num" style="color:${impactCol};font-weight:700">${impactLabel}</td>
+      <td class="td-num" style="color:${e.days>30?C.red:e.days>15?C.amber:C.gray}">${e.days}</td>
+      <td><span style="font-size:9px;font-weight:700;color:${statusCol};background:${statusCol}15;padding:2px 7px;border-radius:3px;white-space:nowrap">${e.status}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterChangeLog() {
+  const s = document.getElementById('clogFilterStatus').value;
+  const t = document.getElementById('clogFilterType').value;
+  renderChangeLogTable(CHANGE_LOG.filter(e => (!s || e.status === s) && (!t || e.type === t)));
 }
 
 // FINANCE
